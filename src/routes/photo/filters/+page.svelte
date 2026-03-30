@@ -7,7 +7,7 @@
 	import ExportDialog from '$components/filters/ExportDialog.svelte';
 	import { compressFromImageData, terminate as terminateCompressor } from '$compress/client';
 	import { downloadBlob } from '$qr/exporter';
-	import { FilterRenderer } from '$filters/renderer';
+	import type { FilterRenderer } from '$filters/renderer';
 	import type { AdjustmentParams } from '$filters/types';
 	import type { CodecName } from '$compress/types';
 	import { getCodec } from '$compress/codecs';
@@ -97,7 +97,7 @@
 </script>
 
 <svelte:head>
-	<title>Photo Filters — nah.tools</title>
+	<title>Photo Filters — nah</title>
 	<meta
 		name="description"
 		content="Adjust brightness, contrast, exposure, color temperature, and more. Real-time WebGL2 photo editing in your browser."
@@ -138,6 +138,13 @@
 			<!-- Preview canvas -->
 			<div class="min-w-0 flex-1">
 				<div class="relative">
+						<div class:hidden={comparing}>
+						<FilterCanvas
+							image={loadedImage}
+							{params}
+							onrenderer={handleRendererReady}
+						/>
+					</div>
 					{#if comparing}
 						<img
 							src={originalSrc}
@@ -147,12 +154,6 @@
 						<div class="absolute left-3 top-3 rounded-md bg-black/60 px-2 py-1 text-xs font-medium text-white">
 							Original
 						</div>
-					{:else}
-						<FilterCanvas
-							image={loadedImage}
-							{params}
-							onrenderer={handleRendererReady}
-						/>
 					{/if}
 				</div>
 

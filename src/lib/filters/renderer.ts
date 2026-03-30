@@ -8,6 +8,7 @@ export class FilterRenderer {
 	private imageTexture: WebGLTexture;
 	private curvesTexture: WebGLTexture;
 	private vao: WebGLVertexArrayObject;
+	private vbo: WebGLBuffer;
 	private uniforms: Map<string, WebGLUniformLocation> = new Map();
 
 	constructor(canvas: HTMLCanvasElement, image: HTMLImageElement | ImageBitmap) {
@@ -43,7 +44,9 @@ export class FilterRenderer {
 		}
 
 		// Set up fullscreen quad
-		this.vao = this.createQuad();
+		const { vao, vbo } = this.createQuad();
+		this.vao = vao;
+		this.vbo = vbo;
 
 		// Upload image texture
 		this.imageTexture = this.createImageTexture(image);
@@ -125,6 +128,7 @@ export class FilterRenderer {
 		const gl = this.gl;
 		gl.deleteTexture(this.imageTexture);
 		gl.deleteTexture(this.curvesTexture);
+		gl.deleteBuffer(this.vbo);
 		gl.deleteProgram(this.program);
 		gl.deleteVertexArray(this.vao);
 	}
@@ -172,7 +176,7 @@ export class FilterRenderer {
 		return shader;
 	}
 
-	private createQuad(): WebGLVertexArrayObject {
+	private createQuad(): { vao: WebGLVertexArrayObject; vbo: WebGLBuffer } {
 		const gl = this.gl;
 		const vao = gl.createVertexArray()!;
 		gl.bindVertexArray(vao);
@@ -186,8 +190,8 @@ export class FilterRenderer {
 			 1,  1, 1, 1
 		]);
 
-		const buffer = gl.createBuffer()!;
-		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+		const vbo = gl.createBuffer()!;
+		gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 		gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
 
 		const posLoc = gl.getAttribLocation(this.program, 'a_position');
@@ -198,7 +202,7 @@ export class FilterRenderer {
 		gl.enableVertexAttribArray(texLoc);
 		gl.vertexAttribPointer(texLoc, 2, gl.FLOAT, false, 16, 8);
 
-		return vao;
+		return { vao, vbo };
 	}
 
 	private createImageTexture(image: HTMLImageElement | ImageBitmap): WebGLTexture {

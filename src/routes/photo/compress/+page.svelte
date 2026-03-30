@@ -6,7 +6,7 @@
 	import CompressionResultView from '$components/compress/CompressionResult.svelte';
 	import { compress, terminate } from '$compress/client';
 	import { getCodec } from '$compress/codecs';
-	import { downloadBlob, makeFilename } from '$qr/exporter';
+	import { downloadBlob } from '$qr/exporter';
 	import type { CodecName, CompressionResult } from '$compress/types';
 
 	type PageState = 'idle' | 'loaded' | 'compressing' | 'result';
@@ -93,7 +93,7 @@
 </script>
 
 <svelte:head>
-	<title>Compress Images — nah.tools</title>
+	<title>Compress Images — nah</title>
 	<meta
 		name="description"
 		content="Compress images to WebP, AVIF, JPEG, PNG, or JPEG XL in your browser. Free, unlimited, no upload required."

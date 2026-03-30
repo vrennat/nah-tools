@@ -46,8 +46,14 @@ async function decodeImage(buffer: ArrayBuffer, mimeType: string): Promise<Image
 	else if (mimeType.includes('png')) codecName = 'png';
 	else if (mimeType.includes('jxl')) codecName = 'jxl';
 	else {
-		// Fallback: try to decode with canvas in the main thread
-		throw new Error(`Unsupported input format: ${mimeType}`);
+		// Fallback: decode via createImageBitmap (handles GIF, BMP, TIFF, etc.)
+		const blob = new Blob([buffer], { type: mimeType });
+		const bitmap = await createImageBitmap(blob);
+		const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+		const ctx = canvas.getContext('2d')!;
+		ctx.drawImage(bitmap, 0, 0);
+		bitmap.close();
+		return ctx.getImageData(0, 0, canvas.width, canvas.height);
 	}
 
 	const mod = await loadCodec(codecName as CodecName);
