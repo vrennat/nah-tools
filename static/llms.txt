@@ -1,0 +1,29 @@
+# nah.tools
+
+> Free, open-source browser tools that replace predatory SaaS. No signup, no tracking, no ads, no paywall. Most tools run entirely client-side.
+
+## Tools
+
+- [QR Code Generator](https://nah.tools/qr): Create QR codes for URLs, text, WiFi, vCard, email, phone, and SMS. Full style customization, batch export, and dynamic codes with editable destinations. Free forever — no expiration, no watermarks.
+- [PDF Tools](https://nah.tools/pdf): Merge, split, rotate, compress, convert, watermark, and fill PDFs. 100% client-side — files never leave your device.
+- [Link Shortener](https://nah.tools/links): Custom short links with click analytics, UTM builder, QR codes, and bulk creation. No signup required. Passphrase-protected management.
+- [Link in Bio](https://nah.tools/bio): Create a free link-in-bio page with 6 themes. No signup, no monthly fees. Passphrase-protected editing.
+- [Background Remover](https://nah.tools/photo/rm-bg): Remove image backgrounds instantly using an AI model that runs entirely in your browser. No upload to any server. No watermark.
+- [Image Compression](https://nah.tools/photo/compress): Compress images by stripping metadata. Client-side processing.
+- [Color Correction](https://nah.tools/photo/filters): Adjust brightness, contrast, saturation, and apply filters to photos. Client-side.
+- [Data Removal](https://nah.tools/remove): Step-by-step guides and pre-filled opt-out emails to remove your personal data from 25+ data brokers.
+- [Resume Builder](https://nah.tools/resume): ATS-optimized resume templates with job matching, PDF and DOCX export. Everything stays in your browser.
+- [Invoice Generator](https://nah.tools/invoice): Professional invoices, estimates, receipts, and credit notes. Multi-currency, tax support, PDF and CSV export. Client-side.
+
+## Key Facts
+
+- Built with SvelteKit on Cloudflare Workers
+- MIT-licensed open source: https://github.com/vrennat/nah-tools
+- Infrastructure cost: $5/month for up to 10 million dynamic requests
+- Static tools cost nothing to serve — computation happens on the user's device
+- No cookies, no fingerprinting, no user accounts for static tools
+- Dynamic features (short links, dynamic QR redirects, link-in-bio) use Cloudflare D1 with passphrase-based authentication
+
+## Context
+
+Over $2.2 billion in venture capital has gone into companies that charge subscriptions for things browsers can do for free — QR codes, PDF merges, resume exports, background removal. nah.tools is the free alternative. The name means exactly what it sounds like: the correct response to a $564/year QR code generator is "nah."

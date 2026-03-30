@@ -78,7 +78,7 @@
 		<h2 id="investigations" class="mb-6 mt-12 font-display text-2xl font-700 text-text">The investigations</h2>
 
 		{#each articles as article}
-			<a href="/why/{article.slug}" class="group mb-4 flex items-baseline justify-between rounded-lg border border-border p-5 transition-colors hover:border-accent/50 hover:bg-surface-alt">
+			<a href="/why/{article.slug}" class="group mb-4 flex items-center justify-between rounded-lg border border-border p-5 transition-colors hover:border-accent/50 hover:bg-surface-alt">
 				<div>
 					<h3 class="text-lg font-semibold text-text group-hover:text-accent">{article.title}</h3>
 					<p class="mt-1 text-sm text-text-muted">{article.summary}</p>
