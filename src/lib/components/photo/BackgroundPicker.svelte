@@ -21,35 +21,25 @@
 	{#each presets as preset}
 		<button
 			type="button"
-			class="h-7 w-7 rounded-md border-2 transition-colors
-				{value === preset.id ? 'border-accent' : 'border-border hover:border-accent/50'}"
+			class="h-6 w-6 rounded-md border transition-transform hover:scale-110
+				{value === preset.id ? 'border-accent ring-1 ring-accent' : 'border-border'}"
 			title={preset.label}
 			onclick={() => (value = preset.id)}
-		>
-			{#if preset.id === 'transparent'}
-				<div
-					class="h-full w-full rounded-[4px]"
-					style="background-image: repeating-conic-gradient(#d4d4d4 0% 25%, #ffffff 0% 50%); background-size: 8px 8px;"
-				></div>
-			{:else}
-				<div
-					class="h-full w-full rounded-[4px]"
-					style="background-color: {preset.color};"
-				></div>
-			{/if}
-		</button>
+			style={preset.id === 'transparent'
+				? 'background-image: repeating-conic-gradient(#d4d4d4 0% 25%, #ffffff 0% 50%); background-size: 8px 8px;'
+				: `background-color: ${preset.color};`}
+		></button>
 	{/each}
 
 	<div class="relative">
 		<button
 			type="button"
-			class="h-7 w-7 overflow-hidden rounded-md border-2 transition-colors
-				{isCustom ? 'border-accent' : 'border-border hover:border-accent/50'}"
+			class="h-6 w-6 rounded-md border transition-transform hover:scale-110
+				{isCustom ? 'border-accent ring-1 ring-accent' : 'border-border'}"
 			title="Custom color"
 			onclick={() => (value = customColor)}
-		>
-			<div class="h-full w-full rounded-[4px]" style="background-color: {customColor};"></div>
-		</button>
+			style="background-color: {customColor};"
+		></button>
 		<input
 			type="color"
 			bind:value={customColor}
