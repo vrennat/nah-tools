@@ -26,7 +26,7 @@
 		class="w-full max-w-3xl rounded-2xl border border-border bg-surface/80 px-4 py-2.5 shadow-lg backdrop-blur-lg sm:px-5"
 	>
 		<div class="flex items-center justify-between">
-			<a href="/" class="text-lg font-bold tracking-tight text-brand">
+			<a href="/" class="font-display text-xl font-700 tracking-tight text-brand">
 				nah<span class="text-accent">.tools</span>
 			</a>
 
