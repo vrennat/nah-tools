@@ -134,7 +134,9 @@ export async function ocrPDF(
 		const words: { text: string; bbox: { x0: number; y0: number; x1: number; y1: number } }[] = [];
 		if (data.blocks) {
 			for (const block of data.blocks) {
+				if (!block.paragraphs) continue;
 				for (const paragraph of block.paragraphs) {
+					if (!paragraph.lines) continue;
 					for (const line of paragraph.lines) {
 						for (const word of line.words) {
 							words.push(word);

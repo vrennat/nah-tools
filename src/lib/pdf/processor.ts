@@ -325,7 +325,7 @@ export async function protectPDF(
 			copying: permissions.copying,
 			modifying: permissions.modifying,
 			annotating: permissions.annotating,
-			fillingForms: permissions.annotating,
+			fillingForms: permissions.annotating || permissions.modifying,
 			contentAccessibility: true
 		}
 	});

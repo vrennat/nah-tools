@@ -211,10 +211,16 @@ export async function extractTables(
 						pageIndex: i
 					});
 				} else {
-					// Generate column headers (A, B, C, ...)
-					const headers = columns.map((_, idx) =>
-						String.fromCharCode(65 + (idx % 26))
-					);
+					// Generate column headers (A, B, ..., Z, AA, AB, ...)
+					const headers = columns.map((_, idx) => {
+						let col = '';
+						let n = idx;
+						do {
+							col = String.fromCharCode(65 + (n % 26)) + col;
+							n = Math.floor(n / 26) - 1;
+						} while (n >= 0);
+						return col;
+					});
 					tables.push({
 						headers,
 						rows: filtered.map((row) => row.map((cell) => cell.trim())),
