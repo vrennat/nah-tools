@@ -3,6 +3,7 @@
 	import QRPreview from '$components/QRPreview.svelte';
 	import DownloadBar from '$components/DownloadBar.svelte';
 	import { debounce } from '$utils/debounce';
+	import { normalizeUrl } from '$utils/url';
 
 	let url = $state('');
 	let alias = $state('');
@@ -56,8 +57,7 @@
 	let taggedUrl = $derived(() => {
 		if (!url) return '';
 		try {
-			const raw = url.match(/^https?:\/\//i) ? url : `https://${url}`;
-			const u = new URL(raw);
+			const u = new URL(normalizeUrl(url));
 			if (utmSource) u.searchParams.set('utm_source', utmSource);
 			if (utmMedium) u.searchParams.set('utm_medium', utmMedium);
 			if (utmCampaign) u.searchParams.set('utm_campaign', utmCampaign);
@@ -123,8 +123,7 @@
 		loading = true;
 		error = '';
 
-		const normalizedUrl = url.match(/^https?:\/\//i) ? url : `https://${url}`;
-		const destinationUrl = hasUtm ? taggedUrl() : normalizedUrl;
+		const destinationUrl = hasUtm ? taggedUrl() : normalizeUrl(url);
 
 		try {
 			const res = await fetch('/api/links', {

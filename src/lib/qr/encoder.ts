@@ -4,6 +4,7 @@
  */
 
 import type { WiFiData, VCardData, EmailData, SMSData } from './types';
+import { normalizeUrl } from '$utils/url';
 
 /** Escape special characters for WiFi QR strings */
 function escapeWiFi(s: string): string {
@@ -11,11 +12,7 @@ function escapeWiFi(s: string): string {
 }
 
 export function encodeURL(url: string): string {
-	// Auto-prepend https:// if no protocol
-	if (url && !url.match(/^https?:\/\//i)) {
-		return `https://${url}`;
-	}
-	return url;
+	return url ? normalizeUrl(url) : url;
 }
 
 export function encodeWiFi(data: WiFiData): string {
