@@ -1,9 +1,10 @@
+<!-- svelte-ignore state_referenced_locally -->
 <script lang="ts">
 	import { encodeURL } from '$qr/encoder';
 
-	let { value = $bindable('') } = $props();
+	let { value = $bindable(''), defaultUrl = '' }: { value: string; defaultUrl?: string } = $props();
 
-	let url = $state('');
+	let url = $state(defaultUrl);
 
 	$effect(() => {
 		value = encodeURL(url);

@@ -145,7 +145,7 @@
 			<div class="space-y-6">
 				<div>
 					{#if qrType === 'url'}
-						<URLInput bind:value={encodedData} />
+						<URLInput bind:value={encodedData} defaultUrl="https://example.com" />
 					{:else if qrType === 'text'}
 						<TextInput bind:value={encodedData} />
 					{:else if qrType === 'wifi'}
