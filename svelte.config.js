@@ -17,6 +17,7 @@ const config = {
 			$photo: 'src/lib/photo',
 			$qr: 'src/lib/qr',
 			$pdf: 'src/lib/pdf',
+			$remove: 'src/lib/remove',
 			$server: 'src/lib/server',
 			$utils: 'src/lib/utils'
 		}

@@ -96,6 +96,7 @@
 				</svg>
 			</div>
 		</a>
+
 		<a
 			href="/photo/rm-bg"
 			class="animate-fade-up group relative overflow-hidden rounded-2xl border border-border bg-surface-alt p-8 transition-all duration-300 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
@@ -121,6 +122,27 @@
 				</svg>
 			</div>
 		</a>
-	</section>
 
+		<a
+			href="/remove"
+			class="animate-fade-up group relative overflow-hidden rounded-2xl border border-border bg-surface-alt p-8 transition-all duration-300 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			style="animation-delay: 600ms;"
+		>
+			<div class="mb-5 flex h-14 w-14 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
+				<svg class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+				</svg>
+			</div>
+			<h2 class="font-display text-xl font-700 text-text group-hover:text-accent transition-colors duration-300">Data Removal</h2>
+			<p class="mt-2 text-sm leading-relaxed text-text-muted">
+				Remove your personal data from 25+ data brokers. Step-by-step guides and pre-filled opt-out emails.
+			</p>
+			<div class="mt-5 flex items-center gap-1.5 text-sm font-medium text-accent opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-1">
+				Get started
+				<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+				</svg>
+			</div>
+		</a>
+	</section>
 </div>
