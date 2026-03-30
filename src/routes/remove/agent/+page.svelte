@@ -1,3 +1,28 @@
+<script lang="ts">
+	const tools = [
+		{
+			name: 'list_brokers',
+			description: 'List and filter brokers by priority, difficulty, opt-out method, or category. Returns a summary for each broker.'
+		},
+		{
+			name: 'get_broker',
+			description: 'Get full details for a specific broker including step-by-step opt-out instructions, URLs, required info, and notes.'
+		},
+		{
+			name: 'get_broker_search_url',
+			description: 'Get a pre-filled search URL to check if your data appears on a broker site before opting out.'
+		},
+		{
+			name: 'generate_removal_email',
+			description: 'Generate a CCPA or GDPR data deletion request email with the correct legal language, ready to send.'
+		},
+		{
+			name: 'get_removal_plan',
+			description: 'Get a prioritized removal plan that deduplicates subsidiaries and estimates the total time required.'
+		}
+	];
+</script>
+
 <svelte:head>
 	<title>Automate Data Broker Removal with AI — nah</title>
 	<meta
@@ -31,7 +56,21 @@
 	</section>
 
 	<section class="space-y-4">
-		<h2 class="text-xl font-bold">Setup</h2>
+		<h2 class="text-xl font-bold">Connect with Claude</h2>
+		<p class="text-text-muted">
+			The fastest way to get started is adding nah.tools as a connector in Claude.
+		</p>
+
+		<h3 class="mt-2 text-lg font-semibold">Claude.ai (Connectors)</h3>
+		<ol class="list-decimal space-y-2 pl-6 text-text-muted">
+			<li>Open <a href="https://claude.ai" class="text-accent underline hover:text-accent-hover">claude.ai</a> &rarr; Settings &rarr; Connectors</li>
+			<li>Click <strong class="text-text">Add custom connector</strong></li>
+			<li>Name: <code class="rounded bg-surface-alt px-1.5 py-0.5 text-sm font-mono">nah-tools</code></li>
+			<li>URL: <code class="rounded bg-surface-alt px-1.5 py-0.5 text-sm font-mono">https://nah.tools/mcp</code></li>
+			<li>Click <strong class="text-text">Add</strong></li>
+		</ol>
+
+		<h3 class="mt-6 text-lg font-semibold">Claude Code / Claude Desktop</h3>
 		<p class="text-text-muted">
 			Add this to your MCP client configuration. In Claude Desktop, go to Settings &rarr; Developer &rarr; Edit Config. In Claude Code, add it to your <code class="rounded bg-surface-alt px-1.5 py-0.5 text-sm font-mono">settings.json</code>.
 		</p>
@@ -60,7 +99,7 @@
 }`}</code></pre>
 		</div>
 		<p class="text-sm text-text-muted">
-			That's it. No API key, no account, no authentication required.
+			No API key, no account, no authentication required. Works with any MCP-compatible client.
 		</p>
 	</section>
 
@@ -111,13 +150,6 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Getting started prompt</h2>
-		<p class="text-text-muted">
-			The server includes a <code class="rounded bg-surface-alt px-1.5 py-0.5 text-sm font-mono">removal_guide</code> prompt that bootstraps the entire workflow. MCP clients that support prompts can use it to give the agent full context on how to drive the removal process.
-		</p>
-	</section>
-
-	<section class="space-y-3">
 		<h2 class="text-xl font-bold">Best with browser access</h2>
 		<p class="text-text-muted">
 			The most powerful setup pairs this MCP server with browser automation (like Claude with computer use). The agent can navigate opt-out pages, fill forms, and handle CAPTCHAs — turning a multi-hour manual process into a supervised automated one. Without browser access, the agent acts as a guided assistant: generating emails, providing step-by-step instructions, and tracking what's done.
@@ -131,28 +163,3 @@
 		</p>
 	</div>
 </article>
-
-<script lang="ts">
-	const tools = [
-		{
-			name: 'list_brokers',
-			description: 'List and filter brokers by priority, difficulty, opt-out method, or category. Returns a summary for each broker.'
-		},
-		{
-			name: 'get_broker',
-			description: 'Get full details for a specific broker including step-by-step opt-out instructions, URLs, required info, and notes.'
-		},
-		{
-			name: 'get_broker_search_url',
-			description: 'Get a pre-filled search URL to check if your data appears on a broker site before opting out.'
-		},
-		{
-			name: 'generate_removal_email',
-			description: 'Generate a CCPA or GDPR data deletion request email with the correct legal language, ready to send.'
-		},
-		{
-			name: 'get_removal_plan',
-			description: 'Get a prioritized removal plan that deduplicates subsidiaries and estimates the total time required.'
-		}
-	];
-</script>
