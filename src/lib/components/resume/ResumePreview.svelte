@@ -7,7 +7,7 @@
 		$props();
 
 	let activeTab: 'preview' | 'xray' = $state('preview');
-	let blobUrl: string | null = $state(null);
+	let pageImages: string[] = $state([]);
 	let xrayText: string = $state('');
 	let loading = $state(false);
 	let xrayLoading = $state(false);
@@ -15,24 +15,49 @@
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined;
 	let currentBlob: Blob | null = null;
 
-	function cleanupUrl() {
-		if (blobUrl) {
-			URL.revokeObjectURL(blobUrl);
-			blobUrl = null;
+	function cleanupImages() {
+		for (const url of pageImages) {
+			URL.revokeObjectURL(url);
 		}
+		pageImages = [];
+	}
+
+	async function renderPdfToImages(blob: Blob): Promise<string[]> {
+		const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+		pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+			'pdfjs-dist/legacy/build/pdf.worker.mjs',
+			import.meta.url
+		).href;
+
+		const arrayBuffer = await blob.arrayBuffer();
+		const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+		const urls: string[] = [];
+
+		for (let i = 1; i <= pdf.numPages; i++) {
+			const page = await pdf.getPage(i);
+			const scale = 2; // 2x for crisp rendering
+			const viewport = page.getViewport({ scale });
+			const canvas = document.createElement('canvas');
+			canvas.width = viewport.width;
+			canvas.height = viewport.height;
+			const ctx = canvas.getContext('2d')!;
+			await page.render({ canvasContext: ctx, viewport, canvas } as any).promise;
+			const dataUrl = canvas.toDataURL('image/png');
+			urls.push(dataUrl);
+		}
+
+		return urls;
 	}
 
 	async function regeneratePDF() {
 		loading = true;
 		error = null;
 		try {
-			// JSON round-trip strips Svelte 5 reactive proxies before passing to pdfmake
 			const plainResume = JSON.parse(JSON.stringify(resume));
 			const blob = await generatePDF(plainResume, template);
-			cleanupUrl();
+			cleanupImages();
 			currentBlob = blob;
-			blobUrl = URL.createObjectURL(blob);
-			// If xray tab is active, also regenerate xray text
+			pageImages = await renderPdfToImages(blob);
 			if (activeTab === 'xray') {
 				await loadXray();
 			}
@@ -56,7 +81,6 @@
 	}
 
 	$effect(() => {
-		// Track resume content and template changes
 		const _key = JSON.stringify(resume) + template;
 		void _key;
 
@@ -70,10 +94,9 @@
 		};
 	});
 
-	// Cleanup blob URL on destroy
 	$effect(() => {
 		return () => {
-			cleanupUrl();
+			cleanupImages();
 		};
 	});
 
@@ -122,13 +145,16 @@
 				<p class="text-sm text-error">{error}</p>
 			</div>
 		{:else if activeTab === 'preview'}
-			{#if blobUrl}
-				<iframe
-					src={blobUrl}
-					title="Resume preview"
-					class="h-full w-full border-0 bg-white"
-					style="min-height: 600px;"
-				></iframe>
+			{#if pageImages.length > 0}
+				<div class="space-y-4 overflow-auto p-4" style="max-height: 70vh;">
+					{#each pageImages as src, i}
+						<img
+							{src}
+							alt="Resume page {i + 1}"
+							class="w-full rounded border border-border shadow-sm"
+						/>
+					{/each}
+				</div>
 			{:else}
 				<div class="flex h-full items-center justify-center p-6">
 					<p class="text-sm text-text-muted">Fill in your resume details to see a preview.</p>
