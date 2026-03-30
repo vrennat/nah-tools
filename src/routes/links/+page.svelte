@@ -123,7 +123,8 @@
 		loading = true;
 		error = '';
 
-		const destinationUrl = hasUtm ? taggedUrl() : url;
+		const normalizedUrl = url.match(/^https?:\/\//i) ? url : `https://${url}`;
+		const destinationUrl = hasUtm ? taggedUrl() : normalizedUrl;
 
 		try {
 			const res = await fetch('/api/links', {

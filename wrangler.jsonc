@@ -3,20 +3,22 @@
 	"name": "nah-tools",
 	"compatibility_date": "2026-03-29",
 	"compatibility_flags": ["nodejs_compat"],
+	"main": ".svelte-kit/cloudflare/_worker.js",
 	"assets": {
+		"binding": "ASSETS",
 		"directory": ".svelte-kit/cloudflare"
 	},
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "nah-tools-db",
-			"database_id": "TODO_REPLACE_WITH_D1_DATABASE_ID"
+			"database_id": "e2e045cb-6a54-484c-8041-2fee149d52ea"
 		}
 	],
 	"routes": [
 		{
-			"pattern": "nah.tools/*",
-			"zone_name": "nah.tools"
+			"pattern": "nah.tools",
+			"custom_domain": true
 		}
 	]
 }

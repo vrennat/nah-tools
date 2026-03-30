@@ -6,15 +6,15 @@
 	"compatibility_flags": ["nodejs_compat"],
 	"routes": [
 		{
-			"pattern": "go.nah.tools/*",
-			"zone_name": "nah.tools"
+			"pattern": "go.nah.tools",
+			"custom_domain": true
 		}
 	],
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "nah-tools-db",
-			"database_id": "TODO_REPLACE_WITH_D1_DATABASE_ID"
+			"database_id": "e2e045cb-6a54-484c-8041-2fee149d52ea"
 		}
 	]
 }

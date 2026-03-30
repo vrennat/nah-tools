@@ -29,6 +29,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'URL is required');
 	}
 
+	// Auto-prepend https:// if no protocol
+	const normalizedUrl = url.match(/^https?:\/\//i) ? url : `https://${url}`;
+
 	// Verify Turnstile if configured
 	const turnstileSecret = platform?.env?.TURNSTILE_SECRET_KEY;
 	if (turnstileSecret) {
@@ -49,7 +52,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 
 	// Validate URL safety
-	const safety = await validateUrlSafety(url, db);
+	const safety = await validateUrlSafety(normalizedUrl, db);
 	if (!safety.safe) {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
@@ -76,7 +79,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 
 	const shortCode = generateShortCode();
-	await createLink(db, shortCode, url, passphraseHash, {
+	await createLink(db, shortCode, normalizedUrl, passphraseHash, {
 		label,
 		customAlias: alias,
 		expiresAt: expires_at,
@@ -112,8 +115,10 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'short_code, passphrase, and url are required');
 	}
 
+	const normalizedUrl = url.match(/^https?:\/\//i) ? url : `https://${url}`;
+
 	// Validate URL safety
-	const safety = await validateUrlSafety(url, db);
+	const safety = await validateUrlSafety(normalizedUrl, db);
 	if (!safety.safe) {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
@@ -127,7 +132,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 			 WHERE short_code = ? OR custom_alias = ?`
 		)
 		.bind(
-			url,
+			normalizedUrl,
 			body.utm?.source ?? null,
 			body.utm?.medium ?? null,
 			body.utm?.campaign ?? null,
