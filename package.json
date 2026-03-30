@@ -31,8 +31,11 @@
 	},
 	"dependencies": {
 		"bcryptjs": "^2.4.3",
-		"jszip": "^3.10.1",
+		"comlink": "^4.4.2",
 		"jspdf": "^2.5.2",
+		"jszip": "^3.10.1",
+		"onnxruntime-web": "^1.24.3",
+		"pica": "^9.0.1",
 		"qr-code-styling": "^1.8.4"
 	}
 }

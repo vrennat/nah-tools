@@ -29,6 +29,14 @@
 				Links
 			</a>
 			<a
+				href="/photo"
+				class="transition-colors hover:text-accent"
+				class:text-accent={pathname.startsWith('/photo')}
+				class:text-text-muted={!pathname.startsWith('/photo')}
+			>
+				Photo
+			</a>
+			<a
 				href="/why"
 				class="transition-colors hover:text-accent"
 				class:text-accent={pathname === '/why'}

@@ -13,7 +13,7 @@
 		</p>
 	</section>
 
-	<div class="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
+	<div class="mx-auto grid max-w-4xl gap-4 sm:grid-cols-3">
 		<a
 			href="/qr"
 			class="group rounded-xl border border-border bg-surface p-6 shadow-sm transition-all hover:border-accent hover:shadow-md"
@@ -41,6 +41,25 @@
 			<h2 class="text-lg font-semibold text-text group-hover:text-accent">Link Shortener</h2>
 			<p class="mt-1 text-sm text-text-muted">
 				Custom short links with click analytics, UTM builder, and QR codes. No signup required.
+			</p>
+		</a>
+		<a
+			href="/photo/remove-bg"
+			class="group rounded-xl border border-border bg-surface p-6 shadow-sm transition-all hover:border-accent hover:shadow-md"
+		>
+			<div class="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-accent/10 text-accent">
+				<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z"
+					/>
+				</svg>
+			</div>
+			<h2 class="text-lg font-semibold text-text group-hover:text-accent">Background Remover</h2>
+			<p class="mt-1 text-sm text-text-muted">
+				Remove image backgrounds instantly in your browser. No upload, no signup, no watermark.
 			</p>
 		</a>
 	</div>
