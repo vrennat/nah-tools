@@ -10,7 +10,7 @@ export { analyzeATSCompatibility, extractTextFromPDF } from './xray';
  * Full pipeline: analyze how well a resume matches a job description.
  * Extracts keywords from both, computes overlap, and generates suggestions.
  */
-export function analyzeJobMatch(resume: ResumeData, jobDescription: string): JobMatchResult {
+export async function analyzeJobMatch(resume: ResumeData, jobDescription: string): Promise<JobMatchResult> {
 	// Build resume text from all sections
 	const resumeTextParts: string[] = [];
 	const { personal, summary, experience, education, skills, projects, certifications } = resume;
@@ -54,8 +54,8 @@ export function analyzeJobMatch(resume: ResumeData, jobDescription: string): Job
 	}
 
 	const resumeText = resumeTextParts.join(' ');
-	const resumeKeywords = extractKeywords(resumeText);
-	const jobKeywords = extractKeywords(jobDescription);
+	const resumeKeywords = await extractKeywords(resumeText);
+	const jobKeywords = await extractKeywords(jobDescription);
 
 	const matched = findMatchedKeywords(resumeKeywords, jobKeywords);
 	const missing = findMissingKeywords(resumeKeywords, jobKeywords);

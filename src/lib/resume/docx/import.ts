@@ -115,8 +115,10 @@ export async function importDOCX(blob: Blob): Promise<Partial<ResumeData>> {
 	let text: string;
 	try {
 		const arrayBuffer = await blob.arrayBuffer();
-		const buffer = Buffer.from(arrayBuffer);
-		const result = await mammoth.extractRawText({ buffer });
+		const input = typeof Buffer !== 'undefined'
+			? { buffer: Buffer.from(arrayBuffer) }
+			: { arrayBuffer };
+		const result = await mammoth.extractRawText(input);
 		text = result.value;
 	} catch {
 		throw new Error('Could not parse file. Please ensure it is a valid DOCX document.');

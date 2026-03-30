@@ -8,8 +8,9 @@ const MONTHS = [
 export function formatDate(dateStr: string): string {
 	if (!dateStr) return 'Present';
 	const [year, month] = dateStr.split('-');
+	if (!month) return year;
 	const monthIndex = parseInt(month, 10) - 1;
-	return `${MONTHS[monthIndex]} ${year}`;
+	return `${MONTHS[monthIndex] ?? month} ${year}`;
 }
 
 export function dateRange(start: string, end: string): string {

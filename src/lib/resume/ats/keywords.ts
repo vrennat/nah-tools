@@ -1,4 +1,13 @@
-import nlp from 'compromise';
+import type { default as NlpType } from 'compromise';
+
+let _nlp: typeof NlpType | null = null;
+async function loadNlp() {
+	if (!_nlp) {
+		const mod = await import('compromise');
+		_nlp = mod.default;
+	}
+	return _nlp;
+}
 
 const STOP_WORDS = new Set([
 	'a',
@@ -112,15 +121,40 @@ const STOP_WORDS = new Set([
 	'there'
 ]);
 
+const COMMON_VERBS = new Set([
+	'looking',
+	'experience',
+	'required',
+	'ability',
+	'strong',
+	'ideal',
+	'candidate',
+	'plus',
+	'using',
+	'work',
+	'working',
+	'build',
+	'building',
+	'develop',
+	'developing',
+	'create',
+	'creating',
+	'manage',
+	'managing',
+	'lead',
+	'leading'
+]);
+
 /**
  * Extract meaningful keywords from text using NLP and pattern matching.
  */
-export function extractKeywords(text: string): string[] {
+export async function extractKeywords(text: string): Promise<string[]> {
 	if (!text.trim()) return [];
 
 	const keywords = new Set<string>();
 
 	// Use compromise for nouns and proper nouns
+	const nlp = await loadNlp();
 	const doc = nlp(text);
 	for (const noun of doc.nouns().out('array') as string[]) {
 		const cleaned = noun.toLowerCase().replace(/[^a-z0-9\s./-]/g, '').trim();
@@ -172,35 +206,10 @@ export function extractKeywords(text: string): string[] {
 		if (
 			cleaned.length > 2 &&
 			!STOP_WORDS.has(cleaned) &&
+			!COMMON_VERBS.has(cleaned) &&
 			/[a-z]/.test(cleaned)
 		) {
-			// Only include if it looks like a meaningful term (not a common verb/adjective)
-			const commonVerbs = new Set([
-				'looking',
-				'experience',
-				'required',
-				'ability',
-				'strong',
-				'ideal',
-				'candidate',
-				'plus',
-				'using',
-				'work',
-				'working',
-				'build',
-				'building',
-				'develop',
-				'developing',
-				'create',
-				'creating',
-				'manage',
-				'managing',
-				'lead',
-				'leading'
-			]);
-			if (!commonVerbs.has(cleaned)) {
-				keywords.add(cleaned);
-			}
+			keywords.add(cleaned);
 		}
 	}
 

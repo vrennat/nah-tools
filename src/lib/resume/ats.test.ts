@@ -13,26 +13,26 @@ and ability to mentor junior engineers required.
 `;
 
 describe('extractKeywords', () => {
-	it('returns an array of strings', () => {
-		const result = extractKeywords('Hello world of programming');
+	it('returns an array of strings', async () => {
+		const result = await extractKeywords('Hello world of programming');
 		expect(Array.isArray(result)).toBe(true);
 		for (const kw of result) {
 			expect(typeof kw).toBe('string');
 		}
 	});
 
-	it('excludes common stop words', () => {
-		const result = extractKeywords('the and is a to in of for with');
+	it('excludes common stop words', async () => {
+		const result = await extractKeywords('the and is a to in of for with');
 		const stopWords = ['the', 'and', 'is', 'a', 'to', 'in'];
 		for (const stop of stopWords) {
 			expect(result).not.toContain(stop);
 		}
 	});
 
-	it('finds technical terms', () => {
+	it('finds technical terms', async () => {
 		const text =
 			'Experience with JavaScript, React, Python, and machine learning required.';
-		const result = extractKeywords(text);
+		const result = await extractKeywords(text);
 		expect(result).toEqual(
 			expect.arrayContaining([
 				expect.stringMatching(/javascript/i),
@@ -42,15 +42,15 @@ describe('extractKeywords', () => {
 		);
 	});
 
-	it('returns unique keywords with no duplicates', () => {
+	it('returns unique keywords with no duplicates', async () => {
 		const text = 'React React React JavaScript JavaScript TypeScript';
-		const result = extractKeywords(text);
+		const result = await extractKeywords(text);
 		const unique = new Set(result);
 		expect(result.length).toBe(unique.size);
 	});
 
-	it('returns empty array for empty string', () => {
-		const result = extractKeywords('');
+	it('returns empty array for empty string', async () => {
+		const result = await extractKeywords('');
 		expect(result).toEqual([]);
 	});
 });
@@ -155,16 +155,16 @@ describe('analyzeATSCompatibility', () => {
 });
 
 describe('analyzeJobMatch', () => {
-	it('returns a JobMatchResult with score, matched, missing, suggestions', () => {
+	it('returns a JobMatchResult with score, matched, missing, suggestions', async () => {
 		const resume = createMockResume();
-		const result = analyzeJobMatch(resume, jobDescription);
+		const result = await analyzeJobMatch(resume, jobDescription);
 		expect(typeof result.score).toBe('number');
 		expect(Array.isArray(result.matched)).toBe(true);
 		expect(Array.isArray(result.missing)).toBe(true);
 		expect(Array.isArray(result.suggestions)).toBe(true);
 	});
 
-	it('resume containing relevant keywords gets a higher match score than one without', () => {
+	it('resume containing relevant keywords gets a higher match score than one without', async () => {
 		const relevantResume = createMockResume();
 		const irrelevantResume = createMinimalResume({
 			summary: 'I enjoy painting and gardening in my free time.',
@@ -177,8 +177,8 @@ describe('analyzeJobMatch', () => {
 			]
 		});
 
-		const relevantScore = analyzeJobMatch(relevantResume, jobDescription).score;
-		const irrelevantScore = analyzeJobMatch(irrelevantResume, jobDescription).score;
+		const relevantScore = (await analyzeJobMatch(relevantResume, jobDescription)).score;
+		const irrelevantScore = (await analyzeJobMatch(irrelevantResume, jobDescription)).score;
 		expect(relevantScore).toBeGreaterThan(irrelevantScore);
 	});
 });

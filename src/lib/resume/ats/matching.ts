@@ -15,16 +15,7 @@ export function computeMatchScore(resumeKeywords: string[], jobKeywords: string[
  */
 export function findMissingKeywords(resumeKeywords: string[], jobKeywords: string[]): string[] {
 	const resumeSet = new Set(resumeKeywords.map((k) => k.toLowerCase()));
-	return jobKeywords.filter((jk) => {
-		const lower = jk.toLowerCase();
-		// Check exact match or substring match
-		for (const rk of resumeSet) {
-			if (rk === lower || rk.includes(lower) || lower.includes(rk)) {
-				return false;
-			}
-		}
-		return true;
-	});
+	return jobKeywords.filter((jk) => !keywordMatch(jk.toLowerCase(), resumeSet));
 }
 
 /**
@@ -32,13 +23,29 @@ export function findMissingKeywords(resumeKeywords: string[], jobKeywords: strin
  */
 export function findMatchedKeywords(resumeKeywords: string[], jobKeywords: string[]): string[] {
 	const resumeSet = new Set(resumeKeywords.map((k) => k.toLowerCase()));
-	return jobKeywords.filter((jk) => {
-		const lower = jk.toLowerCase();
-		for (const rk of resumeSet) {
-			if (rk === lower || rk.includes(lower) || lower.includes(rk)) {
-				return true;
-			}
+	return jobKeywords.filter((jk) => keywordMatch(jk.toLowerCase(), resumeSet));
+}
+
+/**
+ * Check if a keyword matches any entry in the set.
+ * Uses exact match first, then word-boundary-aware substring for multi-word terms.
+ */
+function keywordMatch(keyword: string, set: Set<string>): boolean {
+	if (set.has(keyword)) return true;
+	// Only do substring matching for terms with 4+ chars to avoid false positives
+	if (keyword.length < 4) return false;
+	for (const entry of set) {
+		if (entry.length < 4) continue;
+		// Check if one is a multi-word version of the other (e.g. "react" in "react native")
+		if (entry.includes(keyword) || keyword.includes(entry)) {
+			// Require that the match is on a word boundary
+			const longer = entry.length > keyword.length ? entry : keyword;
+			const shorter = entry.length > keyword.length ? keyword : entry;
+			const idx = longer.indexOf(shorter);
+			const before = idx === 0 || /[\s/.-]/.test(longer[idx - 1]);
+			const after = idx + shorter.length === longer.length || /[\s/.-]/.test(longer[idx + shorter.length]);
+			if (before && after) return true;
 		}
-		return false;
-	});
+	}
+	return false;
 }

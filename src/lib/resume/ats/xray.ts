@@ -111,6 +111,10 @@ export function analyzeATSCompatibility(resume: ResumeData): ATSAnalysis {
  */
 export async function extractTextFromPDF(pdfBlob: Blob): Promise<string> {
 	const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf.mjs');
+	pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+		'pdfjs-dist/legacy/build/pdf.worker.mjs',
+		import.meta.url
+	).href;
 	const arrayBuffer = await pdfBlob.arrayBuffer();
 	const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
 	const textParts: string[] = [];
