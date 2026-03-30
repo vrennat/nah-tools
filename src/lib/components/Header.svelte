@@ -21,6 +21,14 @@
 				QR Generator
 			</a>
 			<a
+				href="/pdf"
+				class="transition-colors hover:text-accent"
+				class:text-accent={pathname.startsWith('/pdf')}
+				class:text-text-muted={!pathname.startsWith('/pdf')}
+			>
+				PDF Tools
+			</a>
+			<a
 				href="/links"
 				class="transition-colors hover:text-accent"
 				class:text-accent={pathname.startsWith('/links')}
