@@ -30,7 +30,7 @@
 			Why nah
 		</h1>
 		<p class="mt-4 text-xl text-text-muted">
-			$2.2 billion in venture capital to charge you for things your browser can do for free.
+			$2.2 billion in venture capital has been raised to charge you for things your browser does for free. The BBB estimates consumers have lost <strong class="text-text">$1.3 billion</strong> to the free trial traps these companies use.
 		</p>
 	</header>
 
@@ -53,6 +53,70 @@
 	</section>
 
 	<section class="mb-12">
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">Where the money went</h2>
+		<p class="mb-4 leading-relaxed text-text-muted">
+			Here's where the money went — and what it bought.
+		</p>
+		<div class="overflow-x-auto">
+			<table class="w-full text-left text-sm">
+				<thead>
+					<tr class="border-b border-border">
+						<th class="py-3 pr-4 font-semibold text-text">Company</th>
+						<th class="py-3 pr-4 font-semibold text-text">What They Charge For</th>
+						<th class="py-3 pr-4 font-semibold text-text">Capital Raised</th>
+						<th class="py-3 pr-4 font-semibold text-text">Valuation</th>
+						<th class="py-3 font-semibold text-text">Annual Revenue</th>
+					</tr>
+				</thead>
+				<tbody class="text-text-muted">
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4 font-medium text-text">BOLD LLC</td>
+						<td class="py-3 pr-4">Resume templates</td>
+						<td class="py-3 pr-4">PE-backed (undisclosed)</td>
+						<td class="py-3 pr-4">Undisclosed</td>
+						<td class="py-3">~$628M</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4 font-medium text-text">airSlate (PDFFiller)</td>
+						<td class="py-3 pr-4">PDF form filling</td>
+						<td class="py-3 pr-4">$185M</td>
+						<td class="py-3 pr-4">$1.25B</td>
+						<td class="py-3">~$120M ARR</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4 font-medium text-text">PhotoRoom</td>
+						<td class="py-3 pr-4">Background removal</td>
+						<td class="py-3 pr-4">$62M</td>
+						<td class="py-3 pr-4">$500M</td>
+						<td class="py-3">~$94.5M ARR</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4 font-medium text-text">Claranova (Soda PDF)</td>
+						<td class="py-3 pr-4">PDF utilities</td>
+						<td class="py-3 pr-4">Public (Euronext)</td>
+						<td class="py-3 pr-4">Public market cap</td>
+						<td class="py-3">&euro;118M (software div.)</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4 font-medium text-text">Bitly</td>
+						<td class="py-3 pr-4">QR codes &amp; short links</td>
+						<td class="py-3 pr-4">$163M</td>
+						<td class="py-3 pr-4">Acquired</td>
+						<td class="py-3">~$180M ARR</td>
+					</tr>
+					<tr>
+						<td class="py-3 pr-4 font-medium text-text">Linktree</td>
+						<td class="py-3 pr-4">Link-in-bio pages</td>
+						<td class="py-3 pr-4">$167M</td>
+						<td class="py-3 pr-4">$1.3B</td>
+						<td class="py-3">Undisclosed</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<section class="mb-12">
 		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">The playbook</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			Every one of these companies runs some version of the same five steps.
@@ -71,6 +135,9 @@
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			<strong class="text-text">Make cancellation hard.</strong> Hide the cancel button. Break it when ad-blockers are on. Route billing receipts to an email address the user doesn't check. Some companies respond to cancellation attempts with chatbot loops for weeks.
+		</p>
+		<p class="mb-4 leading-relaxed text-text-muted">
+			In October 2024, the FTC finalized its <a href="https://www.ftc.gov/legal-library/browse/federal-register-notices/negative-option-rule" target="_blank" rel="noopener noreferrer" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent">"click-to-cancel" rule</a>, requiring companies to make cancellation as easy as signup. These companies are already on regulators' radar.
 		</p>
 	</section>
 

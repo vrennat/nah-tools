@@ -3,18 +3,35 @@
 	import ThemeToggle from '$components/ThemeToggle.svelte';
 
 	let pathname = $derived(page.url.pathname as string);
+	let toolsOpen = $state(false);
+	let mobileOpen = $state(false);
 
-	const links = [
-		{ href: '/qr', label: 'QR', match: (p: string) => p.startsWith('/qr') },
+	const topLinks = [
 		{ href: '/pdf', label: 'PDF', match: (p: string) => p.startsWith('/pdf') },
-		{ href: '/links', label: 'Links', match: (p: string) => p.startsWith('/links') },
-		{ href: '/bio', label: 'Bio', match: (p: string) => p.startsWith('/bio') },
-		{ href: '/photo/rm-bg', label: 'Photo', match: (p: string) => p.startsWith('/photo') },
-		{ href: '/remove', label: 'Remove', match: (p: string) => p.startsWith('/remove') },
-		{ href: '/resume', label: 'Resume', match: (p: string) => p.startsWith('/resume') },
-		{ href: '/invoice', label: 'Invoice', match: (p: string) => p.startsWith('/invoice') }
+		{ href: '/qr', label: 'QR', match: (p: string) => p.startsWith('/qr') }
 	];
+
+	const toolsDropdown = [
+		{ href: '/pdf', label: 'PDF Tools', desc: 'Merge, split, rotate, compress, convert' },
+		{ href: '/photo/rm-bg', label: 'Background Remover', desc: 'AI-powered, runs in your browser' },
+		{ href: '/resume', label: 'Resume Builder', desc: 'ATS-optimized, PDF and DOCX export' },
+		{ href: '/qr', label: 'QR Code Generator', desc: 'Static, dynamic, styled, batch export' },
+		{ href: '/invoice', label: 'Invoice Generator', desc: 'Multi-currency, tax support, PDF export' },
+		{ href: '/links', label: 'Link Shortener', desc: 'Custom aliases, click analytics, UTM builder' },
+		{ href: '/bio', label: 'Link in Bio', desc: 'Your links, your page, no signup' },
+		{ href: '/remove', label: 'Data Removal', desc: 'Remove your info from 25+ data brokers' }
+	];
+
+	function closeDropdown() {
+		toolsOpen = false;
+	}
+
+	function handleToolsKey(e: KeyboardEvent) {
+		if (e.key === 'Escape') closeDropdown();
+	}
 </script>
+
+<svelte:window onclick={() => { toolsOpen = false; mobileOpen = false; }} />
 
 <header class="mx-auto w-full max-w-6xl px-4 pt-6 pb-2 sm:px-6 sm:pt-8 lg:px-8">
 	<div class="flex items-center justify-between">
@@ -26,8 +43,9 @@
 		</a>
 
 		<div class="flex items-center gap-5">
+			<!-- Desktop nav -->
 			<nav class="hidden items-center gap-4 text-sm sm:flex">
-				{#each links as link}
+				{#each topLinks as link}
 					<a
 						href={link.href}
 						class="transition-colors hover:text-accent {link.match(pathname) ? 'text-accent font-medium' : 'text-text-muted'}"
@@ -35,8 +53,97 @@
 						{link.label}
 					</a>
 				{/each}
+
+				<!-- Tools dropdown -->
+				<div class="relative">
+					<button
+						onclick={(e: MouseEvent) => { e.stopPropagation(); toolsOpen = !toolsOpen; }}
+						onkeydown={handleToolsKey}
+						class="flex items-center gap-1 transition-colors hover:text-accent {toolsOpen ? 'text-accent font-medium' : 'text-text-muted'}"
+						aria-expanded={toolsOpen}
+						aria-haspopup="true"
+					>
+						Tools
+						<svg class="h-3.5 w-3.5 transition-transform {toolsOpen ? 'rotate-180' : ''}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+						</svg>
+					</button>
+
+					{#if toolsOpen}
+						<!-- svelte-ignore a11y_interactive_supports_focus -->
+						<div
+							class="absolute right-0 top-full z-50 mt-3 w-72 rounded-xl border border-border bg-surface p-2 shadow-lg"
+							onclick={(e: MouseEvent) => e.stopPropagation()}
+							onkeydown={(e: KeyboardEvent) => { if (e.key === 'Escape') closeDropdown(); }}
+							role="menu"
+						>
+							{#each toolsDropdown as tool}
+								<a
+									href={tool.href}
+									class="block rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-alt"
+									role="menuitem"
+									onclick={closeDropdown}
+								>
+									<div class="text-sm font-medium text-text">{tool.label}</div>
+									<div class="text-xs text-text-muted">{tool.desc}</div>
+								</a>
+							{/each}
+						</div>
+					{/if}
+				</div>
+
+				<a
+					href="/why"
+					class="transition-colors hover:text-accent {pathname.startsWith('/why') ? 'text-accent font-medium' : 'text-text-muted'}"
+				>
+					Why
+				</a>
+
+				<a
+					href="https://github.com/vrennat/nah-tools"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="text-text-muted transition-colors hover:text-accent"
+					aria-label="GitHub"
+				>
+					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+					</svg>
+				</a>
 			</nav>
+
 			<ThemeToggle />
+
+			<!-- Mobile hamburger -->
+			<button
+				class="flex items-center sm:hidden"
+				onclick={(e: MouseEvent) => { e.stopPropagation(); mobileOpen = !mobileOpen; }}
+				aria-label="Menu"
+				aria-expanded={mobileOpen}
+			>
+				<svg class="h-6 w-6 text-text-muted" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+					{#if mobileOpen}
+						<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+					{:else}
+						<path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+					{/if}
+				</svg>
+			</button>
 		</div>
 	</div>
+
+	<!-- Mobile menu -->
+	{#if mobileOpen}
+		<nav class="mt-4 flex flex-col gap-1 border-t border-border pt-4 sm:hidden">
+			{#each toolsDropdown as tool}
+				<a href={tool.href} class="rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-alt">
+					<div class="text-sm font-medium text-text">{tool.label}</div>
+					<div class="text-xs text-text-muted">{tool.desc}</div>
+				</a>
+			{/each}
+			<hr class="my-2 border-border" />
+			<a href="/why" class="rounded-lg px-3 py-2.5 text-sm font-medium text-text transition-colors hover:bg-surface-alt">Why</a>
+			<a href="https://github.com/vrennat/nah-tools" target="_blank" rel="noopener noreferrer" class="rounded-lg px-3 py-2.5 text-sm font-medium text-text transition-colors hover:bg-surface-alt">GitHub</a>
+		</nav>
+	{/if}
 </header>

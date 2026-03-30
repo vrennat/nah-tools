@@ -114,10 +114,16 @@
 			<strong class="text-text">19 to 20 US states</strong> now have privacy laws with deletion rights. Under <a href="https://oag.ca.gov/privacy/ccpa" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">CCPA</a>, you have the legal right to demand any data broker delete your personal information.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">California's DELETE Act</strong> is the big one. The <a href="https://cppa.ca.gov/data_broker_registry/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">DROP platform</a> launched <strong class="text-text">January 1, 2026</strong>, letting California residents submit a single deletion request covering all 543+ registered brokers. Starting August 1, 2026, brokers must process these requests within 90 days. Penalties: <strong class="text-text">$200 per unfulfilled request per day</strong>.
+			<strong class="text-text">California's DELETE Act</strong> is the big one. The <a href="https://cppa.ca.gov/data_broker_registry/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">DROP platform</a> is live and enforcement is coming fast:
 		</p>
+		<ul class="mb-4 list-disc space-y-3 pl-6">
+			<li class="leading-relaxed text-text-muted"><strong class="text-text">January 1, 2026:</strong> DROP launched — California consumers can submit universal deletion requests covering all 543+ registered brokers in one request, for free.</li>
+			<li class="leading-relaxed text-text-muted"><strong class="text-text">Spring 2026:</strong> CalPrivacy opens API access for data brokers to ingest opt-out requests automatically.</li>
+			<li class="leading-relaxed text-text-muted"><strong class="text-text">August 1, 2026:</strong> Enforcement begins — all registered brokers must check DROP at least every 45 days or face fines of <strong class="text-text">$200/day per violation</strong>.</li>
+			<li class="leading-relaxed text-text-muted"><strong class="text-text">January 1, 2028:</strong> Mandatory independent privacy audits every three years kick in.</li>
+		</ul>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			The government just made the core function of DeleteMe and Incogni a free public utility. For everyone else, CCPA-style requests still work with most major brokers.
+			August 2026 enforcement is roughly four months away. The government just made the core function of DeleteMe and Incogni a free public utility. For everyone else, CCPA-style requests still work with most major brokers.
 		</p>
 	</section>
 
