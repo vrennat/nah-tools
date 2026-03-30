@@ -12,7 +12,7 @@
 		"@type": "WebSite",
 		"name": "nah",
 		"url": "https://nah.tools",
-		"description": "Free, open-source QR code generator. No signup, no expiration, no catch.",
+		"description": "Free, open-source browser tools — QR codes, PDF tools, image editing, link shortening, and more. No signup, no tracking, no catch.",
 		"potentialAction": {
 			"@type": "SearchAction",
 			"target": "https://nah.tools/?q={search_term_string}",

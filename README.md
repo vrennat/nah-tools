@@ -1,52 +1,37 @@
-# nah — Free, Open-Source QR Code Generator
+# nah — Free, Open-Source Browser Tools
 
-**Create QR codes for free. No signup. No expiration. No catch.**
+**Free tools that respect your privacy. No signup. No tracking. No catch.**
 
-nah ([nah.tools](https://nah.tools)) is a free, open-source QR code generator that runs entirely in your browser. Generate static QR codes for URLs, WiFi, vCards, email, phone, SMS, and plain text — with full visual customization, high-res exports, and zero tracking. Your data never touches our server.
+nah ([nah.tools](https://nah.tools)) is a collection of free, open-source utilities that run in your browser. QR codes, PDF tools, image editing, link shortening, resume building — all client-side, all free, forever.
 
-Need a QR code that you can update after printing? nah also offers free dynamic QR codes with scan counting — no account required, no expiration, managed by passphrase.
+## Tools
+
+**QR Code Generator** — Static codes for URLs, WiFi, vCards, email, phone, SMS, and plain text. Dynamic codes with editable destinations and scan counting. Visual customization (colors, gradients, dot styles, corner styles, logo embedding), high-res exports (PNG, SVG, PDF), and batch generation via CSV.
+
+**PDF Tools** — Merge, split, compress, rotate, reorder, remove pages, add page numbers, add watermarks, convert to/from images. All processing happens in your browser.
+
+**Photo Tools** — Compress images, apply filters, remove backgrounds. No uploads to external servers.
+
+**Link Shortener** — Custom short links with click analytics, UTM builder, QR code generation, and bulk creation. Passphrase-protected management.
+
+**Resume Builder** — Build resumes with ATS analysis and job matching.
+
+**Data Broker Removal** — Find and request removal of your personal data from data brokers.
 
 ## Why This Exists
 
-The QR code generator industry charges $120–564/year for something that takes one millisecond of free computation. QR Code Generator Pro has 9,199 Trustpilot reviews averaging 1.5/5 stars — nearly all complaining about the same bait-and-switch: create a "free" QR code, print it, then get charged to keep it working. [Read the full story →](https://nah.tools/why)
+The utility tool industry charges subscription fees for things that take milliseconds of free computation. QR Code Generator Pro has 9,199 Trustpilot reviews averaging 1.5/5 stars — nearly all complaining about the same bait-and-switch: create a "free" code, then get charged to keep it working. [Read the full story.](https://nah.tools/why)
 
-## Features
+## Privacy by Architecture
 
-**Static QR codes (100% client-side, zero server cost):**
-- QR types: URL, plain text, WiFi, vCard, email, phone, SMS
-- Visual customization: colors, gradients, 6 dot styles, 3 corner styles
-- Logo embedding: upload your own or pick from preset icons
-- Export: PNG (any resolution), SVG, PDF — one click, no gate
-- Batch generation: CSV upload → ZIP of QR codes
-- Works offline (PWA with service worker)
-- Zero tracking, zero cookies, zero analytics beyond Cloudflare Web Analytics
-
-**Dynamic QR codes (free, no account):**
-- Edit destination URL after printing
-- Basic scan counter (total only — no PII, no geolocation)
-- Passphrase-based management (no email, no signup)
-- Codes never expire unless you explicitly deactivate them
-
-**Privacy by architecture:** Static codes are generated entirely in your browser. The server never sees your data. Dynamic codes use a minimal redirect through Cloudflare Workers. No accounts, no email collection, no ads, no affiliate links.
-
-## How We Compare
-
-| Feature | nah | QR Code Generator Pro | QR Tiger | Flowcode |
-|---------|-----------|----------------------|----------|----------|
-| Price | **Free** | $120–564/yr | $84–444/yr | $60–3,000/yr |
-| Signup required | No | Yes | Yes | Yes |
-| Codes expire | Never | After 14-day trial | After trial | After trial |
-| SVG export | Free | Paid plans | Paid plans | No |
-| Open source | Yes (MIT) | No | No | No |
-| Works offline | Yes | No | No | No |
+Static tools (QR codes, PDFs, photos) run entirely in your browser. The server never sees your data. Dynamic features (short links, dynamic QR codes) use a minimal redirect through Cloudflare Workers. No accounts, no email collection, no ads, no cookies.
 
 ## Tech Stack
 
 - **Framework:** SvelteKit + Svelte 5
 - **Styling:** Tailwind CSS 4
-- **QR Library:** qr-code-styling (client-side)
-- **Hosting:** Cloudflare Workers ($5/month total infrastructure cost)
-- **Database:** Cloudflare D1 (for dynamic code redirects)
+- **Hosting:** Cloudflare Workers
+- **Database:** Cloudflare D1 (for redirects and dynamic codes)
 - **Analytics:** Cloudflare Web Analytics (privacy-respecting)
 
 ## Development
@@ -66,4 +51,4 @@ Contributions welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
-**[nah.tools](https://nah.tools)** — QR codes belong to you. They always did.
+**[nah.tools](https://nah.tools)** — Free tools. No catch.
