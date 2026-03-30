@@ -39,10 +39,10 @@
 			There's a pattern in software that most people don't think about until it happens to them. You need a QR code, so you google "free QR code generator." You find one, make your code, print it on 200 wedding invitations. Two weeks later the code stops working. It was a 14-day trial, and now you either pay $120/year or reprint everything.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			I started looking into how widespread this actually is. It's not a few shady companies. It's an entire industry. Over <strong class="text-text">$2.2 billion in venture capital</strong> has gone into companies that basically charge subscriptions for stuff your browser can already do for free. QR codes, PDF merges, resume exports, background removal. All of it runs client-side with open-source JavaScript libraries. The infrastructure cost is close to zero. The subscriptions exist because most people don't know that.
+			I started looking into how widespread this actually is. It's not a few shady companies. It's an entire industry. Over <a href="#investigations" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent"><strong>$2.2 billion in venture capital</strong></a> has gone into companies that basically charge subscriptions for stuff your browser can already do for free. QR codes, PDF merges, resume exports, background removal. All of it runs client-side with open-source JavaScript libraries. The infrastructure cost is close to zero. The subscriptions exist because most people don't know that.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			The Better Business Bureau has documented <strong class="text-text">$1.3 billion in consumer losses</strong> from "free trial offer" scams over the past decade. That's the world these tools operate in.
+			The Better Business Bureau has documented <a href="https://www.bbb.org/all/scamstudies/free_trial_scams/free_trial_scams_full_study" target="_blank" rel="noopener noreferrer" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent"><strong>$1.3 billion in consumer losses</strong></a> from "free trial offer" scams over the past decade. That's the world these tools operate in.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			So I built <a href="/" class="text-accent underline hover:text-accent-hover">nah.tools</a>. It's a free, open-source set of browser-based tools that replaces the worst offenders. No signup, no ads, no tracking, no catch.
@@ -75,7 +75,7 @@
 	</section>
 
 	<section class="mb-12">
-		<h2 class="mb-6 mt-12 font-display text-2xl font-700 text-text">The investigations</h2>
+		<h2 id="investigations" class="mb-6 mt-12 font-display text-2xl font-700 text-text">The investigations</h2>
 
 		{#each articles as article}
 			<a href="/why/{article.slug}" class="group mb-4 flex items-baseline justify-between rounded-lg border border-border p-5 transition-colors hover:border-accent/50 hover:bg-surface-alt">
