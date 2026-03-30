@@ -1,9 +1,27 @@
+<script lang="ts">
+	import ArticleSchema from '$lib/components/why/ArticleSchema.svelte';
+	import InvestigationFooter from '$lib/components/why/InvestigationFooter.svelte';
+</script>
+
+<ArticleSchema
+	title="The Resume Shakedown: How 'Free' Resume Builders Trap Job Seekers into Paying $389/Year"
+	description="BOLD LLC runs four resume brands that look like competitors. Same company, same trap. Here's the evidence."
+	slug="resume"
+	datePublished="2026-03-30"
+	dateModified="2026-03-30"
+/>
+
 <svelte:head>
 	<title>The Resume Shakedown: How "Free" Resume Builders Trap Job Seekers into Paying $389/Year</title>
 	<meta
 		name="description"
 		content="BOLD LLC runs four resume brands that look like competitors. Same company, same trap. Here's how it works and a free alternative."
 	/>
+	<meta property="og:title" content="The Resume Shakedown" />
+	<meta property="og:description" content="BOLD LLC runs four resume brands that look like competitors. Same company, same trap." />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="https://nah.tools/why/resume" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <article class="mx-auto max-w-3xl py-8">
@@ -70,7 +88,7 @@
 			<p class="mb-3 leading-relaxed text-text-muted"><strong class="text-text">Zety:</strong> $25.95 every four weeks</p>
 			<p class="mb-3 leading-relaxed text-text-muted"><strong class="text-text">MyPerfectResume:</strong> $34.95 every four weeks</p>
 			<p class="mb-3 leading-relaxed text-text-muted"><strong class="text-text">Resume.io:</strong> $29.95 every four weeks</p>
-			<p class="leading-relaxed text-text-muted">Every four weeks, not monthly. That's <strong class="text-text">13 billing cycles per year</strong> instead of 12.</p>
+			<p class="leading-relaxed text-text-muted">Every four weeks, not monthly. That's <strong class="text-text">13 billing cycles per year</strong> instead of 12. The same four-week billing trick appears across <a href="/why/pdf" class="text-accent underline hover:text-accent-hover">PDF tools</a> too.</p>
 		</div>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			On Zety, that works out to <strong class="text-text">$337/year</strong>. On Resume.io, it's <strong class="text-text">$389/year</strong>. For a PDF export of an HTML template.
@@ -83,13 +101,13 @@
 	<section class="mb-12">
 		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">What the reviews say</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Zety:</strong> 1.3 out of 5 on PissedConsumer. 87% unfavorable.
+			<strong class="text-text">Zety:</strong> <a href="https://www.pissedconsumer.com/zety/reviews.html" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">1.3 out of 5 on PissedConsumer</a>. 87% unfavorable.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Resume Genius:</strong> 1.3 out of 5 on PissedConsumer. Users consistently report unauthorized charges and difficulty canceling.
+			<strong class="text-text">Resume Genius:</strong> <a href="https://www.pissedconsumer.com/resume-genius/reviews.html" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">1.3 out of 5 on PissedConsumer</a>. Users consistently report unauthorized charges and difficulty canceling.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Resume.io:</strong> 1.5 out of 5 on ProductHunt. Their own FAQ page admits users may have "selected a subscription extension instead of completing the full cancellation process." They're acknowledging the interface is confusing and framing it as your fault.
+			<strong class="text-text">Resume.io:</strong> <a href="https://www.producthunt.com/products/resume-io/reviews" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">1.5 out of 5 on ProductHunt</a>. Their own FAQ page admits users may have "selected a subscription extension instead of completing the full cancellation process." They're acknowledging the interface is confusing and framing it as your fault.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			One Trustpilot reviewer reported being charged <strong class="text-text">$590 over two years</strong> without using the service. A PissedConsumer user: "Resume Genius stole $167.65 from me."
@@ -124,10 +142,10 @@
 			A resume is structured text rendered into a layout and exported as a PDF. That's it. There is no complex computation. No server processing. It's a form that outputs a formatted document.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text"><a href="https://rxresu.me" class="text-accent underline hover:text-accent-hover">Reactive Resume</a></strong> has 28,000+ GitHub stars. Full-featured, multiple templates, drag-and-drop, PDF export. Free, open source, no data collection.
+			<strong class="text-text"><a href="https://rxresu.me" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Reactive Resume</a></strong> (<a href="https://github.com/AmruthPillworking/Reactive-Resume" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">GitHub</a>) has 28,000+ GitHub stars. Full-featured, multiple templates, drag-and-drop, PDF export. Free, open source, no data collection.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text"><a href="https://www.open-resume.com/" class="text-accent underline hover:text-accent-hover">OpenResume</a></strong> has 7,200+ GitHub stars. Runs entirely in the browser. No signup, no data leaving your device.
+			<strong class="text-text"><a href="https://www.open-resume.com/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">OpenResume</a></strong> (<a href="https://github.com/xitanggg/open-resume" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">GitHub</a>) has 7,200+ GitHub stars. Runs entirely in the browser. No signup, no data leaving your device.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			These aren't demos. They're mature tools that do everything the paid ones do, minus the billing trap.
@@ -152,7 +170,7 @@
 		<ol class="mb-4 list-decimal space-y-4 pl-6">
 			<li class="leading-relaxed text-text-muted"><strong class="text-text">Never enter a credit card for a "free" tool.</strong> If it asks for payment info, it's a trial. Walk away.</li>
 			<li class="leading-relaxed text-text-muted"><strong class="text-text">Check who owns the product.</strong> If you had a bad experience with one resume builder, look up the parent company before trying another. Four of the biggest brands are the same company.</li>
-			<li class="leading-relaxed text-text-muted"><strong class="text-text">Google Docs has free resume templates.</strong> So does Microsoft Word online. So does LibreOffice. They're not marketed as "resume builders" but they produce the same output.</li>
+			<li class="leading-relaxed text-text-muted"><strong class="text-text"><a href="https://docs.google.com/document/u/0/?ftv=1&tgif=c" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Google Docs</a> has free resume templates.</strong> So does Microsoft Word online. So does LibreOffice. They're not marketed as "resume builders" but they produce the same output.</li>
 			<li class="leading-relaxed text-text-muted"><strong class="text-text">If you've already been charged,</strong> check your statement for recurring charges from names you don't recognize. Dispute with your bank. Many people report success with chargebacks.</li>
 			<li class="leading-relaxed text-text-muted"><strong class="text-text">Watch for four-week billing.</strong> If a service bills "every four weeks" instead of "monthly," that's 13 charges per year, not 12.</li>
 			<li class="leading-relaxed text-text-muted"><strong class="text-text">Your resume data belongs to you.</strong> Any builder that won't export to PDF or DOCX without payment is holding your own information hostage.</li>
@@ -165,13 +183,5 @@
 		</p>
 	</section>
 
-	<div class="mt-12 rounded-xl border border-border bg-surface p-8 text-center">
-		<p class="mb-4 text-lg text-text">Ready to build a resume without the billing trap?</p>
-		<a
-			href="/resume"
-			class="inline-block rounded-lg bg-accent px-6 py-3 font-semibold text-white hover:bg-accent-hover"
-		>
-			Build your resume for free
-		</a>
-	</div>
+	<InvestigationFooter slug="resume" />
 </article>

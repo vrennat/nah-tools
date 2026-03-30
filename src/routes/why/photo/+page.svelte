@@ -1,9 +1,27 @@
+<script lang="ts">
+	import ArticleSchema from '$lib/components/why/ArticleSchema.svelte';
+	import InvestigationFooter from '$lib/components/why/InvestigationFooter.svelte';
+</script>
+
+<ArticleSchema
+	title="The Background Removal Shakedown: How Image Tools Show the Result Then Charge $2 to Use It"
+	description="remove.bg processes your photo at full resolution then delivers a thumbnail. The AI model now runs free in your browser."
+	slug="photo"
+	datePublished="2026-03-30"
+	dateModified="2026-03-30"
+/>
+
 <svelte:head>
 	<title>The Background Removal Shakedown: How Image Tools Show the Result Then Charge $2 to Use It</title>
 	<meta
 		name="description"
 		content="remove.bg processes your photo at full resolution then delivers a thumbnail. The AI model now runs free in your browser. Here's the evidence."
 	/>
+	<meta property="og:title" content="The Background Removal Shakedown" />
+	<meta property="og:description" content="remove.bg shows you the perfect result, then charges $2 for the pixels. The AI now runs free in your browser." />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="https://nah.tools/why/photo" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <article class="mx-auto max-w-3xl py-8">
@@ -43,7 +61,7 @@
 
 		<h3 class="mb-3 mt-8 text-xl font-semibold text-text">remove.bg</h3>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			remove.bg, originally built by Vienna-based Kaleido AI and acquired by Canva, is the biggest name in this space. <strong class="text-text">60 million monthly visits.</strong> The free tier processes your image at full resolution and delivers a <strong class="text-text">625x400 pixel download</strong>. About 3% of the pixels in a typical smartphone photo.
+			<a href="https://www.remove.bg/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">remove.bg</a>, originally built by Vienna-based Kaleido AI and acquired by Canva, is the biggest name in this space. <strong class="text-text">60 million monthly visits.</strong> The free tier processes your image at full resolution and delivers a <strong class="text-text">625x400 pixel download</strong>. About 3% of the pixels in a typical smartphone photo.
 		</p>
 		<div class="my-6 rounded-lg border border-border bg-surface-alt p-6">
 			<p class="mb-2 leading-relaxed text-text-muted">$1.99 per image on pay-as-you-go</p>
@@ -73,13 +91,13 @@
 			Two years ago, charging for background removal was defensible. The AI models were big, needed GPUs, and couldn't run in a browser. Server costs were real. That changed fast.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">ONNX Runtime Web</strong> brought neural network inference to the browser through WebAssembly and WebGPU. Models that needed a server with a GPU now run on the user's device. WebGPU acceleration gets up to 20x faster than CPU-only processing.
+			<a href="https://github.com/microsoft/onnxruntime" target="_blank" rel="noopener noreferrer" class="font-bold text-text underline hover:text-accent-hover">ONNX Runtime Web</a> brought neural network inference to the browser through WebAssembly and WebGPU. Models that needed a server with a GPU now run on the user's device. WebGPU acceleration gets up to 20x faster than CPU-only processing.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">IS-Net and BiRefNet</strong> are open-source segmentation models (Apache 2.0 and MIT licensed) that produce commercial-quality results. These aren't research demos. They match remove.bg's output quality.
+			<a href="https://github.com/xuebinqin/DIS" target="_blank" rel="noopener noreferrer" class="font-bold text-text underline hover:text-accent-hover">IS-Net</a> and <a href="https://github.com/ZhengPeng7/BiRefNet" target="_blank" rel="noopener noreferrer" class="font-bold text-text underline hover:text-accent-hover">BiRefNet</a> are open-source segmentation models (Apache 2.0 and MIT licensed) that produce commercial-quality results. These aren't research demos. They match remove.bg's output quality.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">@imgly/background-removal-js</strong> (6,000+ GitHub stars) packages these models into a JavaScript library that runs entirely in the browser. Full resolution, no upload, no server.
+			<a href="https://github.com/nicolo-ribaudo/background-removal-js" target="_blank" rel="noopener noreferrer" class="font-bold text-text underline hover:text-accent-hover">@imgly/background-removal-js</a> (6,000+ GitHub stars) packages these models into a JavaScript library that runs entirely in the browser. Full resolution, no upload, no server.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			The computation that remove.bg charges $1.99 per image for costs <strong class="text-text">$0.00</strong> to run in your browser.
@@ -131,13 +149,5 @@
 		</p>
 	</section>
 
-	<div class="mt-12 rounded-xl border border-border bg-surface p-8 text-center">
-		<p class="mb-4 text-lg text-text">Ready to remove backgrounds without the resolution ransom?</p>
-		<a
-			href="/photo/rm-bg"
-			class="inline-block rounded-lg bg-accent px-6 py-3 font-semibold text-white hover:bg-accent-hover"
-		>
-			Remove backgrounds for free
-		</a>
-	</div>
+	<InvestigationFooter slug="photo" />
 </article>

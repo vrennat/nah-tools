@@ -1,9 +1,27 @@
+<script lang="ts">
+	import ArticleSchema from '$lib/components/why/ArticleSchema.svelte';
+	import InvestigationFooter from '$lib/components/why/InvestigationFooter.svelte';
+</script>
+
+<ArticleSchema
+	title="The Link Shortener Shakedown: $348/Year for a Database Lookup That Takes 4 Milliseconds"
+	description="A URL redirect costs half a millionth of a dollar. Bitly charges $348/year. Here's the evidence."
+	slug="links"
+	datePublished="2026-03-30"
+	dateModified="2026-03-30"
+/>
+
 <svelte:head>
 	<title>The Link Shortener Shakedown: $348/Year for a Database Lookup That Takes 4 Milliseconds</title>
 	<meta
 		name="description"
 		content="A URL redirect costs half a millionth of a dollar. Bitly charges $348/year. Here's the evidence and a free alternative."
 	/>
+	<meta property="og:title" content="The Link Shortener Shakedown" />
+	<meta property="og:description" content="A URL redirect costs half a millionth of a dollar. Bitly charges $348/year." />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="https://nah.tools/why/links" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <article class="mx-auto max-w-3xl py-8">
@@ -49,7 +67,7 @@
 	<section class="mb-12">
 		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">What Bitly charges</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			Bitly has raised <strong class="text-text">$80 million+</strong> in venture capital. It's also the parent company of QR Code Generator Pro, the QR tool with 9,000+ Trustpilot reviews at 1.5 stars.
+			<a href="https://www.crunchbase.com/organization/bitly" target="_blank" rel="noopener noreferrer">Bitly</a> has raised <strong class="text-text">$80 million+</strong> in venture capital. It's also the parent company of QR Code Generator Pro, <a href="/why/qr" class="text-accent underline hover:text-accent-hover">the QR tool with 9,000+ Trustpilot reviews at 1.5 stars</a>.
 		</p>
 		<div class="my-6 overflow-x-auto">
 			<table class="w-full text-left text-sm">
@@ -74,14 +92,14 @@
 
 		<h3 class="mb-3 mt-8 text-xl font-semibold text-text">Everyone else</h3>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Rebrandly:</strong> $89 to $499/year. <strong class="text-text">Short.io:</strong> $240 to $600/year. <strong class="text-text">TinyURL</strong>, which was free for nearly two decades, now has paid plans at $120 to $600/year. <strong class="text-text">Dub.co:</strong> $288/year for Pro.
+			<strong class="text-text">Rebrandly:</strong> $89 to $499/year. <strong class="text-text">Short.io:</strong> $240 to $600/year. <strong class="text-text">TinyURL</strong>, which was free for nearly two decades, now has paid plans at $120 to $600/year. <strong class="text-text"><a href="https://dub.co" target="_blank" rel="noopener noreferrer">Dub.co</a>:</strong> $288/year for Pro.
 		</p>
 	</section>
 
 	<section class="mb-12">
 		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">The Linktree connection</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Linktree</strong> raised <strong class="text-text">$167 million</strong> and hit a <strong class="text-text">$1.3 billion valuation</strong> in 2022. The product is a single HTML page with a profile picture and a list of links. Hosting a static HTML page on Cloudflare costs $0.00.
+			<a href="https://www.crunchbase.com/organization/linktree" target="_blank" rel="noopener noreferrer"><strong class="text-text">Linktree</strong></a> raised <strong class="text-text">$167 million</strong> and hit a <strong class="text-text">$1.3 billion valuation</strong> in 2022. The product is a single HTML page with a profile picture and a list of links. Hosting a static HTML page on Cloudflare costs $0.00.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			Linktree Pro costs <strong class="text-text">$60/year</strong>. Premium is <strong class="text-text">$180/year</strong>. The free plan forces Linktree branding and takes a <strong class="text-text">12% commission on every digital product sale</strong>. A creator making $1,000/month through Linktree's free plan pays $1,440/year in fees for what is architecturally a static HTML page with a Stripe integration.
@@ -137,13 +155,5 @@
 		</p>
 	</section>
 
-	<div class="mt-12 rounded-xl border border-border bg-surface p-8 text-center">
-		<p class="mb-4 text-lg text-text">Ready to shorten links without the markup?</p>
-		<a
-			href="/links"
-			class="inline-block rounded-lg bg-accent px-6 py-3 font-semibold text-white hover:bg-accent-hover"
-		>
-			Shorten links for free
-		</a>
-	</div>
+	<InvestigationFooter slug="links" />
 </article>

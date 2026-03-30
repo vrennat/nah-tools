@@ -1,9 +1,27 @@
+<script lang="ts">
+	import ArticleSchema from '$lib/components/why/ArticleSchema.svelte';
+	import InvestigationFooter from '$lib/components/why/InvestigationFooter.svelte';
+</script>
+
+<ArticleSchema
+	title="The Invoice Shakedown: How 'Free' Invoice Tools Hold Your Business Data Hostage"
+	description="Wave went from free to 1.03/5 BBB rating after paywalling core features. FreshBooks locks your data when you cancel."
+	slug="invoice"
+	datePublished="2026-03-30"
+	dateModified="2026-03-30"
+/>
+
 <svelte:head>
 	<title>The Invoice Shakedown: How "Free" Invoice Tools Hold Your Business Data Hostage</title>
 	<meta
 		name="description"
 		content="Wave went from free to 1.03/5 BBB rating after paywalling core features. FreshBooks locks your data when you cancel. Here's the evidence and a free alternative."
 	/>
+	<meta property="og:title" content="The Invoice Shakedown" />
+	<meta property="og:description" content="Wave went from free to 1.03/5 BBB rating. FreshBooks locks your data when you cancel." />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="https://nah.tools/why/invoice" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <article class="mx-auto max-w-3xl py-8">
@@ -25,17 +43,17 @@
 			Six months later, the features you rely on move behind a paywall. Your bank feed stops syncing. Your CSV exports disappear. Your invoice history is locked inside an account you now need to pay $16/month to access. You can't even download your own data without upgrading.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			This isn't hypothetical. It's what happened to 400,000+ businesses using Wave after H&R Block acquired it for $405 million.
+			This isn't hypothetical. It's what happened to 400,000+ businesses using <a href="https://www.waveapps.com/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Wave</a> after H&R Block acquired it for $405 million.
 		</p>
 		<p class="mb-4 text-lg font-semibold leading-relaxed text-text">
-			An invoice is structured text rendered as a PDF. The entire operation runs in your browser. There is no reason it should cost money.
+			An invoice is structured text rendered as a PDF. The <a href="/why/pdf" class="text-accent underline hover:text-accent-hover">PDF tools investigation</a> covers how that industry charges $96/year for the same operation. The entire operation runs in your browser. There is no reason it should cost money.
 		</p>
 	</section>
 
 	<section class="mb-12">
 		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">Wave: from beloved to 1.03 out of 5</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			Wave Financial built a reputation as the genuinely free accounting tool for small businesses, serving <strong class="text-text">400,000+ monthly active businesses</strong> across 200+ countries. H&R Block acquired it in June 2019 for <strong class="text-text">$405 million in cash</strong>. The CEO's blog post promised: "The brand that you have come to trust and love in Wave is not going away."
+			Wave Financial built a reputation as the genuinely free accounting tool for small businesses, serving <strong class="text-text">400,000+ monthly active businesses</strong> across 200+ countries. H&R Block <a href="https://www.hrblock.com/tax-center/newsroom/around-block/h-r-block-acquires-wave/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">acquired</a> it in June 2019 for <strong class="text-text">$405 million in cash</strong>. The CEO's blog post promised: "The brand that you have come to trust and love in Wave is not going away."
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			The degradation followed a textbook timeline. The CEO stepped down in mid-2022. Community forums were eliminated the same year, cutting off free peer support. In March 2024, Wave laid off 14% of staff. Then the real changes came.
@@ -44,8 +62,8 @@
 			In January 2024, automatic bank transaction imports — the feature around which thousands of businesses had built their workflows — <strong class="text-text">moved behind a $16/month paywall</strong>. Receipt scanning, gone. CSV export, gone. The new CEO framed it as taking Wave "from a startup designed to remove a barrier to entry for aspiring entrepreneurs to a purpose-driven, profitable, and sustainable company."
 		</p>
 		<div class="my-6 rounded-lg border border-border bg-surface-alt p-6">
-			<p class="mb-3 leading-relaxed text-text-muted">Wave's BBB rating: <strong class="text-text">1.03 out of 5</strong> from 201 complaints.</p>
-			<p class="leading-relaxed text-text-muted">Trustpilot: <strong class="text-text">1.2 out of 5</strong> from 194 reviews.</p>
+			<p class="mb-3 leading-relaxed text-text-muted">Wave's BBB rating: <a href="https://www.bbb.org/ca/on/toronto/profile/accounting-software/wave-financial-inc-0107-1355498" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover"><strong class="text-text">1.03 out of 5</strong></a> from 201 complaints.</p>
+			<p class="leading-relaxed text-text-muted">Trustpilot: <a href="https://www.trustpilot.com/review/waveapps.com" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover"><strong class="text-text">1.2 out of 5</strong></a> from 194 reviews.</p>
 		</div>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			One BBB complaint reported Wave <strong class="text-text">automatically refunding over $50,000 across multiple client transactions</strong> that had been processed months earlier — without prior notice — despite services being fully delivered. Multiple users reported employees not receiving paychecks after a botched payroll system migration. Free-tier users now receive zero human support — only a chatbot named "Mave."
@@ -55,7 +73,7 @@
 	<section class="mb-12">
 		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">FreshBooks: your data dies when you stop paying</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			FreshBooks has <strong class="text-text">no permanent free plan</strong>. After a 30-day trial, plans start at $19/month with a 5-client limit. The Plus plan removes the limit for $33/month. Premium is $60/month.
+			<a href="https://www.freshbooks.com/pricing" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">FreshBooks</a> has <strong class="text-text">no permanent free plan</strong>. After a 30-day trial, plans start at $19/month with a 5-client limit. The Plus plan removes the limit for $33/month. Premium is $60/month.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			Here's the real trap: users report <strong class="text-text">losing access to all invoices and customer data upon cancellation</strong>. Years of business records, client histories, and financial documents — locked behind a paywall the moment you stop paying. That's not a subscription service. It's data hostage-taking.
@@ -68,7 +86,7 @@
 	<section class="mb-12">
 		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">The rest of the field</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Zoho Invoice</strong> is genuinely free up to 500 invoices per year. But multi-currency support was quietly moved to Zoho Billing (paid). The upgrade path pushes toward Zoho Books at $20/month. And they still require an account with your data on their servers.
+			<strong class="text-text"><a href="https://www.zoho.com/invoice/" target="_blank" rel="noopener noreferrer" class="text-accent hover:text-accent-hover">Zoho Invoice</a></strong> is genuinely free up to 500 invoices per year. But multi-currency support was quietly moved to Zoho Billing (paid). The upgrade path pushes toward Zoho Books at $20/month. And they still require an account with your data on their servers.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			<strong class="text-text">Square Invoices</strong> offers unlimited free invoices but increased online processing fees from <strong class="text-text">2.9% to 3.3%</strong> on the free plan in October 2025. A business processing $10,000/month in invoice payments just saw their effective cost rise by $40/month — with no opt-out.
@@ -106,7 +124,7 @@
 			An invoice is a document with structured fields: who's sending it, who's receiving it, what was delivered, how much it costs, and when to pay. The computation involved is basic arithmetic — multiply quantity by price, apply a tax rate, sum the totals. The output is a PDF.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">pdfmake</strong> (12,300 GitHub stars) generates professional PDFs with tables, headers, footers, and automatic page breaks — entirely in the browser. No server. No upload. No account. The library is 900KB. That's the entire engine behind a multi-billion-dollar industry.
+			<strong class="text-text"><a href="https://github.com/bpampuch/pdfmake" target="_blank" rel="noopener noreferrer" class="text-accent hover:text-accent-hover">pdfmake</a></strong> (12,300 GitHub stars) generates professional PDFs with tables, headers, footers, and automatic page breaks — entirely in the browser. No server. No upload. No account. The library is 900KB. That's the entire engine behind a multi-billion-dollar industry.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			The features that justify the subscriptions — recurring invoices, payment tracking, bank feeds — are real. But for the freelancer or small business that just needs to generate and send professional invoices? The computation happens in your browser. The PDF belongs to you. There is nothing to charge for.
@@ -122,7 +140,7 @@
 			<strong class="text-text">New businesses.</strong> Someone starting their first consulting practice, Etsy shop, or tutoring business. They're learning to invoice for the first time, most likely to search "free invoice generator," and most vulnerable to building a workflow around a tool that will change its terms later.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">International sellers.</strong> Cross-border invoicing means dealing with multiple currencies, VAT, and increasingly, e-invoice mandates. Germany requires ZUGFeRD format from January 2027. France requires Factur-X from September 2026. No free client-side tool handles these standards. Paid tools charge premium rates for compliance that could run in a browser.
+			<strong class="text-text">International sellers.</strong> Cross-border invoicing means dealing with multiple currencies, VAT, and increasingly, e-invoice mandates. Germany requires <a href="https://www.ferd-net.de/zugferd/definition/index.html" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">ZUGFeRD</a> format from January 2027. France requires <a href="https://fnfe-mpe.org/factur-x/factur-x-en/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Factur-X</a> from September 2026. No free client-side tool handles these standards. Paid tools charge premium rates for compliance that could run in a browser.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			<strong class="text-text">Anyone who built their workflow around Wave.</strong> 400,000+ businesses trusted a "free forever" promise. The promise lasted until the acquisition check cleared.
@@ -181,13 +199,5 @@
 		</p>
 	</section>
 
-	<div class="mt-12 rounded-xl border border-border bg-surface p-8 text-center">
-		<p class="mb-4 text-lg text-text">Ready to send invoices without the strings attached?</p>
-		<a
-			href="/invoice"
-			class="inline-block rounded-lg bg-accent px-6 py-3 font-semibold text-white hover:bg-accent-hover"
-		>
-			Create an invoice for free
-		</a>
-	</div>
+	<InvestigationFooter slug="invoice" />
 </article>

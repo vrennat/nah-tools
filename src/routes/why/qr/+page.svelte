@@ -1,9 +1,27 @@
+<script lang="ts">
+	import ArticleSchema from '$lib/components/why/ArticleSchema.svelte';
+	import InvestigationFooter from '$lib/components/why/InvestigationFooter.svelte';
+</script>
+
+<ArticleSchema
+	title="The QR Code Shakedown: How 'Free' QR Generators Charge Hundreds per Year"
+	description="QR Code Generator Pro has thousands of 1-star reviews. Here's how the subscription trap works and a genuinely free alternative."
+	slug="qr"
+	datePublished="2026-03-15"
+	dateModified="2026-03-30"
+/>
+
 <svelte:head>
 	<title>The QR Code Shakedown: How 'Free' QR Generators Charge Hundreds per Year</title>
 	<meta
 		name="description"
 		content="QR Code Generator Pro has thousands of 1-star reviews. Here's how the subscription trap works and a genuinely free alternative."
 	/>
+	<meta property="og:title" content="The QR Code Shakedown" />
+	<meta property="og:description" content="QR Code Generator Pro has thousands of 1-star reviews. Here's how the subscription trap works." />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="https://nah.tools/why/qr" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <article class="mx-auto max-w-3xl py-8">
@@ -48,7 +66,7 @@
 			To understand the trap, you need to understand what a QR code actually is. A QR code is a
 			picture that encodes text. That's it. The black-and-white pixel pattern is a visual
 			representation of data — usually a URL — following an international standard called
-			ISO/IEC 18004. Your phone's camera reads the pixels, decodes the text, and opens the link.
+			<a href="https://en.wikipedia.org/wiki/QR_code#Standards" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">ISO/IEC 18004</a>. Your phone's camera reads the pixels, decodes the text, and opens the link.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			There are two fundamentally different types of QR codes, and the distinction between them
@@ -105,8 +123,8 @@
 		<h3 class="mb-3 mt-8 text-xl font-semibold text-text">QR Code Generator Pro</h3>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			QR Code Generator Pro, one of the largest players in the space, has accumulated
-			<strong class="text-text">over 9,000 reviews on Trustpilot with an average rating of 1.5 out of 5 stars</strong>.
-			On Sitejabber, they hold 350+ reviews at 1.2 out of 5. The complaints follow a strikingly
+			<a href="https://www.trustpilot.com/review/qr-code-generator.com" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover"><strong class="text-text">over 9,000 reviews on Trustpilot with an average rating of 1.5 out of 5 stars</strong></a>.
+			On Sitejabber, they hold <a href="https://www.sitejabber.com/reviews/qr-code-generator.com" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">350+ reviews at 1.2 out of 5</a>. The complaints follow a strikingly
 			consistent pattern: user creates a "free" QR code, prints it on physical materials, discovers
 			within 14 days that the code has been deactivated, and is presented with a paid subscription.
 			Plans range from around $5 to $38 per month, billed annually — meaning users face charges
@@ -318,13 +336,5 @@
 		</p>
 	</section>
 
-	<div class="mt-12 rounded-xl border border-border bg-surface p-8 text-center">
-		<p class="mb-4 text-lg text-text">Ready to make a QR code that actually stays free?</p>
-		<a
-			href="/qr"
-			class="inline-block rounded-lg bg-accent px-6 py-3 font-semibold text-white hover:bg-accent-hover"
-		>
-			Create a free QR code
-		</a>
-	</div>
+	<InvestigationFooter slug="qr" />
 </article>

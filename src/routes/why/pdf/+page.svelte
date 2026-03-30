@@ -1,9 +1,27 @@
+<script lang="ts">
+	import ArticleSchema from '$lib/components/why/ArticleSchema.svelte';
+	import InvestigationFooter from '$lib/components/why/InvestigationFooter.svelte';
+</script>
+
+<ArticleSchema
+	title="The PDF Shakedown: How 'Free' PDF Tools Charge $96/Year for Government Forms"
+	description="PDFFiller ranks above government websites and charges $96/year for forms your taxes paid for. Here's the evidence."
+	slug="pdf"
+	datePublished="2026-03-30"
+	dateModified="2026-03-30"
+/>
+
 <svelte:head>
 	<title>The PDF Shakedown: How "Free" PDF Tools Charge $96/Year for Government Forms</title>
 	<meta
 		name="description"
 		content="PDFFiller ranks above government websites and charges $96/year for forms your taxes paid for. Here's the evidence and a free alternative."
 	/>
+	<meta property="og:title" content="The PDF Shakedown" />
+	<meta property="og:description" content="PDFFiller ranks above government websites and charges $96/year for forms your taxes paid for." />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="https://nah.tools/why/pdf" />
+	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
 <article class="mx-auto max-w-3xl py-8">
@@ -60,7 +78,7 @@
 			airSlate's official response to the BBB: "99% of the complaints are, sadly, related to the fact that some people do not understand how free trial period works."
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			PDFFiller has a <strong class="text-text">1.8 out of 5 on PissedConsumer</strong> from 88 reviews. 77% unfavorable.
+			PDFFiller has a <a href="https://www.pissedconsumer.com/pdffiller/reviews.html" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">1.8 out of 5 on PissedConsumer</a> from 88 reviews. 77% unfavorable.
 		</p>
 	</section>
 
@@ -70,13 +88,13 @@
 			<strong class="text-text">SmallPDF</strong> is a top-200 website globally, with roughly $11 million in revenue. Its free tier gives you <strong class="text-text">two actions per day</strong>. Merging a PDF and downloading the result counts as two actions. One task per day on the free plan.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Soda PDF</strong>, owned by Avanquest (a subsidiary of publicly traded Claranova), has a <strong class="text-text">1.0 out of 5 on PissedConsumer</strong>. The lowest rating I found across every company I looked into.
+			<strong class="text-text">Soda PDF</strong>, owned by Avanquest (a subsidiary of publicly traded Claranova), has a <a href="https://www.pissedconsumer.com/soda-pdf/reviews.html" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">1.0 out of 5 on PissedConsumer</a>. The lowest rating I found across every company I looked into.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			Claranova's strategy is in their investor materials. They shifted from 50% subscription revenue in 2019 to <strong class="text-text">92% by 2024</strong>, hitting 21.3% EBITDA margins. The playbook: buy PDF tools, convert them to subscriptions. The technology doesn't change. The billing does.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">iLovePDF</strong> and <strong class="text-text">PDF24</strong> prove you can run PDF tools without dark patterns. PDF24 is entirely free with no account required. They exist. They just get outranked by the predatory ones in search results.
+			<a href="https://www.ilovepdf.com/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover"><strong class="text-text">iLovePDF</strong></a> and <a href="https://tools.pdf24.org/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover"><strong class="text-text">PDF24</strong></a> prove you can run PDF tools without dark patterns. PDF24 is entirely free with no account required. They exist. They just get outranked by the predatory ones in search results.
 		</p>
 	</section>
 
@@ -107,7 +125,7 @@
 			<strong class="text-text">Small businesses.</strong> Invoices, contracts, tax filings, permits. A business owner who merges two invoices has exhausted SmallPDF's daily limit.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Anyone in a hurry.</strong> Same pattern as every other category. You need to merge something for a meeting in 30 minutes. The paywall appears when you're least able to walk away.
+			<strong class="text-text">Anyone in a hurry.</strong> Same pattern as every other category. You need to merge something for a meeting in 30 minutes. The paywall appears when you're least able to walk away. The same build-then-paywall pattern drives the <a href="/why/resume" class="text-accent underline hover:text-accent-hover">resume builder industry</a>.
 		</p>
 	</section>
 
@@ -127,10 +145,10 @@
 	<section class="mb-12">
 		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">How to protect yourself</h2>
 		<ol class="mb-4 list-decimal space-y-4 pl-6">
-			<li class="leading-relaxed text-text-muted"><strong class="text-text">Get government forms from government websites.</strong> IRS forms at IRS.gov. DMV forms at your state's DMV site. Immigration forms at USCIS.gov. Never fill out government forms on third-party sites.</li>
+			<li class="leading-relaxed text-text-muted"><strong class="text-text">Get government forms from government websites.</strong> IRS forms at <a href="https://www.irs.gov/forms-instructions" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">IRS.gov</a>. DMV forms at your state's DMV site. Immigration forms at <a href="https://www.uscis.gov/forms" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">USCIS.gov</a>. Never fill out government forms on third-party sites.</li>
 			<li class="leading-relaxed text-text-muted"><strong class="text-text">Check the URL.</strong> If the site doesn't end in .gov, you're not on a government website.</li>
 			<li class="leading-relaxed text-text-muted"><strong class="text-text">Never enter a credit card for basic PDF operations.</strong> Merging, splitting, compressing, and rotating PDFs are simple file operations. If a tool charges for them, you're overpaying.</li>
-			<li class="leading-relaxed text-text-muted"><strong class="text-text">Use built-in tools first.</strong> macOS Preview can merge, split, annotate, and fill PDFs. Chrome and Edge can print anything to PDF. LibreOffice Draw can edit PDF content. All free.</li>
+			<li class="leading-relaxed text-text-muted"><strong class="text-text">Use built-in tools first.</strong> <a href="https://support.apple.com/guide/preview/welcome/mac" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">macOS Preview</a> can merge, split, annotate, and fill PDFs. Chrome and Edge can print anything to PDF. LibreOffice Draw can edit PDF content. All free.</li>
 			<li class="leading-relaxed text-text-muted"><strong class="text-text">If you've been charged,</strong> dispute it with your bank. Document the misleading interface and file a chargeback.</li>
 		</ol>
 	</section>
@@ -141,13 +159,5 @@
 		</p>
 	</section>
 
-	<div class="mt-12 rounded-xl border border-border bg-surface p-8 text-center">
-		<p class="mb-4 text-lg text-text">Ready to use PDF tools that are actually free?</p>
-		<a
-			href="/pdf"
-			class="inline-block rounded-lg bg-accent px-6 py-3 font-semibold text-white hover:bg-accent-hover"
-		>
-			Use free PDF tools
-		</a>
-	</div>
+	<InvestigationFooter slug="pdf" />
 </article>
