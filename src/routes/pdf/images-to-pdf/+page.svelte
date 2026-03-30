@@ -2,15 +2,17 @@
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
 	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import { isHeic, convertHeicToJpeg } from '$lib/heic';
 
 	let files = $state<File[]>([]);
 	let pageSize = $state<'fit' | 'a4' | 'letter'>('fit');
 	let processing = $state(false);
+	let convertingHeic = $state(false);
 	let progress = $state({ current: 0, total: 0 });
 	let error = $state('');
 	let dragIndex = $state<number | null>(null);
 
-	let canConvert = $derived(files.length > 0 && !processing);
+	let canConvert = $derived(files.length > 0 && !processing && !convertingHeic);
 
 	function moveFile(from: number, to: number) {
 		if (from === to) return;
@@ -19,6 +21,23 @@
 		updated.splice(to, 0, item);
 		files = updated;
 	}
+
+	// Convert any HEIC files to JPEG when files change
+	$effect(() => {
+		const heicFiles = files.filter(isHeic);
+		if (heicFiles.length === 0) return;
+
+		convertingHeic = true;
+		Promise.all(
+			files.map(async (f) => (isHeic(f) ? convertHeicToJpeg(f) : f))
+		).then((converted) => {
+			files = converted;
+			convertingHeic = false;
+		}).catch(() => {
+			error = 'Failed to convert one or more HEIC files';
+			convertingHeic = false;
+		});
+	});
 
 	function getImageType(file: File): 'png' | 'jpg' {
 		return file.type === 'image/png' ? 'png' : 'jpg';
@@ -64,12 +83,12 @@
 
 <PdfToolLayout
 	title="Images to PDF"
-	description="Convert JPG or PNG images to a PDF document."
+	description="Convert JPG, PNG, or HEIC images to a PDF document."
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
 			<FileDropZone
-				accept=".jpg,.jpeg,.png"
+				accept=".jpg,.jpeg,.png,.heic,.heif"
 				multiple={true}
 				bind:files
 				label="Drop images here or click to browse"
@@ -128,6 +147,13 @@
 						<option value="a4">A4</option>
 						<option value="letter">Letter</option>
 					</select>
+				</div>
+			{/if}
+
+			{#if convertingHeic}
+				<div class="mt-4 flex items-center gap-2 rounded-lg bg-accent/5 border border-accent/20 px-3 py-2 text-sm text-text-muted">
+					<div class="h-4 w-4 animate-spin rounded-full border-2 border-accent border-t-transparent"></div>
+					Converting HEIC files...
 				</div>
 			{/if}
 

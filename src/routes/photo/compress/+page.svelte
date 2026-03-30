@@ -204,7 +204,7 @@
 	<div class="rounded-lg border border-border bg-surface-alt p-6">
 		<h2 class="text-sm font-semibold text-text">How it works</h2>
 		<p class="mt-2 text-sm text-text-muted">
-			Images are compressed entirely in your browser using WebAssembly codecs from Google's Squoosh project. Nothing is uploaded to any server. Supports JPEG, WebP, AVIF, PNG, OxiPNG, and JPEG XL.
+			Images are compressed entirely in your browser using WebAssembly codecs from Google's Squoosh project. Nothing is uploaded to any server. Supports JPEG, WebP, AVIF, PNG, OxiPNG, JPEG XL, and HEIC.
 		</p>
 	</div>
 </div>

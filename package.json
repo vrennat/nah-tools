@@ -45,6 +45,7 @@
 		"comlink": "^4.4.2",
 		"compromise": "^14.15.0",
 		"docx": "^9.6.1",
+		"heic2any": "^0.0.4",
 		"idb-keyval": "^6.2.2",
 		"jspdf": "^2.5.2",
 		"jszip": "^3.10.1",
