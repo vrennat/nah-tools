@@ -45,19 +45,18 @@
 	async function handleImage(file: File) {
 		error = '';
 
-		// Create object URL for preview
-		originalSrc = URL.createObjectURL(file);
-
-		// Create ImageBitmap for processing
-		const bitmap = await createImageBitmap(file);
-		originalBitmap = bitmap;
-
-		// Check if model is cached to decide initial state
-		const cached = await isModelCached();
-		pageState = cached ? 'processing' : 'loading-model';
-		downloadLoaded = 0;
-
 		try {
+			// Create object URL for preview
+			originalSrc = URL.createObjectURL(file);
+
+			// Create ImageBitmap for processing
+			const bitmap = await createImageBitmap(file);
+			originalBitmap = bitmap;
+
+			// Check if model is cached to decide initial state
+			const cached = await isModelCached();
+			pageState = cached ? 'processing' : 'loading-model';
+			downloadLoaded = 0;
 			const result = await removeBackground(
 				await createImageBitmap(file), // create a new one since we transfer it
 				(loaded, total) => {

@@ -26,13 +26,18 @@ async function fetchModelWithCache(
 	model: ModelInfo,
 	onProgress?: ProgressCallback
 ): Promise<ArrayBuffer> {
-	const cache = await caches.open(MODEL_CACHE_NAME);
-	const cached = await cache.match(model.url);
+	let cache: Cache | null = null;
+	try {
+		cache = await caches.open(MODEL_CACHE_NAME);
+		const cached = await cache.match(model.url);
 
-	if (cached) {
-		const buffer = await cached.arrayBuffer();
-		onProgress?.(buffer.byteLength, buffer.byteLength);
-		return buffer;
+		if (cached) {
+			const buffer = await cached.arrayBuffer();
+			onProgress?.(buffer.byteLength, buffer.byteLength);
+			return buffer;
+		}
+	} catch {
+		// Cache API unavailable (e.g. private browsing) — proceed without caching
 	}
 
 	const response = await fetch(model.url);
@@ -44,8 +49,9 @@ async function fetchModelWithCache(
 	if (!response.body) {
 		const buffer = await response.arrayBuffer();
 		onProgress?.(buffer.byteLength, buffer.byteLength);
-		// Cache the response for next time
-		await cache.put(model.url, new Response(buffer.slice(0)));
+		try {
+			await cache?.put(model.url, new Response(buffer.slice(0)));
+		} catch { /* caching is best-effort */ }
 		return buffer;
 	}
 
@@ -68,13 +74,15 @@ async function fetchModelWithCache(
 		offset += chunk.byteLength;
 	}
 
-	// Cache for next time
-	await cache.put(
-		model.url,
-		new Response(buffer.buffer.slice(0), {
-			headers: { 'Content-Type': 'application/octet-stream' }
-		})
-	);
+	// Cache for next time (best-effort)
+	try {
+		await cache?.put(
+			model.url,
+			new Response(buffer.buffer.slice(0), {
+				headers: { 'Content-Type': 'application/octet-stream' }
+			})
+		);
+	} catch { /* caching is best-effort */ }
 
 	return buffer.buffer;
 }
