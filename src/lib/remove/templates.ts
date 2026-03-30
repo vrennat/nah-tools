@@ -50,7 +50,8 @@ ${user.firstName} ${user.lastName}`;
 }
 
 export function generateEmail(broker: Broker, user: UserInfo): GeneratedEmail {
-	if (broker.legalBasis.includes('gdpr') && !broker.legalBasis.includes('ccpa')) {
+	const isUS = user.state && user.state !== 'outside-us';
+	if (!isUS && broker.legalBasis.includes('gdpr')) {
 		return generateGDPREmail(broker, user);
 	}
 	return generateCCPAEmail(broker, user);
