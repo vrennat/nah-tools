@@ -50,3 +50,66 @@ export interface PageRange {
 
 /** Progress callback for multi-page operations */
 export type ProgressCallback = (current: number, total: number) => void;
+
+/** Text annotation for PDF editing */
+export interface TextAnnotation {
+	type: 'text';
+	pageIndex: number;
+	x: number;
+	y: number;
+	text: string;
+	fontSize: number;
+	color: string;
+}
+
+/** Image annotation for PDF editing */
+export interface ImageAnnotation {
+	type: 'image';
+	pageIndex: number;
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	data: ArrayBuffer;
+	imageType: 'png' | 'jpg';
+}
+
+/** Freehand drawing annotation for PDF editing */
+export interface DrawAnnotation {
+	type: 'draw';
+	pageIndex: number;
+	paths: { x: number; y: number }[][];
+	strokeColor: string;
+	strokeWidth: number;
+}
+
+/** Union type for all PDF edit annotations */
+export type EditAnnotation = TextAnnotation | ImageAnnotation | DrawAnnotation;
+
+/** A signature placed on a PDF page */
+export interface SignatureField {
+	pageIndex: number;
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+	data: string; // data URL (drawn/typed) or base64
+}
+
+/** A text annotation placed on a PDF page */
+export interface TextFieldFill {
+	pageIndex: number;
+	x: number;
+	y: number;
+	text: string;
+	fontSize: number;
+	color: string;
+}
+
+/** PDF permission flags for encryption */
+export interface PDFPermissions {
+	printing: boolean;
+	copying: boolean;
+	modifying: boolean;
+	annotating: boolean;
+}

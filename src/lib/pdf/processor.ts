@@ -3,7 +3,16 @@
  * All functions are async and lazily load the library on first use.
  */
 
-import type { PageNumberConfig, PageRange, ProgressCallback, WatermarkConfig } from './types';
+import type {
+	EditAnnotation,
+	PageNumberConfig,
+	PageRange,
+	PDFPermissions,
+	ProgressCallback,
+	SignatureField,
+	TextFieldFill,
+	WatermarkConfig
+} from './types';
 
 let PDFLib: typeof import('@cantoo/pdf-lib');
 
@@ -242,6 +251,50 @@ export async function addPageNumbers(
 	return doc.save();
 }
 
+/** Add password protection and encryption to a PDF */
+export async function protectPDF(
+	source: ArrayBuffer,
+	userPassword: string,
+	ownerPassword: string,
+	permissions: PDFPermissions
+): Promise<Uint8Array> {
+	const { PDFDocument } = await getPDFLib();
+	const doc = await PDFDocument.load(source);
+
+	doc.encrypt({
+		userPassword,
+		ownerPassword: ownerPassword || userPassword,
+		permissions: {
+			printing: permissions.printing ? 'highResolution' : false,
+			copying: permissions.copying,
+			modifying: permissions.modifying,
+			annotating: permissions.annotating,
+			fillingForms: permissions.annotating,
+			contentAccessibility: true
+		}
+	});
+
+	return doc.save();
+}
+
+/** Remove password protection from a PDF by loading with the password and re-saving */
+export async function unlockPDF(
+	source: ArrayBuffer,
+	password: string
+): Promise<Uint8Array> {
+	const { PDFDocument } = await getPDFLib();
+	const doc = await PDFDocument.load(source, { password });
+
+	// Copy all pages to a fresh (unencrypted) document
+	const newDoc = await PDFDocument.create();
+	const pages = await newDoc.copyPages(doc, doc.getPageIndices());
+	for (const page of pages) {
+		newDoc.addPage(page);
+	}
+
+	return newDoc.save();
+}
+
 /** Add a text watermark to all pages */
 export async function addWatermark(
 	source: ArrayBuffer,
@@ -273,6 +326,132 @@ export async function addWatermark(
 			color: rgb(r, g, b),
 			opacity: config.opacity,
 			rotate: degrees(config.rotation)
+		});
+	}
+
+	return doc.save();
+}
+
+/** Parse a hex color string to r, g, b values (0-1 range) */
+function parseHex(hex: string): { r: number; g: number; b: number } {
+	const clean = hex.replace('#', '');
+	return {
+		r: parseInt(clean.slice(0, 2), 16) / 255,
+		g: parseInt(clean.slice(2, 4), 16) / 255,
+		b: parseInt(clean.slice(4, 6), 16) / 255
+	};
+}
+
+/** Burn annotations (text, image, draw) into a PDF */
+export async function editPDF(
+	source: ArrayBuffer,
+	annotations: EditAnnotation[]
+): Promise<Uint8Array> {
+	const { PDFDocument, rgb, StandardFonts } = await getPDFLib();
+	const doc = await PDFDocument.load(source);
+	const font = await doc.embedFont(StandardFonts.Helvetica);
+	const pages = doc.getPages();
+
+	for (const ann of annotations) {
+		const page = pages[ann.pageIndex];
+		if (!page) continue;
+
+		if (ann.type === 'text') {
+			const { r, g, b } = parseHex(ann.color);
+			page.drawText(ann.text, {
+				x: ann.x,
+				y: ann.y,
+				size: ann.fontSize,
+				font,
+				color: rgb(r, g, b)
+			});
+		} else if (ann.type === 'image') {
+			const embedded =
+				ann.imageType === 'png'
+					? await doc.embedPng(ann.data)
+					: await doc.embedJpg(ann.data);
+			page.drawImage(embedded, {
+				x: ann.x,
+				y: ann.y,
+				width: ann.width,
+				height: ann.height
+			});
+		} else if (ann.type === 'draw') {
+			const { r, g, b } = parseHex(ann.strokeColor);
+			for (const path of ann.paths) {
+				if (path.length < 2) continue;
+				for (let i = 0; i < path.length - 1; i++) {
+					page.drawLine({
+						start: { x: path[i].x, y: path[i].y },
+						end: { x: path[i + 1].x, y: path[i + 1].y },
+						thickness: ann.strokeWidth,
+						color: rgb(r, g, b)
+					});
+				}
+			}
+		}
+	}
+
+	return doc.save();
+}
+
+/** Convert a data URL to a Uint8Array of raw image bytes */
+function dataUrlToBytes(dataUrl: string): Uint8Array {
+	const base64 = dataUrl.split(',')[1];
+	const binary = atob(base64);
+	const bytes = new Uint8Array(binary.length);
+	for (let i = 0; i < binary.length; i++) {
+		bytes[i] = binary.charCodeAt(i);
+	}
+	return bytes;
+}
+
+/** Fill text fields and place signatures on a PDF */
+export async function fillAndSignPDF(
+	source: ArrayBuffer,
+	textFields: TextFieldFill[],
+	signatures: SignatureField[]
+): Promise<Uint8Array> {
+	const { PDFDocument, rgb, StandardFonts } = await getPDFLib();
+	const doc = await PDFDocument.load(source);
+	const font = await doc.embedFont(StandardFonts.Helvetica);
+	const pages = doc.getPages();
+
+	// Draw text fields
+	for (const tf of textFields) {
+		if (tf.pageIndex < 0 || tf.pageIndex >= pages.length) continue;
+		const page = pages[tf.pageIndex];
+
+		const hex = tf.color.replace('#', '');
+		const r = parseInt(hex.slice(0, 2), 16) / 255;
+		const g = parseInt(hex.slice(2, 4), 16) / 255;
+		const b = parseInt(hex.slice(4, 6), 16) / 255;
+
+		page.drawText(tf.text, {
+			x: tf.x,
+			y: tf.y,
+			size: tf.fontSize,
+			font,
+			color: rgb(r, g, b)
+		});
+	}
+
+	// Draw signatures
+	for (const sig of signatures) {
+		if (sig.pageIndex < 0 || sig.pageIndex >= pages.length) continue;
+		const page = pages[sig.pageIndex];
+		const imgBytes = dataUrlToBytes(sig.data);
+
+		const isPng = sig.data.startsWith('data:image/png');
+		const embedded = isPng
+			? await doc.embedPng(imgBytes)
+			: await doc.embedJpg(imgBytes);
+
+		page.drawImage(embedded, {
+			x: sig.x,
+			y: sig.y,
+			width: sig.width,
+			height: sig.height
 		});
 	}
 

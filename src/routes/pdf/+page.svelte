@@ -235,6 +235,112 @@
 				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Watermark</h2>
 				<p class="mt-1 text-sm text-text-muted">Add text watermark to all pages</p>
 			</a>
+
+			<a
+				href="/pdf/edit"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Edit PDF</h2>
+				<p class="mt-1 text-sm text-text-muted">Add text, images, and drawings to your PDF</p>
+			</a>
+
+			<a
+				href="/pdf/fill-sign"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Fill & Sign</h2>
+				<p class="mt-1 text-sm text-text-muted">Add text and signatures to your PDF</p>
+			</a>
+
+			<a
+				href="/pdf/word-to-pdf"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+						/>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 13l3 3 3-3"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Word to PDF</h2>
+				<p class="mt-1 text-sm text-text-muted">Convert DOCX files to PDF</p>
+			</a>
+
+			<a
+				href="/pdf/protect"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Protect PDF</h2>
+				<p class="mt-1 text-sm text-text-muted">Add password protection to your PDF</p>
+			</a>
+
+			<a
+				href="/pdf/unlock"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Unlock PDF</h2>
+				<p class="mt-1 text-sm text-text-muted">Remove password from your PDF</p>
+			</a>
 		</div>
 	</div>
 </div>
