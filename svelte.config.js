@@ -22,6 +22,7 @@ const config = {
 			$remove: 'src/lib/remove',
 			$resume: 'src/lib/resume',
 			$bio: 'src/lib/bio',
+			$invoice: 'src/lib/invoice',
 			$server: 'src/lib/server',
 			$utils: 'src/lib/utils'
 		}
