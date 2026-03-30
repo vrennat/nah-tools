@@ -20,7 +20,7 @@
 
 <div class="relative">
 	<!-- Hero -->
-	<section class="relative flex flex-col items-center pt-8 pb-16 sm:pt-16 sm:pb-24">
+	<section class="relative flex flex-col items-center pt-8 pb-6 sm:pt-12 sm:pb-10">
 		<p
 			class="animate-fade-up font-mono text-xs tracking-widest text-text-muted uppercase sm:text-sm"
 			style="animation-delay: 60ms;"
@@ -46,7 +46,7 @@
 
 	<!-- Trust copy -->
 	<section
-		class="animate-fade-up mx-auto max-w-2xl pb-16 text-center"
+		class="animate-fade-up mx-auto max-w-2xl pb-8 text-center"
 		style="animation-delay: 260ms;"
 	>
 		<p class="text-sm leading-relaxed text-text-muted sm:text-base">
