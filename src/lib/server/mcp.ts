@@ -309,6 +309,101 @@ export function createMcpServer() {
 		};
 	});
 
+	server.registerTool('generate_all_emails', {
+		title: 'Generate All Removal Emails',
+		description:
+			'Generate CCPA/GDPR deletion request emails for every broker that accepts email opt-outs. Takes your info once and returns all emails with mailto links — ideal for batch removal without browser access.',
+		inputSchema: {
+			first_name: z.string().describe('Your first name'),
+			last_name: z.string().describe('Your last name'),
+			email: z.string().describe('Your email address'),
+			state: z.string().describe('Your US state abbreviation, or "outside-us" for GDPR'),
+			address: z.string().optional().describe('Your street address'),
+			city: z.string().optional().describe('Your city'),
+			zip: z.string().optional().describe('Your ZIP code'),
+			phone: z.string().optional().describe('Your phone number'),
+			priority_min: z
+				.enum(['crucial', 'high', 'medium', 'low'])
+				.optional()
+				.describe('Minimum priority to include (default: all)')
+		},
+		annotations: {
+			readOnlyHint: true
+		}
+	}, async ({ first_name, last_name, email, state, address, city, zip, phone, priority_min }) => {
+		const userInfo: UserInfo = {
+			firstName: first_name,
+			lastName: last_name,
+			email,
+			state,
+			address,
+			city,
+			zip,
+			phone
+		};
+
+		const priorityOrder = { crucial: 0, high: 1, medium: 2, low: 3 };
+		const minLevel = priorityOrder[priority_min ?? 'low'];
+
+		// Find all brokers with email addresses, respecting priority filter
+		const emailBrokers = brokers.filter(
+			(b) => b.emailAddress && priorityOrder[b.priority] <= minLevel
+		);
+
+		// Deduplicate by parent company — skip subsidiaries if parent is included
+		const parentsSeen = new Set<string>();
+		const deduplicated = emailBrokers.filter((b) => {
+			if (b.parentCompany && parentsSeen.has(b.parentCompany)) return false;
+			if (b.subsidiaries) parentsSeen.add(b.id);
+			return true;
+		});
+
+		// Sort by priority
+		deduplicated.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+
+		const emails = deduplicated.map((broker) => {
+			const result = generateEmail(broker, userInfo);
+			const covers = [broker.name];
+			if (broker.subsidiaries) {
+				covers.push(
+					...broker.subsidiaries.map((id) => {
+						const sub = brokers.find((s) => s.id === id);
+						return sub?.name ?? id;
+					})
+				);
+			}
+			return {
+				broker_id: broker.id,
+				broker_name: broker.name,
+				priority: broker.priority,
+				covers,
+				to: result.to,
+				subject: result.subject,
+				body: result.body,
+				mailto: result.mailto,
+				legal_basis:
+					state === 'outside-us' && broker.legalBasis.includes('gdpr') ? 'GDPR' : 'CCPA'
+			};
+		});
+
+		return {
+			content: [
+				{
+					type: 'text' as const,
+					text: JSON.stringify(
+						{
+							total_emails: emails.length,
+							note: 'Each email is ready to send. Use the mailto links to open them in your email client, or copy the body to send manually.',
+							emails
+						},
+						null,
+						2
+					)
+				}
+			]
+		};
+	});
+
 	server.registerTool('get_broker_search_url', {
 		title: 'Get Broker Search URL',
 		description:

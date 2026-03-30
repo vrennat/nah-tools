@@ -40,7 +40,7 @@
 			class="animate-fade-up mt-6 text-center text-lg text-text-muted sm:mt-8 sm:text-xl"
 			style="animation-delay: 200ms;"
 		>
-			Everything is free. Forever. <a href="/trust" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent">Here's&nbsp;why.</a>
+			Everything is free. Forever. <a href="/trust" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent">Here's&nbsp;how.</a>
 		</p>
 	</section>
 
