@@ -1,9 +1,12 @@
 <script lang="ts">
 	import '../app.css';
+	import { page } from '$app/state';
 	import Header from '$components/Header.svelte';
 	import Footer from '$components/Footer.svelte';
 
 	let { children } = $props();
+
+	let isHome = $derived(page.url.pathname === '/');
 </script>
 
 <svelte:head>
@@ -22,8 +25,10 @@
 </svelte:head>
 
 <div class="flex min-h-screen flex-col">
-	<Header />
-	<main class="mx-auto w-full max-w-6xl flex-1 px-4 pt-20 pb-8 sm:px-6 lg:px-8">
+	{#if !isHome}
+		<Header />
+	{/if}
+	<main class="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 sm:px-6 lg:px-8 {isHome ? 'pt-8 sm:pt-12' : 'pt-24'}">
 		{@render children()}
 	</main>
 	<Footer />
