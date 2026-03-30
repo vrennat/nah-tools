@@ -4,9 +4,12 @@
  */
 
 import type {
+	CropConfig,
 	EditAnnotation,
 	PageNumberConfig,
 	PageRange,
+	PdfAPreparationConfig,
+	PdfAPreparationResult,
 	PDFPermissions,
 	ProgressCallback,
 	SignatureField,
@@ -199,6 +202,19 @@ export async function compressPDF(source: ArrayBuffer): Promise<Uint8Array> {
 	});
 }
 
+/** Flatten form fields and annotations into static content */
+export async function flattenPDF(source: ArrayBuffer): Promise<Uint8Array> {
+	const { PDFDocument } = await getPDFLib();
+	const doc = await PDFDocument.load(source, { ignoreEncryption: true });
+	try {
+		const form = doc.getForm();
+		form.flatten();
+	} catch {
+		// No form fields — re-save for optimization
+	}
+	return doc.save();
+}
+
 /** Add page numbers to a PDF */
 export async function addPageNumbers(
 	source: ArrayBuffer,
@@ -251,6 +267,46 @@ export async function addPageNumbers(
 	return doc.save();
 }
 
+/** Get page dimensions (width, height in points) for all pages */
+export async function getPageSizes(source: ArrayBuffer): Promise<{ width: number; height: number }[]> {
+	const { PDFDocument } = await getPDFLib();
+	const doc = await PDFDocument.load(source, { ignoreEncryption: true });
+	return doc.getPages().map((p) => p.getSize());
+}
+
+/** Crop pages by trimming margins. Margins are in PDF points (1/72 inch). */
+export async function cropPages(
+	source: ArrayBuffer,
+	config: CropConfig,
+	pageIndices?: number[]
+): Promise<Uint8Array> {
+	const { PDFDocument } = await getPDFLib();
+	const doc = await PDFDocument.load(source);
+	const pages = doc.getPages();
+	const indices = pageIndices ?? pages.map((_, i) => i);
+
+	for (const i of indices) {
+		const page = pages[i];
+		const box = page.getCropBox() ?? page.getMediaBox();
+
+		const newX = box.x + config.left;
+		const newY = box.y + config.bottom;
+		const newWidth = box.width - config.left - config.right;
+		const newHeight = box.height - config.top - config.bottom;
+
+		if (newWidth <= 0 || newHeight <= 0) {
+			throw new Error(
+				`Crop margins too large for page ${i + 1} (${Math.round(box.width)} × ${Math.round(box.height)} pt)`
+			);
+		}
+
+		page.setMediaBox(newX, newY, newWidth, newHeight);
+		page.setCropBox(newX, newY, newWidth, newHeight);
+	}
+
+	return doc.save();
+}
+
 /** Add password protection and encryption to a PDF */
 export async function protectPDF(
 	source: ArrayBuffer,
@@ -269,7 +325,7 @@ export async function protectPDF(
 			copying: permissions.copying,
 			modifying: permissions.modifying,
 			annotating: permissions.annotating,
-			fillingForms: permissions.annotating,
+			fillingForms: permissions.annotating || permissions.modifying,
 			contentAccessibility: true
 		}
 	});
@@ -330,6 +386,107 @@ export async function addWatermark(
 	}
 
 	return doc.save();
+}
+
+function escapeXml(s: string): string {
+	return s
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;');
+}
+
+/** Best-effort PDF/A preparation — adds metadata, strips JS, embeds sRGB profile */
+export async function preparePdfA(
+	source: ArrayBuffer,
+	config: PdfAPreparationConfig
+): Promise<PdfAPreparationResult> {
+	const { PDFDocument, PDFName, PDFString, PDFDict } = await getPDFLib();
+	const doc = await PDFDocument.load(source, { ignoreEncryption: true });
+	const warnings: string[] = [];
+
+	// 1. Set document metadata
+	const title = config.title || doc.getTitle() || 'Untitled';
+	doc.setTitle(title);
+	doc.setProducer('nah.tools PDF/A Preparation');
+	doc.setModificationDate(new Date());
+	if (!doc.getCreationDate()) doc.setCreationDate(new Date());
+
+	// 2. Strip JavaScript from catalog
+	const catalog = doc.catalog;
+	if (catalog.has(PDFName.of('Names'))) {
+		const names = catalog.lookup(PDFName.of('Names'));
+		if (names instanceof PDFDict && names.has(PDFName.of('JavaScript'))) {
+			names.delete(PDFName.of('JavaScript'));
+			warnings.push('JavaScript actions were removed from the document.');
+		}
+	}
+	if (catalog.has(PDFName.of('AA'))) {
+		catalog.delete(PDFName.of('AA'));
+		warnings.push('Additional actions (AA) were removed from the catalog.');
+	}
+
+	// 3. Add XMP metadata stream
+	const part = config.conformanceLevel === 'PDF/A-1b' ? '1' : '2';
+	const conformance = 'B';
+	const now = new Date().toISOString();
+	const xmp = `<?xpacket begin="\uFEFF" id="W5M0MpCehiHzreSzNTczkc9d"?>
+<x:xmpmeta xmlns:x="adobe:ns:meta/">
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:Description rdf:about=""
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:xmp="http://ns.adobe.com/xap/1.0/"
+  xmlns:pdf="http://ns.adobe.com/pdf/1.3/"
+  xmlns:pdfaid="http://www.aiim.org/pdfa/ns/id/">
+  <pdfaid:part>${part}</pdfaid:part>
+  <pdfaid:conformance>${conformance}</pdfaid:conformance>
+  <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${escapeXml(title)}</rdf:li></rdf:Alt></dc:title>
+  <xmp:CreateDate>${now}</xmp:CreateDate>
+  <xmp:ModifyDate>${now}</xmp:ModifyDate>
+  <pdf:Producer>nah.tools PDF/A Preparation</pdf:Producer>
+</rdf:Description>
+</rdf:RDF>
+</x:xmpmeta>
+${' '.repeat(2048)}
+<?xpacket end="w"?>`;
+
+	const xmpBytes = new TextEncoder().encode(xmp);
+	const metadataStream = doc.context.stream(xmpBytes, {
+		Type: 'Metadata',
+		Subtype: 'XML',
+		Length: xmpBytes.length
+	});
+	const metadataRef = doc.context.register(metadataStream);
+	catalog.set(PDFName.of('Metadata'), metadataRef);
+
+	// 4. Add sRGB ICC output intent
+	const { SRGB_ICC_PROFILE } = await import('./srgb-icc');
+	const iccStream = doc.context.stream(SRGB_ICC_PROFILE, {
+		N: 3,
+		Length: SRGB_ICC_PROFILE.length
+	});
+	const iccRef = doc.context.register(iccStream);
+
+	const outputIntentDict = doc.context.obj({
+		Type: 'OutputIntent',
+		S: 'GTS_PDFA1',
+		OutputConditionIdentifier: PDFString.of('sRGB IEC61966-2.1'),
+		DestOutputProfile: iccRef
+	});
+	const outputIntentRef = doc.context.register(outputIntentDict);
+	catalog.set(PDFName.of('OutputIntents'), doc.context.obj([outputIntentRef]));
+
+	// 5. Warnings about limitations
+	warnings.push(
+		'Font embedding was not verified. If fonts are missing from the source PDF, the output may not pass strict PDF/A validation.'
+	);
+	if (config.conformanceLevel === 'PDF/A-1b') {
+		warnings.push(
+			'Transparency (if present) was not flattened. PDF/A-1b prohibits transparency.'
+		);
+	}
+
+	return { data: await doc.save(), warnings };
 }
 
 /** Parse a hex color string to r, g, b values (0-1 range) */
