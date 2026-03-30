@@ -14,8 +14,9 @@
 	let activeTab = $state<'editor' | 'preview'>('editor');
 	let saveTimeout: ReturnType<typeof setTimeout> | undefined;
 	let loaded = $state(false);
+	let userHasEdited = $state(false);
 
-	// Load most recent resume on mount
+	// Load most recent resume on mount, or keep sample as preview
 	$effect(() => {
 		if (loaded) return;
 		loadInitial();
@@ -30,14 +31,16 @@
 			const data = await getResume(sorted[0].id);
 			if (data) {
 				resume = data;
+				userHasEdited = true; // Existing resume — auto-save normally
 			}
+			// else: no saved data, keep sample as read-only preview
 		}
 		loaded = true;
 	}
 
-	// Auto-save with debounce — track content changes, not metadata
+	// Auto-save with debounce — only after user has started editing
 	$effect(() => {
-		if (!loaded) return;
+		if (!loaded || !userHasEdited) return;
 		// Serialize resume to track content changes (this subscribes to all fields)
 		const snapshot = JSON.stringify(resume);
 		void snapshot;
@@ -53,11 +56,19 @@
 	});
 
 	function handleSelect(selected: ResumeData) {
+		userHasEdited = true;
 		resume = selected;
 	}
 
 	function handleImport(data: Partial<ResumeData>) {
+		userHasEdited = true;
 		resume = { ...resume, ...data, updatedAt: new Date().toISOString() };
+	}
+
+	function handleEdit() {
+		if (!userHasEdited) {
+			userHasEdited = true;
+		}
 	}
 </script>
 
@@ -117,7 +128,9 @@
 			class:hidden={activeTab !== 'editor'}
 			class:sm:block={activeTab !== 'editor'}
 		>
-			<div class="space-y-6">
+			<!-- svelte-ignore a11y_no_static_element_interactions -->
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<div class="space-y-6" oninput={handleEdit} onclick={handleEdit}>
 				<ResumeEditor bind:resume />
 			</div>
 		</div>

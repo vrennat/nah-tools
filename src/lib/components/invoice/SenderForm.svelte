@@ -26,6 +26,7 @@
 		const input = e.target as HTMLInputElement;
 		const file = input.files?.[0];
 		if (!file) return;
+		if (file.size > 5 * 1024 * 1024) return; // Skip files over 5 MB
 
 		const reader = new FileReader();
 		reader.onload = () => {

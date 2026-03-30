@@ -58,6 +58,7 @@
 	let editLinkUrl = $state('');
 	let editLinkTitle = $state('');
 	let savingLink = $state(false);
+	let linkError = $state('');
 
 	// Deactivate state
 	let deactivateLoading = $state(false);
@@ -245,9 +246,12 @@
 					l.id === editingLinkId ? { ...l, url: editLinkUrl, title: editLinkTitle } : l
 				);
 				editingLinkId = null;
+				linkError = '';
+			} else {
+				linkError = 'Failed to save link. Please try again.';
 			}
 		} catch {
-			// silent
+			linkError = 'Network error saving link.';
 		} finally {
 			savingLink = false;
 		}
@@ -263,9 +267,12 @@
 
 			if (res.ok) {
 				profileLinks = profileLinks.filter((l) => l.id !== linkId);
+				linkError = '';
+			} else {
+				linkError = 'Failed to delete link.';
 			}
 		} catch {
-			// silent
+			linkError = 'Network error deleting link.';
 		}
 	}
 
@@ -289,7 +296,7 @@
 				})
 			});
 		} catch {
-			// silent
+			linkError = 'Failed to reorder links.';
 		}
 	}
 
@@ -305,9 +312,11 @@
 			if (res.ok) {
 				isActive = false;
 				showDeactivateConfirm = false;
+			} else {
+				linkError = 'Failed to deactivate profile.';
 			}
 		} catch {
-			// silent
+			linkError = 'Network error. Please try again.';
 		} finally {
 			deactivateLoading = false;
 		}
@@ -583,6 +592,10 @@
 		<!-- Links manager -->
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm space-y-4">
 			<h3 class="text-sm font-medium text-text">Links</h3>
+
+			{#if linkError}
+				<p class="rounded-lg bg-error/10 px-3 py-2 text-xs text-error">{linkError}</p>
+			{/if}
 
 			{#if profileLinks.length > 0}
 				<div class="space-y-2">

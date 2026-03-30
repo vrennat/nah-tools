@@ -34,6 +34,17 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'handle, display_name, and passphrase are required');
 	}
 
+	// Input length limits
+	if (display_name.length > 100) {
+		throw error(400, 'Display name must be 100 characters or fewer');
+	}
+	if (bio && bio.length > 500) {
+		throw error(400, 'Bio must be 500 characters or fewer');
+	}
+	if (avatar_url && avatar_url.length > 2000) {
+		throw error(400, 'Avatar URL is too long');
+	}
+
 	// Verify Turnstile if configured
 	const turnstileSecret = platform?.env?.TURNSTILE_SECRET_KEY;
 	if (turnstileSecret) {
@@ -135,6 +146,14 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	}
 
 	await authenticateProfile(db, handle, passphrase);
+
+	// Input length limits
+	if (fields.display_name && fields.display_name.length > 100) {
+		throw error(400, 'Display name must be 100 characters or fewer');
+	}
+	if (fields.bio && fields.bio.length > 500) {
+		throw error(400, 'Bio must be 500 characters or fewer');
+	}
 
 	// Validate avatar URL if changing
 	if (fields.avatar_url) {

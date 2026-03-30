@@ -7,6 +7,7 @@
 	const initials = $derived(
 		data.profile.display_name
 			.split(' ')
+			.filter(Boolean)
 			.map((w: string) => w[0])
 			.join('')
 			.slice(0, 2)
@@ -17,7 +18,7 @@
 		if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
 			navigator.sendBeacon(
 				'/api/bio/click',
-				JSON.stringify({ handle: data.profile.handle, link_id: linkId })
+				new Blob([JSON.stringify({ handle: data.profile.handle, link_id: linkId })], { type: 'application/json' })
 			);
 		}
 	}

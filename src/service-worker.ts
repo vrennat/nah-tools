@@ -35,8 +35,11 @@ self.addEventListener('fetch', (event) => {
 	if (event.request.method !== 'GET') return;
 	if (url.origin !== self.location.origin) return;
 
-	// Skip API routes
+	// Skip API routes and SSR-dependent pages (bio profiles, link management, etc.)
 	if (url.pathname.startsWith('/api/')) return;
+	if (url.pathname.startsWith('/bio/')) return;
+	if (url.pathname.startsWith('/links/manage/')) return;
+	if (url.pathname.startsWith('/qr/manage/')) return;
 
 	if (ASSETS.includes(url.pathname)) {
 		// Cache-first for versioned build assets

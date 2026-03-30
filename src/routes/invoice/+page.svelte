@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { InvoiceData, DocumentType } from '$invoice/types';
-	import { createEmptyInvoice } from '$invoice/types';
+	import { createEmptyInvoice, DOCUMENT_PREFIXES } from '$invoice/types';
 	import { listInvoices, getInvoice, saveInvoice, nextDocumentNumber } from '$invoice/storage';
 	import DocumentTypeSelector from '$components/invoice/DocumentTypeSelector.svelte';
 	import CurrencyPicker from '$components/invoice/CurrencyPicker.svelte';
@@ -65,9 +65,10 @@
 
 	async function handleDocTypeChange(newType: DocumentType) {
 		if (newType !== invoice.documentType) {
+			const oldPrefix = DOCUMENT_PREFIXES[invoice.documentType];
 			invoice.documentType = newType;
 			// Generate new number for the new doc type if it's a new draft
-			if (!invoice.documentNumber || invoice.documentNumber.startsWith(invoice.documentType.toUpperCase())) {
+			if (!invoice.documentNumber || invoice.documentNumber.startsWith(oldPrefix)) {
 				invoice.documentNumber = await nextDocumentNumber(newType);
 			}
 		}

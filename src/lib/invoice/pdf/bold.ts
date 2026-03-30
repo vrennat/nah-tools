@@ -1,14 +1,11 @@
 import type { TDocumentDefinitions, Content } from 'pdfmake/interfaces';
 import type { InvoiceData } from '../types';
 import type { InvoiceSummary } from '../calculations';
-import { DOCUMENT_LABELS } from '../types';
 import { buildHeader, buildBillTo, buildLineItemTable, buildTotalsBlock, buildFooter } from './shared';
 
 const ACCENT = '#3b82f6';
 
 export function buildBold(data: InvoiceData, summary: InvoiceSummary): TDocumentDefinitions {
-	const docLabel = DOCUMENT_LABELS[data.documentType];
-
 	return {
 		pageSize: 'A4',
 		pageMargins: [40, 40, 40, 40],

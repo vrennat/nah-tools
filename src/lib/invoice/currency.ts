@@ -40,7 +40,6 @@ export const CURRENCIES: CurrencyDef[] = [
 	{ code: 'RON', symbol: 'lei', name: 'Romanian Leu', locale: 'ro-RO', decimals: 2 },
 	{ code: 'HUF', symbol: 'Ft', name: 'Hungarian Forint', locale: 'hu-HU', decimals: 0 },
 	{ code: 'BGN', symbol: 'лв', name: 'Bulgarian Lev', locale: 'bg-BG', decimals: 2 },
-	{ code: 'HRK', symbol: 'kn', name: 'Croatian Kuna', locale: 'hr-HR', decimals: 2 },
 	{ code: 'VND', symbol: '\u20AB', name: 'Vietnamese Dong', locale: 'vi-VN', decimals: 0 }
 ];
 
@@ -67,10 +66,17 @@ export function formatCurrency(amount: number, currencyCode: string): string {
 	return formatter.format(amount);
 }
 
+const numberFormatterCache = new Map<string, Intl.NumberFormat>();
+
 export function formatNumber(amount: number, currencyCode: string): string {
-	const def = getCurrency(currencyCode);
-	return new Intl.NumberFormat(def.locale, {
-		minimumFractionDigits: def.decimals,
-		maximumFractionDigits: def.decimals
-	}).format(amount);
+	let formatter = numberFormatterCache.get(currencyCode);
+	if (!formatter) {
+		const def = getCurrency(currencyCode);
+		formatter = new Intl.NumberFormat(def.locale, {
+			minimumFractionDigits: def.decimals,
+			maximumFractionDigits: def.decimals
+		});
+		numberFormatterCache.set(currencyCode, formatter);
+	}
+	return formatter.format(amount);
 }
