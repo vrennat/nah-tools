@@ -1,8 +1,8 @@
 <svelte:head>
-	<title>The QR Code Shakedown: How 'Free' QR Generators Charge Hundreds per Year</title>
+	<title>Why nah exists — $2.2 Billion in VC to Charge You for Things Your Browser Can Do for Free</title>
 	<meta
 		name="description"
-		content="QR Code Generator Pro has thousands of 1-star reviews. Here's how the subscription trap works and a genuinely free alternative."
+		content="Over $2.2 billion in venture capital has gone into companies that charge subscriptions for things your browser already does for free. Here's the evidence."
 	/>
 </svelte:head>
 
@@ -10,321 +10,273 @@
 	<header class="mb-12">
 		<p class="mb-4 text-sm font-medium uppercase tracking-wider text-accent">Investigation</p>
 		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">
-			The QR Code Shakedown
+			Why nah
 		</h1>
 		<p class="mt-4 text-xl text-text-muted">
-			How "free" QR code generators extract hundreds of dollars a year for something that costs
-			a fraction of a penny.
+			$2.2 billion in venture capital to charge you for things your browser can do for free.
 		</p>
 	</header>
 
 	<section class="mb-12">
 		<p class="mb-4 leading-relaxed text-text-muted">
-			Imagine this: you've spent weeks planning your wedding. The invitations are gorgeous — letterpress
-			on heavy cotton stock, with a custom QR code linking guests to your RSVP page. Two hundred
-			invitations, already stamped and mailed to every friend and family member on the list.
+			There's a pattern in software that most people don't think about until it happens to them. You need a QR code, so you google "free QR code generator." You find one, make your code, print it on 200 wedding invitations. Two weeks later the code stops working. It was a 14-day trial, and now you either pay $120/year or reprint everything.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			Three weeks later, your aunt calls. "Honey, the little square thing on your invitation
-			doesn't work." You pull out your phone and scan it yourself. Instead of your RSVP page,
-			you get a screen telling you your "free trial has expired." To reactivate your QR code —
-			the one already printed on two hundred invitations sitting on two hundred kitchen counters —
-			you need to subscribe. Plans start around $5 a month, billed annually. That's $60 or more
-			per year for a QR code that took a computer less than a millisecond to generate.
+			I started looking into how widespread this actually is. It's not a few shady companies. It's an entire industry. Over <strong class="text-text">$2.2 billion in venture capital</strong> has gone into companies that basically charge subscriptions for stuff your browser can already do for free. QR codes, PDF merges, resume exports, background removal. All of it runs client-side with open-source JavaScript libraries. The infrastructure cost is close to zero. The subscriptions exist because most people don't know that.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			You have two options: pay the ransom, or reprint everything.
+			The Better Business Bureau has documented <strong class="text-text">$1.3 billion in consumer losses</strong> from "free trial offer" scams over the past decade. That's the world these tools operate in.
 		</p>
-		<p class="mb-4 text-lg font-semibold leading-relaxed text-text">
-			This isn't a bug. It's the business model.
+		<p class="mb-4 leading-relaxed text-text-muted">
+			So I built <a href="/" class="text-accent underline hover:text-accent-hover">nah.tools</a>. It's a free, open-source set of browser-based tools that replaces the worst offenders. No signup, no ads, no tracking, no catch. The QR code generator and link shortener took about two hours. The whole suite took a weekend. That's how simple this stuff actually is to build when you're not engineering a billing trap around it.
+		</p>
+		<p class="mb-4 leading-relaxed text-text-muted">
+			Here's what I found when I looked into the companies nah is meant to replace.
 		</p>
 	</section>
 
 	<section class="mb-12">
-		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">
-			Why did my QR code stop working?
-		</h2>
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">The playbook</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			To understand the trap, you need to understand what a QR code actually is. A QR code is a
-			picture that encodes text. That's it. The black-and-white pixel pattern is a visual
-			representation of data — usually a URL — following an international standard called
-			ISO/IEC 18004. Your phone's camera reads the pixels, decodes the text, and opens the link.
+			Every one of these companies runs some version of the same five steps.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			There are two fundamentally different types of QR codes, and the distinction between them
-			is the entire basis of the subscription trap.
-		</p>
-
-		<h3 class="mb-3 mt-8 text-xl font-semibold text-text">Static QR codes</h3>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			A static QR code encodes your URL directly into the pixel pattern. When someone scans it,
-			their phone reads the pixels and goes straight to your website. There is no middleman, no
-			server involved, no company that can flip a switch. The data is the code. A static QR code
-			works the same way today, next year, and fifty years from now — as long as the destination
-			URL exists. Generating one takes three lines of JavaScript and about one millisecond of
-			computation. It is, in every practical sense, free.
-		</p>
-
-		<h3 class="mb-3 mt-8 text-xl font-semibold text-text">Dynamic QR codes</h3>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			A dynamic QR code does something different. Instead of encoding your URL, it encodes the
-			QR company's URL — something like <code class="rounded bg-surface-alt px-1.5 py-0.5 text-sm text-text">qr-company.com/redirect/abc123</code>.
-			When someone scans the code, their phone goes to the company's server first, and the server
-			redirects them to your actual destination. This means the company controls whether your code
-			works. If they turn off the redirect — because your trial expired, because you cancelled,
-			because they went out of business — your QR code is dead. The printed pixels haven't changed,
-			but the link behind them has been severed.
+			<strong class="text-text">Buy the search results.</strong> Spend on Google Ads and SEO until your product shows up above the genuinely free options. In some categories, one parent company owns multiple brands to take up several top results at once, creating a fake sense of competition.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			Dynamic codes have a legitimate use case: if you need to change where a QR code points after
-			printing, a redirect lets you update the destination without reprinting. Event organizers,
-			for instance, might update a schedule link after printing programs.
+			<strong class="text-text">Offer a "free" tool.</strong> Let the user start working. The interface looks polished. There's no mention of pricing anywhere. Everything feels real.
 		</p>
-
-		<h3 class="mb-3 mt-8 text-xl font-semibold text-text">The deception</h3>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			Here's what makes this predatory: every major "free" QR code generator defaults to dynamic
-			codes without explaining what that means. They don't tell you that a static code would serve
-			you permanently for free. They don't explain that by choosing dynamic, you're handing them
-			a kill switch for your QR code. The interface simply creates a dynamic code, starts a 14-day
-			trial timer, and waits for you to print it on something permanent. Most people searching for
-			"free QR code generator" have a URL that will never change. They need a static code. They
-			get a dynamic one — and a subscription invoice two weeks later.
+			<strong class="text-text">Collect their time.</strong> Let someone spend 30 to 60 minutes entering their work history into a resume builder. Let them upload and arrange sensitive tax documents into a PDF tool. Let them design a QR code and print it. The longer they work, the less likely they are to leave.
+		</p>
+		<p class="mb-4 leading-relaxed text-text-muted">
+			<strong class="text-text">Trigger the trap.</strong> The paywall shows up right when you try to download. The resume you just spent an hour on? That'll be $2.95 for a "14-day trial." The trial auto-converts to $24 every four weeks. Not every month. Every four weeks. That's 13 billing cycles per year. No receipt emails are sent.
+		</p>
+		<p class="mb-4 leading-relaxed text-text-muted">
+			<strong class="text-text">Make cancellation hard.</strong> Hide the cancel button. Break it when ad-blockers are on. Route billing receipts to an email address the user doesn't check. Some companies respond to cancellation attempts with chatbot loops for weeks.
 		</p>
 	</section>
 
 	<section class="mb-12">
-		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">
-			How much do QR code generators actually charge?
-		</h2>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			The scale of the problem becomes clear when you look at the review data. These are not
-			isolated complaints. This is a pattern operating at industrial scale.
-		</p>
+		<h2 class="mb-6 mt-12 font-display text-2xl font-700 text-text">The evidence</h2>
 
-		<h3 class="mb-3 mt-8 text-xl font-semibold text-text">QR Code Generator Pro</h3>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			QR Code Generator Pro, one of the largest players in the space, has accumulated
-			<strong class="text-text">over 9,000 reviews on Trustpilot with an average rating of 1.5 out of 5 stars</strong>.
-			On Sitejabber, they hold 350+ reviews at 1.2 out of 5. The complaints follow a strikingly
-			consistent pattern: user creates a "free" QR code, prints it on physical materials, discovers
-			within 14 days that the code has been deactivated, and is presented with a paid subscription.
-			Plans range from around $5 to $38 per month, billed annually — meaning users face charges
-			of $60 to over $450 per year.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			The trial period is not accidental. Fourteen days is long enough for most people to design
-			their materials, approve the print run, and distribute. By the time the code stops working,
-			it's already on wedding invitations, business cards, restaurant tables, and event flyers.
-			The switching cost isn't the subscription — it's the cost of reprinting everything.
-		</p>
-
-		<h3 class="mb-3 mt-8 text-xl font-semibold text-text">The broader pattern</h3>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			QR Code Generator Pro isn't alone. QRCodeCreator has over 4,000 Trustpilot reviews — and
-			while its overall rating is better, it still draws complaints about the same trial-expiry
-			pattern. QR.io's Product Hunt page is dominated by reports of unexpected charges. QRfy
-			follows the same trial-to-subscription model. The playbook is the same everywhere: offer
-			a "free" tool, default to dynamic codes, start a trial timer, wait for the user to print,
-			then charge.
-		</p>
-
-		<h3 class="mb-3 mt-8 text-xl font-semibold text-text">The markup math</h3>
-		<div
-			class="my-6 rounded-lg border border-border bg-surface-alt p-6"
-		>
+		<div class="mb-8 rounded-lg border border-border bg-surface-alt p-6">
+			<h3 class="mb-2 text-xl font-semibold text-text">Resume builders: four brands, one company, $628 million</h3>
 			<p class="mb-3 leading-relaxed text-text-muted">
-				QR Code Generator Pro's top-tier plan costs roughly <strong class="text-text">$38/month</strong>, which
-				includes up to 250 dynamic QR codes.
+				BOLD LLC runs <strong class="text-text">Zety, LiveCareer, MyPerfectResume, and Resume Genius</strong>. Four websites that look like competitors. Same parent company. Same billing system. Same trap. Zety converts trials to <strong class="text-text">$25.95 every four weeks</strong>. Zety has a <strong class="text-text">1.3 out of 5 on PissedConsumer</strong> with 87% unfavorable reviews.
 			</p>
-			<p class="mb-3 leading-relaxed text-text-muted">
-				That works out to about <strong class="text-text">$0.15 per QR code per month</strong>.
-			</p>
-			<p class="mb-3 leading-relaxed text-text-muted">
-				The raw compute cost to generate a QR code is roughly <strong class="text-text">$0.00001</strong> —
-				a hundred-thousandth of a penny.
-			</p>
-			<p class="leading-relaxed text-text">
-				That's a markup of roughly <strong class="text-2xl text-accent">1,500,000%</strong>.
-			</p>
+			<a href="/why/resume" class="text-sm font-medium text-accent hover:text-accent-hover">Read the full investigation &rarr;</a>
 		</div>
+
+		<div class="mb-8 rounded-lg border border-border bg-surface-alt p-6">
+			<h3 class="mb-2 text-xl font-semibold text-text">PDF tools: ranking above government websites</h3>
+			<p class="mb-3 leading-relaxed text-text-muted">
+				PDFFiller, owned by airSlate (<strong class="text-text">$1.25 billion valuation</strong>), shows up in Google results above actual government websites. People fill out forms with their Social Security numbers, then find out they can't save without subscribing. Soda PDF has a <strong class="text-text">1.0 out of 5 on PissedConsumer</strong> — the lowest rating I found anywhere.
+			</p>
+			<a href="/why/pdf" class="text-sm font-medium text-accent hover:text-accent-hover">Read the full investigation &rarr;</a>
+		</div>
+
+		<div class="mb-8 rounded-lg border border-border bg-surface-alt p-6">
+			<h3 class="mb-2 text-xl font-semibold text-text">QR code generators: 1,500,000% markup</h3>
+			<p class="mb-3 leading-relaxed text-text-muted">
+				QR Code Generator Pro has <strong class="text-text">over 9,000 Trustpilot reviews at 1.5 out of 5 stars</strong>. A QR code takes a few lines of JavaScript and about one millisecond. They charge up to $38/month. That's a markup of about <strong class="text-text">1,500,000%</strong>.
+			</p>
+			<a href="/why/qr" class="text-sm font-medium text-accent hover:text-accent-hover">Read the full investigation &rarr;</a>
+		</div>
+
+		<div class="mb-8 rounded-lg border border-border bg-surface-alt p-6">
+			<h3 class="mb-2 text-xl font-semibold text-text">Background removal: perfect result, ransomed resolution</h3>
+			<p class="mb-3 leading-relaxed text-text-muted">
+				remove.bg shows you a perfect result, then gives you a <strong class="text-text">625x400 pixel download</strong>. Your original was 4000x3000. PhotoRoom (<strong class="text-text">$94.5 million ARR</strong>) downgraded paying users' plans mid-contract and refused refunds.
+			</p>
+			<a href="/why/photo" class="text-sm font-medium text-accent hover:text-accent-hover">Read the full investigation &rarr;</a>
+		</div>
+
+		<div class="mb-8 rounded-lg border border-border bg-surface-alt p-6">
+			<h3 class="mb-2 text-xl font-semibold text-text">Link shorteners: $348/year for a database lookup</h3>
+			<p class="mb-3 leading-relaxed text-text-muted">
+				A redirect takes 4 milliseconds and costs half a millionth of a dollar. Bitly charges <strong class="text-text">$348/year</strong>. Linktree raised <strong class="text-text">$167 million</strong> for what is architecturally a static HTML page.
+			</p>
+			<a href="/why/links" class="text-sm font-medium text-accent hover:text-accent-hover">Read the full investigation &rarr;</a>
+		</div>
+
+		<div class="mb-8 rounded-lg border border-border bg-surface-alt p-6">
+			<h3 class="mb-2 text-xl font-semibold text-text">Data brokers: a subscription to exercise your legal rights</h3>
+			<p class="mb-3 leading-relaxed text-text-muted">
+				DeleteMe charges $129/year but Consumer Reports found it only achieved a <strong class="text-text">27% removal rate</strong>. EasyOptOuts at $19.99/year hit <strong class="text-text">65%</strong>. California's DELETE Act made the core function free in January 2026.
+			</p>
+			<a href="/why/remove" class="text-sm font-medium text-accent hover:text-accent-hover">Read the full investigation &rarr;</a>
+		</div>
+	</section>
+
+	<section class="mb-12">
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">What it actually costs to run these tools</h2>
+		<div class="overflow-x-auto">
+			<table class="w-full text-left text-sm">
+				<thead>
+					<tr class="border-b border-border">
+						<th class="py-3 pr-4 font-semibold text-text">What nah does</th>
+						<th class="py-3 pr-4 font-semibold text-text">What it costs us</th>
+						<th class="py-3 font-semibold text-text">What others charge</th>
+					</tr>
+				</thead>
+				<tbody class="text-text-muted">
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">Generate a QR code</td>
+						<td class="py-3 pr-4">$0.00 (your browser)</td>
+						<td class="py-3">$120–564/year</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">Merge a PDF</td>
+						<td class="py-3 pr-4">$0.00 (your browser)</td>
+						<td class="py-3">$96/year</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">Remove a background</td>
+						<td class="py-3 pr-4">$0.00 (your browser)</td>
+						<td class="py-3">$2/image or $99/month</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">Build a resume</td>
+						<td class="py-3 pr-4">$0.00 (your browser)</td>
+						<td class="py-3">$24/month (every 4 weeks)</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">Shorten a link</td>
+						<td class="py-3 pr-4">~$0.000003 (one redirect)</td>
+						<td class="py-3">$348/year (Bitly Pro)</td>
+					</tr>
+					<tr>
+						<td class="py-3 pr-4">Remove data broker listings</td>
+						<td class="py-3 pr-4">$0.00 (pre-filled templates)</td>
+						<td class="py-3">$78–129/year</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<p class="mt-6 leading-relaxed text-text-muted">
+			nah.tools runs on Cloudflare Workers. Total infrastructure cost: <strong class="text-text">$5/month</strong> for up to 10 million dynamic requests. Static tools cost nothing to serve because the computation happens on your device, not ours.
+		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			To be clear, companies are entitled to charge for services. Hosting, bandwidth, analytics,
-			and customer support cost money — the raw compute comparison doesn't capture all of that.
-			But even accounting for infrastructure overhead, the gap between cost and price is enormous,
-			and the thousands of 1-star reviews suggest the value proposition isn't computing power or
-			customer service. It's leverage over people who already printed something.
+			There is no business model pressure because there are almost no business costs. I don't need your email because I have nothing to email you about. I don't need your credit card because I have nothing to charge you for.
 		</p>
 	</section>
 
 	<section class="mb-12">
-		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">
-			Who gets hurt
-		</h2>
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">Why "free" tools aren't already winning</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			Behind the review scores are real people who got caught in a trap they didn't know existed.
-			The common thread is physical printing — once a QR code is on a tangible object, you can't
-			change it. You can only pay or reprint.
+			<strong class="text-text">Search results are bought, not earned.</strong> BOLD LLC runs four resume brands to take up multiple Google positions at once. PDFFiller outranks actual government websites for form searches. When you search "free resume builder," almost every top result is a subscription trap wearing the word "free."
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Wedding couples</strong> put QR codes on invitations, save-the-dates,
-			programs, and table cards. A wedding invitation gets printed once, mailed once, and can't be
-			recalled. When the code dies, the couple either pays the subscription or asks two hundred
-			guests to manually type a URL.
+			<strong class="text-text">The audience isn't technical.</strong> The person who needs to merge a PDF doesn't know that pdf-lib exists. The person building a resume doesn't know that Reactive Resume has 28,000 GitHub stars. The gap between a polished website and a GitHub repo is the entire moat.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Small restaurants</strong> print QR menus on table tents, counter
-			cards, and takeout bags. Replacing them means a new print run and the staff time to swap
-			every table in the restaurant.
+			<strong class="text-text">Urgency is the weapon.</strong> You need to merge a PDF before a meeting. You need a resume tonight for an application due tomorrow. You need a QR code before the print shop closes. The moment you're least likely to comparison-shop is the moment they ask for your credit card.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Small businesses</strong> put QR codes on business cards, product
-			packaging, trade show banners, and storefront signage. A box of 500 business cards costs
-			$30 to print. The subscription to keep the QR code alive costs $60 or more a year.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Nonprofits</strong> add QR codes to fundraiser materials, event
-			programs, and donation posters — often printed by volunteers with razor-thin budgets.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Teachers</strong> use QR codes on classroom worksheets, assignment
-			handouts, and resource guides. When the code stops working mid-semester, thirty students
-			lose access to their materials.
+			<strong class="text-text">Open-source alternatives are scattered.</strong> For every predatory tool, there are free replacements on GitHub. But they're spread across dozens of repos with different interfaces and no marketing. Nobody had put them all in one place with a real UI. That's what nah is.
 		</p>
 	</section>
 
 	<section class="mb-12">
-		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">
-			Why this keeps working
-		</h2>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			Three structural forces keep the subscription trap profitable.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">SEO dominance.</strong> These companies spend heavily on search ads
-			and have years of domain authority. When you search "free QR code generator," nearly every
-			top result is a subscription trap wearing the word "free" as a mask. The genuinely free
-			alternatives are buried.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Technical opacity.</strong> Most people don't know that a QR code
-			is just encoded text. The difference between static and dynamic codes is invisible unless
-			someone explains it — and the companies creating dynamic codes have no incentive to explain.
-			This isn't a failure of intelligence; it's specialized knowledge that most people have no
-			reason to possess.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			<strong class="text-text">Printing creates lock-in.</strong> This is the most important one.
-			The 14-day trial is calibrated to outlast the printing timeline. By day 14, the code is on
-			physical materials. The company knows that once you've printed, the cost of switching isn't
-			the subscription fee — it's the cost of reprinting your entire run of invitations, menus, business cards,
-			or signage. That asymmetry is the engine of the business model.
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">What nah is</h2>
+		<div class="space-y-3">
+			<p class="leading-relaxed text-text-muted"><a href="/qr" class="font-semibold text-accent underline hover:text-accent-hover">QR Code Generator</a> — Seven QR types, full visual customization, batch export, dynamic codes. No trial, no expiration, no kill switch.</p>
+			<p class="leading-relaxed text-text-muted"><a href="/pdf" class="font-semibold text-accent underline hover:text-accent-hover">PDF Tools</a> — Merge, split, compress, rotate, reorder, add page numbers, add watermarks, convert. 100% in your browser. Files never leave your device.</p>
+			<p class="leading-relaxed text-text-muted"><a href="/links" class="font-semibold text-accent underline hover:text-accent-hover">Link Shortener</a> — Custom short links with click analytics and UTM tracking. No account.</p>
+			<p class="leading-relaxed text-text-muted"><a href="/photo" class="font-semibold text-accent underline hover:text-accent-hover">Background Remover</a> — Full-resolution background removal. No upload, no watermark, no per-image fee.</p>
+			<p class="leading-relaxed text-text-muted"><a href="/remove" class="font-semibold text-accent underline hover:text-accent-hover">Data Broker Removal</a> — Pre-filled opt-out emails and step-by-step guides for 25+ brokers. Your info stays on your device.</p>
+			<p class="leading-relaxed text-text-muted"><a href="/resume" class="font-semibold text-accent underline hover:text-accent-hover">Resume Builder</a> — ATS-optimized templates with PDF and DOCX export. Your data never leaves your browser.</p>
+		</div>
+	</section>
+
+	<section class="mb-12">
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">The rules</h2>
+		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No accounts.</strong> If a tool doesn't need to know who you are, it won't ask.</p>
+		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No tracking.</strong> No cookies, no fingerprinting. Basic Cloudflare analytics that count page views without identifying visitors.</p>
+		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No ads.</strong> Not now, not later.</p>
+		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No paywall.</strong> Every feature free for every user. No premium tiers, no daily limits, no watermarks.</p>
+		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">Privacy by architecture, not policy.</strong> Static tools run in your browser. There is no server to send your data to. This isn't a promise. It's how the code works.</p>
+		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">Open source.</strong> The <a href="https://github.com/vrennat/nah-tools" class="text-accent underline hover:text-accent-hover">full codebase</a> is MIT-licensed. Read every line, verify every claim, self-host the whole thing.</p>
+		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">Built to keep working without me.</strong> If I stopped maintaining this tomorrow, the static tools would keep running because they're just code in your browser. The tools are designed to outlast the person who built them.</p>
+	</section>
+
+	<section class="mb-12">
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">Why it's called nah</h2>
+		<p class="mb-4 leading-relaxed text-text-muted">Because the correct response to a $564/year QR code generator is "nah."</p>
+		<p class="mb-4 leading-relaxed text-text-muted">Because the correct response to a resume builder that holds your work history hostage is "nah."</p>
+		<p class="mb-4 leading-relaxed text-text-muted">Because the correct response to a PDF tool that ranks above government websites and charges $96 for a form fill is "nah."</p>
+		<p class="mb-4 leading-relaxed text-text-muted">Because the correct response to paying $2 per image for something your browser does for free is "nah."</p>
+		<p class="mb-4 leading-relaxed text-text-muted">The internet is full of tools that should be free but aren't. They survive because most people don't know there's an alternative. Now there is.</p>
+	</section>
+
+	<section class="mb-12">
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">What's under the hood</h2>
+		<p class="mb-6 leading-relaxed text-text-muted">nah is built on open-source libraries written by developers who solved these problems and gave their work away for free.</p>
+		<div class="overflow-x-auto">
+			<table class="w-full text-left text-sm">
+				<thead>
+					<tr class="border-b border-border">
+						<th class="py-3 pr-4 font-semibold text-text">Tool</th>
+						<th class="py-3 pr-4 font-semibold text-text">Key libraries</th>
+						<th class="py-3 font-semibold text-text">What they do</th>
+					</tr>
+				</thead>
+				<tbody class="text-text-muted">
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">QR codes</td>
+						<td class="py-3 pr-4">qr-code-styling</td>
+						<td class="py-3">Styled QR generation with logos and gradients, client-side</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">PDF tools</td>
+						<td class="py-3 pr-4">pdf-lib, PDF.js</td>
+						<td class="py-3">PDF manipulation and rendering in the browser</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">Background removal</td>
+						<td class="py-3 pr-4">ONNX Runtime Web, Transformers.js</td>
+						<td class="py-3">AI model inference in the browser via WebAssembly/WebGPU</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">Image compression</td>
+						<td class="py-3 pr-4">jSquash</td>
+						<td class="py-3">WASM-compiled MozJPEG, OxiPNG, WebP, AVIF codecs</td>
+					</tr>
+					<tr>
+						<td class="py-3 pr-4">Resume builder</td>
+						<td class="py-3 pr-4">pdf-lib</td>
+						<td class="py-3">PDF generation from HTML templates</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<p class="mt-6 leading-relaxed text-text-muted">
+			Built with <a href="https://kit.svelte.dev/" class="text-accent underline hover:text-accent-hover">SvelteKit</a> and deployed on <a href="https://workers.cloudflare.com/" class="text-accent underline hover:text-accent-hover">Cloudflare Workers</a>. Infrastructure cost: $5/month. <a href="https://github.com/vrennat/nah-tools" class="text-accent underline hover:text-accent-hover">Source code</a> is MIT-licensed.
 		</p>
 	</section>
 
 	<section class="mb-12">
-		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">
-			The free alternative
-		</h2>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			We built <a href="/qr" class="text-accent underline hover:text-accent-hover">nah</a> because
-			the alternative shouldn't cost hundreds of dollars a year.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			nah is a free, open-source QR code generator. It supports every feature the paid
-			tools charge for: custom colors, dot styles, logo embedding, gradients, SVG and high-resolution
-			PNG export, WiFi codes, vCard codes, and batch generation. There is no signup, no trial,
-			no account, no expiration, and no catch.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			Static QR codes are generated entirely in your browser. Your data never touches our servers.
-			There's nothing to expire because there's no server involved — the code is computed on your
-			device, and the result belongs to you.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			We also offer <a href="/qr" class="text-accent underline hover:text-accent-hover">dynamic QR codes</a>
-			for cases where you genuinely need to change a destination after printing. These run through
-			a lightweight redirect service on Cloudflare Workers. The total infrastructure cost is $5
-			per month for up to 10 million redirects. We don't charge for this because, at that price
-			point, there's nothing meaningful to charge for.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			There are no ads, no tracking cookies, no email collection, and no analytics beyond basic
-			redirect counts for dynamic codes. The source code is
-			<a href="https://github.com/vrennat/nah-tools" class="text-accent underline hover:text-accent-hover">public on GitHub</a>.
-			You can read every line, verify every claim, and self-host the entire thing if you want to.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			We didn't build this to compete with enterprise QR platforms. We built it because 90% of
-			people who search for "free QR code generator" need a static code that never expires.
-			That's a solved problem. It shouldn't cost money.
-		</p>
-	</section>
-
-	<section class="mb-12">
-		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">
-			How do I make a QR code that never expires?
-		</h2>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			Whether you use our tool or someone else's, here's how to protect yourself.
-		</p>
-		<ol class="mb-4 list-decimal space-y-4 pl-6">
-			<li class="leading-relaxed text-text-muted">
-				<strong class="text-text">Always create static codes for permanent materials.</strong>
-				If the QR code is going on a business card, a sign, a menu, an invitation, or anything
-				else that gets printed — use a static code. Static codes encode your URL directly and
-				cannot be deactivated by anyone.
-			</li>
-			<li class="leading-relaxed text-text-muted">
-				<strong class="text-text">Only use dynamic codes when you genuinely need to change the destination later.</strong>
-				Event-specific campaigns, A/B testing URLs, temporary promotions — these are valid
-				use cases for dynamic codes. Your restaurant menu URL that won't change? Static.
-			</li>
-			<li class="leading-relaxed text-text-muted">
-				<strong class="text-text">If you already have a dynamic code from a paid service,</strong>
-				check whether you can replace it with a static code that encodes the same URL. If the
-				destination won't change, you don't need dynamic.
-			</li>
-			<li class="leading-relaxed text-text-muted">
-				<strong class="text-text">Read the fine print before creating any QR code.</strong>
-				If a "free" tool asks for your credit card, it's a trial, not a free tool. If it
-				requires an account to download your code, ask yourself why.
-			</li>
-			<li class="leading-relaxed text-text-muted">
-				<strong class="text-text">If you've already been charged unexpectedly,</strong>
-				dispute the charge with your bank or credit card company. Many users report success
-				with chargebacks for services they didn't knowingly consent to. Document the
-				misleading marketing and the lack of clear trial disclosure.
-			</li>
-		</ol>
-	</section>
-
-	<section class="mb-12">
-		<p class="mb-4 leading-relaxed text-text-muted">
-			The QR code industry is one example of a broader pattern in software: wrapping trivial
-			computation in subscriptions propped up by dark patterns. A QR code is encoded text.
-			Generating one is a solved problem that takes less than a millisecond. There's no ongoing
-			service, no complex infrastructure, no reason for a recurring charge — unless the business
-			model depends on manufacturing one.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			We're building nah as a set of free browser-based utilities that replace this kind
-			of predatory software, starting with QR codes. The code is open. The tools are free.
-			And if you find them useful, the best thing you can do is share them with someone who
-			needs a QR code and doesn't know about the trap.
-		</p>
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">Help make this work</h2>
+		<p class="mb-4 leading-relaxed text-text-muted">nah has no marketing budget, no ads, no VC money. It grows when people share it.</p>
+		<ul class="mb-4 list-disc space-y-3 pl-6 text-text-muted">
+			<li class="leading-relaxed"><strong class="text-text">Share the link.</strong> Send <a href="/" class="text-accent underline hover:text-accent-hover">nah.tools</a> to someone who needs a QR code, a PDF merge, or a resume. Drop it in a Reddit thread next time someone asks for a free alternative.</li>
+			<li class="leading-relaxed"><strong class="text-text">Star the <a href="https://github.com/vrennat/nah-tools" class="text-accent underline hover:text-accent-hover">GitHub repo</a>.</strong> It helps with discoverability.</li>
+			<li class="leading-relaxed"><strong class="text-text">Contribute.</strong> Bug reports, feature requests, PRs, new tools. It's all open source.</li>
+			<li class="leading-relaxed"><strong class="text-text">Tell the story.</strong> Link to this page. The tools work, but they only help people who know they exist.</li>
+		</ul>
 		<p class="mt-8 text-lg font-semibold leading-relaxed text-text">
-			Your QR codes belong to you. They always did.
+			No one should pay $564/year for a QR code. Help make sure they don't.
 		</p>
 	</section>
 
 	<div class="mt-12 rounded-xl border border-border bg-surface p-8 text-center">
-		<p class="mb-4 text-lg text-text">Ready to make a QR code that actually stays free?</p>
+		<p class="mb-4 text-lg text-text">Ready to try tools that are actually free?</p>
 		<a
-			href="/qr"
+			href="/"
 			class="inline-block rounded-lg bg-accent px-6 py-3 font-semibold text-white hover:bg-accent-hover"
 		>
-			Create a free QR code
+			Explore all tools
 		</a>
 	</div>
 </article>
