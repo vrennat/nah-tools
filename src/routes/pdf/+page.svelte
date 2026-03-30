@@ -197,6 +197,26 @@
 			</a>
 
 			<a
+				href="/pdf/flatten"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Flatten PDF</h2>
+				<p class="mt-1 text-sm text-text-muted">Bake form fields and annotations into static content</p>
+			</a>
+
+			<a
 				href="/pdf/page-numbers"
 				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
 			>
@@ -340,6 +360,146 @@
 				</div>
 				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Unlock PDF</h2>
 				<p class="mt-1 text-sm text-text-muted">Remove password from your PDF</p>
+			</a>
+
+			<a
+				href="/pdf/pdf-to-csv"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M3 10h18M3 14h18M3 18h18M3 6h18M9 6v12M15 6v12"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">PDF to CSV</h2>
+				<p class="mt-1 text-sm text-text-muted">Extract tables from PDFs as spreadsheet data</p>
+			</a>
+
+			<a
+				href="/pdf/ocr"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">OCR PDF</h2>
+				<p class="mt-1 text-sm text-text-muted">Make scanned PDFs searchable with text recognition</p>
+			</a>
+
+			<a
+				href="/pdf/crop"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M7 3v4M3 7h4m0 0v10a2 2 0 002 2h10m4-4v4m-4 0h4m0 0V9a2 2 0 00-2-2H7"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Crop PDF</h2>
+				<p class="mt-1 text-sm text-text-muted">Trim margins from PDF pages</p>
+			</a>
+
+			<a
+				href="/pdf/extract-images"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Extract Images</h2>
+				<p class="mt-1 text-sm text-text-muted">Pull all embedded images from a PDF</p>
+			</a>
+
+			<a
+				href="/pdf/pdfa"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Prepare for PDF/A</h2>
+				<p class="mt-1 text-sm text-text-muted">Add archival metadata for long-term preservation</p>
+			</a>
+
+			<a
+				href="/pdf/compare"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Compare PDFs</h2>
+				<p class="mt-1 text-sm text-text-muted">Visual side-by-side diff of two PDFs</p>
+			</a>
+
+			<a
+				href="/pdf/redact"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-8px_rgba(59,130,246,0.15)]"
+			>
+				<div
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+				>
+					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l18 18"
+						/>
+					</svg>
+				</div>
+				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Redact PDF</h2>
+				<p class="mt-1 text-sm text-text-muted">Permanently black out sensitive content</p>
 			</a>
 		</div>
 	</div>

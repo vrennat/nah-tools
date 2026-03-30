@@ -106,10 +106,88 @@ export interface TextFieldFill {
 	color: string;
 }
 
+/** Extracted table data from a PDF page */
+export interface ExtractedTable {
+	headers: string[];
+	rows: string[][];
+	pageIndex: number;
+}
+
+/** OCR configuration */
+export interface OCRConfig {
+	language: string; // Tesseract language code: 'eng', 'spa', 'fra', etc.
+}
+
 /** PDF permission flags for encryption */
 export interface PDFPermissions {
 	printing: boolean;
 	copying: boolean;
 	modifying: boolean;
 	annotating: boolean;
+}
+
+/** Crop/margin trim configuration — values in PDF points (1pt = 1/72 inch) */
+export interface CropConfig {
+	top: number;
+	right: number;
+	bottom: number;
+	left: number;
+}
+
+/** Extracted image from a PDF */
+export interface ExtractedImage {
+	id: string;
+	pageNumber: number;
+	width: number;
+	height: number;
+	dataUrl: string;
+	blob: Blob;
+}
+
+export interface PdfAPreparationConfig {
+	conformanceLevel: 'PDF/A-1b' | 'PDF/A-2b';
+	title?: string;
+}
+
+export interface PdfAPreparationResult {
+	data: Uint8Array;
+	warnings: string[];
+}
+
+/** Options for PDF comparison */
+export interface CompareOptions {
+	scale?: number;
+	diffColor?: [number, number, number];
+	threshold?: number;
+}
+
+/** Result of comparing a single page pair */
+export interface PageCompareResult {
+	pageIndex: number;
+	originalDataUrl: string;
+	revisedDataUrl: string;
+	diffDataUrl: string;
+	diffPixelCount: number;
+	totalPixelCount: number;
+	diffPercent: number;
+	width: number;
+	height: number;
+}
+
+/** Redaction region in percentage coordinates (0-1) relative to page dimensions */
+export interface RedactRegion {
+	x: number;
+	y: number;
+	width: number;
+	height: number;
+}
+
+export interface RedactPageConfig {
+	pageIndex: number;
+	regions: RedactRegion[];
+}
+
+export interface RedactConfig {
+	pages: RedactPageConfig[];
+	scale?: number;
 }

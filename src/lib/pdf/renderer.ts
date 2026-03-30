@@ -3,7 +3,7 @@
  * All functions lazily load the library on first use.
  */
 
-import type { PageThumbnail, ProgressCallback } from './types';
+import type { ExtractedImage, PageThumbnail, ProgressCallback } from './types';
 
 type PDFJSLib = typeof import('pdfjs-dist');
 let pdfjsLib: PDFJSLib;
@@ -114,4 +114,94 @@ export async function pdfToImages(
 
 	doc.destroy();
 	return blobs;
+}
+
+/** Extract all embedded images from a PDF */
+export async function extractImages(
+	source: ArrayBuffer,
+	onProgress?: ProgressCallback
+): Promise<ExtractedImage[]> {
+	const pdfjs = await getPDFJS();
+	const doc = await pdfjs.getDocument({ data: source }).promise;
+	const images: ExtractedImage[] = [];
+	const seenObjIds = new Set<string>();
+	const canvas = document.createElement('canvas');
+	const ctx = canvas.getContext('2d')!;
+
+	for (let i = 0; i < doc.numPages; i++) {
+		const page = await doc.getPage(i + 1);
+		const opList = await page.getOperatorList();
+
+		for (let j = 0; j < opList.fnArray.length; j++) {
+			const fn = opList.fnArray[j];
+			if (fn !== pdfjs.OPS.paintImageXObject && fn !== pdfjs.OPS.paintInlineImageXObject)
+				continue;
+
+			const isInline = fn === pdfjs.OPS.paintInlineImageXObject;
+			let imgData: any;
+
+			if (isInline) {
+				imgData = opList.argsArray[j][0];
+			} else {
+				const objId = opList.argsArray[j][0];
+				if (seenObjIds.has(objId)) continue;
+				seenObjIds.add(objId);
+				try {
+					imgData = await new Promise((resolve, reject) => {
+						page.objs.get(objId, (data: any) => {
+							if (data) resolve(data);
+							else reject(new Error('No data'));
+						});
+					});
+				} catch {
+					continue;
+				}
+			}
+
+			if (!imgData?.data || !imgData.width || !imgData.height) continue;
+			if (imgData.width < 10 || imgData.height < 10) continue;
+
+			// Render to canvas for PNG export
+			canvas.width = imgData.width;
+			canvas.height = imgData.height;
+			const imageData = new ImageData(
+				new Uint8ClampedArray(imgData.data),
+				imgData.width,
+				imgData.height
+			);
+			ctx.putImageData(imageData, 0, 0);
+
+			const blob = await new Promise<Blob>((resolve, reject) => {
+				canvas.toBlob(
+					(b) => (b ? resolve(b) : reject(new Error('toBlob failed'))),
+					'image/png'
+				);
+			});
+
+			// Thumbnail
+			const thumbMax = 200;
+			const scale = Math.min(1, thumbMax / Math.max(imgData.width, imgData.height));
+			const tw = Math.round(imgData.width * scale);
+			const th = Math.round(imgData.height * scale);
+			canvas.width = tw;
+			canvas.height = th;
+			ctx.drawImage(await createImageBitmap(imageData), 0, 0, tw, th);
+			const dataUrl = canvas.toDataURL('image/png');
+
+			images.push({
+				id: `p${i + 1}-img${images.length}`,
+				pageNumber: i + 1,
+				width: imgData.width,
+				height: imgData.height,
+				dataUrl,
+				blob
+			});
+		}
+
+		page.cleanup();
+		onProgress?.(i + 1, doc.numPages);
+	}
+
+	doc.destroy();
+	return images;
 }
