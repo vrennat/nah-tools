@@ -8,6 +8,7 @@
 		{ href: '/qr', label: 'QR', match: (p: string) => p.startsWith('/qr') },
 		{ href: '/pdf', label: 'PDF', match: (p: string) => p.startsWith('/pdf') },
 		{ href: '/links', label: 'Links', match: (p: string) => p.startsWith('/links') },
+		{ href: '/bio', label: 'Bio', match: (p: string) => p.startsWith('/bio') },
 		{ href: '/photo', label: 'Photo', match: (p: string) => p.startsWith('/photo') },
 		{ href: '/remove', label: 'Remove', match: (p: string) => p.startsWith('/remove') },
 		{ href: '/resume', label: 'Resume', match: (p: string) => p.startsWith('/resume') }

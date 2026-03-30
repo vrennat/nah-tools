@@ -66,7 +66,12 @@ const RESERVED_ALIASES = [
 	'mail',
 	'ftp',
 	'cdn',
-	'static'
+	'static',
+	'bio',
+	'pdf',
+	'photo',
+	'resume',
+	'remove'
 ];
 
 /** Validate URL safety beyond basic scheme checks */
@@ -138,6 +143,26 @@ export function validateAlias(alias: string): { valid: boolean; reason?: string 
 	}
 	if (RESERVED_ALIASES.includes(alias.toLowerCase())) {
 		return { valid: false, reason: 'This alias is reserved.' };
+	}
+	return { valid: true };
+}
+
+/** Validate a bio handle (same rules as alias) */
+export function validateHandle(handle: string): { valid: boolean; reason?: string } {
+	if (handle.length < 3) {
+		return { valid: false, reason: 'Handle must be at least 3 characters.' };
+	}
+	if (handle.length > 32) {
+		return { valid: false, reason: 'Handle must be 32 characters or fewer.' };
+	}
+	if (!/^[a-zA-Z0-9-]+$/.test(handle)) {
+		return { valid: false, reason: 'Handle can only contain letters, numbers, and hyphens.' };
+	}
+	if (handle.startsWith('-') || handle.endsWith('-')) {
+		return { valid: false, reason: 'Handle cannot start or end with a hyphen.' };
+	}
+	if (RESERVED_ALIASES.includes(handle.toLowerCase())) {
+		return { valid: false, reason: 'This handle is reserved.' };
 	}
 	return { valid: true };
 }
