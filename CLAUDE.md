@@ -87,9 +87,9 @@ Defined in `svelte.config.js`: `$components`, `$qr`, `$server`, `$utils`
 - `FAQPage` schema on each landing page (via reusable `FAQSchema.svelte` component)
 - Sitemap at `/sitemap.xml`, referenced in `robots.txt`
 
-### CI/CD
+### Deployment
 
-GitHub Actions (`.github/workflows/deploy.yml`) deploys both workers on push to `main` using bun.
+Manual via `bun run deploy` (main site) and `bun run deploy:redirect` (redirect worker). No CI/CD pipeline — deploy locally with Wrangler.
 
 ### Docs
 

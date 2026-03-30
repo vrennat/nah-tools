@@ -3,6 +3,25 @@
 	"private": true,
 	"version": "0.1.0",
 	"type": "module",
+	"description": "Free, open-source browser tools that replace predatory SaaS. QR codes, PDFs, resumes, background removal, and more.",
+	"author": "Tanner Vass",
+	"homepage": "https://nah.tools",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/vrennat/nah-tools.git"
+	},
+	"keywords": [
+		"qr-code",
+		"pdf",
+		"resume-builder",
+		"background-removal",
+		"link-shortener",
+		"invoice",
+		"privacy",
+		"open-source",
+		"svelte",
+		"cloudflare-workers"
+	],
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",

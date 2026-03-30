@@ -21,6 +21,11 @@ Thumbs.db
 # Claude Code
 .claude/worktrees
 
+# Planning / drafts
+tmp/
+CHANGES.md
+gemini-research-eval.md
+
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
