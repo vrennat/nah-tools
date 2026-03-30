@@ -1,7 +1,8 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getDB, authenticateRedirect, isValidURL, generateShortCode, createRedirect, updateRedirect, deactivateRedirect } from '$server/db';
+import { getDB, authenticateRedirect, generateShortCode, createRedirect, updateRedirect, deactivateRedirect } from '$server/db';
 import { hashPassphrase } from '$server/auth';
+import { validateUrlSafety } from '$server/safety';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -12,8 +13,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	if (!url || typeof url !== 'string') {
 		throw error(400, 'URL is required');
 	}
-	if (!isValidURL(url)) {
-		throw error(400, 'Invalid URL. Must be a valid http or https URL.');
+	const safety = await validateUrlSafety(url, db);
+	if (!safety.safe) {
+		throw error(400, safety.reason || 'URL is not allowed');
 	}
 	if (!passphrase || typeof passphrase !== 'string') {
 		throw error(400, 'Passphrase is required');
@@ -45,8 +47,9 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	if (!short_code || !passphrase || !url) {
 		throw error(400, 'short_code, passphrase, and url are required');
 	}
-	if (!isValidURL(url)) {
-		throw error(400, 'Invalid URL. Must be a valid http or https URL.');
+	const safety = await validateUrlSafety(url, db);
+	if (!safety.safe) {
+		throw error(400, safety.reason || 'URL is not allowed');
 	}
 
 	await authenticateRedirect(db, short_code, passphrase);
