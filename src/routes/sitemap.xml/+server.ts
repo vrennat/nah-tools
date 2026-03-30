@@ -7,6 +7,7 @@ const routes: { path: string; changefreq: string; priority: string }[] = [
 	{ path: '/qr', changefreq: 'weekly', priority: '1.0' },
 	{ path: '/links', changefreq: 'weekly', priority: '1.0' },
 	{ path: '/pdf', changefreq: 'weekly', priority: '1.0' },
+	{ path: '/resume', changefreq: 'weekly', priority: '1.0' },
 	{ path: '/pdf/merge', changefreq: 'monthly', priority: '0.9' },
 	{ path: '/pdf/split', changefreq: 'monthly', priority: '0.9' },
 	{ path: '/pdf/rotate', changefreq: 'monthly', priority: '0.8' },
