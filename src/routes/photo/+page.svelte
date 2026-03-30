@@ -15,7 +15,7 @@
 
 	<div class="mx-auto grid max-w-2xl gap-4 sm:grid-cols-2">
 		<a
-			href="/photo/remove-bg"
+			href="/photo/rm-bg"
 			class="group rounded-xl border border-border bg-surface p-6 shadow-sm transition-all hover:border-accent hover:shadow-md"
 		>
 			<div class="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-accent/10 text-accent">
