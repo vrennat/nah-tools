@@ -21,6 +21,7 @@ const config = {
 			$pdf: 'src/lib/pdf',
 			$remove: 'src/lib/remove',
 			$resume: 'src/lib/resume',
+			$bio: 'src/lib/bio',
 			$server: 'src/lib/server',
 			$utils: 'src/lib/utils'
 		}
