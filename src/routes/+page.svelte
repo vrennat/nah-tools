@@ -50,7 +50,7 @@
 		style="animation-delay: 260ms;"
 	>
 		<p class="text-sm leading-relaxed text-text-muted sm:text-base">
-			Other "free" tools upload your files, limit your usage, then paywall the download. We don't. Everything runs in your browser. Your files never leave your device. It costs us $5/month to run this for everyone. The BBB estimates consumers have lost $1.3 billion to the free trial traps these companies use. The code is on <a href="https://github.com/vrennat/nah-tools" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent">GitHub</a>.
+			Other "free" tools upload your files, limit your usage, then paywall the download. We don't. Everything runs in your browser. Your files never leave your device. It costs us $5/month to run this for everyone. The code is on <a href="https://github.com/vrennat/nah-tools" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent">GitHub</a>.
 		</p>
 	</section>
 
