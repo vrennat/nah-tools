@@ -42,7 +42,7 @@
 </script>
 
 <svelte:head>
-	<title>Add Watermark to PDF Online Free | Nah Tools</title>
+	<title>Add Watermark to PDF Online Free | nah</title>
 	<meta
 		name="description"
 		content="Add a text watermark to all pages of your PDF. Customize text, opacity, rotation, and color. Free, no upload — processed in your browser."

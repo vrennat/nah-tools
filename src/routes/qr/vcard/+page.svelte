@@ -33,13 +33,13 @@
 <FAQSchema {faqs} />
 
 <svelte:head>
-	<title>Free vCard QR Code Generator — Business Card QR Code — Nah Tools</title>
+	<title>Free vCard QR Code Generator — Business Card QR Code — nah</title>
 	<meta name="description" content="Create a free QR code for your business card. Add name, phone, email, company, and more. Scan to save contact info instantly. No signup, no expiration." />
 </svelte:head>
 
 <div class="mx-auto max-w-3xl space-y-12">
 	<section class="text-center">
-		<h1 class="font-display text-4xl font-800 tracking-tight text-text sm:text-5xl md:text-6xl">
+		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">
 			Free Business Card QR Code Generator
 		</h1>
 		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
@@ -88,7 +88,7 @@
 	</section>
 
 	<section class="rounded-xl border border-border bg-surface p-6">
-		<h2 class="text-xl font-bold text-text">Why Use Nah Tools</h2>
+		<h2 class="text-xl font-bold text-text">Why Use nah</h2>
 		<ul class="mt-4 space-y-3 text-text-muted">
 			<li class="flex items-start gap-3">
 				<span class="mt-0.5 text-accent">&bull;</span>

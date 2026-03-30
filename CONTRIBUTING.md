@@ -1,6 +1,6 @@
-# Contributing to Nah Tools
+# Contributing to nah
 
-Thanks for your interest in contributing. Nah Tools is an indie open-source project — the process is intentionally lightweight.
+Thanks for your interest in contributing. nah is an indie open-source project — the process is intentionally lightweight.
 
 ## Setup
 

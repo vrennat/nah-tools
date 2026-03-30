@@ -10,7 +10,7 @@
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		"@context": "https://schema.org",
 		"@type": "WebSite",
-		"name": "Nah Tools",
+		"name": "nah",
 		"url": "https://nah.tools",
 		"description": "Free, open-source QR code generator. No signup, no expiration, no catch.",
 		"potentialAction": {

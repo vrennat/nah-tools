@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Nah Tools — Free, Open-Source Utilities</title>
+	<title>nah — Free, Open-Source Utilities</title>
 	<meta name="description" content="Free, open-source developer and utility tools. No signup, no tracking, no catch." />
 </svelte:head>
 

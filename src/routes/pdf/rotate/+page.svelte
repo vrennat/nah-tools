@@ -87,7 +87,7 @@
 </script>
 
 <svelte:head>
-	<title>Rotate PDF Pages Online Free | Nah Tools</title>
+	<title>Rotate PDF Pages Online Free | nah</title>
 	<meta
 		name="description"
 		content="Rotate PDF pages. Rotate all or individual pages 90, 180, or 270 degrees. Free, no upload — processed in your browser."

@@ -55,7 +55,7 @@
 </script>
 
 <svelte:head>
-	<title>Convert Images to PDF Online Free | Nah Tools</title>
+	<title>Convert Images to PDF Online Free | nah</title>
 	<meta
 		name="description"
 		content="Convert JPG and PNG images to PDF. Drag to reorder, choose page size. Free, no upload — processed in your browser."

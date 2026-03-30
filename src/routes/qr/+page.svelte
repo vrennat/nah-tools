@@ -105,12 +105,12 @@
 </script>
 
 <svelte:head>
-	<title>Nah Tools — Free QR Code Generator</title>
+	<title>Free QR Code Generator — nah</title>
 	<meta name="description" content="Free, open-source QR code generator. No signup, no expiration, no tracking." />
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		"@context": "https://schema.org",
 		"@type": "SoftwareApplication",
-		"name": "Nah Tools — Free QR Code Generator",
+		"name": "nah — Free QR Code Generator",
 		"url": "https://nah.tools/qr",
 		"description": "Free, open-source QR code generator. Create QR codes for URLs, WiFi, vCards, email, phone, and SMS. No signup, no expiration, no tracking.",
 		"applicationCategory": "UtilityApplication",
@@ -122,7 +122,7 @@
 		},
 		"creator": {
 			"@type": "Organization",
-			"name": "Nah Tools",
+			"name": "nah",
 			"url": "https://nah.tools"
 		}
 	})}</script>`}
@@ -211,7 +211,7 @@
 										type="button"
 										disabled={!canCreateDynamic}
 										onclick={createDynamic}
-										class="w-full rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+										class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 									>
 										{#if dynamicLoading}
 											Creating...
@@ -301,7 +301,7 @@
 			</div>
 			<button
 				type="submit"
-				class="shrink-0 rounded-full bg-accent px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+				class="shrink-0 rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
 			>
 				Manage
 			</button>

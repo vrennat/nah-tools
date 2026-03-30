@@ -1,6 +1,6 @@
 <svelte:head>
-	<title>Privacy Policy — Nah Tools</title>
-	<meta name="description" content="Nah Tools privacy policy. Static QR codes are generated entirely in your browser. We never see your data." />
+	<title>Privacy Policy — nah</title>
+	<meta name="description" content="nah privacy policy. Static QR codes are generated entirely in your browser. We never see your data." />
 </svelte:head>
 
 <article class="mx-auto max-w-3xl space-y-8">

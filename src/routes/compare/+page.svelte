@@ -29,20 +29,20 @@
 </script>
 
 <svelte:head>
-	<title>Compare QR Code Generators — Nah Tools vs Paid Alternatives</title>
+	<title>Compare QR Code Generators — nah vs Paid Alternatives</title>
 	<meta
 		name="description"
-		content="See how Nah Tools compares to QR Code Generator Pro, QR Tiger, Flowcode, and Uniqode. Every feature, side by side."
+		content="See how nah compares to QR Code Generator Pro, QR Tiger, Flowcode, and Uniqode. Every feature, side by side."
 	/>
 </svelte:head>
 
 <div class="space-y-16 py-8">
 	<section class="text-center">
-		<h1 class="font-display text-4xl font-800 tracking-tight text-text sm:text-5xl md:text-6xl">
+		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">
 			Compare QR Code Generators
 		</h1>
 		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
-			How Nah Tools stacks up against paid QR code generators, side by side.
+			How nah stacks up against paid QR code generators, side by side.
 			No signup, no trial, no catch.
 		</p>
 	</section>
@@ -56,7 +56,7 @@
 							Feature
 						</th>
 						<th class="bg-accent/10 px-4 py-4 text-center font-bold text-accent">
-							Nah Tools
+							nah
 							<span class="block text-xs font-normal text-accent/80">Free forever</span>
 						</th>
 						{#each competitors as comp}

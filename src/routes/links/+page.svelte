@@ -339,12 +339,12 @@
 </script>
 
 <svelte:head>
-	<title>Nah Tools — Free Link Shortener</title>
+	<title>nah — Free Link Shortener</title>
 	<meta name="description" content="Free, open-source link shortener with custom aliases, click analytics, UTM builder, and QR codes. No signup required." />
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		"@context": "https://schema.org",
 		"@type": "SoftwareApplication",
-		"name": "Nah Tools — Free Link Shortener",
+		"name": "nah — Free Link Shortener",
 		"url": "https://nah.tools/links",
 		"description": "Free, open-source link shortener with custom aliases, click analytics, UTM builder, and QR codes. No signup required.",
 		"applicationCategory": "UtilityApplication",
@@ -356,7 +356,7 @@
 		},
 		"creator": {
 			"@type": "Organization",
-			"name": "Nah Tools",
+			"name": "nah",
 			"url": "https://nah.tools"
 		}
 	})}</script>`}
@@ -546,7 +546,7 @@
 						type="button"
 						disabled={!canCreate}
 						onclick={handleCreate}
-						class="w-full rounded-full bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
+						class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 					>
 						{#if loading}
 							Creating...
@@ -755,7 +755,7 @@
 					<div class="flex items-center gap-3">
 						<button
 							type="button"
-							class="rounded-full bg-accent px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+							class="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 							disabled={bulkLoading}
 							onclick={handleBulkCreate}
 						>
@@ -805,7 +805,7 @@
 			</div>
 			<button
 				type="submit"
-				class="shrink-0 rounded-full bg-accent px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+				class="shrink-0 rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
 			>
 				Manage
 			</button>

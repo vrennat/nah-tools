@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Photo Tools — nah.tools</title>
+	<title>Photo Tools — nah</title>
 	<meta name="description" content="Free, client-side photo editing tools. Background removal, and more coming soon. No upload, no signup." />
 </svelte:head>
 

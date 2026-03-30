@@ -17,7 +17,7 @@
 <header class="mx-auto w-full max-w-6xl px-4 pt-6 pb-2 sm:px-6 sm:pt-8 lg:px-8">
 	<div class="flex items-center justify-between">
 		<a href="/" class="font-display text-xl font-700 tracking-tight text-brand">
-			nah<span class="text-accent">.tools</span>
+			nah
 		</a>
 
 		<div class="flex items-center gap-5">

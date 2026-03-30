@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Free PDF Tools — Merge, Split, Rotate, Compress | Nah Tools</title>
+	<title>Free PDF Tools — Merge, Split, Rotate, Compress | nah</title>
 	<meta
 		name="description"
 		content="Free online PDF tools. Merge, split, rotate, compress, convert, and more. 100% client-side — files never leave your device. No signup, no limits."
@@ -7,14 +7,14 @@
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		'@context': 'https://schema.org',
 		'@type': 'SoftwareApplication',
-		name: 'Nah Tools PDF Tools',
+		name: 'nah PDF Tools',
 		url: 'https://nah.tools/pdf',
 		description:
 			'Free online PDF tools. Merge, split, rotate, compress, convert PDFs in your browser. Files never leave your device.',
 		applicationCategory: 'UtilityApplication',
 		operatingSystem: 'Any',
 		offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-		creator: { '@type': 'Organization', name: 'Nah Tools', url: 'https://nah.tools' }
+		creator: { '@type': 'Organization', name: 'nah', url: 'https://nah.tools' }
 	})}</script>`}
 </svelte:head>
 

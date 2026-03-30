@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Manage Link — Nah Tools</title>
+	<title>Manage Link — nah</title>
 </svelte:head>
 
 <script lang="ts">
@@ -235,7 +235,7 @@
 			<button
 				type="submit"
 				disabled={!passphrase || authLoading}
-				class="w-full rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed"
+				class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
 			>
 				{#if authLoading}
 					Verifying...
@@ -407,7 +407,7 @@
 					<button
 						type="submit"
 						disabled={updateLoading || newUrl === destinationUrl}
-						class="w-full rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed"
+						class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
 					>
 						{#if updateLoading}
 							Updating...
@@ -454,7 +454,7 @@
 							<button
 								onclick={handleDeactivate}
 								disabled={deactivateLoading}
-								class="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-600 disabled:opacity-50"
+								class="flex-1 rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-600 disabled:opacity-40"
 							>
 								{#if deactivateLoading}
 									Deactivating...
@@ -506,7 +506,7 @@
 				<button
 					type="submit"
 					disabled={!reportReason || reportLoading}
-					class="w-full rounded-lg border border-border px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-alt disabled:opacity-50 disabled:cursor-not-allowed"
+					class="w-full rounded-lg border border-border px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-alt disabled:opacity-40 disabled:cursor-not-allowed"
 				>
 					{#if reportLoading}
 						Submitting...

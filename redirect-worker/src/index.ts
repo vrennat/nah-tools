@@ -1,5 +1,5 @@
 /**
- * Nah Tools — Dynamic QR Code Redirect Worker
+ * nah — Dynamic QR Code Redirect Worker
  * Deployed to go.nah.tools
  *
  * Handles: go.nah.tools/{short_code} → D1 lookup → 302 redirect

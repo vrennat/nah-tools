@@ -44,7 +44,7 @@
 </script>
 
 <svelte:head>
-	<title>Merge PDFs Online Free — Combine PDF Files | Nah Tools</title>
+	<title>Merge PDFs Online Free — Combine PDF Files | nah</title>
 	<meta
 		name="description"
 		content="Merge multiple PDF files into one. Free, no upload — files are combined in your browser. Drag to reorder before merging."

@@ -1,6 +1,6 @@
 <svelte:head>
-	<title>Terms of Service — Nah Tools</title>
-	<meta name="description" content="Nah Tools terms of service. Free, open-source, provided as-is." />
+	<title>Terms of Service — nah</title>
+	<meta name="description" content="nah terms of service. Free, open-source, provided as-is." />
 </svelte:head>
 
 <article class="mx-auto max-w-3xl space-y-8">
@@ -10,7 +10,7 @@
 	</header>
 
 	<p class="text-lg text-text-muted">
-		Nah Tools is a free, open-source QR code generator. Use it for any lawful purpose.
+		nah is a free, open-source QR code generator. Use it for any lawful purpose.
 		We provide it as-is with no guarantees. Don't use our dynamic code redirect service for
 		spam, malware, or illegal content. That's basically it.
 	</p>
@@ -18,7 +18,7 @@
 	<section class="space-y-3">
 		<h2 class="text-xl font-bold">The Service</h2>
 		<p class="text-text-muted">
-			Nah Tools is provided free of charge, as-is. It offers two things:
+			nah is provided free of charge, as-is. It offers two things:
 		</p>
 		<ul class="list-disc space-y-1 pl-6 text-text-muted">
 			<li><strong>Static QR code generation</strong> — runs entirely in your browser. Once generated, we have no control over the codes.</li>
@@ -57,7 +57,7 @@
 	<section class="space-y-3">
 		<h2 class="text-xl font-bold">No Warranty</h2>
 		<p class="text-text-muted">
-			Nah Tools is provided "as is" without warranty of any kind. The service may experience
+			nah is provided "as is" without warranty of any kind. The service may experience
 			downtime, bugs, or other issues. We do not guarantee that QR codes will be scannable by all
 			devices in all conditions. We are not liable for any damages arising from your use of the
 			service.
@@ -67,7 +67,7 @@
 	<section class="space-y-3">
 		<h2 class="text-xl font-bold">Acceptable Use</h2>
 		<p class="text-text-muted">
-			You may use Nah Tools for any lawful purpose, including commercial use. Don't attempt to
+			You may use nah for any lawful purpose, including commercial use. Don't attempt to
 			overload or attack our servers, circumvent rate limits, or use automated scripts to
 			bulk-create dynamic codes.
 		</p>
@@ -76,7 +76,7 @@
 	<section class="space-y-3">
 		<h2 class="text-xl font-bold">Service Changes</h2>
 		<p class="text-text-muted">
-			We may modify or discontinue the service at any time. Since Nah Tools is
+			We may modify or discontinue the service at any time. Since nah is
 			<a href="https://github.com/vrennat/nah-tools" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">open source</a>,
 			you can always self-host your own instance.
 		</p>

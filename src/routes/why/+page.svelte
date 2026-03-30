@@ -9,7 +9,7 @@
 <article class="mx-auto max-w-3xl py-8">
 	<header class="mb-12">
 		<p class="mb-4 text-sm font-medium uppercase tracking-wider text-accent">Investigation</p>
-		<h1 class="font-display text-4xl font-800 leading-tight tracking-tight text-text sm:text-5xl md:text-6xl">
+		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">
 			The QR Code Shakedown
 		</h1>
 		<p class="mt-4 text-xl text-text-muted">
@@ -227,11 +227,11 @@
 			The free alternative
 		</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			We built <a href="/qr" class="text-accent underline hover:text-accent-hover">Nah Tools</a> because
+			We built <a href="/qr" class="text-accent underline hover:text-accent-hover">nah</a> because
 			the alternative shouldn't cost hundreds of dollars a year.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			Nah Tools is a free, open-source QR code generator. It supports every feature the paid
+			nah is a free, open-source QR code generator. It supports every feature the paid
 			tools charge for: custom colors, dot styles, logo embedding, gradients, SVG and high-resolution
 			PNG export, WiFi codes, vCard codes, and batch generation. There is no signup, no trial,
 			no account, no expiration, and no catch.
@@ -308,7 +308,7 @@
 			model depends on manufacturing one.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			We're building Nah Tools as a set of free browser-based utilities that replace this kind
+			We're building nah as a set of free browser-based utilities that replace this kind
 			of predatory software, starting with QR codes. The code is open. The tools are free.
 			And if you find them useful, the best thing you can do is share them with someone who
 			needs a QR code and doesn't know about the trap.
