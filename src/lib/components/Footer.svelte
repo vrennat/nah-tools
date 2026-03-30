@@ -4,6 +4,7 @@
 			<a href="/privacy" class="transition-colors hover:text-accent">Privacy</a>
 			<a href="/terms" class="transition-colors hover:text-accent">Terms</a>
 			<a href="https://github.com/vrennat/nah-tools" class="transition-colors hover:text-accent">GitHub</a>
+			<a href="/why" class="transition-colors hover:text-accent">Why</a>
 		</nav>
 	</div>
 </footer>
