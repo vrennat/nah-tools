@@ -41,6 +41,7 @@
 		"@jsquash/oxipng": "^2.3.0",
 		"@jsquash/png": "^3.1.1",
 		"@jsquash/webp": "^1.5.0",
+		"@modelcontextprotocol/sdk": "^1.28.0",
 		"bcryptjs": "^2.4.3",
 		"comlink": "^4.4.2",
 		"compromise": "^14.15.0",
