@@ -37,19 +37,9 @@
 		</h1>
 
 		<p
-			class="animate-fade-up mt-6 max-w-lg text-center text-lg text-text-muted sm:mt-8 sm:text-xl"
+			class="animate-fade-up mt-6 max-w-xl text-center text-base leading-relaxed text-text-muted sm:mt-8 sm:text-lg"
 			style="animation-delay: 200ms;"
 		>
-			Utilities that respect your privacy. Most tools run entirely in your browser. Everything is free. Forever.
-		</p>
-	</section>
-
-	<!-- Trust copy -->
-	<section
-		class="animate-fade-up mx-auto max-w-2xl pb-8 text-center"
-		style="animation-delay: 260ms;"
-	>
-		<p class="text-sm leading-relaxed text-text-muted sm:text-base">
 			Other "free" tools upload your files, limit your usage, then paywall the download. We don't. Everything runs in your browser. Your files never leave your device. It costs us $5/month to run this for everyone. The code is on <a href="https://github.com/vrennat/nah-tools" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent">GitHub</a>.
 		</p>
 	</section>
