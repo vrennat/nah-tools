@@ -555,6 +555,67 @@ export async function batchDocxToPDF(
 	return results;
 }
 
+/** Tags mammoth legitimately produces — anything else gets stripped. */
+const ALLOWED_TAGS = new Set([
+	'p', 'br', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+	'strong', 'b', 'em', 'i', 'u', 'a',
+	'ul', 'ol', 'li',
+	'table', 'thead', 'tbody', 'tr', 'th', 'td',
+	'img', 'hr', 'sup', 'sub', 'blockquote'
+]);
+
+const ALLOWED_ATTRS: Record<string, Set<string>> = {
+	a: new Set(['href']),
+	img: new Set(['src', 'alt', 'width', 'height'])
+};
+
+/** Strip HTML down to the tags mammoth actually produces. */
+function sanitizeHtml(html: string): string {
+	const doc = new DOMParser().parseFromString(html, 'text/html');
+
+	function clean(node: Node): void {
+		for (const child of Array.from(node.childNodes)) {
+			if (child.nodeType === Node.ELEMENT_NODE) {
+				const el = child as Element;
+				const tag = el.tagName.toLowerCase();
+
+				if (!ALLOWED_TAGS.has(tag)) {
+					// Keep the element's children, drop the tag itself
+					while (el.firstChild) el.parentNode!.insertBefore(el.firstChild, el);
+					el.remove();
+					continue;
+				}
+
+				// Strip disallowed attributes
+				const allowed = ALLOWED_ATTRS[tag];
+				for (const attr of Array.from(el.attributes)) {
+					if (!allowed?.has(attr.name)) el.removeAttribute(attr.name);
+				}
+
+				// For links, block javascript: URIs
+				if (tag === 'a') {
+					const href = el.getAttribute('href') || '';
+					if (/^\s*javascript\s*:/i.test(href)) el.removeAttribute('href');
+				}
+
+				// For images, only allow data: URIs (mammoth's inline images)
+				if (tag === 'img') {
+					const src = el.getAttribute('src') || '';
+					if (!src.startsWith('data:image/')) {
+						el.remove();
+						continue;
+					}
+				}
+
+				clean(el);
+			}
+		}
+	}
+
+	clean(doc.body);
+	return doc.body.innerHTML;
+}
+
 /**
  * Convert DOCX to HTML for preview rendering.
  */
@@ -575,7 +636,7 @@ export async function docxToHtml(source: ArrayBuffer): Promise<string> {
 		}
 	);
 
-	return result.value;
+	return sanitizeHtml(result.value);
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
