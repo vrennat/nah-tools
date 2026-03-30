@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { getDB, generateShortCode, createLink, isAliasAvailable } from '$server/db';
 import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, validateAlias, verifyTurnstile, checkRateLimit } from '$server/safety';
+import { normalizeUrl } from '$utils/url';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -50,21 +51,22 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		passphraseHash = await hashPassphrase(passphrase);
 	}
 
-	const results: Array<{ short_code: string; redirect_url: string; error?: string }> = [];
+	const results: Array<{ short_code: string; short_url: string; destination: string; error?: string }> = [];
 
 	for (const link of links) {
 		try {
 			if (!link.url || typeof link.url !== 'string') {
-				results.push({ short_code: '', redirect_url: '', error: 'URL is required' });
+				results.push({ short_code: '', short_url: '', destination: link.url || '', error: 'URL is required' });
 				continue;
 			}
 
+			const normalized = normalizeUrl(link.url);
+
 			// Validate URL safety
-			const safety = await validateUrlSafety(link.url, db);
+			const safety = await validateUrlSafety(normalized, db);
 			if (!safety.safe) {
 				results.push({
-					short_code: '',
-					redirect_url: '',
+					short_code: '', short_url: '', destination: link.url,
 					error: safety.reason || 'URL is not allowed'
 				});
 				continue;
@@ -75,8 +77,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				const aliasCheck = validateAlias(link.alias);
 				if (!aliasCheck.valid) {
 					results.push({
-						short_code: '',
-						redirect_url: '',
+						short_code: '', short_url: '', destination: link.url,
 						error: aliasCheck.reason || 'Invalid alias'
 					});
 					continue;
@@ -84,8 +85,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				const available = await isAliasAvailable(db, link.alias);
 				if (!available) {
 					results.push({
-						short_code: '',
-						redirect_url: '',
+						short_code: '', short_url: '', destination: link.url,
 						error: 'Alias is already taken'
 					});
 					continue;
@@ -93,7 +93,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			}
 
 			const shortCode = generateShortCode();
-			await createLink(db, shortCode, link.url, passphraseHash, {
+			await createLink(db, shortCode, normalized, passphraseHash, {
 				label: link.label,
 				customAlias: link.alias
 			});
@@ -101,12 +101,12 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			const displayCode = link.alias || shortCode;
 			results.push({
 				short_code: displayCode,
-				redirect_url: `https://go.nah.tools/${displayCode}`
+				short_url: `https://go.nah.tools/${displayCode}`,
+				destination: link.url
 			});
 		} catch {
 			results.push({
-				short_code: '',
-				redirect_url: '',
+				short_code: '', short_url: '', destination: link.url,
 				error: 'Failed to create link'
 			});
 		}

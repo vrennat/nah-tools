@@ -13,7 +13,7 @@
 		</p>
 	</section>
 
-	<div class="mx-auto grid max-w-4xl gap-4 sm:grid-cols-3">
+	<div class="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
 		<a
 			href="/qr"
 			class="group rounded-xl border border-border bg-surface p-6 shadow-sm transition-all hover:border-accent hover:shadow-md"
@@ -26,6 +26,21 @@
 			<h2 class="text-lg font-semibold text-text group-hover:text-accent">QR Code Generator</h2>
 			<p class="mt-1 text-sm text-text-muted">
 				URL, text, WiFi, vCard, email, phone, SMS. Full style customization, batch export, dynamic codes.
+			</p>
+		</a>
+
+		<a
+			href="/pdf"
+			class="group rounded-xl border border-border bg-surface p-6 shadow-sm transition-all hover:border-accent hover:shadow-md"
+		>
+			<div class="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-accent/10 text-accent">
+				<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+				</svg>
+			</div>
+			<h2 class="text-lg font-semibold text-text group-hover:text-accent">PDF Tools</h2>
+			<p class="mt-1 text-sm text-text-muted">
+				Merge, split, rotate, compress, and convert. 100% client-side — files never leave your device.
 			</p>
 		</a>
 
