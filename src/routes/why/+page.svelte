@@ -107,6 +107,14 @@
 			</p>
 			<a href="/why/remove" class="text-sm font-medium text-accent hover:text-accent-hover">Read the full investigation &rarr;</a>
 		</div>
+
+		<div class="mb-8 rounded-lg border border-border bg-surface-alt p-6">
+			<h3 class="mb-2 text-xl font-semibold text-text">Invoice tools: "free forever" until the acquisition check clears</h3>
+			<p class="mb-3 leading-relaxed text-text-muted">
+				Wave served 400,000+ businesses for free, got acquired for <strong class="text-text">$405 million</strong>, then paywalled core features. BBB rating collapsed to <strong class="text-text">1.03 out of 5</strong>. FreshBooks locks your data when you cancel. An invoice is structured text rendered as a PDF.
+			</p>
+			<a href="/why/invoice" class="text-sm font-medium text-accent hover:text-accent-hover">Read the full investigation &rarr;</a>
+		</div>
 	</section>
 
 	<section class="mb-12">
