@@ -13,7 +13,6 @@
 		{ name: 'Batch generation', nah: true, qrpro: false, qrtiger: false, flowcode: false, uniqode: false, qrproNote: 'Paid plans', qrtigerNote: 'Paid plans', flowcodeNote: 'Enterprise', uniqodeNote: 'Paid plans' },
 		{ name: 'No ads or watermarks', nah: true, qrpro: false, qrtiger: false, flowcode: true, uniqode: true, qrproNote: 'Paid only', qrtigerNote: 'Paid only' },
 		{ name: 'Open source', nah: true, qrpro: false, qrtiger: false, flowcode: false, uniqode: false },
-		{ name: 'Works offline', nah: true, qrpro: false, qrtiger: false, flowcode: false, uniqode: false },
 		{ name: 'Privacy-first (client-side)', nah: true, qrpro: false, qrtiger: false, flowcode: false, uniqode: false, qrproNote: 'Server-side', qrtigerNote: 'Server-side', flowcodeNote: 'Server-side', uniqodeNote: 'Server-side' },
 		{ name: 'No cookies', nah: true, qrpro: false, qrtiger: false, flowcode: false, uniqode: false },
 	];
@@ -194,7 +193,7 @@
 			</p>
 			<p class="leading-relaxed text-text-muted">
 				If you'd like to support the project, you can star the
-				<a href="https://github.com/tannerbroberts/nah-tools" class="text-accent underline hover:text-accent-hover">GitHub repo</a>
+				<a href="https://github.com/vrennat/nah-tools" class="text-accent underline hover:text-accent-hover">GitHub repo</a>
 				or share it with someone who needs a QR code.
 			</p>
 		</div>

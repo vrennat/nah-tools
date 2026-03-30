@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What is this
 
-nah.tools — a free, open-source QR code generator. Static QR codes (URL, text, WiFi, vCard, email, phone, SMS) are generated client-side with full style customization. Dynamic QR codes use a redirect service (`go.nah.tools/{code}` -> destination URL) backed by Cloudflare D1, passphrase-protected and editable.
+nah.tools — free, open-source browser tools that replace predatory SaaS. Tools include: QR code generator (static + dynamic), PDF tools (merge, split, compress, rotate, watermark, etc.), photo tools (compress, filters, background removal), link shortener with analytics, resume builder with ATS analysis, and data broker removal. Most tools run entirely client-side. Dynamic features (short links, dynamic QR redirects) use Cloudflare Workers + D1, passphrase-protected and editable.
 
 ## Commands
 

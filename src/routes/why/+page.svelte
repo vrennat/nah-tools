@@ -251,7 +251,7 @@
 		<p class="mb-4 leading-relaxed text-text-muted">
 			There are no ads, no tracking cookies, no email collection, and no analytics beyond basic
 			redirect counts for dynamic codes. The source code is
-			<a href="https://github.com/tannerbroberts/nah-tools" class="text-accent underline hover:text-accent-hover">public on GitHub</a>.
+			<a href="https://github.com/vrennat/nah-tools" class="text-accent underline hover:text-accent-hover">public on GitHub</a>.
 			You can read every line, verify every claim, and self-host the entire thing if you want to.
 		</p>
 		<p class="mb-4 leading-relaxed text-text-muted">
