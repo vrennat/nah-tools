@@ -5,7 +5,7 @@
 
 <article class="mx-auto max-w-3xl space-y-8">
 	<header class="space-y-2">
-		<h1 class="text-3xl font-bold tracking-tight sm:text-4xl">Terms of Service</h1>
+		<h1 class="font-display text-3xl font-800 tracking-tight sm:text-4xl">Terms of Service</h1>
 		<p class="text-sm text-text-muted">Last updated: March 2026</p>
 	</header>
 

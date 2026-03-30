@@ -9,7 +9,7 @@
 <article class="mx-auto max-w-3xl py-8">
 	<header class="mb-12">
 		<p class="mb-4 text-sm font-medium uppercase tracking-wider text-accent">Investigation</p>
-		<h1 class="text-4xl font-bold leading-tight tracking-tight text-text sm:text-5xl">
+		<h1 class="font-display text-4xl font-800 leading-tight tracking-tight text-text sm:text-5xl md:text-6xl">
 			The QR Code Shakedown
 		</h1>
 		<p class="mt-4 text-xl text-text-muted">
@@ -41,7 +41,7 @@
 	</section>
 
 	<section class="mb-12">
-		<h2 class="mb-4 mt-12 text-2xl font-bold text-text">
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">
 			Why did my QR code stop working?
 		</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
@@ -94,7 +94,7 @@
 	</section>
 
 	<section class="mb-12">
-		<h2 class="mb-4 mt-12 text-2xl font-bold text-text">
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">
 			How much do QR code generators actually charge?
 		</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
@@ -158,7 +158,7 @@
 	</section>
 
 	<section class="mb-12">
-		<h2 class="mb-4 mt-12 text-2xl font-bold text-text">
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">
 			Who gets hurt
 		</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
@@ -194,7 +194,7 @@
 	</section>
 
 	<section class="mb-12">
-		<h2 class="mb-4 mt-12 text-2xl font-bold text-text">
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">
 			Why this keeps working
 		</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
@@ -223,7 +223,7 @@
 	</section>
 
 	<section class="mb-12">
-		<h2 class="mb-4 mt-12 text-2xl font-bold text-text">
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">
 			The free alternative
 		</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
@@ -262,7 +262,7 @@
 	</section>
 
 	<section class="mb-12">
-		<h2 class="mb-4 mt-12 text-2xl font-bold text-text">
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">
 			How do I make a QR code that never expires?
 		</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">

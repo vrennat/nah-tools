@@ -119,7 +119,7 @@
 <div class="mx-auto max-w-3xl space-y-6">
 	<!-- Header -->
 	<div class="text-center">
-		<h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
+		<h1 class="font-display text-3xl font-800 tracking-tight sm:text-4xl md:text-5xl">
 			Remove <span class="text-accent">Background</span>
 		</h1>
 		<p class="mt-2 text-text-muted">

@@ -38,7 +38,7 @@
 
 <div class="space-y-16 py-8">
 	<section class="text-center">
-		<h1 class="text-4xl font-bold tracking-tight text-text sm:text-5xl">
+		<h1 class="font-display text-4xl font-800 tracking-tight text-text sm:text-5xl md:text-6xl">
 			Compare QR Code Generators
 		</h1>
 		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">

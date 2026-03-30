@@ -1,23 +1,11 @@
-<script lang="ts">
-	import ThemeToggle from '$components/ThemeToggle.svelte';
-</script>
-
 <svelte:head>
 	<title>Nah Tools — Free, Open-Source Utilities</title>
 	<meta name="description" content="Free, open-source developer and utility tools. No signup, no tracking, no catch." />
 </svelte:head>
 
 <div class="relative">
-	<!-- Top bar: brand + theme toggle -->
-	<div class="animate-fade-up flex items-center justify-between" style="animation-delay: 0ms;">
-		<span class="font-display text-xl font-700 tracking-tight text-brand">
-			nah<span class="text-accent">.tools</span>
-		</span>
-		<ThemeToggle />
-	</div>
-
 	<!-- Hero -->
-	<section class="relative flex flex-col items-center pt-12 pb-16 sm:pt-20 sm:pb-24">
+	<section class="relative flex flex-col items-center pt-8 pb-16 sm:pt-16 sm:pb-24">
 		<p
 			class="animate-fade-up font-mono text-xs tracking-widest text-text-muted uppercase sm:text-sm"
 			style="animation-delay: 60ms;"

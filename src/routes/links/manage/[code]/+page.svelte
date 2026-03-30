@@ -208,7 +208,7 @@
 
 <div class="mx-auto max-w-2xl space-y-8">
 	<section class="text-center">
-		<h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
+		<h1 class="font-display text-3xl font-800 tracking-tight sm:text-4xl">
 			Manage <span class="text-accent">Link</span>
 		</h1>
 		<p class="mt-1 font-mono text-sm text-text-muted">{data.code}</p>
