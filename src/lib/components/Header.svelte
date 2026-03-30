@@ -5,6 +5,8 @@
 	let pathname = $derived(page.url.pathname as string);
 	let toolsOpen = $state(false);
 	let mobileOpen = $state(false);
+	let focusedIndex = $state(-1);
+	let menuRef: HTMLDivElement | undefined = $state(undefined);
 
 	const topLinks = [
 		{ href: '/pdf', label: 'PDF', match: (p: string) => p.startsWith('/pdf') },
@@ -24,10 +26,58 @@
 
 	function closeDropdown() {
 		toolsOpen = false;
+		focusedIndex = -1;
+	}
+
+	function focusMenuItem(index: number) {
+		if (!menuRef) return;
+		const items = menuRef.querySelectorAll<HTMLElement>('[role="menuitem"]');
+		if (items[index]) {
+			focusedIndex = index;
+			items[index].focus();
+		}
 	}
 
 	function handleToolsKey(e: KeyboardEvent) {
-		if (e.key === 'Escape') closeDropdown();
+		if (e.key === 'Escape') {
+			closeDropdown();
+			return;
+		}
+		if (!toolsOpen && (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ')) {
+			e.preventDefault();
+			toolsOpen = true;
+			// Focus first item on next tick after menu renders
+			requestAnimationFrame(() => focusMenuItem(0));
+			return;
+		}
+	}
+
+	function handleMenuKey(e: KeyboardEvent) {
+		const len = toolsDropdown.length;
+		switch (e.key) {
+			case 'ArrowDown':
+				e.preventDefault();
+				focusMenuItem((focusedIndex + 1) % len);
+				break;
+			case 'ArrowUp':
+				e.preventDefault();
+				focusMenuItem((focusedIndex - 1 + len) % len);
+				break;
+			case 'Home':
+				e.preventDefault();
+				focusMenuItem(0);
+				break;
+			case 'End':
+				e.preventDefault();
+				focusMenuItem(len - 1);
+				break;
+			case 'Escape':
+				closeDropdown();
+				break;
+			case 'Tab':
+				closeDropdown();
+				break;
+		}
 	}
 </script>
 
@@ -72,16 +122,18 @@
 					{#if toolsOpen}
 						<!-- svelte-ignore a11y_interactive_supports_focus -->
 						<div
+							bind:this={menuRef}
 							class="absolute right-0 top-full z-50 mt-3 w-72 rounded-xl border border-border bg-surface p-2 shadow-lg"
 							onclick={(e: MouseEvent) => e.stopPropagation()}
-							onkeydown={(e: KeyboardEvent) => { if (e.key === 'Escape') closeDropdown(); }}
+							onkeydown={handleMenuKey}
 							role="menu"
 						>
-							{#each toolsDropdown as tool}
+							{#each toolsDropdown as tool, i}
 								<a
 									href={tool.href}
-									class="block rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-alt"
+									class="block rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-alt {focusedIndex === i ? 'bg-surface-alt' : ''}"
 									role="menuitem"
+									tabindex="-1"
 									onclick={closeDropdown}
 								>
 									<div class="text-sm font-medium text-text">{tool.label}</div>
@@ -116,7 +168,7 @@
 
 			<!-- Mobile hamburger -->
 			<button
-				class="flex items-center sm:hidden"
+				class="flex items-center p-2 sm:hidden"
 				onclick={(e: MouseEvent) => { e.stopPropagation(); mobileOpen = !mobileOpen; }}
 				aria-label="Menu"
 				aria-expanded={mobileOpen}

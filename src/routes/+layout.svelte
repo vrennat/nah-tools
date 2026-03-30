@@ -21,9 +21,13 @@
 	})}</script>`}
 </svelte:head>
 
+<a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-lg focus:bg-accent focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white focus:shadow-lg">
+	Skip to content
+</a>
+
 <div class="flex min-h-screen flex-col">
 	<Header />
-	<main class="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 sm:px-6 lg:px-8">
+	<main id="main-content" class="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 sm:px-6 lg:px-8">
 		{@render children()}
 	</main>
 	<Footer />

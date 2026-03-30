@@ -19,6 +19,8 @@
 	--font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
 	--font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
 	--font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+	--shadow-card-hover: 0 8px 30px -8px color-mix(in srgb, var(--color-accent) 15%, transparent);
 }
 
 body {

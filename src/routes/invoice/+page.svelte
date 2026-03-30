@@ -107,7 +107,7 @@
 	<!-- Header -->
 	<section class="text-center">
 		<h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
-			Free Invoice Generator. <span class="text-accent">No catch.</span>
+			Invoices. <span class="text-accent">No signup.</span>
 		</h1>
 		<p class="mx-auto mt-2 max-w-2xl text-text-muted">
 			Create professional invoices, estimates, and receipts — everything stays in your browser.
