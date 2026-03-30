@@ -11,14 +11,16 @@
 		userInfo,
 		progress,
 		onStatusChange,
+		initialExpanded = false,
 	}: {
 		broker: Broker;
 		userInfo: UserInfo;
 		progress: ProgressEntry | undefined;
 		onStatusChange: (brokerId: string, status: RemovalStatus) => void;
+		initialExpanded?: boolean;
 	} = $props();
 
-	let expanded = $state(false);
+	let expanded = $state(initialExpanded);
 	let status = $derived<RemovalStatus>(progress?.status ?? 'not-started');
 
 	let hasEmail = $derived(

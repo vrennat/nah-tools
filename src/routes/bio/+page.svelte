@@ -9,6 +9,7 @@
 <script lang="ts">
 	import { debounce } from '$utils/debounce';
 	import { themes } from '$bio/themes';
+	import BioPreview from '$components/bio/BioPreview.svelte';
 
 	let handle = $state('');
 	let displayName = $state('');
@@ -151,7 +152,7 @@
 	}
 </script>
 
-<div class="mx-auto max-w-2xl space-y-8 py-8">
+<div class="mx-auto max-w-5xl space-y-8 py-8">
 	<!-- Hero -->
 	<section class="text-center">
 		<h1
@@ -224,11 +225,11 @@
 			</div>
 		</div>
 	{:else}
-		<!-- Creation form -->
+		<!-- Creation form + preview -->
+		<div class="animate-fade-up grid gap-8 lg:grid-cols-[1fr,20rem]" style="animation-delay: 200ms;">
 		<form
 			onsubmit={handleSubmit}
-			class="animate-fade-up space-y-6"
-			style="animation-delay: 200ms;"
+			class="space-y-6"
 		>
 			<!-- Handle -->
 			<div class="rounded-xl border border-border bg-surface p-6 shadow-sm space-y-4">
@@ -268,6 +269,7 @@
 						type="text"
 						bind:value={displayName}
 						required
+						autocomplete="name"
 						placeholder="Your Name"
 						class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
 					/>
@@ -408,5 +410,19 @@
 				{/if}
 			</button>
 		</form>
+
+		<!-- Live preview -->
+		<div class="hidden lg:block">
+			<div class="sticky top-8">
+				<BioPreview
+					{displayName}
+					{bio}
+					{avatarUrl}
+					themeId={selectedTheme}
+					{links}
+				/>
+			</div>
+		</div>
+		</div>
 	{/if}
 </div>

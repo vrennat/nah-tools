@@ -190,48 +190,48 @@
 	<div class="grid gap-3 sm:grid-cols-2">
 		<div class="sm:col-span-2">
 			<label for="sender-name" class="mb-1 block text-xs font-medium text-text-muted">Business / Name</label>
-			<input id="sender-name" type="text" bind:value={sender.name}
+			<input id="sender-name" type="text" autocomplete="organization" bind:value={sender.name}
 				class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
 				placeholder="Your business name" />
 		</div>
 		<div>
 			<label for="sender-email" class="mb-1 block text-xs font-medium text-text-muted">Email</label>
-			<input id="sender-email" type="email" bind:value={sender.email}
+			<input id="sender-email" type="email" autocomplete="email" bind:value={sender.email}
 				class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
 				placeholder="you@example.com" />
 		</div>
 		<div>
 			<label for="sender-phone" class="mb-1 block text-xs font-medium text-text-muted">Phone</label>
-			<input id="sender-phone" type="tel" bind:value={sender.phone}
+			<input id="sender-phone" type="tel" autocomplete="tel" bind:value={sender.phone}
 				class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
 				placeholder="+1 (555) 000-0000" />
 		</div>
 		<div class="sm:col-span-2">
 			<label for="sender-address" class="mb-1 block text-xs font-medium text-text-muted">Address</label>
-			<input id="sender-address" type="text" bind:value={sender.address}
+			<input id="sender-address" type="text" autocomplete="street-address" bind:value={sender.address}
 				class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
 				placeholder="123 Main St" />
 		</div>
 		<div>
 			<label for="sender-city" class="mb-1 block text-xs font-medium text-text-muted">City</label>
-			<input id="sender-city" type="text" bind:value={sender.city}
+			<input id="sender-city" type="text" autocomplete="address-level2" bind:value={sender.city}
 				class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" />
 		</div>
 		<div class="grid grid-cols-2 gap-3">
 			<div>
 				<label for="sender-state" class="mb-1 block text-xs font-medium text-text-muted">State</label>
-				<input id="sender-state" type="text" bind:value={sender.state}
+				<input id="sender-state" type="text" autocomplete="address-level1" bind:value={sender.state}
 					class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" />
 			</div>
 			<div>
 				<label for="sender-zip" class="mb-1 block text-xs font-medium text-text-muted">Postal Code</label>
-				<input id="sender-zip" type="text" bind:value={sender.postalCode}
+				<input id="sender-zip" type="text" autocomplete="postal-code" bind:value={sender.postalCode}
 					class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" />
 			</div>
 		</div>
 		<div>
 			<label for="sender-country" class="mb-1 block text-xs font-medium text-text-muted">Country</label>
-			<input id="sender-country" type="text" bind:value={sender.country}
+			<input id="sender-country" type="text" autocomplete="country-name" bind:value={sender.country}
 				class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent" />
 		</div>
 		<div>
@@ -242,7 +242,7 @@
 		</div>
 		<div class="sm:col-span-2">
 			<label for="sender-website" class="mb-1 block text-xs font-medium text-text-muted">Website</label>
-			<input id="sender-website" type="url" bind:value={sender.website}
+			<input id="sender-website" type="url" autocomplete="url" bind:value={sender.website}
 				class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
 				placeholder="https://yoursite.com" />
 		</div>

@@ -16,6 +16,7 @@
 		<input
 			id="phone"
 			type="tel"
+			autocomplete="tel"
 			bind:value={phone}
 			placeholder="+1 (555) 123-4567"
 			class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"

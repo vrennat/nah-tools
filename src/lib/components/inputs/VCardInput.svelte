@@ -30,6 +30,7 @@
 		<input
 			id="firstName"
 			type="text"
+			autocomplete="given-name"
 			bind:value={firstName}
 			placeholder="John"
 			required
@@ -42,6 +43,7 @@
 		<input
 			id="lastName"
 			type="text"
+			autocomplete="family-name"
 			bind:value={lastName}
 			placeholder="Doe"
 			required
@@ -54,6 +56,7 @@
 		<input
 			id="vcard-phone"
 			type="tel"
+			autocomplete="tel"
 			bind:value={phone}
 			placeholder="+1 (555) 123-4567"
 			class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
@@ -65,6 +68,7 @@
 		<input
 			id="vcard-email"
 			type="email"
+			autocomplete="email"
 			bind:value={email}
 			placeholder="john@example.com"
 			class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
@@ -76,6 +80,7 @@
 		<input
 			id="org"
 			type="text"
+			autocomplete="organization"
 			bind:value={org}
 			placeholder="Acme Inc."
 			class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
@@ -87,6 +92,7 @@
 		<input
 			id="title"
 			type="text"
+			autocomplete="organization-title"
 			bind:value={title}
 			placeholder="Software Engineer"
 			class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
@@ -98,6 +104,7 @@
 		<input
 			id="vcard-url"
 			type="url"
+			autocomplete="url"
 			bind:value={url}
 			placeholder="https://example.com"
 			class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"

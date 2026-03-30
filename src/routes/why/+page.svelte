@@ -165,6 +165,35 @@
 	<section class="mb-12">
 		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">Help make this work</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">nah has no marketing budget, no ads, no VC money. It grows when people share it.</p>
+
+		<div class="mb-6 flex flex-wrap gap-3">
+			<button
+				onclick={() => {
+					navigator.clipboard.writeText('https://nah.tools');
+					const btn = document.getElementById('copy-link-btn');
+					if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy link'; }, 2000); }
+				}}
+				id="copy-link-btn"
+				class="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text transition-colors hover:border-accent hover:text-accent"
+			>
+				<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+				</svg>
+				Copy link
+			</button>
+			<a
+				href="https://twitter.com/intent/tweet?text=Found%20this%20%E2%80%94%20free%2C%20open-source%20tools%20that%20replace%20predatory%20SaaS.%20QR%20codes%2C%20PDFs%2C%20resumes%2C%20background%20removal.%20No%20signup%2C%20no%20tracking%2C%20no%20catch.&url=https%3A%2F%2Fnah.tools"
+				target="_blank"
+				rel="noopener noreferrer"
+				class="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text transition-colors hover:border-accent hover:text-accent"
+			>
+				<svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+					<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+				</svg>
+				Share on X
+			</a>
+		</div>
+
 		<ul class="mb-4 list-disc space-y-3 pl-6 text-text-muted">
 			<li class="leading-relaxed"><strong class="text-text">Share the link.</strong> Send <a href="/" class="text-accent underline hover:text-accent-hover">nah.tools</a> to someone who needs a QR code, a PDF merge, or a resume.</li>
 			<li class="leading-relaxed"><strong class="text-text">Star the <a href="https://github.com/vrennat/nah-tools" class="text-accent underline hover:text-accent-hover">GitHub repo</a>.</strong> It helps with discoverability.</li>

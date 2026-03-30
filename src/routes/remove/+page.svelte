@@ -109,13 +109,15 @@
 	<BrokerFilterBar bind:filters bind:sort />
 
 	<!-- Broker list -->
+	<p class="text-sm text-text-muted">Click any broker below to expand it and start the removal process.</p>
 	<div class="space-y-3">
-		{#each filteredBrokers as broker (broker.id)}
+		{#each filteredBrokers as broker, i (broker.id)}
 			<BrokerCard
 				{broker}
 				{userInfo}
 				progress={progress[broker.id]}
 				onStatusChange={handleStatusChange}
+				initialExpanded={i === 0}
 			/>
 		{/each}
 
