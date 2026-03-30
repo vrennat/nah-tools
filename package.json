@@ -35,9 +35,12 @@
 	"dependencies": {
 		"@cantoo/pdf-lib": "^2.6.5",
 		"bcryptjs": "^2.4.3",
+		"comlink": "^4.4.2",
 		"jspdf": "^2.5.2",
 		"jszip": "^3.10.1",
+		"onnxruntime-web": "^1.24.3",
 		"pdfjs-dist": "^5.6.205",
+		"pica": "^9.0.1",
 		"qr-code-styling": "^1.8.4"
 	}
 }

@@ -15,6 +15,7 @@
 		{ href: '/qr', label: 'QR Generator', match: (p: string) => p.startsWith('/qr') },
 		{ href: '/pdf', label: 'PDF Tools', match: (p: string) => p.startsWith('/pdf') },
 		{ href: '/links', label: 'Links', match: (p: string) => p.startsWith('/links') },
+		{ href: '/photo', label: 'Photo', match: (p: string) => p.startsWith('/photo') },
 		{ href: '/why', label: 'Why Free?', match: (p: string) => p === '/why' },
 		{ href: '/compare', label: 'Compare', match: (p: string) => p === '/compare' }
 	];
