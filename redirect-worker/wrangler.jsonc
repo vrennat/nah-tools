@@ -1,0 +1,20 @@
+{
+	"$schema": "../node_modules/wrangler/config-schema.json",
+	"name": "nah-tools-redirect",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-03-29",
+	"compatibility_flags": ["nodejs_compat"],
+	"routes": [
+		{
+			"pattern": "go.nah.tools/*",
+			"zone_name": "nah.tools"
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "nah-tools-db",
+			"database_id": "TODO_REPLACE_WITH_D1_DATABASE_ID"
+		}
+	]
+}
