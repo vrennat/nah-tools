@@ -156,6 +156,6 @@ Run these through Cloudflare Registrar:
 
 Suite-ready: nah.tools/qr, nah.tools/resize, nah.tools/compress — whatever comes next just slots in.
 
-Brand line: **"Nah Tools — the stuff that should be free, is."**
+Brand line: **"nah — the stuff that should be free, is."**
 
 Dynamic code redirect subdomain: **go.nah.tools**

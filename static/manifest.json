@@ -1,6 +1,6 @@
 {
-	"name": "Nah Tools",
-	"short_name": "Nah Tools",
+	"name": "nah",
+	"short_name": "nah",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#ffffff",

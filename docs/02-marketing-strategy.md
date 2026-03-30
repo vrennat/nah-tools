@@ -16,7 +16,7 @@ Every piece of content follows this three-beat structure:
 
 2. **The explanation**: "Here's how the scam works technically: static QR codes encode data directly and can never expire. Dynamic QR codes route through their server, which they can shut off. Every predatory company creates dynamic codes by default without telling you a static code would work forever for free."
 
-3. **The alternative**: "So we built Nah Tools (nah.tools). It's free, open-source, runs in your browser, and your QR codes will never expire. Here's the link."
+3. **The alternative**: "So we built nah (nah.tools). It's free, open-source, runs in your browser, and your QR codes will never expire. Here's the link."
 
 This structure works on every platform, at every length — a 3,000-word article, a 280-character tweet, a 60-second TikTok, a Reddit comment.
 
@@ -31,13 +31,13 @@ This structure works on every platform, at every length — a 3,000-word article
 - [ ] Product Hunt listing is drafted (can schedule in advance)
 - [ ] Screenshots and OG images are created for social sharing
 - [ ] Identify 5–10 Reddit threads with active QR code complaints to comment on
-- [ ] Draft HN submission title and first comment (e.g., "Show HN: Nah Tools – Free, open-source QR codes. No signup, no expiration")
+- [ ] Draft HN submission title and first comment (e.g., "Show HN: nah – Free, open-source QR codes. No signup, no expiration")
 - [ ] Prep a Twitter/X thread version of the exposé (10–15 tweets)
 
 ### Day 1 — Tuesday (Best HN/PH launch day)
 **Morning (6–8 AM PT):**
 - [ ] Product Hunt goes live at 12:01 AM PT
-- [ ] Submit to Hacker News: `Show HN: Nah Tools – Free, open-source QR codes. No signup, no expiration` or the exposé angle
+- [ ] Submit to Hacker News: `Show HN: nah – Free, open-source QR codes. No signup, no expiration` or the exposé angle
 - [ ] Post Twitter/X thread
 - [ ] Post to r/opensource with the open-source angle
 

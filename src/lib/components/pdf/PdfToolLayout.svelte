@@ -14,9 +14,9 @@
 
 <div class="space-y-8">
 	<section class="text-center">
-		<h1 class="font-display text-3xl font-800 tracking-tight sm:text-4xl md:text-5xl">{title}</h1>
-		<p class="mx-auto mt-3 max-w-2xl text-text-muted">{description}</p>
-		<p class="mt-2 text-xs text-text-muted">
+		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">{title}</h1>
+		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">{description}</p>
+		<p class="mt-4 text-sm text-text-muted">
 			<svg
 				class="mr-1 inline-block h-3.5 w-3.5"
 				fill="none"

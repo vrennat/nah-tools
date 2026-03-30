@@ -1,10 +1,10 @@
-# Nah Tools — Free, Open-Source QR Code Generator
+# nah — Free, Open-Source QR Code Generator
 
 **Create QR codes for free. No signup. No expiration. No catch.**
 
-Nah Tools ([nah.tools](https://nah.tools)) is a free, open-source QR code generator that runs entirely in your browser. Generate static QR codes for URLs, WiFi, vCards, email, phone, SMS, and plain text — with full visual customization, high-res exports, and zero tracking. Your data never touches our server.
+nah ([nah.tools](https://nah.tools)) is a free, open-source QR code generator that runs entirely in your browser. Generate static QR codes for URLs, WiFi, vCards, email, phone, SMS, and plain text — with full visual customization, high-res exports, and zero tracking. Your data never touches our server.
 
-Need a QR code that you can update after printing? Nah Tools also offers free dynamic QR codes with scan counting — no account required, no expiration, managed by passphrase.
+Need a QR code that you can update after printing? nah also offers free dynamic QR codes with scan counting — no account required, no expiration, managed by passphrase.
 
 ## Why This Exists
 
@@ -31,7 +31,7 @@ The QR code generator industry charges $120–564/year for something that takes 
 
 ## How We Compare
 
-| Feature | Nah Tools | QR Code Generator Pro | QR Tiger | Flowcode |
+| Feature | nah | QR Code Generator Pro | QR Tiger | Flowcode |
 |---------|-----------|----------------------|----------|----------|
 | Price | **Free** | $120–564/yr | $84–444/yr | $60–3,000/yr |
 | Signup required | No | Yes | Yes | Yes |

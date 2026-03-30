@@ -75,7 +75,7 @@
 </script>
 
 <svelte:head>
-	<title>Remove PDF Pages Online Free | Nah Tools</title>
+	<title>Remove PDF Pages Online Free | nah</title>
 	<meta
 		name="description"
 		content="Remove pages from a PDF. Click to select pages for deletion. Free, no upload — processed in your browser."

@@ -93,7 +93,7 @@
 </script>
 
 <svelte:head>
-	<title>Split PDF Online Free — Extract Pages | Nah Tools</title>
+	<title>Split PDF Online Free — Extract Pages | nah</title>
 	<meta
 		name="description"
 		content="Split PDF files into separate documents. Extract page ranges or individual pages. Free, no upload — processed in your browser."

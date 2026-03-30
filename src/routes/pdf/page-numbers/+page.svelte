@@ -43,7 +43,7 @@
 </script>
 
 <svelte:head>
-	<title>Add Page Numbers to PDF Online Free | Nah Tools</title>
+	<title>Add Page Numbers to PDF Online Free | nah</title>
 	<meta
 		name="description"
 		content="Add page numbers to your PDF. Choose position, format, and starting number. Free, no upload — processed in your browser."

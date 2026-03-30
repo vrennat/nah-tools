@@ -1,4 +1,4 @@
--- Nah Tools — Dynamic QR Code Redirects
+-- nah — Dynamic QR Code Redirects
 -- D1 (SQLite) schema
 
 CREATE TABLE IF NOT EXISTS redirects (

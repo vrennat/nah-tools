@@ -7,7 +7,7 @@
 
 This comparison doubles as website content — a version of this table should live on the site at `/compare` or inline on the main page.
 
-| Feature | Nah Tools (Free) | QR Code Generator Pro ($120–564/yr) | QR Tiger ($84–444/yr) | Flowcode ($60–3,000/yr) | Uniqode ($60–588/yr) | QR Code Monkey (Free) |
+| Feature | nah (Free) | QR Code Generator Pro ($120–564/yr) | QR Tiger ($84–444/yr) | Flowcode ($60–3,000/yr) | Uniqode ($60–588/yr) | QR Code Monkey (Free) |
 |---------|-----------|-----------------------------------|-----------------------|------------------------|---------------------|-----------------------|
 | **Static QR codes** | ✅ Unlimited | ✅ | ✅ | ❌ All dynamic | ✅ | ✅ Limited/day |
 | **No signup required** | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ |
@@ -77,12 +77,12 @@ For different contexts, the pitch changes:
 | Context | One-liner |
 |---------|-----------|
 | Product Hunt | "Every QR code feature they charge $564/yr for. Free. Forever. nah.tools" |
-| Hacker News | "Nah Tools — open-source QR code generator. Client-side, no tracking, no signup." |
+| Hacker News | "nah — open-source QR code generator. Client-side, no tracking, no signup." |
 | Reddit (r/smallbusiness) | "Free QR codes for your business. No signup, no expiration, no hidden fees. nah.tools" |
 | Reddit (r/weddingplanning) | "Free QR codes for your invitations that will never expire or stop working. nah.tools" |
 | Twitter/X | "QR Code Generator Pro charges $564/year for something that takes 3 lines of JavaScript. nah.tools — it's free." |
-| LinkedIn | "We built Nah Tools — a free, open-source alternative to $120/year QR code generators. Because the existing tools are predatory." |
-| Elevator pitch | "Nah Tools — free browser tools that replace predatory SaaS. Starting with QR codes." |
+| LinkedIn | "We built nah — a free, open-source alternative to $120/year QR code generators. Because the existing tools are predatory." |
+| Elevator pitch | "nah — free browser tools that replace predatory SaaS. Starting with QR codes." |
 
 ---
 

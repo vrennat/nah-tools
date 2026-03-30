@@ -49,7 +49,7 @@
 </script>
 
 <svelte:head>
-	<title>Remove Your Data from Data Brokers — Nah Tools</title>
+	<title>Remove Your Data from Data Brokers — nah</title>
 	<meta
 		name="description"
 		content="Free, open-source data broker removal tool. Generate opt-out requests and follow step-by-step guides to remove your personal information from 25+ data brokers. 100% client-side."
@@ -57,7 +57,7 @@
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		'@context': 'https://schema.org',
 		'@type': 'SoftwareApplication',
-		name: 'Nah Tools — Data Broker Removal Tool',
+		name: 'nah — Data Broker Removal Tool',
 		url: 'https://nah.tools/remove',
 		description: 'Free, open-source tool to remove your personal information from data brokers. Generates opt-out emails and provides step-by-step removal guides.',
 		applicationCategory: 'UtilityApplication',
@@ -69,7 +69,7 @@
 		},
 		creator: {
 			'@type': 'Organization',
-			name: 'Nah Tools',
+			name: 'nah',
 			url: 'https://nah.tools',
 		},
 	})}</script>`}
@@ -84,7 +84,7 @@
 		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
 			Generate opt-out requests for data brokers. Everything runs in your browser — we never see your information.
 		</p>
-		<div class="mt-3 inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1 text-xs font-medium text-success">
+		<div class="mt-4 inline-flex items-center gap-2 rounded-full bg-success/10 px-4 py-1.5 text-sm font-medium text-success">
 			<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
 			</svg>

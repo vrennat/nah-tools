@@ -72,7 +72,7 @@
 </script>
 
 <svelte:head>
-	<title>Reorder PDF Pages Online Free | Nah Tools</title>
+	<title>Reorder PDF Pages Online Free | nah</title>
 	<meta
 		name="description"
 		content="Rearrange PDF pages by dragging and dropping. Free, no upload — processed in your browser."

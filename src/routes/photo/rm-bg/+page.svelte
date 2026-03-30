@@ -109,7 +109,7 @@
 </script>
 
 <svelte:head>
-	<title>Remove Background — nah.tools</title>
+	<title>Remove Background — nah</title>
 	<meta
 		name="description"
 		content="Remove image backgrounds instantly in your browser. Free, unlimited, full resolution. No upload, no signup, no watermark."
@@ -119,10 +119,10 @@
 <div class="mx-auto max-w-3xl space-y-6">
 	<!-- Header -->
 	<div class="text-center">
-		<h1 class="font-display text-3xl font-800 tracking-tight sm:text-4xl md:text-5xl">
+		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">
 			Remove <span class="text-accent">Background</span>
 		</h1>
-		<p class="mt-2 text-text-muted">
+		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
 			100% in your browser. Images never leave your device.
 		</p>
 	</div>

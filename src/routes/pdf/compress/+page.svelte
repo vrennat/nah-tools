@@ -42,7 +42,7 @@
 </script>
 
 <svelte:head>
-	<title>Compress PDF Online Free | Nah Tools</title>
+	<title>Compress PDF Online Free | nah</title>
 	<meta
 		name="description"
 		content="Reduce PDF file size by stripping metadata and optimizing structure. Free, no upload — processed in your browser."
