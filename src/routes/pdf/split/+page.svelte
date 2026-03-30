@@ -18,9 +18,17 @@
 			pageCount = 0;
 			return;
 		}
-		file.arrayBuffer().then(async (buf) => {
+		const currentFile = file;
+		pageCount = 0;
+		currentFile.arrayBuffer().then(async (buf) => {
+			if (file !== currentFile) return;
 			const { getPageCount } = await import('$pdf/processor');
-			pageCount = await getPageCount(buf);
+			const count = await getPageCount(buf);
+			if (file !== currentFile) return;
+			pageCount = count;
+		}).catch((e) => {
+			if (file !== currentFile) return;
+			error = e instanceof Error ? e.message : 'Failed to read PDF';
 		});
 	});
 

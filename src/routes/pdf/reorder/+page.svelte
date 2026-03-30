@@ -24,17 +24,22 @@
 	});
 
 	async function loadThumbnails() {
+		const currentFile = file!;
 		loading = true;
 		error = '';
 		try {
-			const buf = await file!.arrayBuffer();
+			const buf = await currentFile.arrayBuffer();
+			if (file !== currentFile) return;
 			const { renderThumbnails } = await import('$pdf/renderer');
-			thumbnails = await renderThumbnails(buf);
-			order = thumbnails.map((t) => t.pageIndex);
+			const result = await renderThumbnails(buf);
+			if (file !== currentFile) return;
+			thumbnails = result;
+			order = result.map((t) => t.pageIndex);
 		} catch (e) {
+			if (file !== currentFile) return;
 			error = e instanceof Error ? e.message : 'Failed to load PDF';
 		} finally {
-			loading = false;
+			if (file === currentFile) loading = false;
 		}
 	}
 
