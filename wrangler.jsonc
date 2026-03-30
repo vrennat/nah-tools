@@ -20,5 +20,11 @@
 			"pattern": "nah.tools",
 			"custom_domain": true
 		}
-	]
+	],
+	"observability": {
+		"logs": {
+			"enabled": false,
+			"invocation_logs": true
+		}
+	}
 }
