@@ -26,7 +26,9 @@
 		loading = true;
 		error = null;
 		try {
-			const blob = await generatePDF(resume, template);
+			// JSON round-trip strips Svelte 5 reactive proxies before passing to pdfmake
+			const plainResume = JSON.parse(JSON.stringify(resume));
+			const blob = await generatePDF(plainResume, template);
 			cleanupUrl();
 			currentBlob = blob;
 			blobUrl = URL.createObjectURL(blob);
@@ -54,14 +56,14 @@
 	}
 
 	$effect(() => {
-		// Track resume and template reactively
-		const _resume = JSON.stringify(resume);
-		const _template = template;
+		// Track resume content and template changes
+		const _key = JSON.stringify(resume) + template;
+		void _key;
 
 		clearTimeout(debounceTimer);
 		debounceTimer = setTimeout(() => {
 			regeneratePDF();
-		}, 500);
+		}, 800);
 
 		return () => {
 			clearTimeout(debounceTimer);

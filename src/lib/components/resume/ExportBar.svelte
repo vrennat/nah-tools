@@ -30,7 +30,8 @@
 		pdfLoading = true;
 		error = null;
 		try {
-			const blob = await generatePDF(resume, resume.template);
+			const plain = JSON.parse(JSON.stringify(resume));
+			const blob = await generatePDF(plain, plain.template);
 			triggerDownload(blob, `${fileBaseName()}.pdf`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to generate PDF.';
@@ -43,7 +44,7 @@
 		docxLoading = true;
 		error = null;
 		try {
-			const blob = await exportDOCX(resume);
+			const blob = await exportDOCX(JSON.parse(JSON.stringify(resume)));
 			triggerDownload(blob, `${fileBaseName()}.docx`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to generate DOCX.';

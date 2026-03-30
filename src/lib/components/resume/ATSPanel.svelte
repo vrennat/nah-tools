@@ -32,8 +32,9 @@
 		analyzing = true;
 		error = null;
 		try {
-			matchResult = analyzeJobMatch(resume, jobDescription);
-			atsAnalysis = analyzeATSCompatibility(resume);
+			const plain = JSON.parse(JSON.stringify(resume));
+			matchResult = analyzeJobMatch(plain, jobDescription);
+			atsAnalysis = analyzeATSCompatibility(plain);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Analysis failed.';
 		} finally {

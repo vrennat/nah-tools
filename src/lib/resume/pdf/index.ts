@@ -21,29 +21,27 @@ async function getPdfMake() {
 	const pdfMakeModule = await import('pdfmake/build/pdfmake');
 	const pdfFontsModule = (await import('pdfmake/build/vfs_fonts')) as any;
 	const pdfMake = (pdfMakeModule as any).default || pdfMakeModule;
-	if (pdfFontsModule.pdfMake?.vfs) {
-		pdfMake.vfs = pdfFontsModule.pdfMake.vfs;
-	} else if (pdfFontsModule.default?.pdfMake?.vfs) {
-		pdfMake.vfs = pdfFontsModule.default.pdfMake.vfs;
-	} else if (pdfFontsModule.default) {
-		pdfMake.vfs = pdfFontsModule.default;
+
+	// pdfmake VFS font setup — try all known module shapes
+	const vfs =
+		pdfFontsModule?.pdfMake?.vfs ??
+		pdfFontsModule?.default?.pdfMake?.vfs ??
+		pdfFontsModule?.default ??
+		null;
+
+	if (vfs && typeof vfs === 'object') {
+		pdfMake.vfs = vfs;
 	}
+
 	return pdfMake;
 }
 
 export async function generatePDF(data: ResumeData, template: TemplateId = 'professional'): Promise<Blob> {
 	const pdfMake = await getPdfMake();
 	const docDefinition = buildDocDefinition(data, template);
-
-	return new Promise((resolve, reject) => {
-		try {
-			(pdfMake as any).createPdf(docDefinition).getBlob((blob: Blob) => {
-				resolve(blob);
-			});
-		} catch (err) {
-			reject(err);
-		}
-	});
+	const pdf = (pdfMake as any).createPdf(docDefinition);
+	// pdfmake 0.3.x: getBlob() returns a Promise (callback arg is ignored)
+	return await pdf.getBlob();
 }
 
 export function getTemplateMeta(): { id: TemplateId; name: string; description: string }[] {

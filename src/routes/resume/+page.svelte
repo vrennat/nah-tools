@@ -35,17 +35,18 @@
 		loaded = true;
 	}
 
-	// Auto-save with debounce
+	// Auto-save with debounce — track content changes, not metadata
 	$effect(() => {
 		if (!loaded) return;
-		// Access resume to track it
-		const _track = resume.updatedAt;
-		void _track;
+		// Serialize resume to track content changes (this subscribes to all fields)
+		const snapshot = JSON.stringify(resume);
+		void snapshot;
 
 		clearTimeout(saveTimeout);
 		saveTimeout = setTimeout(() => {
-			resume.updatedAt = new Date().toISOString();
-			saveResume(structuredClone(resume));
+			const data = JSON.parse(snapshot) as ResumeData;
+			data.updatedAt = new Date().toISOString();
+			saveResume(data);
 		}, 1000);
 
 		return () => clearTimeout(saveTimeout);
