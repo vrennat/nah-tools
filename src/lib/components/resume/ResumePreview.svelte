@@ -6,6 +6,14 @@
 	let { resume, template = 'professional' }: { resume: ResumeData; template?: TemplateId } =
 		$props();
 
+	let isResumeEmpty = $derived(
+		!resume.personal.fullName.trim() &&
+			!resume.summary.trim() &&
+			resume.experience.length === 0 &&
+			resume.education.length === 0 &&
+			resume.skills.length === 0
+	);
+
 	let activeTab: 'preview' | 'xray' = $state('preview');
 	let pageImages: string[] = $state([]);
 	let xrayText: string = $state('');
@@ -145,7 +153,49 @@
 				<p class="text-sm text-error">{error}</p>
 			</div>
 		{:else if activeTab === 'preview'}
-			{#if pageImages.length > 0}
+			{#if isResumeEmpty}
+				<div class="overflow-auto p-4" style="max-height: 70vh;">
+					<div
+						class="mx-auto aspect-[8.5/11] w-full rounded border border-border bg-white p-8 shadow-sm dark:bg-slate-100"
+					>
+						<!-- Name skeleton -->
+						<div class="mx-auto mb-1 h-6 w-48 rounded bg-slate-200"></div>
+						<!-- Contact info skeleton -->
+						<div class="mx-auto mb-6 h-3 w-72 rounded bg-slate-100"></div>
+
+						<!-- Summary section -->
+						<div class="mb-1 h-3.5 w-20 rounded bg-slate-200"></div>
+						<div class="mb-1 border-b border-slate-200"></div>
+						<div class="mb-1 h-2.5 w-full rounded bg-slate-100"></div>
+						<div class="mb-5 h-2.5 w-4/5 rounded bg-slate-100"></div>
+
+						<!-- Experience section -->
+						<div class="mb-1 h-3.5 w-24 rounded bg-slate-200"></div>
+						<div class="mb-2 border-b border-slate-200"></div>
+						<div class="mb-1 h-3 w-40 rounded bg-slate-100"></div>
+						<div class="mb-2 h-2.5 w-32 rounded bg-slate-50"></div>
+						<div class="mb-1 ml-4 h-2 w-5/6 rounded bg-slate-100"></div>
+						<div class="mb-1 ml-4 h-2 w-4/6 rounded bg-slate-100"></div>
+						<div class="mb-5 ml-4 h-2 w-3/4 rounded bg-slate-100"></div>
+
+						<!-- Education section -->
+						<div class="mb-1 h-3.5 w-22 rounded bg-slate-200"></div>
+						<div class="mb-2 border-b border-slate-200"></div>
+						<div class="mb-1 h-3 w-48 rounded bg-slate-100"></div>
+						<div class="mb-5 h-2.5 w-36 rounded bg-slate-50"></div>
+
+						<!-- Skills section -->
+						<div class="mb-1 h-3.5 w-14 rounded bg-slate-200"></div>
+						<div class="mb-2 border-b border-slate-200"></div>
+						<div class="mb-1 h-2.5 w-64 rounded bg-slate-100"></div>
+						<div class="h-2.5 w-56 rounded bg-slate-100"></div>
+
+						<p class="mt-8 text-center text-xs text-slate-300">
+							Fill in your details to see a live preview
+						</p>
+					</div>
+				</div>
+			{:else if pageImages.length > 0}
 				<div class="space-y-4 overflow-auto p-4" style="max-height: 70vh;">
 					{#each pageImages as src, i}
 						<img

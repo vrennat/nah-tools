@@ -143,74 +143,113 @@ export function createSampleResume(): ResumeData {
 		name: 'Sample Resume',
 		template: 'professional',
 		personal: {
-			fullName: 'Alex Johnson',
-			email: 'alex.johnson@email.com',
-			phone: '(555) 123-4567',
-			location: 'San Francisco, CA',
-			linkedin: 'linkedin.com/in/alexjohnson',
-			website: 'alexjohnson.dev'
+			fullName: 'Jane Doe',
+			email: 'jane.doe@example.com',
+			phone: '(555) 000-1234',
+			location: 'Austin, TX',
+			linkedin: 'linkedin.com/in/example',
+			website: 'example.com'
 		},
 		summary:
-			'Full-stack engineer with 5 years of experience building web applications. Passionate about clean code, accessible interfaces, and shipping products that solve real problems.',
+			'Senior software engineer with 8+ years of experience designing and shipping scalable distributed systems, developer tools, and data pipelines. Track record of leading cross-functional teams, driving architecture decisions, and mentoring engineers. Deeply motivated by developer experience and operational reliability.',
 		experience: [
 			{
 				id: createId(),
-				company: 'Acme Corp',
-				title: 'Senior Software Engineer',
-				location: 'San Francisco, CA',
-				startDate: '2022-03',
+				company: 'Horizon Technologies',
+				title: 'Staff Software Engineer',
+				location: 'Austin, TX',
+				startDate: '2023-01',
 				endDate: 'Present',
 				bullets: [
-					'Led migration from legacy monolith to microservices, reducing deploy times by 70%',
-					'Built real-time analytics dashboard used by 500+ internal users',
-					'Mentored 3 junior engineers through onboarding and first production features'
+					'Architected event-driven ingestion pipeline processing 12M+ events/day with sub-100ms p99 latency, replacing a batch system that ran 6 hours behind',
+					'Led a team of 5 engineers to deliver a self-service feature flagging platform adopted by 40+ internal teams within 3 months of launch',
+					'Reduced infrastructure costs by $180K/year by profiling and right-sizing Kubernetes workloads across 3 production clusters',
+					'Established engineering RFC process and authored 8 design documents that shaped the platform roadmap'
 				]
 			},
 			{
 				id: createId(),
-				company: 'StartupCo',
-				title: 'Software Engineer',
+				company: 'Nimbus Cloud',
+				title: 'Senior Software Engineer',
 				location: 'Remote',
-				startDate: '2019-06',
-				endDate: '2022-02',
+				startDate: '2020-04',
+				endDate: '2022-12',
 				bullets: [
-					'Developed customer-facing API serving 2M+ requests/day with 99.9% uptime',
-					'Implemented CI/CD pipeline that cut release cycle from 2 weeks to daily',
-					'Designed and built onboarding flow that improved trial-to-paid conversion by 25%'
+					'Designed and built a multi-tenant API gateway handling 5M+ requests/day with 99.95% uptime SLA',
+					'Implemented zero-downtime database migration strategy for PostgreSQL clusters serving 200+ microservices',
+					'Created internal CLI tool for service scaffolding that cut new service setup time from 2 days to 15 minutes',
+					'Mentored 6 engineers across two teams, with 3 earning promotions within 18 months'
+				]
+			},
+			{
+				id: createId(),
+				company: 'Greenfield Labs',
+				title: 'Software Engineer',
+				location: 'Denver, CO',
+				startDate: '2017-06',
+				endDate: '2020-03',
+				bullets: [
+					'Built real-time collaboration features for a document editor serving 50K+ daily active users',
+					'Developed CI/CD pipeline with automated canary deployments, reducing production incidents by 40%',
+					'Designed and shipped a notification system processing 1M+ daily messages across email, SMS, and push channels'
 				]
 			}
 		],
 		education: [
 			{
 				id: createId(),
-				institution: 'University of California, Berkeley',
+				institution: 'University of Texas at Austin',
 				degree: 'B.S.',
 				field: 'Computer Science',
-				startDate: '2015-08',
-				endDate: '2019-05',
-				gpa: '3.7',
-				honors: 'Magna Cum Laude'
+				startDate: '2013-08',
+				endDate: '2017-05',
+				gpa: '3.8',
+				honors: 'Summa Cum Laude, Dean\'s List'
 			}
 		],
 		skills: [
 			{
 				id: createId(),
 				name: 'Languages',
-				skills: ['TypeScript', 'Python', 'Go', 'SQL']
+				skills: ['TypeScript', 'Go', 'Python', 'Rust', 'SQL']
 			},
 			{
 				id: createId(),
-				name: 'Frameworks',
-				skills: ['React', 'Node.js', 'Next.js', 'FastAPI']
+				name: 'Frameworks & Libraries',
+				skills: ['React', 'Node.js', 'Next.js', 'FastAPI', 'gRPC']
 			},
 			{
 				id: createId(),
-				name: 'Tools',
-				skills: ['Git', 'Docker', 'AWS', 'PostgreSQL', 'Redis']
+				name: 'Infrastructure',
+				skills: ['AWS', 'Kubernetes', 'Terraform', 'Docker', 'Kafka', 'PostgreSQL', 'Redis']
+			},
+			{
+				id: createId(),
+				name: 'Practices',
+				skills: ['System Design', 'CI/CD', 'Observability', 'Incident Response', 'Technical Writing']
 			}
 		],
-		projects: [],
-		certifications: [],
+		projects: [
+			{
+				id: createId(),
+				name: 'OpenTrace',
+				description: 'Open-source distributed tracing toolkit for Node.js microservices. 2.4K GitHub stars.',
+				url: 'github.com/example/opentrace',
+				bullets: [
+					'Automatic instrumentation for Express, Fastify, and gRPC with zero config',
+					'Adopted by 3 companies in production after a conference talk at NodeConf'
+				]
+			}
+		],
+		certifications: [
+			{
+				id: createId(),
+				name: 'AWS Solutions Architect - Professional',
+				issuer: 'Amazon Web Services',
+				date: '2023-06',
+				url: ''
+			}
+		],
 		customSections: [],
 		createdAt: now,
 		updatedAt: now
