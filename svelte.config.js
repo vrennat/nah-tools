@@ -15,6 +15,8 @@ const config = {
 		alias: {
 			$components: 'src/lib/components',
 			$photo: 'src/lib/photo',
+			$compress: 'src/lib/compress',
+			$filters: 'src/lib/filters',
 			$qr: 'src/lib/qr',
 			$pdf: 'src/lib/pdf',
 			$remove: 'src/lib/remove',
