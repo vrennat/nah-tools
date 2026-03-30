@@ -72,13 +72,31 @@
 
 	const inputClass =
 		'w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent';
-	const labelClass = 'block text-sm font-medium text-text mb-1';
+	const labelClass = 'block text-sm font-medium text-text mb-0.5';
+	const hintClass = 'block text-xs text-text-muted mb-1';
+
+	const colorSwatches = [
+		'#000000', '#374151', '#1e3a5f', '#1e40af', '#3b82f6',
+		'#7c3aed', '#db2777', '#dc2626', '#ea580c', '#16a34a'
+	];
 </script>
 
 <div class="space-y-6">
 	<div class="grid grid-cols-2 gap-4">
 		<div>
 			<label for="qr-fg" class={labelClass}>Foreground</label>
+			<span class={hintClass}>The color of the QR pattern</span>
+			<div class="mb-1.5 flex flex-wrap gap-1">
+				{#each colorSwatches as swatch}
+					<button
+						type="button"
+						class="h-6 w-6 rounded-md border transition-transform hover:scale-110 {options.foreground === swatch ? 'border-accent ring-1 ring-accent' : 'border-border'}"
+						style="background-color: {swatch}"
+						onclick={() => { options.foreground = swatch; }}
+						aria-label="Set foreground to {swatch}"
+					></button>
+				{/each}
+			</div>
 			<div class="flex gap-2">
 				<input
 					type="color"
@@ -90,6 +108,7 @@
 		</div>
 		<div>
 			<label for="qr-bg" class={labelClass}>Background</label>
+			<span class={hintClass}>Behind the QR pattern</span>
 			<div class="flex gap-2">
 				<input
 					type="color"
@@ -159,6 +178,7 @@
 	<div class="grid grid-cols-2 gap-4">
 		<div>
 			<label for="qr-dot-style" class={labelClass}>Dot style</label>
+			<span class={hintClass}>Shape of the individual data modules</span>
 			<select id="qr-dot-style" bind:value={options.dotStyle} class={inputClass}>
 				{#each dotStyles as { value, label }}
 					<option {value}>{label}</option>
@@ -167,6 +187,7 @@
 		</div>
 		<div>
 			<label for="qr-corner-sq" class={labelClass}>Corner square style</label>
+			<span class={hintClass}>The three large positioning squares</span>
 			<select id="qr-corner-sq" bind:value={options.cornerSquareStyle} class={inputClass}>
 				{#each cornerSquareStyles as { value, label }}
 					<option {value}>{label}</option>
@@ -178,6 +199,7 @@
 	<div class="grid grid-cols-2 gap-4">
 		<div>
 			<label for="qr-corner-dot" class={labelClass}>Corner dot style</label>
+			<span class={hintClass}>The dot inside each corner square</span>
 			<select id="qr-corner-dot" bind:value={options.cornerDotStyle} class={inputClass}>
 				{#each cornerDotStyles as { value, label }}
 					<option {value}>{label}</option>
@@ -186,6 +208,7 @@
 		</div>
 		<div>
 			<label for="qr-ec" class={labelClass}>Error correction</label>
+			<span class={hintClass}>Higher = more scannable if damaged or covered by a logo</span>
 			<select id="qr-ec" bind:value={options.errorCorrection} class={inputClass}>
 				{#each errorLevels as { value, label }}
 					<option {value}>{label}</option>
@@ -196,6 +219,7 @@
 
 	<div>
 		<label for="qr-logo" class={labelClass}>Logo</label>
+		<span class={hintClass}>Centered on the code — use H error correction for best results</span>
 		{#if options.logo}
 			<div class="flex items-center gap-3">
 				<img src={options.logo} alt="Logo preview" class="h-12 w-12 rounded-lg border border-border object-contain" />

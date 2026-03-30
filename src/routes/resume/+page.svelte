@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ResumeData } from '$resume/types';
-	import { createEmptyResume } from '$resume/types';
+	import { createEmptyResume, createSampleResume } from '$resume/types';
 	import { listResumes, getResume, saveResume } from '$resume/storage';
 	import ResumeManager from '$components/resume/ResumeManager.svelte';
 	import ResumeEditor from '$components/resume/ResumeEditor.svelte';
@@ -10,7 +10,7 @@
 	import ATSPanel from '$components/resume/ATSPanel.svelte';
 	import ImportDialog from '$components/resume/ImportDialog.svelte';
 
-	let resume = $state<ResumeData>(createEmptyResume());
+	let resume = $state<ResumeData>(createSampleResume());
 	let activeTab = $state<'editor' | 'preview'>('editor');
 	let saveTimeout: ReturnType<typeof setTimeout> | undefined;
 	let loaded = $state(false);
