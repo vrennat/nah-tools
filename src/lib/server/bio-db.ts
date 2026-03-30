@@ -162,9 +162,10 @@ export async function addBioLink(
 	return result;
 }
 
-/** Update a bio link */
+/** Update a bio link (scoped to handle for ownership safety) */
 export async function updateBioLink(
 	db: D1Database,
+	handle: string,
 	linkId: number,
 	fields: { url?: string; title?: string; icon?: string | null; is_active?: number }
 ): Promise<void> {
@@ -193,14 +194,14 @@ export async function updateBioLink(
 	sets.push("updated_at = datetime('now')");
 
 	await db
-		.prepare(`UPDATE bio_links SET ${sets.join(', ')} WHERE id = ?`)
-		.bind(...values, linkId)
+		.prepare(`UPDATE bio_links SET ${sets.join(', ')} WHERE id = ? AND profile_handle = ?`)
+		.bind(...values, linkId, handle)
 		.run();
 }
 
-/** Delete a bio link */
-export async function deleteBioLink(db: D1Database, linkId: number): Promise<void> {
-	await db.prepare('DELETE FROM bio_links WHERE id = ?').bind(linkId).run();
+/** Delete a bio link (scoped to handle for ownership safety) */
+export async function deleteBioLink(db: D1Database, handle: string, linkId: number): Promise<void> {
+	await db.prepare('DELETE FROM bio_links WHERE id = ? AND profile_handle = ?').bind(linkId, handle).run();
 }
 
 /** Reorder links by setting order_index from an ordered array of IDs */
@@ -227,13 +228,20 @@ export async function getAllBioLinks(db: D1Database, handle: string): Promise<Bi
 
 // --- Click Tracking ---
 
-/** Log a click on a bio link */
+/** Log a click on a bio link (validates link belongs to handle) */
 export async function logBioClick(
 	db: D1Database,
 	handle: string,
 	linkId: number,
 	meta: { country?: string; deviceType?: string; referer?: string }
 ): Promise<void> {
+	// Verify the link belongs to this handle and is active
+	const link = await db
+		.prepare('SELECT 1 FROM bio_links WHERE id = ? AND profile_handle = ? AND is_active = 1')
+		.bind(linkId, handle)
+		.first();
+	if (!link) return; // Silently ignore mismatched or inactive links
+
 	await db
 		.prepare(
 			'INSERT INTO bio_click_logs (profile_handle, link_id, country, device_type, referer) VALUES (?, ?, ?, ?, ?)'
@@ -243,8 +251,8 @@ export async function logBioClick(
 
 	// Also increment the denormalized click_count on the link
 	await db
-		.prepare('UPDATE bio_links SET click_count = click_count + 1 WHERE id = ?')
-		.bind(linkId)
+		.prepare('UPDATE bio_links SET click_count = click_count + 1 WHERE id = ? AND profile_handle = ?')
+		.bind(linkId, handle)
 		.run();
 }
 

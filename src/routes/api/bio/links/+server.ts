@@ -67,7 +67,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		fields.url = normalizedUrl;
 	}
 
-	await updateBioLink(db, link_id, fields);
+	await updateBioLink(db, handle, link_id, fields);
 
 	return json({ success: true });
 };
@@ -88,7 +88,7 @@ export const DELETE: RequestHandler = async ({ request, platform }) => {
 	}
 
 	await authenticateProfile(db, handle, passphrase);
-	await deleteBioLink(db, link_id);
+	await deleteBioLink(db, handle, link_id);
 
 	return json({ success: true });
 };

@@ -57,7 +57,7 @@
 		url: `https://nah.tools/bio/${data.profile.handle}`,
 		...(data.profile.bio ? { description: data.profile.bio } : {}),
 		...(data.profile.avatar_url ? { image: data.profile.avatar_url } : {})
-	})}</script>`}
+	}).replace(/</g, '\\u003c')}</script>`}
 </svelte:head>
 
 <div
