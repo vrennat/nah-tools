@@ -139,17 +139,17 @@
 			</table>
 		</div>
 		<p class="mt-6 leading-relaxed text-text-muted">
-			nah.tools runs on Cloudflare Workers. Total infrastructure cost: <strong class="text-text">$5/month</strong> for up to 10 million dynamic requests. Static tools cost nothing to serve because the computation happens on your device, not ours.
+			nah.tools runs on <a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Cloudflare Workers</a>. Total infrastructure cost: <strong class="text-text">$5/month</strong> for up to 10 million dynamic requests. Static tools cost nothing to serve because the computation happens on your device, not ours.
 		</p>
 	</section>
 
 	<section class="mb-12">
 		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">The rules</h2>
 		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No accounts.</strong> If a tool doesn't need to know who you are, it won't ask.</p>
-		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No tracking.</strong> No cookies, no fingerprinting. Basic Cloudflare analytics that count page views without identifying visitors.</p>
+		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No tracking.</strong> No cookies, no fingerprinting. Basic <a href="https://www.cloudflare.com/web-analytics/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Cloudflare Web Analytics</a> that count page views without identifying visitors.</p>
 		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No ads.</strong> Not now, not later.</p>
 		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No paywall.</strong> Every feature free for every user. No premium tiers, no daily limits, no watermarks.</p>
-		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">Privacy by architecture, not policy.</strong> Static tools run in your browser. There is no server to send your data to. This isn't a promise. It's how the code works.</p>
+		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">Privacy by architecture, not policy.</strong> Static tools run in your browser. There is no server to send your data to. Dynamic features use <a href="https://developers.cloudflare.com/d1/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Cloudflare D1</a> with passphrase-based auth — no accounts, no email collection. This isn't a promise. It's how the code works.</p>
 		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">Open source.</strong> The <a href="https://github.com/vrennat/nah-tools" class="text-accent underline hover:text-accent-hover">full codebase</a> is MIT-licensed. Read every line, verify every claim, self-host the whole thing.</p>
 	</section>
 
