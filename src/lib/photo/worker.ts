@@ -92,6 +92,11 @@ async function loadModel(onProgress?: ProgressCallback): Promise<BackendType> {
 
 	const ort = await import('onnxruntime-web');
 
+	// Fall back to single-threaded WASM if SharedArrayBuffer is unavailable
+	if (typeof SharedArrayBuffer === 'undefined') {
+		ort.env.wasm.numThreads = 1;
+	}
+
 	currentBackend = await detectBackend();
 
 	const modelBuffer = await fetchModelWithCache(DEFAULT_BG_MODEL, onProgress);
