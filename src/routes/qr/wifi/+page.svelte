@@ -33,7 +33,7 @@
 <FAQSchema {faqs} />
 
 <svelte:head>
-	<title>Free WiFi QR Code Generator — Nah Tools</title>
+	<title>Free WiFi QR Code Generator — nah</title>
 	<meta name="description" content="Create a free WiFi QR code so guests can join your network instantly. No signup, no expiration. Enter your network name and password, download, and print." />
 </svelte:head>
 
@@ -95,7 +95,7 @@
 	</section>
 
 	<section class="rounded-xl border border-border bg-surface p-6">
-		<h2 class="text-xl font-bold text-text">Why Use Nah Tools</h2>
+		<h2 class="text-xl font-bold text-text">Why Use nah</h2>
 		<ul class="mt-4 space-y-3 text-text-muted">
 			<li class="flex items-start gap-3">
 				<span class="mt-0.5 text-accent">&bull;</span>

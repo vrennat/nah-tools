@@ -62,7 +62,7 @@
 </script>
 
 <svelte:head>
-	<title>Free Resume Builder — Nah Tools</title>
+	<title>Free Resume Builder — nah</title>
 	<meta
 		name="description"
 		content="Build a professional resume for free. ATS-optimized templates, job description matching, PDF and DOCX export. No signup, no watermarks, no catch."

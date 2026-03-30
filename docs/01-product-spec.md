@@ -1,8 +1,8 @@
-# Product Spec: Nah Tools — QR Code Generator
+# Product Spec: nah — QR Code Generator
 
 ## North Star
 
-**One sentence**: **Nah Tools** (nah.tools) — the internet's most honest QR code generator. Free, open-source, browser-based, with no signup, no expiration, and no catch.
+**One sentence**: **nah** (nah.tools) — the internet's most honest QR code generator. Free, open-source, browser-based, with no signup, no expiration, and no catch.
 
 **The bet**: We can replicate every meaningful feature of tools charging $10–90/month, ship it for $5/month total infrastructure cost, and use an investigative exposé as the distribution engine to reach users the predatory incumbents have already burned.
 
