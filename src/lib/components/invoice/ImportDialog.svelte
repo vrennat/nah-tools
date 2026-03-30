@@ -38,9 +38,11 @@
 
 {#if showDialog}
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick={() => { showDialog = false; }}>
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onclick={() => { showDialog = false; }} role="presentation">
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="mx-4 w-full max-w-sm rounded-xl border border-border bg-surface p-6 shadow-xl" onclick={(e) => e.stopPropagation()}>
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
+		<div class="mx-4 w-full max-w-sm rounded-xl border border-border bg-surface p-6 shadow-xl" onclick={(e) => e.stopPropagation()} role="dialog" tabindex="-1">
 			<h3 class="text-lg font-semibold text-text">Import Invoice</h3>
 			<p class="mt-1 text-sm text-text-muted">Select a JSON file exported from this tool.</p>
 

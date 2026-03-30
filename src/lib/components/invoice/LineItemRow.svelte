@@ -37,7 +37,7 @@
 	<!-- Main row -->
 	<div class="flex items-start gap-2">
 		<!-- Drag handle -->
-		<button type="button" class="mt-2.5 cursor-grab text-text-muted opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing">
+		<button type="button" aria-label="Drag to reorder" class="mt-2.5 cursor-grab text-text-muted opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing">
 			<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
 				<circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
 				<circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
@@ -137,7 +137,7 @@
 		<div class="ml-6 mt-3 grid gap-3 border-t border-border pt-3 sm:grid-cols-3">
 			<!-- Discount -->
 			<div>
-				<label class="mb-1 block text-xs text-text-muted">Discount</label>
+				<span class="mb-1 block text-xs text-text-muted">Discount</span>
 				<div class="flex gap-1">
 					<input
 						type="number"
@@ -158,7 +158,7 @@
 
 			<!-- Tax override -->
 			<div>
-				<label class="mb-1 block text-xs text-text-muted">Tax Rate Override</label>
+				<span class="mb-1 block text-xs text-text-muted">Tax Rate Override</span>
 				<div class="flex items-center gap-2">
 					<input
 						type="number"
@@ -178,7 +178,7 @@
 
 			<!-- Category -->
 			<div>
-				<label class="mb-1 block text-xs text-text-muted">Category</label>
+				<span class="mb-1 block text-xs text-text-muted">Category</span>
 				<select
 					bind:value={item.category}
 					class="w-full rounded-md border border-border bg-surface px-2 py-1 text-xs focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"

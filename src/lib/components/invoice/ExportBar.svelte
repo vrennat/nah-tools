@@ -122,7 +122,8 @@
 			</button>
 			{#if showCSVMenu}
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<div class="fixed inset-0 z-40" onclick={() => { showCSVMenu = false; }}></div>
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<div class="fixed inset-0 z-40" onclick={() => { showCSVMenu = false; }} role="presentation"></div>
 				<div class="absolute left-0 z-50 mt-1 w-44 rounded-lg border border-border bg-surface shadow-lg">
 					<button type="button" onclick={() => downloadCSV('quickbooks')}
 						class="block w-full px-3 py-2 text-left text-sm hover:bg-surface-alt">QuickBooks</button>
@@ -150,7 +151,8 @@
 			</button>
 			{#if showEInvoiceMenu}
 				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<div class="fixed inset-0 z-40" onclick={() => { showEInvoiceMenu = false; }}></div>
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<div class="fixed inset-0 z-40" onclick={() => { showEInvoiceMenu = false; }} role="presentation"></div>
 				<div class="absolute left-0 z-50 mt-1 w-52 rounded-lg border border-border bg-surface shadow-lg">
 					<button type="button" onclick={() => downloadEInvoice('zugferd')}
 						class="block w-full px-3 py-2 text-left text-sm hover:bg-surface-alt">

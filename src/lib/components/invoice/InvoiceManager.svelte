@@ -105,7 +105,8 @@
 
 		{#if showList}
 			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div class="fixed inset-0 z-40" onclick={() => { showList = false; }}></div>
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
+			<div class="fixed inset-0 z-40" onclick={() => { showList = false; }} role="presentation"></div>
 			<div class="absolute left-0 z-50 mt-1 w-80 rounded-lg border border-border bg-surface shadow-lg">
 				<div class="max-h-64 overflow-y-auto">
 					{#each invoices as inv}
@@ -125,6 +126,7 @@
 							<button
 								type="button"
 								class="ml-2 rounded p-1 text-text-muted hover:text-error"
+								aria-label="Delete invoice"
 								onclick={(e) => { e.stopPropagation(); handleDelete(inv.id); }}
 							>
 								<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

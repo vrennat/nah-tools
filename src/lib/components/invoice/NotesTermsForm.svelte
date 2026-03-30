@@ -23,9 +23,10 @@
 <div class="space-y-4">
 	<!-- Document-level discount -->
 	<div>
-		<label class="mb-1 block text-xs font-medium text-text-muted">Document Discount</label>
+		<label for="invoice-discount" class="mb-1 block text-xs font-medium text-text-muted">Document Discount</label>
 		<div class="flex items-center gap-2">
 			<input
+				id="invoice-discount"
 				type="number"
 				bind:value={discountValue}
 				min="0"

@@ -23,7 +23,7 @@
 <div class="space-y-4">
 	<!-- Tax mode -->
 	<div>
-		<label class="mb-2 block text-xs font-medium text-text-muted">Tax Mode</label>
+		<span class="mb-2 block text-xs font-medium text-text-muted">Tax Mode</span>
 		<div class="flex flex-wrap gap-1 rounded-lg bg-surface-alt p-1">
 			{#each modes as mode}
 				<button
@@ -73,6 +73,7 @@
 							type="button"
 							onclick={() => removeTaxLine(idx)}
 							class="rounded p-1 text-text-muted hover:text-error"
+							aria-label="Remove tax line"
 						>
 							<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

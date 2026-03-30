@@ -101,7 +101,8 @@
 				</button>
 				{#if showProfiles}
 					<!-- svelte-ignore a11y_no_static_element_interactions -->
-					<div class="fixed inset-0 z-40" onclick={() => { showProfiles = false; }}></div>
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
+					<div class="fixed inset-0 z-40" onclick={() => { showProfiles = false; }} role="presentation"></div>
 					<div class="absolute left-0 z-50 mt-1 w-56 rounded-lg border border-border bg-surface shadow-lg">
 						{#each profiles as profile}
 							<div class="flex items-center justify-between px-3 py-2 hover:bg-surface-alt">
@@ -162,7 +163,7 @@
 
 	<!-- Logo -->
 	<div>
-		<label class="mb-1 block text-xs font-medium text-text-muted">Logo</label>
+		<span class="mb-1 block text-xs font-medium text-text-muted">Logo</span>
 		{#if logoDataUrl}
 			<div class="flex items-center gap-3">
 				<img src={logoDataUrl} alt="Logo" class="h-12 rounded border border-border object-contain" />
