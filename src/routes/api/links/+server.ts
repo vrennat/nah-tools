@@ -10,6 +10,7 @@ import {
 } from '$server/db';
 import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, validateAlias, verifyTurnstile, checkRateLimit } from '$server/safety';
+import { normalizeUrl } from '$utils/url';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -29,8 +30,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'URL is required');
 	}
 
-	// Auto-prepend https:// if no protocol
-	const normalizedUrl = url.match(/^https?:\/\//i) ? url : `https://${url}`;
+	const normalizedUrl = normalizeUrl(url);
 
 	// Verify Turnstile if configured
 	const turnstileSecret = platform?.env?.TURNSTILE_SECRET_KEY;
@@ -88,9 +88,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 	const displayCode = alias || shortCode;
 
-	const response: { short_code: string; redirect_url: string; manage_url?: string } = {
+	const response: { short_code: string; short_url: string; manage_url?: string } = {
 		short_code: displayCode,
-		redirect_url: `https://go.nah.tools/${displayCode}`
+		short_url: `https://go.nah.tools/${displayCode}`
 	};
 
 	if (passphraseHash) {
@@ -115,7 +115,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'short_code, passphrase, and url are required');
 	}
 
-	const normalizedUrl = url.match(/^https?:\/\//i) ? url : `https://${url}`;
+	const normalizedUrl = normalizeUrl(url);
 
 	// Validate URL safety
 	const safety = await validateUrlSafety(normalizedUrl, db);

@@ -13,7 +13,9 @@
 		"deploy": "bun run build && wrangler deploy",
 		"deploy:redirect": "cd redirect-worker && wrangler deploy",
 		"db:migrate:local": "wrangler d1 execute nah-tools-db --local --file=migrations/0001_create_redirects.sql",
-		"db:migrate:prod": "wrangler d1 execute nah-tools-db --file=migrations/0001_create_redirects.sql"
+		"db:migrate:prod": "wrangler d1 execute nah-tools-db --file=migrations/0001_create_redirects.sql",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20260329.1",
@@ -27,6 +29,7 @@
 		"tailwindcss": "^4.0.0",
 		"typescript": "^5.9.3",
 		"vite": "^7.3.1",
+		"vitest": "^4.1.2",
 		"wrangler": "^4.0.0"
 	},
 	"dependencies": {
