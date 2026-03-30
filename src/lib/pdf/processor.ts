@@ -254,6 +254,9 @@ export async function addWatermark(
 
 	// Parse hex color
 	const hex = config.color.replace('#', '');
+	if (!/^[0-9a-fA-F]{6}$/.test(hex)) {
+		throw new Error(`Invalid hex color: ${config.color}`);
+	}
 	const r = parseInt(hex.slice(0, 2), 16) / 255;
 	const g = parseInt(hex.slice(2, 4), 16) / 255;
 	const b = parseInt(hex.slice(4, 6), 16) / 255;
