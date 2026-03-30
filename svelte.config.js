@@ -18,6 +18,7 @@ const config = {
 			$qr: 'src/lib/qr',
 			$pdf: 'src/lib/pdf',
 			$remove: 'src/lib/remove',
+			$resume: 'src/lib/resume',
 			$server: 'src/lib/server',
 			$utils: 'src/lib/utils'
 		}
