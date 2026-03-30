@@ -37,10 +37,10 @@
 		</h1>
 
 		<p
-			class="animate-fade-up mt-6 max-w-xl text-center text-base leading-relaxed text-text-muted sm:mt-8 sm:text-lg"
+			class="animate-fade-up mt-6 text-center text-lg text-text-muted sm:mt-8 sm:text-xl"
 			style="animation-delay: 200ms;"
 		>
-			Other "free" tools upload your files, limit your usage, then paywall the download. We don't. Everything runs in your browser. Your files never leave your device. It costs us $5/month to run this for everyone. The code is on <a href="https://github.com/vrennat/nah-tools" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent">GitHub</a>.
+			Everything is free. Forever. <a href="/trust" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent">Here's&nbsp;why.</a>
 		</p>
 	</section>
 
