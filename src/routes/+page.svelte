@@ -52,7 +52,7 @@
 	</section>
 
 	<!-- Featured tools -->
-	<section class="grid gap-5 sm:grid-cols-3 mt-2">
+	<section class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4 mt-2">
 		<a
 			href="/pdf"
 			class="animate-fade-up group rounded-2xl border border-border bg-surface-alt p-5 transition-all duration-200 hover:border-accent/50 hover:shadow-card-hover sm:p-7"
@@ -103,10 +103,27 @@
 				</svg>
 			</span>
 		</a>
+
+		<a
+			href="/pptx"
+			class="animate-fade-up group rounded-2xl border border-border bg-surface-alt p-5 transition-all duration-200 hover:border-accent/50 hover:shadow-card-hover sm:p-7"
+			style="animation-delay: 380ms;"
+		>
+			<h2 class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">PowerPoint Tools</h2>
+			<p class="mt-2 text-sm leading-relaxed text-text-muted">
+				Merge, split, compress, extract, watermark. Files never leave your device.
+			</p>
+			<span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-accent">
+				Get started
+				<svg class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+				</svg>
+			</span>
+		</a>
 	</section>
 
 	<!-- More tools -->
-	<section class="animate-fade-up mt-10" style="animation-delay: 380ms;">
+	<section class="animate-fade-up mt-10" style="animation-delay: 440ms;">
 		<p class="mb-4 font-mono text-[clamp(0.5rem,1vw,0.75rem)] tracking-widest text-text-muted uppercase">More tools</p>
 
 		<div class="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
