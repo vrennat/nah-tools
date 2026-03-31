@@ -19,6 +19,7 @@ const config = {
 			$filters: 'src/lib/filters',
 			$qr: 'src/lib/qr',
 			$pdf: 'src/lib/pdf',
+			$pptx: 'src/lib/pptx',
 			$remove: 'src/lib/remove',
 			$resume: 'src/lib/resume',
 			$bio: 'src/lib/bio',
