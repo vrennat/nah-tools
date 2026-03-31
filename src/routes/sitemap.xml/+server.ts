@@ -47,6 +47,7 @@ const routes: { path: string; changefreq: string; priority: string }[] = [
 	{ path: '/why/links', changefreq: 'monthly', priority: '0.6' },
 	{ path: '/why/remove', changefreq: 'monthly', priority: '0.6' },
 	{ path: '/why/invoice', changefreq: 'monthly', priority: '0.6' },
+	{ path: '/why/pptx', changefreq: 'monthly', priority: '0.6' },
 	{ path: '/why/protect', changefreq: 'monthly', priority: '0.6' },
 	{ path: '/compare', changefreq: 'monthly', priority: '0.7' },
 	{ path: '/privacy', changefreq: 'yearly', priority: '0.3' },

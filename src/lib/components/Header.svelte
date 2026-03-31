@@ -15,6 +15,7 @@
 
 	const toolsDropdown = [
 		{ href: '/pdf', label: 'PDF Tools', desc: 'Merge, split, rotate, compress, convert' },
+		{ href: '/pptx', label: 'PowerPoint Tools', desc: 'Merge, split, compress, extract, watermark' },
 		{ href: '/photo/rm-bg', label: 'Background Remover', desc: 'AI-powered, runs in your browser' },
 		{ href: '/resume', label: 'Resume Builder', desc: 'ATS-optimized, PDF and DOCX export' },
 		{ href: '/qr', label: 'QR Code Generator', desc: 'Static, dynamic, styled, batch export' },

@@ -178,6 +178,11 @@
 						<td class="py-3">$96/year</td>
 					</tr>
 					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">Merge a PowerPoint</td>
+						<td class="py-3 pr-4">$0.00 (your browser)</td>
+						<td class="py-3">$168/year</td>
+					</tr>
+					<tr class="border-b border-border/50">
 						<td class="py-3 pr-4">Remove a background</td>
 						<td class="py-3 pr-4">$0.00 (your browser)</td>
 						<td class="py-3">$2/image or $99/month</td>

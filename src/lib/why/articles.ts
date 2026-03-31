@@ -79,6 +79,16 @@ export const articles: Article[] = [
 		toolCta: 'Create an invoice for free',
 		datePublished: '2026-03-30',
 		dateModified: '2026-03-30'
+	},
+	{
+		slug: 'pptx',
+		title: 'The PowerPoint Shakedown',
+		summary: '$168/year to merge slides your browser can combine for free.',
+		related: ['pdf', 'resume'],
+		toolHref: '/pptx',
+		toolCta: 'Use free PowerPoint tools',
+		datePublished: '2026-03-30',
+		dateModified: '2026-03-30'
 	}
 ];
 
