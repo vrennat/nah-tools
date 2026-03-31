@@ -54,31 +54,31 @@
 	</section>
 
 	<section>
-		<h2 class="text-2xl font-bold text-text">How to Create a Free Business Card QR Code</h2>
+		<h2 class="text-2xl font-700 text-text">How to Create a Free Business Card QR Code</h2>
 		<ol class="mt-6 space-y-6">
 			<li class="flex gap-4">
-				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">1</span>
+				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-700 text-white">1</span>
 				<div>
 					<h3 class="font-semibold text-text">Enter your contact details</h3>
 					<p class="mt-1 text-text-muted">Fill in your name, phone number, email address, company, job title, and website. Include as much or as little as you want — only the fields you fill in will be encoded.</p>
 				</div>
 			</li>
 			<li class="flex gap-4">
-				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">2</span>
+				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-700 text-white">2</span>
 				<div>
 					<h3 class="font-semibold text-text">Customize the appearance</h3>
 					<p class="mt-1 text-text-muted">Change colors, dot styles, and corner shapes to match your brand. You can also add your company logo to the center of the QR code.</p>
 				</div>
 			</li>
 			<li class="flex gap-4">
-				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">3</span>
+				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-700 text-white">3</span>
 				<div>
 					<h3 class="font-semibold text-text">Download in high resolution</h3>
 					<p class="mt-1 text-text-muted">Download as SVG for print (scalable to any size without losing quality) or PNG for digital use. SVG is best for business cards since printers need high resolution.</p>
 				</div>
 			</li>
 			<li class="flex gap-4">
-				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">4</span>
+				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-700 text-white">4</span>
 				<div>
 					<h3 class="font-semibold text-text">Print on your business cards</h3>
 					<p class="mt-1 text-text-muted">Add the QR code to your business card design. Most people put it on the back. Make sure it is at least 2cm x 2cm (about 0.8 inches) for reliable scanning.</p>
@@ -88,7 +88,7 @@
 	</section>
 
 	<section class="rounded-xl border border-border bg-surface p-6">
-		<h2 class="text-xl font-bold text-text">Why Use nah</h2>
+		<h2 class="text-xl font-700 text-text">Why Use nah</h2>
 		<ul class="mt-4 space-y-3 text-text-muted">
 			<li class="flex items-start gap-3">
 				<span class="mt-0.5 text-accent">&bull;</span>
@@ -110,7 +110,7 @@
 	</section>
 
 	<section>
-		<h2 class="text-2xl font-bold text-text">Frequently Asked Questions</h2>
+		<h2 class="text-2xl font-700 text-text">Frequently Asked Questions</h2>
 		<div class="mt-6 space-y-6">
 			<div>
 				<h3 class="font-semibold text-text">Is it really free?</h3>

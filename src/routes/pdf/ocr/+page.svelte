@@ -129,7 +129,7 @@
 					<div class="mb-1 text-sm text-text-muted">{progressLabel(progress)}</div>
 					<div class="h-2 w-full overflow-hidden rounded-full bg-surface-alt">
 						<div
-							class="h-full rounded-full bg-accent transition-all duration-300"
+							class="h-full rounded-full bg-accent transition-all duration-200"
 							style="width: {((progress.page - 1 + progress.pageProgress) / progress.totalPages) * 100}%"
 						></div>
 					</div>
@@ -137,7 +137,7 @@
 			{/if}
 
 			{#if result}
-				<div class="mt-4 rounded-lg bg-success/10 px-4 py-3">
+				<div role="alert" class="mt-4 rounded-lg bg-success/10 px-3 py-2">
 					<p class="text-sm font-medium text-success">
 						{result.wordsFound.toLocaleString()} words recognized across {result.pageCount} pages
 					</p>
@@ -148,7 +148,7 @@
 			{/if}
 
 			{#if error}
-				<p class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
+				<p role="alert" class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
 			{/if}
 
 			<div class="mt-6">

@@ -103,7 +103,7 @@
 							<div class="mt-2 space-y-1">
 								<div class="h-1.5 w-full rounded-full bg-surface-alt">
 									<div
-										class="h-1.5 rounded-full transition-all duration-300 {passwordStrength.color} {passwordStrength.width}"
+										class="h-1.5 rounded-full transition-all duration-200 {passwordStrength.color} {passwordStrength.width}"
 									></div>
 								</div>
 								<p class="text-xs text-text-muted">{passwordStrength.label}</p>
@@ -186,7 +186,7 @@
 			{/if}
 
 			{#if error}
-				<p class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
+				<p role="alert" class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
 			{/if}
 
 			<div class="mt-6">

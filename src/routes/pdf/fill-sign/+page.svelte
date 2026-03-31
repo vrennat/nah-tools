@@ -630,7 +630,7 @@
 		{/if}
 
 		{#if error}
-			<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
+			<p role="alert" class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
 		{/if}
 
 		<p class="text-center text-xs text-text-muted">

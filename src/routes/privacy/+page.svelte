@@ -16,7 +16,7 @@
 	</p>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Static QR Codes</h2>
+		<h2 class="text-xl font-700">Static QR Codes</h2>
 		<p class="text-text-muted">
 			When you generate a static QR code, all processing happens entirely in your web browser.
 			The content you enter — URLs, text, WiFi passwords, contact info — is never sent to or stored
@@ -28,7 +28,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Dynamic QR Codes</h2>
+		<h2 class="text-xl font-700">Dynamic QR Codes</h2>
 		<p class="text-text-muted">
 			If you create a dynamic QR code (one where you can change the destination after printing),
 			we store the following:
@@ -46,7 +46,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Analytics</h2>
+		<h2 class="text-xl font-700">Analytics</h2>
 		<p class="text-text-muted">
 			We use <a href="https://www.cloudflare.com/web-analytics/" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">Cloudflare Web Analytics</a>,
 			which is privacy-respecting: no cookies, no personal data collection, no tracking individual users.
@@ -55,12 +55,12 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Cookies</h2>
+		<h2 class="text-xl font-700">Cookies</h2>
 		<p class="text-text-muted">We don't use cookies. Period.</p>
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Third Parties</h2>
+		<h2 class="text-xl font-700">Third Parties</h2>
 		<p class="text-text-muted">
 			We use Cloudflare for hosting, CDN, and dynamic QR code redirects.
 			<a href="https://www.cloudflare.com/privacypolicy/" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">Cloudflare's privacy policy</a>
@@ -69,7 +69,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Data Retention</h2>
+		<h2 class="text-xl font-700">Data Retention</h2>
 		<p class="text-text-muted">
 			Dynamic QR code data is retained until you deactivate it using your passphrase.
 			We don't collect your email or any contact information, so we have no way to reach out to you
@@ -78,7 +78,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Open Source</h2>
+		<h2 class="text-xl font-700">Open Source</h2>
 		<p class="text-text-muted">
 			You can verify every claim on this page by reading
 			<a href="https://github.com/vrennat/nah-tools" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">our source code on GitHub</a>.
@@ -86,7 +86,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Changes</h2>
+		<h2 class="text-xl font-700">Changes</h2>
 		<p class="text-text-muted">
 			If we change this policy, the change will be visible in our
 			<a href="https://github.com/vrennat/nah-tools" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">Git history</a>.
@@ -94,7 +94,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Contact</h2>
+		<h2 class="text-xl font-700">Contact</h2>
 		<p class="text-text-muted">
 			Questions or concerns? Open an issue on
 			<a href="https://github.com/vrennat/nah-tools/issues" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">GitHub</a>.

@@ -49,7 +49,7 @@
 	</header>
 
 	<section class="space-y-4 rounded-xl border border-accent/30 bg-accent/5 p-5">
-		<h2 class="text-xl font-bold">No data stored. No data logged. No account.</h2>
+		<h2 class="text-xl font-700">No data stored. No data logged. No account.</h2>
 		<p class="text-text-muted">
 			The MCP server is completely stateless. It serves broker data and generates emails from the information you provide in each request — nothing is stored, logged, or transmitted beyond the immediate response. There is no account, no API key, and no tracking.
 		</p>
@@ -59,7 +59,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">What is MCP?</h2>
+		<h2 class="text-xl font-700">What is MCP?</h2>
 		<p class="text-text-muted">
 			<a href="https://modelcontextprotocol.io" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">Model Context Protocol</a>
 			is an open standard that lets AI agents use external tools. Instead of building "an AI product," we built a resource layer — your existing AI (Claude, or any MCP-compatible agent) connects to our server and gains access to structured opt-out data it didn't have before.
@@ -70,7 +70,7 @@
 	</section>
 
 	<section class="space-y-4">
-		<h2 class="text-xl font-bold">What the server actually returns</h2>
+		<h2 class="text-xl font-700">What the server actually returns</h2>
 		<ul class="list-disc space-y-2 pl-6 text-text-muted">
 			<li>A database of <strong class="text-text">25+ data brokers</strong> with step-by-step opt-out procedures, opt-out URLs, and required information for each</li>
 			<li><strong class="text-text">Pre-filled search URLs</strong> for 11 brokers so your agent can check if you're listed before opting out</li>
@@ -82,7 +82,7 @@
 	</section>
 
 	<section class="space-y-6">
-		<h2 class="text-xl font-bold">Setup</h2>
+		<h2 class="text-xl font-700">Setup</h2>
 
 		<div class="space-y-4">
 			<h3 class="text-lg font-semibold">Claude Desktop / Claude Code</h3>
@@ -144,7 +144,7 @@
 	</section>
 
 	<section class="space-y-4">
-		<h2 class="text-xl font-bold">What to expect</h2>
+		<h2 class="text-xl font-700">What to expect</h2>
 		<p class="text-text-muted">
 			Once connected, tell your agent something like:
 		</p>
@@ -168,12 +168,12 @@
 	</section>
 
 	<section class="space-y-4">
-		<h2 class="text-xl font-bold">Available tools</h2>
+		<h2 class="text-xl font-700">Available tools</h2>
 		<div class="space-y-3">
 			{#each tools as tool}
 				<div class="rounded-xl border border-border bg-surface p-4">
 					<div class="flex items-baseline gap-2">
-						<code class="text-sm font-mono font-bold text-accent">{tool.name}</code>
+						<code class="text-sm font-mono font-700 text-accent">{tool.name}</code>
 					</div>
 					<p class="mt-1 text-sm text-text-muted">{tool.description}</p>
 				</div>
@@ -182,7 +182,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Resources</h2>
+		<h2 class="text-xl font-700">Resources</h2>
 		<p class="text-text-muted">
 			The server also exposes broker data as MCP resources that agents can read directly:
 		</p>
@@ -193,7 +193,7 @@
 	</section>
 
 	<section class="space-y-3 rounded-xl border border-border bg-surface-alt p-5">
-		<h2 class="text-lg font-bold">Built on open-source data</h2>
+		<h2 class="text-lg font-700">Built on open-source data</h2>
 		<p class="text-sm text-text-muted">
 			Our broker database draws from community-maintained opt-out guides, including <a href="https://github.com/nicholasgasior/BADBOOL" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">BADBOOL</a> and <a href="https://github.com/brianreumere/data-brokers" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">brianreumere/data-brokers</a>. Our contribution is the transformation layer: we take those guides and make them machine-actionable — structured data that AI agents can query, filter, and act on. The entire server is <a href="https://github.com/vrennat/nah-tools" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">open source</a>.
 		</p>

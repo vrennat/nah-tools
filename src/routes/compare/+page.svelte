@@ -54,7 +54,7 @@
 						<th class="sticky left-0 z-10 bg-surface py-4 pr-4 text-left font-semibold text-text">
 							Feature
 						</th>
-						<th class="bg-accent/10 px-4 py-4 text-center font-bold text-accent">
+						<th class="bg-accent/10 px-4 py-4 text-center font-700 text-accent">
 							nah
 							<span class="block text-xs font-normal text-accent/80">Free forever</span>
 						</th>
@@ -115,7 +115,7 @@
 	</section>
 
 	<section>
-		<h2 class="mb-4 text-2xl font-bold text-text">What We Don't Offer</h2>
+		<h2 class="mb-4 text-2xl font-700 text-text">What We Don't Offer</h2>
 		<p class="mb-6 leading-relaxed text-text-muted">
 			We serve 90% of QR code use cases for free. The remaining 10% involves enterprise features
 			that genuinely justify paid tooling. We won't pretend those features are trivial — but we
@@ -168,7 +168,7 @@
 	</section>
 
 	<section>
-		<h2 class="mb-4 text-2xl font-bold text-text">How We Afford This</h2>
+		<h2 class="mb-4 text-2xl font-700 text-text">How We Afford This</h2>
 		<div class="rounded-xl border border-border bg-surface p-6">
 			<p class="mb-4 font-semibold text-text">
 				"How is this free? What's the catch?"
@@ -200,7 +200,7 @@
 	</section>
 
 	<section class="rounded-xl border border-border bg-surface p-8 text-center">
-		<h2 class="mb-2 text-2xl font-bold text-text">Ready to try it?</h2>
+		<h2 class="mb-2 text-2xl font-700 text-text">Ready to try it?</h2>
 		<p class="mb-6 text-text-muted">
 			Create a QR code in seconds. No signup, no credit card, no trial timer.
 		</p>

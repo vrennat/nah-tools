@@ -110,7 +110,7 @@
 				aria-expanded={expanded[section.key]}
 			>
 				<div class="flex items-center gap-3">
-					<h3 class="text-sm font-semibold text-text">{section.label}</h3>
+					<span class="text-sm font-semibold text-text">{section.label}</span>
 					{#if section.count !== undefined}
 						<span
 							class="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent/10 px-1.5 text-xs font-medium text-accent"

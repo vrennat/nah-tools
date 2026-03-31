@@ -81,14 +81,14 @@
 				<div
 					class="rounded-xl border border-border p-4 text-center {scoreBg(matchResult.score)}"
 				>
-					<p class="text-3xl font-bold {scoreColor(matchResult.score)}">{matchResult.score}%</p>
+					<p class="text-3xl font-700 {scoreColor(matchResult.score)}">{matchResult.score}%</p>
 					<p class="mt-1 text-xs text-text-muted">Job Match</p>
 				</div>
 				{#if atsAnalysis}
 					<div
 						class="rounded-xl border border-border p-4 text-center {scoreBg(atsAnalysis.score)}"
 					>
-						<p class="text-3xl font-bold {scoreColor(atsAnalysis.score)}">{atsAnalysis.score}%</p>
+						<p class="text-3xl font-700 {scoreColor(atsAnalysis.score)}">{atsAnalysis.score}%</p>
 						<p class="mt-1 text-xs text-text-muted">ATS Compatibility</p>
 					</div>
 				{/if}

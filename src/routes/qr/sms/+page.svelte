@@ -44,31 +44,31 @@
 	</section>
 
 	<section>
-		<h2 class="text-2xl font-bold text-text">How to Create a Free SMS QR Code</h2>
+		<h2 class="text-2xl font-700 text-text">How to Create a Free SMS QR Code</h2>
 		<ol class="mt-6 space-y-6">
 			<li class="flex gap-4">
-				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">1</span>
+				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-700 text-white">1</span>
 				<div>
 					<h3 class="font-semibold text-text">Enter the phone number</h3>
 					<p class="mt-1 text-text-muted">Type the phone number that should receive the text message. Include the country code for international numbers (e.g., +1 for US/Canada).</p>
 				</div>
 			</li>
 			<li class="flex gap-4">
-				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">2</span>
+				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-700 text-white">2</span>
 				<div>
 					<h3 class="font-semibold text-text">Pre-fill the message (optional)</h3>
 					<p class="mt-1 text-text-muted">Add a default message body so people do not have to type anything. For example: "Yes, I'd like to RSVP" or "I'm interested in learning more." The sender can still edit the message before sending.</p>
 				</div>
 			</li>
 			<li class="flex gap-4">
-				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">3</span>
+				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-700 text-white">3</span>
 				<div>
 					<h3 class="font-semibold text-text">Generate your QR code</h3>
 					<p class="mt-1 text-text-muted">The QR code updates in real time. Customize colors and dot style if you want it to match your branding.</p>
 				</div>
 			</li>
 			<li class="flex gap-4">
-				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-bold text-white">4</span>
+				<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-700 text-white">4</span>
 				<div>
 					<h3 class="font-semibold text-text">Download and share</h3>
 					<p class="mt-1 text-text-muted">Download as PNG or SVG. Print on flyers, posters, event materials, or product packaging. The QR code never expires.</p>
@@ -78,7 +78,7 @@
 	</section>
 
 	<section class="rounded-xl border border-border bg-surface p-6">
-		<h2 class="text-xl font-bold text-text">Why Use nah</h2>
+		<h2 class="text-xl font-700 text-text">Why Use nah</h2>
 		<ul class="mt-4 space-y-3 text-text-muted">
 			<li class="flex items-start gap-3">
 				<span class="mt-0.5 text-accent">&bull;</span>
@@ -100,7 +100,7 @@
 	</section>
 
 	<section>
-		<h2 class="text-2xl font-bold text-text">Frequently Asked Questions</h2>
+		<h2 class="text-2xl font-700 text-text">Frequently Asked Questions</h2>
 		<div class="mt-6 space-y-6">
 			<div>
 				<h3 class="font-semibold text-text">Is it really free?</h3>

@@ -362,13 +362,13 @@
 			</div>
 
 			{#if authError}
-				<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{authError}</p>
+				<p role="alert" class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{authError}</p>
 			{/if}
 
 			<button
 				type="submit"
 				disabled={!passphrase || authLoading}
-				class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+				class="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 			>
 				{#if authLoading}
 					Verifying...
@@ -411,11 +411,11 @@
 			<div class="grid grid-cols-2 gap-4 text-center">
 				<div>
 					<p class="text-xs font-medium text-text-muted">Page Views</p>
-					<p class="mt-1 text-3xl font-bold text-text">{stats.totalViews.toLocaleString()}</p>
+					<p class="mt-1 text-3xl font-700 text-text">{stats.totalViews.toLocaleString()}</p>
 				</div>
 				<div>
 					<p class="text-xs font-medium text-text-muted">Link Clicks</p>
-					<p class="mt-1 text-3xl font-bold text-text">{stats.totalClicks.toLocaleString()}</p>
+					<p class="mt-1 text-3xl font-700 text-text">{stats.totalClicks.toLocaleString()}</p>
 				</div>
 			</div>
 
@@ -569,16 +569,16 @@
 				</fieldset>
 
 				{#if profileError}
-					<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{profileError}</p>
+					<p role="alert" class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{profileError}</p>
 				{/if}
 				{#if profileSuccess}
-					<p class="rounded-lg bg-success/10 px-3 py-2 text-sm text-success">{profileSuccess}</p>
+					<p role="alert" class="rounded-lg bg-success/10 px-3 py-2 text-sm text-success">{profileSuccess}</p>
 				{/if}
 
 				<button
 					type="submit"
 					disabled={profileSaving}
-					class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+					class="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 				>
 					{#if profileSaving}
 						Saving...
@@ -594,7 +594,7 @@
 			<h3 class="text-sm font-medium text-text">Links</h3>
 
 			{#if linkError}
-				<p class="rounded-lg bg-error/10 px-3 py-2 text-xs text-error">{linkError}</p>
+				<p role="alert" class="rounded-lg bg-error/10 px-3 py-2 text-xs text-error">{linkError}</p>
 			{/if}
 
 			{#if profileLinks.length > 0}

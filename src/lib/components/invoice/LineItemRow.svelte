@@ -30,6 +30,7 @@
 <div
 	class="group rounded-lg border border-border bg-surface p-3 transition-colors hover:border-border"
 	draggable="true"
+	aria-roledescription="sortable item"
 	ondragstart={ondragstart}
 	ondragover={ondragover}
 	ondrop={ondrop}
@@ -51,6 +52,7 @@
 				type="text"
 				bind:value={item.description}
 				placeholder="Item description"
+				aria-label="Item description"
 				class="w-full rounded-md border border-border bg-surface px-2.5 py-1.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
 			/>
 		</div>
@@ -62,6 +64,7 @@
 				bind:value={item.quantity}
 				min="0"
 				step="any"
+				aria-label="Quantity"
 				class="w-full rounded-md border border-border bg-surface px-2 py-1.5 text-right text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
 			/>
 		</div>
@@ -70,6 +73,7 @@
 		<div class="w-20 shrink-0">
 			<select
 				bind:value={item.unitType}
+				aria-label="Unit"
 				class="w-full rounded-md border border-border bg-surface px-1.5 py-1.5 text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
 			>
 				{#each unitTypes as ut}
@@ -86,6 +90,7 @@
 				min="0"
 				step="any"
 				placeholder="0.00"
+				aria-label="Unit price"
 				class="w-full rounded-md border border-border bg-surface px-2 py-1.5 text-right text-sm focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
 			/>
 		</div>
@@ -102,6 +107,7 @@
 				onclick={() => { showAdvanced = !showAdvanced; }}
 				class="rounded p-1 text-text-muted transition-colors hover:text-accent"
 				title="More options"
+				aria-label="More options"
 			>
 				<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
@@ -112,6 +118,7 @@
 				onclick={onremove}
 				class="rounded p-1 text-text-muted transition-colors hover:text-error"
 				title="Remove item"
+				aria-label="Remove item"
 			>
 				<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

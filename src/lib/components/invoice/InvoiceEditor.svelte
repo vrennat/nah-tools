@@ -97,7 +97,7 @@
 	<div class="rounded-xl border border-accent/20 bg-accent/5 px-4 py-3">
 		<div class="flex items-center justify-between">
 			<span class="text-sm font-medium text-text-muted">{DOCUMENT_LABELS[invoice.documentType as keyof typeof DOCUMENT_LABELS]} Total</span>
-			<span class="text-lg font-bold text-accent">{formatCurrency(summary.total, invoice.currency)}</span>
+			<span class="text-lg font-700 text-accent">{formatCurrency(summary.total, invoice.currency)}</span>
 		</div>
 	</div>
 </div>

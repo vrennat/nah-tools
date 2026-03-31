@@ -3,6 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+	/* Container widths: hub/landing pages = unconstrained, tool pages = max-w-2xl, multi-panel tools (resume, invoice) = max-w-7xl */
 	--color-brand: #0f172a;
 	--color-brand-light: #1e293b;
 	--color-accent: #3b82f6;
@@ -11,10 +12,13 @@
 	--color-surface-alt: #f8fafc;
 	--color-border: #e2e8f0;
 	--color-text: #0f172a;
-	--color-text-muted: #64748b;
+	--color-text-muted: #475569;
 	--color-success: #22c55e;
 	--color-warning: #f59e0b;
 	--color-error: #ef4444;
+
+	/* Spacing: use gap-* for flex/grid layouts, space-y-* for stacked sections, avoid ad-hoc mb-* */
+	/* Border radius: rounded-2xl for featured/large cards, rounded-xl for compact cards, rounded-lg for inputs, rounded-full for buttons/pills */
 
 	--font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
 	--font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
@@ -63,9 +67,24 @@ body {
 	animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Button variants */
+.btn-primary {
+	@apply rounded-full px-5 py-2.5 text-sm font-medium transition-colors bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+	@apply rounded-full px-5 py-2.5 text-sm font-medium transition-colors border border-border text-text hover:bg-surface-alt disabled:opacity-40 disabled:cursor-not-allowed;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.animate-fade-up {
 		animation: none;
 		opacity: 1;
+	}
+
+	*, *::before, *::after {
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
 	}
 }

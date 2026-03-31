@@ -395,13 +395,13 @@
 			</div>
 
 			{#if formError}
-				<p class="rounded-lg bg-error/10 px-4 py-3 text-sm text-error">{formError}</p>
+				<p role="alert" class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{formError}</p>
 			{/if}
 
 			<button
 				type="submit"
 				disabled={!canCreate}
-				class="w-full rounded-full bg-accent px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+				class="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 			>
 				{#if loading}
 					Creating...

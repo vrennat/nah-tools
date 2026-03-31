@@ -110,7 +110,7 @@
 			</div>
 
 			{#if done}
-				<div class="mt-4 rounded-lg bg-success/10 px-4 py-3">
+				<div role="alert" class="mt-4 rounded-lg bg-success/10 px-3 py-2">
 					<p class="text-sm font-medium text-success">
 						PDF/A preparation complete. File downloaded.
 					</p>
@@ -118,7 +118,7 @@
 			{/if}
 
 			{#if warnings.length > 0}
-				<div class="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+				<div role="alert" class="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
 					<p class="text-sm font-medium text-amber-700 dark:text-amber-300">Warnings</p>
 					<ul class="mt-1 list-inside list-disc space-y-1 text-sm text-amber-700 dark:text-amber-200">
 						{#each warnings as warning}
@@ -129,7 +129,7 @@
 			{/if}
 
 			{#if error}
-				<p class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
+				<p role="alert" class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
 			{/if}
 
 			<div class="mt-6">

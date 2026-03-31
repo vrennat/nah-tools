@@ -144,13 +144,13 @@
 			</div>
 
 			{#if authError}
-				<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{authError}</p>
+				<p role="alert" class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{authError}</p>
 			{/if}
 
 			<button
 				type="submit"
 				disabled={!passphrase || authLoading}
-				class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+				class="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
 			>
 				{#if authLoading}
 					Verifying...
@@ -199,17 +199,17 @@
 					</div>
 
 					{#if updateError}
-						<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{updateError}</p>
+						<p role="alert" class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{updateError}</p>
 					{/if}
 
 					{#if updateSuccess}
-						<p class="rounded-lg bg-success/10 px-3 py-2 text-sm text-success">{updateSuccess}</p>
+						<p role="alert" class="rounded-lg bg-success/10 px-3 py-2 text-sm text-success">{updateSuccess}</p>
 					{/if}
 
 					<button
 						type="submit"
 						disabled={updateLoading || newUrl === destinationUrl}
-						class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+						class="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
 					>
 						{#if updateLoading}
 							Updating...

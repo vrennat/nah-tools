@@ -204,14 +204,14 @@
 									</div>
 
 									{#if dynamicError}
-										<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{dynamicError}</p>
+										<p role="alert" class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{dynamicError}</p>
 									{/if}
 
 									<button
 										type="button"
 										disabled={!canCreateDynamic}
 										onclick={createDynamic}
-										class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+										class="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 									>
 										{#if dynamicLoading}
 											Creating...
@@ -220,7 +220,7 @@
 										{/if}
 									</button>
 								{:else}
-									<div class="space-y-2 rounded-lg bg-success/10 p-3">
+									<div role="alert" class="space-y-2 rounded-lg bg-success/10 p-3">
 										<p class="text-sm font-medium text-success">Dynamic QR code created</p>
 										<p class="break-all font-mono text-xs text-text-muted">{dynamicResult.redirect_url}</p>
 									</div>

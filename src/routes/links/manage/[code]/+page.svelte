@@ -229,13 +229,13 @@
 			</div>
 
 			{#if authError}
-				<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{authError}</p>
+				<p role="alert" class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{authError}</p>
 			{/if}
 
 			<button
 				type="submit"
 				disabled={!passphrase || authLoading}
-				class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+				class="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
 			>
 				{#if authLoading}
 					Verifying...
@@ -249,7 +249,7 @@
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm space-y-6">
 			<div class="text-center">
 				<p class="text-xs font-medium text-text-muted">Total Clicks</p>
-				<p class="mt-1 text-4xl font-bold text-text">{totalClicks.toLocaleString()}</p>
+				<p class="mt-1 text-4xl font-700 text-text">{totalClicks.toLocaleString()}</p>
 			</div>
 
 			{#if clicksByDay.length > 0}
@@ -397,17 +397,17 @@
 					</div>
 
 					{#if updateError}
-						<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{updateError}</p>
+						<p role="alert" class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{updateError}</p>
 					{/if}
 
 					{#if updateSuccess}
-						<p class="rounded-lg bg-success/10 px-3 py-2 text-sm text-success">{updateSuccess}</p>
+						<p role="alert" class="rounded-lg bg-success/10 px-3 py-2 text-sm text-success">{updateSuccess}</p>
 					{/if}
 
 					<button
 						type="submit"
 						disabled={updateLoading || newUrl === destinationUrl}
-						class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+						class="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
 					>
 						{#if updateLoading}
 							Updating...
@@ -477,7 +477,7 @@
 	<div class="rounded-xl border border-border bg-surface p-6 shadow-sm space-y-4">
 		<h3 class="text-sm font-medium text-text">Report this link</h3>
 		{#if reportSuccess}
-			<p class="rounded-lg bg-success/10 px-3 py-2 text-sm text-success">
+			<p role="alert" class="rounded-lg bg-success/10 px-3 py-2 text-sm text-success">
 				Report submitted. Thank you for helping keep the web safe.
 			</p>
 		{:else}
@@ -500,7 +500,7 @@
 				</div>
 
 				{#if reportError}
-					<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{reportError}</p>
+					<p role="alert" class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{reportError}</p>
 				{/if}
 
 				<button

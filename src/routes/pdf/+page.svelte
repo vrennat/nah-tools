@@ -32,10 +32,10 @@
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			<a
 				href="/pdf/merge"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -46,16 +46,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Merge PDFs</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Merge PDFs</span>
 				<p class="mt-1 text-sm text-text-muted">Combine multiple PDFs into one file</p>
 			</a>
 
 			<a
 				href="/pdf/split"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -66,16 +66,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Split PDF</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Split PDF</span>
 				<p class="mt-1 text-sm text-text-muted">Extract pages or split into ranges</p>
 			</a>
 
 			<a
 				href="/pdf/rotate"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -86,16 +86,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Rotate Pages</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Rotate Pages</span>
 				<p class="mt-1 text-sm text-text-muted">Rotate all or specific pages</p>
 			</a>
 
 			<a
 				href="/pdf/remove-pages"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -106,16 +106,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Remove Pages</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Remove Pages</span>
 				<p class="mt-1 text-sm text-text-muted">Delete pages from a PDF</p>
 			</a>
 
 			<a
 				href="/pdf/reorder"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -126,16 +126,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Reorder Pages</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Reorder Pages</span>
 				<p class="mt-1 text-sm text-text-muted">Drag and drop to rearrange pages</p>
 			</a>
 
 			<a
 				href="/pdf/images-to-pdf"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -146,16 +146,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Images to PDF</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Images to PDF</span>
 				<p class="mt-1 text-sm text-text-muted">Convert JPG or PNG images to PDF</p>
 			</a>
 
 			<a
 				href="/pdf/pdf-to-images"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -172,16 +172,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">PDF to Images</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">PDF to Images</span>
 				<p class="mt-1 text-sm text-text-muted">Export PDF pages as PNG or JPG</p>
 			</a>
 
 			<a
 				href="/pdf/compress"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -192,16 +192,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Compress PDF</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Compress PDF</span>
 				<p class="mt-1 text-sm text-text-muted">Reduce file size by stripping metadata</p>
 			</a>
 
 			<a
 				href="/pdf/flatten"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -212,16 +212,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Flatten PDF</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Flatten PDF</span>
 				<p class="mt-1 text-sm text-text-muted">Bake form fields and annotations into static content</p>
 			</a>
 
 			<a
 				href="/pdf/page-numbers"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -232,16 +232,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Page Numbers</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Page Numbers</span>
 				<p class="mt-1 text-sm text-text-muted">Add page numbers to your PDF</p>
 			</a>
 
 			<a
 				href="/pdf/watermark"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -252,16 +252,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Watermark</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Watermark</span>
 				<p class="mt-1 text-sm text-text-muted">Add text watermark to all pages</p>
 			</a>
 
 			<a
 				href="/pdf/edit"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -272,16 +272,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Edit PDF</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Edit PDF</span>
 				<p class="mt-1 text-sm text-text-muted">Add text, images, and drawings to your PDF</p>
 			</a>
 
 			<a
 				href="/pdf/fill-sign"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -292,16 +292,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Fill & Sign</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Fill & Sign</span>
 				<p class="mt-1 text-sm text-text-muted">Add text and signatures to your PDF</p>
 			</a>
 
 			<a
 				href="/pdf/word-to-pdf"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -318,16 +318,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Word to PDF</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Word to PDF</span>
 				<p class="mt-1 text-sm text-text-muted">Convert DOCX files to PDF</p>
 			</a>
 
 			<a
 				href="/pdf/protect"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -338,16 +338,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Protect PDF</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Protect PDF</span>
 				<p class="mt-1 text-sm text-text-muted">Add password protection to your PDF</p>
 			</a>
 
 			<a
 				href="/pdf/unlock"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -358,16 +358,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Unlock PDF</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Unlock PDF</span>
 				<p class="mt-1 text-sm text-text-muted">Remove password from your PDF</p>
 			</a>
 
 			<a
 				href="/pdf/pdf-to-csv"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -378,16 +378,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">PDF to CSV</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">PDF to CSV</span>
 				<p class="mt-1 text-sm text-text-muted">Extract tables from PDFs as spreadsheet data</p>
 			</a>
 
 			<a
 				href="/pdf/ocr"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -398,16 +398,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">OCR PDF</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">OCR PDF</span>
 				<p class="mt-1 text-sm text-text-muted">Make scanned PDFs searchable with text recognition</p>
 			</a>
 
 			<a
 				href="/pdf/crop"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -418,16 +418,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Crop PDF</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Crop PDF</span>
 				<p class="mt-1 text-sm text-text-muted">Trim margins from PDF pages</p>
 			</a>
 
 			<a
 				href="/pdf/extract-images"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -438,16 +438,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Extract Images</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Extract Images</span>
 				<p class="mt-1 text-sm text-text-muted">Pull all embedded images from a PDF</p>
 			</a>
 
 			<a
 				href="/pdf/pdfa"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -458,16 +458,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Prepare for PDF/A</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Prepare for PDF/A</span>
 				<p class="mt-1 text-sm text-text-muted">Add archival metadata for long-term preservation</p>
 			</a>
 
 			<a
 				href="/pdf/compare"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -478,16 +478,16 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Compare PDFs</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Compare PDFs</span>
 				<p class="mt-1 text-sm text-text-muted">Visual side-by-side diff of two PDFs</p>
 			</a>
 
 			<a
 				href="/pdf/redact"
-				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+				class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
 			>
 				<div
-					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+					class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-200 group-hover:bg-accent group-hover:text-white"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
@@ -498,7 +498,7 @@
 						/>
 					</svg>
 				</div>
-				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Redact PDF</h2>
+				<span class="font-display font-700 text-text transition-colors duration-200 group-hover:text-accent">Redact PDF</span>
 				<p class="mt-1 text-sm text-text-muted">Permanently black out sensitive content</p>
 			</a>
 		</div>

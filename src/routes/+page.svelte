@@ -58,7 +58,7 @@
 			class="animate-fade-up group rounded-2xl border border-border bg-surface-alt p-5 transition-all duration-200 hover:border-accent/50 hover:shadow-card-hover sm:p-7"
 			style="animation-delay: 200ms;"
 		>
-			<h2 class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">PDF Tools</h2>
+			<span class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">PDF Tools</span>
 			<p class="mt-2 text-sm leading-relaxed text-text-muted">
 				Merge, split, rotate, compress, convert. Files never leave your device.
 			</p>
@@ -75,7 +75,7 @@
 			class="animate-fade-up group rounded-2xl border border-border bg-surface-alt p-5 transition-all duration-200 hover:border-accent/50 hover:shadow-card-hover sm:p-7"
 			style="animation-delay: 260ms;"
 		>
-			<h2 class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">QR Codes</h2>
+			<span class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">QR Codes</span>
 			<p class="mt-2 text-sm leading-relaxed text-text-muted">
 				URL, WiFi, vCard, batch export, dynamic codes. No expiration. No paywall.
 			</p>
@@ -92,7 +92,7 @@
 			class="animate-fade-up group rounded-2xl border border-border bg-surface-alt p-5 transition-all duration-200 hover:border-accent/50 hover:shadow-card-hover sm:p-7"
 			style="animation-delay: 320ms;"
 		>
-			<h2 class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">Background Remover</h2>
+			<span class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">Background Remover</span>
 			<p class="mt-2 text-sm leading-relaxed text-text-muted">
 				AI-powered, runs entirely in your browser. No upload, no watermark.
 			</p>
@@ -111,32 +111,32 @@
 
 		<div class="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-6">
 			<a href="/resume" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Resume Builder</h3>
+				<span class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Resume Builder</span>
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">ATS-optimized, PDF and DOCX export.</p>
 			</a>
 
 			<a href="/invoice" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Invoice Generator</h3>
+				<span class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Invoice Generator</span>
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">Multi-currency, tax support, PDF export.</p>
 			</a>
 
 			<a href="/links" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Link Shortener</h3>
+				<span class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Link Shortener</span>
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">Custom aliases, click analytics, UTM builder.</p>
 			</a>
 
 			<a href="/bio" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Link in Bio</h3>
+				<span class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Link in Bio</span>
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">Your links, your page, no signup.</p>
 			</a>
 
 			<a href="/pptx" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">PowerPoint Tools</h3>
+				<span class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">PowerPoint Tools</span>
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">Merge, split, compress, extract, watermark.</p>
 			</a>
 
 			<a href="/remove" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Data Removal</h3>
+				<span class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Data Removal</span>
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">Remove your info from 25+ data brokers.</p>
 			</a>
 		</div>

@@ -57,13 +57,13 @@
 			</div>
 
 			{#if done}
-				<div class="mt-4 rounded-lg bg-success/10 px-4 py-3">
+				<div role="alert" class="mt-4 rounded-lg bg-success/10 px-3 py-2">
 					<p class="text-sm font-medium text-success">Animations and transitions removed</p>
 				</div>
 			{/if}
 
 			{#if error}
-				<p class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
+				<p role="alert" class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
 			{/if}
 
 			<div class="mt-6">

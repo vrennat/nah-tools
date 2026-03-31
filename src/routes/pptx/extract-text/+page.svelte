@@ -70,7 +70,7 @@
 			<FileDropZone accept=".pptx" bind:files label="Drop a PPTX file here or click to browse" />
 
 			{#if error}
-				<p class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
+				<p role="alert" class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
 			{/if}
 
 			<div class="mt-6">

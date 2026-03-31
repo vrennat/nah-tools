@@ -64,7 +64,7 @@
 			<FileDropZone accept=".pptx" bind:files label="Drop a PPTX file here or click to browse" />
 
 			{#if imageCount !== null}
-				<div class="mt-4 rounded-lg bg-success/10 px-4 py-3">
+				<div role="alert" class="mt-4 rounded-lg bg-success/10 px-3 py-2">
 					<p class="text-sm font-medium text-success">
 						Extracted {imageCount} image{imageCount === 1 ? '' : 's'}
 					</p>
@@ -72,7 +72,7 @@
 			{/if}
 
 			{#if error}
-				<p class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
+				<p role="alert" class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
 			{/if}
 
 			<div class="mt-6">

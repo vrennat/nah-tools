@@ -16,7 +16,7 @@
 	</p>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">The Service</h2>
+		<h2 class="text-xl font-700">The Service</h2>
 		<p class="text-text-muted">
 			nah is provided free of charge, as-is. It offers two things:
 		</p>
@@ -27,7 +27,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Static QR Codes</h2>
+		<h2 class="text-xl font-700">Static QR Codes</h2>
 		<p class="text-text-muted">
 			Static QR codes encode data directly into the QR pattern. They don't depend on our servers
 			and will work forever. They're yours — we make no claim of ownership or control over them.
@@ -35,7 +35,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Dynamic QR Codes</h2>
+		<h2 class="text-xl font-700">Dynamic QR Codes</h2>
 		<p class="text-text-muted">
 			Dynamic QR codes route through our redirect servers. We provide this service on a best-effort
 			basis. We reserve the right to deactivate any dynamic code used for malicious purposes, including
@@ -55,7 +55,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">No Warranty</h2>
+		<h2 class="text-xl font-700">No Warranty</h2>
 		<p class="text-text-muted">
 			nah is provided "as is" without warranty of any kind. The service may experience
 			downtime, bugs, or other issues. We do not guarantee that QR codes will be scannable by all
@@ -65,7 +65,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Acceptable Use</h2>
+		<h2 class="text-xl font-700">Acceptable Use</h2>
 		<p class="text-text-muted">
 			You may use nah for any lawful purpose, including commercial use. Don't attempt to
 			overload or attack our servers, circumvent rate limits, or use automated scripts to
@@ -74,7 +74,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Service Changes</h2>
+		<h2 class="text-xl font-700">Service Changes</h2>
 		<p class="text-text-muted">
 			We may modify or discontinue the service at any time. Since nah is
 			<a href="https://github.com/vrennat/nah-tools" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">open source</a>,
@@ -83,7 +83,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Governing Law</h2>
+		<h2 class="text-xl font-700">Governing Law</h2>
 		<p class="text-text-muted">
 			These terms are governed by the laws of California, United States. Any disputes will be
 			resolved in the courts of California.
@@ -91,7 +91,7 @@
 	</section>
 
 	<section class="space-y-3">
-		<h2 class="text-xl font-bold">Contact</h2>
+		<h2 class="text-xl font-700">Contact</h2>
 		<p class="text-text-muted">
 			Questions? Open an issue on
 			<a href="https://github.com/vrennat/nah-tools/issues" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">GitHub</a>.

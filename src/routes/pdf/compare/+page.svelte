@@ -114,7 +114,7 @@
 				</div>
 
 				{#if error}
-					<p class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
+					<p role="alert" class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
 				{/if}
 
 				{#if loading}
@@ -328,7 +328,7 @@
 										class="h-20 w-auto rounded"
 									/>
 									<span
-										class="absolute -top-1.5 -right-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none {diffBadgeColor(page.diffPercent)} {diffBorderColor(page.diffPercent)} border"
+										class="absolute -top-1.5 -right-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-700 leading-none {diffBadgeColor(page.diffPercent)} {diffBorderColor(page.diffPercent)} border"
 									>
 										{page.diffPercent}%
 									</span>

@@ -539,14 +539,14 @@
 					</details>
 
 					{#if error}
-						<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
+						<p role="alert" class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
 					{/if}
 
 					<button
 						type="button"
 						disabled={!canCreate}
 						onclick={handleCreate}
-						class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
+						class="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 					>
 						{#if loading}
 							Creating...
@@ -557,7 +557,7 @@
 				{:else}
 					<!-- Result card -->
 					<div class="space-y-4">
-						<div class="space-y-2 rounded-lg bg-success/10 p-4">
+						<div role="alert" class="space-y-2 rounded-lg bg-success/10 p-4">
 							<p class="text-sm font-medium text-success">Link created</p>
 							<div class="flex items-center gap-2">
 								<p class="break-all font-mono text-sm text-text">{result.short_url}</p>
@@ -587,7 +587,7 @@
 						<button
 							type="button"
 							onclick={resetForm}
-							class="w-full rounded-full border border-border px-4 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-alt"
+							class="w-full rounded-full border border-border px-5 py-2.5 text-sm font-medium text-text transition-colors hover:bg-surface-alt"
 						>
 							Create another
 						</button>
@@ -767,7 +767,7 @@
 						</button>
 						<button
 							type="button"
-							class="rounded-full border border-border px-5 py-2 text-sm font-medium text-text transition-colors hover:bg-surface-alt disabled:cursor-not-allowed disabled:opacity-40"
+							class="rounded-full border border-border px-5 py-2.5 text-sm font-medium text-text transition-colors hover:bg-surface-alt disabled:cursor-not-allowed disabled:opacity-40"
 							disabled={bulkLoading}
 							onclick={resetBulk}
 						>

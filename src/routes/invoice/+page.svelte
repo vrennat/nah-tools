@@ -106,7 +106,7 @@
 <div class="mx-auto max-w-7xl space-y-6">
 	<!-- Header -->
 	<section class="text-center">
-		<h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
+		<h1 class="text-3xl font-700 tracking-tight sm:text-4xl">
 			Invoices. <span class="text-accent">No signup.</span>
 		</h1>
 		<p class="mx-auto mt-2 max-w-2xl text-text-muted">

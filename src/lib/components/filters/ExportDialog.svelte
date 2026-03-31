@@ -75,7 +75,7 @@
 				<div class="flex gap-3 pt-2">
 					<button
 						type="button"
-						class="flex-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
+						class="flex-1 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-50"
 						onclick={() => onexport(codec, quality)}
 						disabled={exporting}
 					>

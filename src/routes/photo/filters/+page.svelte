@@ -117,7 +117,7 @@
 
 	<!-- Error -->
 	{#if error}
-		<div class="rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
+		<div role="alert" class="rounded-lg border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">
 			{error}
 		</div>
 	{/if}

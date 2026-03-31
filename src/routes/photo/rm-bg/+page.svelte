@@ -129,7 +129,7 @@
 
 	<!-- Error -->
 	{#if error}
-		<div class="rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
+		<div role="alert" class="rounded-lg border border-error/30 bg-error/5 px-3 py-2 text-sm text-error">
 			{error}
 		</div>
 	{/if}
@@ -176,7 +176,7 @@
 			<div class="flex gap-3">
 				<button
 					type="button"
-					class="flex-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+					class="flex-1 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
 					onclick={download}
 				>
 					Download PNG
