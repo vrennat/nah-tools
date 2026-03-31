@@ -1,12 +1,12 @@
 <svelte:head>
 	<title>nah — Free tools. No catch.</title>
-	<meta name="description" content="QR codes, PDFs, links, resumes, invoices — all free, private, and open source. No signup, no tracking, most tools run in your browser." />
+	<meta name="description" content="QR codes, PDFs, PowerPoint, links, resumes, invoices — all free, private, and open source. No signup, no tracking, most tools run in your browser." />
 
 	<!-- Open Graph -->
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://nah.tools" />
 	<meta property="og:title" content="nah — Free tools. No catch." />
-	<meta property="og:description" content="QR codes, PDFs, links, resumes, invoices — all free, private, and open source. No signup, no tracking, most tools run in your browser." />
+	<meta property="og:description" content="QR codes, PDFs, PowerPoint, links, resumes, invoices — all free, private, and open source. No signup, no tracking, most tools run in your browser." />
 	<meta property="og:image" content="https://nah.tools/og.png" />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
@@ -14,7 +14,7 @@
 	<!-- Twitter -->
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="nah — Free tools. No catch." />
-	<meta name="twitter:description" content="QR codes, PDFs, links, resumes, invoices — all free, private, and open source. No signup, no tracking, most tools run in your browser." />
+	<meta name="twitter:description" content="QR codes, PDFs, PowerPoint, links, resumes, invoices — all free, private, and open source. No signup, no tracking, most tools run in your browser." />
 	<meta name="twitter:image" content="https://nah.tools/og.png" />
 </svelte:head>
 

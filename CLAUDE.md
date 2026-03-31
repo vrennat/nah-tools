@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What is this
 
-nah.tools — free, open-source browser tools that replace predatory SaaS. Tools include: QR code generator (static + dynamic), PDF tools (merge, split, compress, rotate, watermark, etc.), photo tools (compress, filters, background removal), link shortener with analytics, resume builder with ATS analysis, and data broker removal. Most tools run entirely client-side. Dynamic features (short links, dynamic QR redirects) use Cloudflare Workers + D1, passphrase-protected and editable.
+nah.tools — free, open-source browser tools that replace predatory SaaS. Tools include: QR code generator (static + dynamic), PDF tools (merge, split, compress, rotate, watermark, etc.), PowerPoint tools (merge, split, compress, extract, watermark, etc.), photo tools (compress, filters, background removal), link shortener with analytics, resume builder with ATS analysis, and data broker removal. Most tools run entirely client-side. Dynamic features (short links, dynamic QR redirects) use Cloudflare Workers + D1, passphrase-protected and editable.
 
 ## Commands
 
@@ -44,6 +44,15 @@ All in `src/lib/qr/` — must be dynamically imported (uses canvas/DOM, no SSR):
 - `generator.ts` — wraps `qr-code-styling` for rendering
 - `exporter.ts` — PNG, SVG, PDF (jsPDF), batch ZIP (JSZip)
 
+### PPTX processing (client-side only)
+
+All in `src/lib/pptx/` — client-side PPTX manipulation via JSZip + DOMParser:
+- `types.ts` — shared type definitions (SlideRange, WatermarkConfig, PptxMetadata, etc.)
+- `processor.ts` — all processing functions (merge, split, compress, extract, watermark, etc.)
+- `exporter.ts` — download helpers (downloadPPTX, downloadAsZip)
+
+PPTX files are ZIP archives of XML (ECMA-376 Open XML). The processor opens them with JSZip, parses/modifies XML with DOMParser/XMLSerializer, and re-zips. No new dependencies — uses JSZip (already installed).
+
 ### Server utilities
 
 - `src/lib/server/db.ts` — D1 query helpers for dynamic redirect CRUD
@@ -72,13 +81,24 @@ All in `src/lib/qr/` — must be dynamically imported (uses canvas/DOM, no SSR):
 - `/qr/wifi`, `/qr/vcard`, `/qr/email`, `/qr/phone`, `/qr/sms` — SEO/GEO landing pages with FAQPage schema
 - `/links` — URL shortener / custom link creator with analytics, UTM builder, bulk creation
 - `/links/manage/[code]` — passphrase-protected link management with click analytics dashboard
+- `/pptx` — PowerPoint tool hub (links to all PPTX tools)
+- `/pptx/merge` — merge multiple PPTX files
+- `/pptx/split` — extract slide ranges or individual slides
+- `/pptx/compress` — reduce file size by compressing images
+- `/pptx/extract-images` — pull all embedded images
+- `/pptx/extract-text` — slide-by-slide text extraction
+- `/pptx/remove-notes` — strip speaker notes
+- `/pptx/watermark` — add text watermark to all slides
+- `/pptx/remove-animations` — strip animations and transitions
+- `/pptx/slide-numbers` — add slide numbers
+- `/pptx/metadata` — view and edit title, author, properties
 - `/why` — expose article about QR code industry
 - `/compare` — competitor comparison table
 - `/privacy`, `/terms` — legal pages
 
 ### Path aliases
 
-Defined in `svelte.config.js`: `$components`, `$qr`, `$server`, `$utils`
+Defined in `svelte.config.js`: `$components`, `$qr`, `$pdf`, `$pptx`, `$server`, `$utils`
 
 ### Schema.org / SEO
 
