@@ -43,6 +43,7 @@
 	function handlePointerUp(e: PointerEvent) {
 		if (!drawing) return;
 		e.preventDefault();
+		(e.target as Element).releasePointerCapture(e.pointerId);
 		drawing = false;
 
 		if (currentPoints.length >= 2) {

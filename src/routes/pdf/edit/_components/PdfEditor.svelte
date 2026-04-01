@@ -141,13 +141,11 @@
 			</div>
 			{#if sidebarOpen}
 				<!-- Mobile sidebar overlay -->
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<div class="absolute inset-0 z-30 md:hidden" onclick={() => (sidebarOpen = false)}>
-					<!-- svelte-ignore a11y_click_events_have_key_events -->
-					<div class="absolute inset-y-0 left-0 z-40 shadow-xl" onclick={(e) => e.stopPropagation()}>
+				<div class="absolute inset-0 z-30 md:hidden">
+					<div class="absolute inset-y-0 left-0 z-40 shadow-xl" role="presentation" onclick={(e) => e.stopPropagation()}>
 						<ThumbnailSidebar {editor} onscrolltopage={(i) => { handleScrollToPage(i); sidebarOpen = false; }} />
 					</div>
-					<div class="absolute inset-0 bg-brand/40 backdrop-blur-sm"></div>
+					<button type="button" class="absolute inset-0 bg-brand/40 backdrop-blur-sm" aria-label="Close sidebar" onclick={() => (sidebarOpen = false)} onkeydown={(e) => { if (e.key === 'Escape') sidebarOpen = false; }}></button>
 				</div>
 			{/if}
 
@@ -183,13 +181,11 @@
 			</div>
 			{#if propsOpen}
 				<!-- Mobile/tablet properties overlay -->
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
-				<div class="absolute inset-0 z-30 lg:hidden" onclick={() => (propsOpen = false)}>
-					<!-- svelte-ignore a11y_click_events_have_key_events -->
-					<div class="absolute inset-y-0 right-0 z-40 shadow-xl" onclick={(e) => e.stopPropagation()}>
+				<div class="absolute inset-0 z-30 lg:hidden">
+					<div class="absolute inset-y-0 right-0 z-40 shadow-xl" role="presentation" onclick={(e) => e.stopPropagation()}>
 						<PropertiesPanel {editor} />
 					</div>
-					<div class="absolute inset-0 bg-brand/40 backdrop-blur-sm"></div>
+					<button type="button" class="absolute inset-0 bg-brand/40 backdrop-blur-sm" aria-label="Close properties panel" onclick={() => (propsOpen = false)} onkeydown={(e) => { if (e.key === 'Escape') propsOpen = false; }}></button>
 				</div>
 			{/if}
 		</div>
