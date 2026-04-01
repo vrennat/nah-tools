@@ -13,7 +13,7 @@ export interface TrimConfig {
 
 export interface VideoCompressConfig {
 	preset: 'email' | 'social' | 'web' | 'custom';
-	videoBitrate: string; // e.g. '1M'
+	crf: number; // 0-51, higher = smaller file, lower quality. 23 = default, 32 = aggressive
 	audioBitrate: string; // e.g. '128k'
 	maxWidth: number;
 	maxHeight: number;

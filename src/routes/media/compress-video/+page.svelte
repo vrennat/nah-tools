@@ -48,7 +48,7 @@
 		try {
 			const config: VideoCompressConfig = {
 				preset: preset as VideoCompressConfig['preset'],
-				videoBitrate: currentPreset.videoBitrate,
+				crf: currentPreset.crf,
 				audioBitrate: currentPreset.audioBitrate,
 				maxWidth: currentPreset.maxWidth,
 				maxHeight: currentPreset.maxHeight,
@@ -118,14 +118,20 @@
 						<div class="space-y-4 rounded-lg border border-border bg-surface-alt p-4">
 							<div class="grid gap-4 sm:grid-cols-2">
 								<div>
-									<label for="vb" class="block text-sm font-medium text-text">Video Bitrate</label>
+									<label for="crf" class="block text-sm font-medium text-text">Quality (CRF)</label>
 									<input
-										id="vb"
-										type="text"
-										bind:value={currentPreset.videoBitrate}
-										class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
+										id="crf"
+										type="range"
+										min="18"
+										max="40"
+										bind:value={currentPreset.crf}
+										class="mt-2 w-full"
 									/>
-									<p class="mt-1 text-xs text-text-muted">e.g., 1M, 2M, 3M</p>
+									<div class="mt-1 flex justify-between text-xs text-text-muted">
+										<span>Higher quality</span>
+										<span class="font-mono">{currentPreset.crf}</span>
+										<span>Smaller file</span>
+									</div>
 								</div>
 
 								<div>
@@ -136,7 +142,7 @@
 										bind:value={currentPreset.audioBitrate}
 										class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
 									/>
-									<p class="mt-1 text-xs text-text-muted">e.g., 128k, 192k</p>
+									<p class="mt-1 text-xs text-text-muted">e.g., 96k, 128k, 192k</p>
 								</div>
 							</div>
 

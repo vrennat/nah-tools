@@ -61,7 +61,7 @@ export async function compressVideo(
 
 	await ffmpeg.writeFile(inputName, await fetchFile(file));
 
-	const args = ['-i', inputName, '-b:v', config.videoBitrate, '-b:a', config.audioBitrate];
+	const args = ['-i', inputName, '-c:v', 'libx264', '-crf', String(config.crf), '-preset', 'medium', '-b:a', config.audioBitrate];
 
 	if (config.maxWidth && config.maxHeight) {
 		args.push(
