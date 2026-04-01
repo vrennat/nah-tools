@@ -15,7 +15,7 @@
 	let loadProgress = $state<LoadProgress>({ state: 'idle', percent: 0 });
 	let processingProgress = $state<PP>({ percent: 0, timeElapsed: 0, estimatedTotal: 0 });
 	let error = $state('');
-	let result = $state<{ originalSize: number; resultSize: number } | null>(null);
+	let result = $state<{ originalSize: number; resultSize: number; keptOriginal: boolean } | null>(null);
 
 	let canProcess = $derived(!!file && !processing && loadProgress.state === 'ready');
 
@@ -51,15 +51,20 @@
 
 			const mediaResult = await compressAudio(file, config, p => (processingProgress = p));
 
+			const keptOriginal = mediaResult.resultSize >= mediaResult.originalSize;
+			const downloadBlob = keptOriginal ? file : mediaResult.blob;
+			const downloadName = keptOriginal ? file.name : mediaResult.filename;
+
 			result = {
 				originalSize: mediaResult.originalSize,
-				resultSize: mediaResult.resultSize
+				resultSize: keptOriginal ? mediaResult.originalSize : mediaResult.resultSize,
+				keptOriginal
 			};
 
-			const url = URL.createObjectURL(mediaResult.blob);
+			const url = URL.createObjectURL(downloadBlob);
 			const a = document.createElement('a');
 			a.href = url;
-			a.download = mediaResult.filename;
+			a.download = downloadName;
 			document.body.appendChild(a);
 			a.click();
 			document.body.removeChild(a);
@@ -161,18 +166,30 @@
 					</button>
 
 					{#if result}
-						<div class="space-y-3 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-900 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300">
-							<div class="font-medium">Compression complete!</div>
-							<div class="space-y-1 text-xs">
-								<div>Original: {formatSize(result.originalSize)}</div>
-								<div>Compressed: {formatSize(result.resultSize)}</div>
-								<div>
-									Saved: {formatSize(result.originalSize - result.resultSize)} ({Math.round(
-										((result.originalSize - result.resultSize) / result.originalSize) * 100
-									)}%)
+						{#if result.keptOriginal}
+							<div class="space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
+								<div class="font-medium">Already optimized</div>
+								<p class="text-xs">
+									This audio file is already smaller than what the compressor would produce. The original file was downloaded instead. Try a lower bitrate.
+								</p>
+								<div class="text-xs">
+									File size: {formatSize(result.originalSize)}
 								</div>
 							</div>
-						</div>
+						{:else}
+							<div class="space-y-3 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-900 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300">
+								<div class="font-medium">Compression complete!</div>
+								<div class="space-y-1 text-xs">
+									<div>Original: {formatSize(result.originalSize)}</div>
+									<div>Compressed: {formatSize(result.resultSize)}</div>
+									<div>
+										Saved: {formatSize(result.originalSize - result.resultSize)} ({Math.round(
+											((result.originalSize - result.resultSize) / result.originalSize) * 100
+										)}%)
+									</div>
+								</div>
+							</div>
+						{/if}
 					{/if}
 
 					{#if error}
