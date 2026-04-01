@@ -99,8 +99,13 @@
 				class="group p-6 rounded-xl bg-surface border border-border hover:border-accent hover:shadow-lg transition-all"
 			>
 				<div class="text-3xl mb-4">
-					<svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+					<svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+						<circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round" />
+						<circle cx="8" cy="9" r="1" fill="currentColor" stroke="none" />
+						<circle cx="13" cy="7" r="1" fill="currentColor" stroke="none" />
+						<circle cx="10" cy="14" r="1" fill="currentColor" stroke="none" />
+						<circle cx="15" cy="12" r="1" fill="currentColor" stroke="none" />
+						<circle cx="7" cy="12" r="1" fill="currentColor" stroke="none" />
 					</svg>
 				</div>
 				<h2 class="text-xl font-semibold text-text mb-2 group-hover:text-accent transition-colors">
@@ -122,8 +127,8 @@
 				class="group p-6 rounded-xl bg-surface border border-border hover:border-accent hover:shadow-lg transition-all"
 			>
 				<div class="text-3xl mb-4">
-					<svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 0v2m0-6V9m0 4V7m0 0v2m6-12H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2z" />
+					<svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
 					</svg>
 				</div>
 				<h2 class="text-xl font-semibold text-text mb-2 group-hover:text-accent transition-colors">
