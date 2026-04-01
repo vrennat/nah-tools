@@ -15,7 +15,9 @@
 		const pending = consumePendingFile();
 		if (pending) {
 			const file = new File([pending.bytes as BlobPart], pending.name, { type: 'application/pdf' });
-			editor.loadFile(file);
+			editor.loadFile(file).then(() => {
+				requestAnimationFrame(fitZoomToWidth);
+			});
 		}
 	});
 
@@ -24,10 +26,28 @@
 	let sidebarOpen = $state(false);
 	let propsOpen = $state(false);
 
+	function fitZoomToWidth() {
+		if (!mainCanvas || editor.pages.length === 0) return;
+		const containerWidth = mainCanvas.getContainerWidth();
+		if (containerWidth <= 0) return;
+		const padding = 48;
+		const maxPageWidth = Math.max(...editor.pages.map(p => {
+			const isRotated = p.rotation === 90 || p.rotation === 270;
+			return isRotated ? p.height : p.width;
+		}));
+		if (maxPageWidth <= 0) return;
+		const fitZoom = (containerWidth - padding) / maxPageWidth;
+		editor.setZoom(Math.min(fitZoom, 2.0));
+	}
+
 	$effect(() => {
 		if (dropFiles.length > 0) {
 			const file = dropFiles[0];
-			if (file) editor.loadFile(file);
+			if (file) {
+				editor.loadFile(file).then(() => {
+					requestAnimationFrame(fitZoomToWidth);
+				});
+			}
 			dropFiles = [];
 		}
 	});

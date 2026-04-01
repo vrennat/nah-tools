@@ -24,13 +24,19 @@
 
 <button
 	type="button"
-	class="group relative flex w-full flex-col items-center gap-1 rounded-lg p-2 transition-colors
+	class="group relative flex w-full cursor-grab flex-col items-center gap-1 rounded-lg p-2 transition-colors active:cursor-grabbing
 		{selected
 		? 'bg-accent/10 ring-2 ring-accent'
 		: 'hover:bg-surface-alt'}"
 	onclick={(e) => onselect(index, e as unknown as PointerEvent)}
 	onpointerdown={(e) => onpointerdown(index, e)}
 >
+	<!-- Grip handle -->
+	<div class="absolute top-1 left-1/2 -translate-x-1/2 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-60">
+		<span class="block h-1 w-1 rounded-full bg-text-muted"></span>
+		<span class="block h-1 w-1 rounded-full bg-text-muted"></span>
+		<span class="block h-1 w-1 rounded-full bg-text-muted"></span>
+	</div>
 	<div
 		class="relative overflow-hidden rounded border border-border bg-white shadow-sm"
 		style="width: {THUMB_WIDTH}px; height: {thumbHeight}px;"

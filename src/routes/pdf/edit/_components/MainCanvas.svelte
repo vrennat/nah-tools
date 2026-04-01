@@ -28,6 +28,10 @@
 		}
 	}
 
+	export function getContainerWidth(): number {
+		return scrollContainer?.clientWidth ?? 0;
+	}
+
 	// Observe container height
 	$effect(() => {
 		if (!scrollContainer) return;
@@ -41,7 +45,7 @@
 
 <div
 	bind:this={scrollContainer}
-	class="flex-1 overflow-y-auto bg-surface-alt"
+	class="flex-1 overflow-auto bg-surface-alt"
 	onscroll={handleScroll}
 >
 	<!-- Spacer for total document height -->

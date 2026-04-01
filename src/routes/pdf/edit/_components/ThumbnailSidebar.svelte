@@ -96,23 +96,32 @@
 	class="flex h-full flex-col gap-1 overflow-y-auto border-r border-border bg-surface p-2"
 	style="width: 180px; min-width: 180px;"
 >
-	<div class="mb-1 flex items-center justify-between px-1">
-		<span class="text-xs font-medium text-text-muted">Pages</span>
-		{#if editor.hasSelection}
-			<button
-				type="button"
-				class="text-xs text-accent hover:underline"
-				onclick={() => editor.clearSelection()}
-			>
-				Clear
-			</button>
+	<div class="mb-1 space-y-0.5 px-1">
+		<div class="flex items-center justify-between">
+			<span class="text-xs font-medium text-text-muted">Pages</span>
+			{#if editor.hasSelection}
+				<button
+					type="button"
+					class="text-xs text-accent hover:underline"
+					onclick={() => editor.clearSelection()}
+				>
+					Clear
+				</button>
+			{/if}
+		</div>
+		{#if !dragging && editor.pageCount > 1}
+			<p class="text-[10px] text-text-muted/60">Drag to reorder</p>
 		{/if}
 	</div>
 
 	{#each editor.pages as page, i (page.index)}
 		<!-- Drop indicator line -->
 		{#if dragging && dragOverIndex === i}
-			<div class="mx-2 h-0.5 rounded-full bg-accent"></div>
+			<div class="mx-2 flex items-center gap-1">
+				<div class="h-2 w-2 rounded-full bg-accent"></div>
+				<div class="h-0.5 flex-1 rounded-full bg-accent"></div>
+				<div class="h-2 w-2 rounded-full bg-accent"></div>
+			</div>
 		{/if}
 
 		<div
@@ -135,7 +144,11 @@
 
 	<!-- Drop indicator at end -->
 	{#if dragging && dragOverIndex === editor.pageCount}
-		<div class="mx-2 h-0.5 rounded-full bg-accent"></div>
+		<div class="mx-2 flex items-center gap-1">
+			<div class="h-2 w-2 rounded-full bg-accent"></div>
+			<div class="h-0.5 flex-1 rounded-full bg-accent"></div>
+			<div class="h-2 w-2 rounded-full bg-accent"></div>
+		</div>
 	{/if}
 
 	<!-- Merge drop zone -->
