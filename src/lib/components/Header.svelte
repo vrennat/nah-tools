@@ -22,7 +22,8 @@
 		{ href: '/invoice', label: 'Invoice Generator', desc: 'Multi-currency, tax support, PDF export' },
 		{ href: '/links', label: 'Link Shortener', desc: 'Custom aliases, click analytics, UTM builder' },
 		{ href: '/bio', label: 'Link in Bio', desc: 'Your links, your page, no signup' },
-		{ href: '/remove', label: 'Data Removal', desc: 'Remove your info from 25+ data brokers' }
+		{ href: '/remove', label: 'Data Removal', desc: 'Remove your info from 25+ data brokers' },
+		{ href: '/mcp', label: 'MCP Server', desc: '30+ tools for AI agents via MCP' }
 	];
 
 	function closeDropdown() {

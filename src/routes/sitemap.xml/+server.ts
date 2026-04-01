@@ -34,6 +34,7 @@ const routes: { path: string; changefreq: string; priority: string }[] = [
 	{ path: '/photo/compress', changefreq: 'monthly', priority: '0.8' },
 	{ path: '/photo/filters', changefreq: 'monthly', priority: '0.8' },
 	{ path: '/remove', changefreq: 'weekly', priority: '1.0' },
+	{ path: '/mcp', changefreq: 'weekly', priority: '0.9' },
 	{ path: '/qr/wifi', changefreq: 'monthly', priority: '0.8' },
 	{ path: '/qr/vcard', changefreq: 'monthly', priority: '0.8' },
 	{ path: '/qr/email', changefreq: 'monthly', priority: '0.8' },

@@ -91,7 +91,7 @@
 			100% client-side — zero data sent to our servers
 		</div>
 		<p class="mt-3 text-sm text-text-muted">
-			Want to automate this? <a href="/remove/agent" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">Connect an AI agent</a> to handle it for you.
+			Want to automate this? <a href="/mcp" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">Connect an AI agent</a> to handle it for you.
 		</p>
 	</section>
 
