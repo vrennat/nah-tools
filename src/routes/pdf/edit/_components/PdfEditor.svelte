@@ -1,15 +1,28 @@
 <script lang="ts">
 	import { createEditorState } from '$pdf/editor-state.svelte';
+	import { consumePendingFile } from '$pdf/file-transfer';
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import Toolbar from './Toolbar.svelte';
 	import ThumbnailSidebar from './ThumbnailSidebar.svelte';
 	import MainCanvas from './MainCanvas.svelte';
 	import PropertiesPanel from './PropertiesPanel.svelte';
+	import { onMount } from 'svelte';
 
 	const editor = createEditorState();
 
+	// Check for file passed from another route (e.g. /pdf/merge -> "Open in editor")
+	onMount(() => {
+		const pending = consumePendingFile();
+		if (pending) {
+			const file = new File([pending.bytes as BlobPart], pending.name, { type: 'application/pdf' });
+			editor.loadFile(file);
+		}
+	});
+
 	let mainCanvas: MainCanvas | undefined = $state();
 	let dropFiles = $state<File[]>([]);
+	let sidebarOpen = $state(false);
+	let propsOpen = $state(false);
 
 	$effect(() => {
 		if (dropFiles.length > 0) {
@@ -109,23 +122,76 @@
 	{#if editor.hasDoc}
 		<Toolbar {editor} />
 
+		{#if editor.isLargeFile}
+			<div class="border-b border-warning/20 bg-warning/5 px-4 py-2 text-sm text-warning">
+				Large file detected ({(editor.fileSize / 1024 / 1024).toFixed(0)} MB). Some operations may be slower.
+			</div>
+		{/if}
+
 		{#if editor.error}
 			<div class="border-b border-error/20 bg-error/5 px-4 py-2 text-sm text-error">
 				{editor.error}
 			</div>
 		{/if}
 
-		<div class="flex flex-1 overflow-hidden">
+		<div class="relative flex flex-1 overflow-hidden">
+			<!-- Sidebar: always visible on md+, toggleable drawer on mobile -->
 			<div class="hidden md:block">
 				<ThumbnailSidebar {editor} onscrolltopage={handleScrollToPage} />
+			</div>
+			{#if sidebarOpen}
+				<!-- Mobile sidebar overlay -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<div class="absolute inset-0 z-30 md:hidden" onclick={() => (sidebarOpen = false)}>
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
+					<div class="absolute inset-y-0 left-0 z-40 shadow-xl" onclick={(e) => e.stopPropagation()}>
+						<ThumbnailSidebar {editor} onscrolltopage={(i) => { handleScrollToPage(i); sidebarOpen = false; }} />
+					</div>
+					<div class="absolute inset-0 bg-brand/40 backdrop-blur-sm"></div>
+				</div>
+			{/if}
+
+			<!-- Mobile toggle buttons -->
+			<div class="absolute left-2 top-2 z-20 flex gap-1 md:hidden">
+				<button
+					type="button"
+					class="rounded-lg bg-surface/90 p-1.5 text-text-muted shadow-md backdrop-blur hover:text-text"
+					onclick={() => (sidebarOpen = !sidebarOpen)}
+					title="Toggle pages"
+				>
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+					</svg>
+				</button>
+				<button
+					type="button"
+					class="rounded-lg bg-surface/90 p-1.5 text-text-muted shadow-md backdrop-blur hover:text-text lg:hidden"
+					onclick={() => (propsOpen = !propsOpen)}
+					title="Toggle properties"
+				>
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+					</svg>
+				</button>
 			</div>
 
 			<MainCanvas bind:this={mainCanvas} {editor} />
 
-			<!-- Properties panel (hidden on small screens) -->
+			<!-- Properties panel: always visible on lg+, toggleable on smaller -->
 			<div class="hidden lg:block">
 				<PropertiesPanel {editor} />
 			</div>
+			{#if propsOpen}
+				<!-- Mobile/tablet properties overlay -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<div class="absolute inset-0 z-30 lg:hidden" onclick={() => (propsOpen = false)}>
+					<!-- svelte-ignore a11y_click_events_have_key_events -->
+					<div class="absolute inset-y-0 right-0 z-40 shadow-xl" onclick={(e) => e.stopPropagation()}>
+						<PropertiesPanel {editor} />
+					</div>
+					<div class="absolute inset-0 bg-brand/40 backdrop-blur-sm"></div>
+				</div>
+			{/if}
 		</div>
 
 		{#if editor.loading}

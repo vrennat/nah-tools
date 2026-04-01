@@ -114,6 +114,19 @@
 		</svg>
 	</button>
 
+	<!-- Extract selected as new PDF -->
+	<button
+		type="button"
+		class="rounded p-1.5 text-text-muted transition-colors hover:bg-surface-alt hover:text-text disabled:opacity-30 disabled:cursor-not-allowed"
+		disabled={!editor.hasSelection || editor.loading}
+		onclick={() => editor.extractSelected()}
+		title="Extract selected pages as PDF"
+	>
+		<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+		</svg>
+	</button>
+
 	<!-- Delete -->
 	<button
 		type="button"

@@ -9,6 +9,23 @@
 
 	let { editor, onscrolltopage }: Props = $props();
 
+	// Merge drop state
+	let mergeOver = $state(false);
+
+	function handleMergeDrop(e: DragEvent) {
+		e.preventDefault();
+		mergeOver = false;
+		const file = e.dataTransfer?.files[0];
+		if (file?.type === 'application/pdf') {
+			editor.mergeFile(file, editor.pageCount);
+		}
+	}
+
+	function handleMergeDragOver(e: DragEvent) {
+		e.preventDefault();
+		mergeOver = true;
+	}
+
 	// Drag state
 	let dragIndex = $state<number | null>(null);
 	let dragOverIndex = $state<number | null>(null);
@@ -120,4 +137,18 @@
 	{#if dragging && dragOverIndex === editor.pageCount}
 		<div class="mx-2 h-0.5 rounded-full bg-accent"></div>
 	{/if}
+
+	<!-- Merge drop zone -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div
+		class="mx-2 mt-2 flex min-h-[60px] items-center justify-center rounded-lg border-2 border-dashed transition-colors
+			{mergeOver ? 'border-accent bg-accent/10 text-accent' : 'border-border text-text-muted'}"
+		ondragover={handleMergeDragOver}
+		ondragleave={() => (mergeOver = false)}
+		ondrop={handleMergeDrop}
+	>
+		<span class="px-2 text-center text-[10px]">
+			{mergeOver ? 'Drop to merge' : 'Drop PDF to add pages'}
+		</span>
+	</div>
 </div>

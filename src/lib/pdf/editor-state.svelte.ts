@@ -58,6 +58,7 @@ export function createEditorState() {
 	let hasDoc = $derived(currentBytes !== null);
 	let pageCount = $derived(pages.length);
 	let hasSelection = $derived(selectedPages.size > 0);
+	let isLargeFile = $derived(fileSize > 50 * 1024 * 1024);
 
 	/** Cumulative page top positions for virtualization */
 	let pageOffsets = $derived.by(() => {
@@ -367,6 +368,19 @@ export function createEditorState() {
 		selectedPages = new Set();
 	}
 
+	async function extractSelected() {
+		if (!currentBytes || selectedPages.size === 0) return;
+		const indices = [...selectedPages].sort((a, b) => a - b);
+		const { PDFDocument } = await import('@cantoo/pdf-lib');
+		const srcDoc = await PDFDocument.load(currentBytes.slice().buffer);
+		const newDoc = await PDFDocument.create();
+		const copied = await newDoc.copyPages(srcDoc, indices);
+		for (const page of copied) newDoc.addPage(page);
+		const bytes = await newDoc.save();
+		const { downloadPDF, makeFilename } = await import('./exporter');
+		downloadPDF(bytes, makeFilename('extracted', 'pdf'));
+	}
+
 	// -- Content layer actions --
 
 	function setTool(tool: EditorTool) {
@@ -466,6 +480,7 @@ export function createEditorState() {
 		get hasDoc() { return hasDoc; },
 		get pageCount() { return pageCount; },
 		get hasSelection() { return hasSelection; },
+		get isLargeFile() { return isLargeFile; },
 		get thumbnails() { return thumbnails; },
 		get pageOffsets() { return pageOffsets; },
 		get totalHeight() { return totalHeight; },
@@ -486,6 +501,7 @@ export function createEditorState() {
 		selectPage,
 		selectAll,
 		clearSelection,
+		extractSelected,
 		exportPdf,
 		getVisibleRange,
 		setTool,
