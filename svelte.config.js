@@ -24,6 +24,10 @@ const config = {
 			$resume: 'src/lib/resume',
 			$bio: 'src/lib/bio',
 			$invoice: 'src/lib/invoice',
+			$signature: 'src/lib/signature',
+			$convert: 'src/lib/convert',
+			$media: 'src/lib/media',
+			$legalgen: 'src/lib/legal-gen',
 			$server: 'src/lib/server',
 			$utils: 'src/lib/utils'
 		}
