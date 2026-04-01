@@ -23,7 +23,7 @@ export function markdownToHtml(markdown: string): string {
 		}
 
 		// Headings
-		if (trimmed.startsWith('# ')) {
+		if (trimmed.startsWith('#')) {
 			const match = trimmed.match(/^(#{1,3})\s+(.+)$/);
 			if (match) {
 				const level = match[1].length;
