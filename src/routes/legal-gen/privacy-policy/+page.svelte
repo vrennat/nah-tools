@@ -47,16 +47,24 @@
 	});
 
 	let isExporting = $state(false);
+	let statusMessage = $state('');
+	let statusType = $state<'success' | 'error'>('success');
 
 	const markdown = $derived(generateDocument('privacy-policy', input));
 	const html = $derived(markdownToHtml(markdown));
 
+	function showStatus(message: string, type: 'success' | 'error' = 'success') {
+		statusMessage = message;
+		statusType = type;
+		if (type === 'success') setTimeout(() => { statusMessage = ''; }, 3000);
+	}
+
 	async function handleCopy() {
 		try {
 			await copyText(markdown);
-			alert('Copied to clipboard');
+			showStatus('Copied to clipboard');
 		} catch (error) {
-			alert('Failed to copy: ' + (error instanceof Error ? error.message : 'Unknown error'));
+			showStatus('Failed to copy: ' + (error instanceof Error ? error.message : 'Unknown error'), 'error');
 		}
 	}
 
@@ -73,7 +81,7 @@
 		try {
 			await downloadPdf(markdown, 'privacy-policy');
 		} catch (error) {
-			alert('Failed to generate PDF: ' + (error instanceof Error ? error.message : 'Unknown error'));
+			showStatus('Failed to generate PDF: ' + (error instanceof Error ? error.message : 'Unknown error'), 'error');
 		} finally {
 			isExporting = false;
 		}
@@ -102,7 +110,10 @@
 	<!-- Export Bar -->
 	<div class="sticky top-0 z-10 bg-surface border-b border-border">
 		<div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-			<div class="flex flex-wrap gap-2">
+			<div class="flex flex-wrap items-center gap-2">
+				{#if statusMessage}
+					<span class="text-sm font-medium {statusType === 'success' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">{statusMessage}</span>
+				{/if}
 				<button
 					onclick={handleCopy}
 					class="px-4 py-2 bg-accent text-white rounded-lg font-medium text-sm hover:opacity-90 transition-opacity"
