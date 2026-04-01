@@ -19,6 +19,12 @@ async function getPDFJS(): Promise<PDFJSLib> {
 	return pdfjsLib;
 }
 
+/** Load a PDF document for rendering. Shared by editor and standalone tools. */
+export async function loadPdfDocument(data: Uint8Array) {
+	const pdfjs = await getPDFJS();
+	return pdfjs.getDocument({ data }).promise;
+}
+
 /** Render page thumbnails for visual tools (rotate, reorder, remove) */
 export async function renderThumbnails(
 	source: ArrayBuffer,
