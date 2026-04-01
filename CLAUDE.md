@@ -53,6 +53,20 @@ All in `src/lib/pptx/` — client-side PPTX manipulation via JSZip + DOMParser:
 
 PPTX files are ZIP archives of XML (ECMA-376 Open XML). The processor opens them with JSZip, parses/modifies XML with DOMParser/XMLSerializer, and re-zips. No new dependencies — uses JSZip (already installed).
 
+### MCP server (Model Context Protocol)
+
+Modular MCP server in `src/lib/server/mcp/` exposes 30+ tools to AI agents via streamable HTTP at `/mcp`:
+- `index.ts` — server factory, registers all tool modules
+- `pdf.ts` — 14 PDF tools (merge, split, rotate, reorder, remove pages, watermark, page numbers, protect, unlock, flatten, crop, compress, set metadata, get info) via `@cantoo/pdf-lib`
+- `pptx.ts` — 9 PPTX tools (merge, split, compress, extract text, remove notes, remove animations, watermark, set metadata, get info) via JSZip + DOMParser
+- `qr.ts` — QR encoding for all 7 content types (URL, WiFi, vCard, email, phone, SMS, text)
+- `invoice.ts` — invoice calculation (line items, multi-tax, compound tax, discounts)
+- `removal.ts` — 6 data broker removal tools + resources + prompts
+
+The `/mcp` route has both `+page.svelte` (landing page for browsers) and `+server.ts` (MCP protocol handler for agents). SvelteKit routes browser GETs to the page and JSON/SSE requests to the server.
+
+File-based tools (PDF, PPTX) accept/return base64-encoded data. The server is stateless — no sessions, no storage, no auth required.
+
 ### Server utilities
 
 - `src/lib/server/db.ts` — D1 query helpers for dynamic redirect CRUD
@@ -72,10 +86,12 @@ PPTX files are ZIP archives of XML (ECMA-376 Open XML). The processor opens them
 - `POST /api/links/bulk` — bulk create up to 100 links
 - `POST /api/links/report` — report abusive link (auto-deactivates after 3 reports)
 - `GET /sitemap.xml` — generated sitemap
+- `GET|POST|DELETE /mcp` — MCP protocol endpoint (streamable HTTP)
 
 ### Pages
 
 - `/` — tool picker landing page (links to all tools)
+- `/mcp` — MCP server landing page (setup docs, tool listing, capabilities)
 - `/qr` — QR code generator (all 7 types, live preview, style customization, download, batch, dynamic)
 - `/qr/manage/[code]` — passphrase-protected dynamic QR management UI
 - `/qr/wifi`, `/qr/vcard`, `/qr/email`, `/qr/phone`, `/qr/sms` — SEO/GEO landing pages with FAQPage schema
@@ -92,6 +108,7 @@ PPTX files are ZIP archives of XML (ECMA-376 Open XML). The processor opens them
 - `/pptx/remove-animations` — strip animations and transitions
 - `/pptx/slide-numbers` — add slide numbers
 - `/pptx/metadata` — view and edit title, author, properties
+- `/remove/agent` — redirects to `/mcp` (301)
 - `/why` — expose article about QR code industry
 - `/compare` — competitor comparison table
 - `/privacy`, `/terms` — legal pages
