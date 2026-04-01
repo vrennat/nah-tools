@@ -1,3 +1,25 @@
+/** Page metadata derived from pdf-lib document */
+export interface PageMeta {
+	index: number;
+	width: number; // PDF points
+	height: number; // PDF points
+	rotation: number; // 0, 90, 180, 270
+	label: string; // "Page 1", "Page 2", etc.
+}
+
+/** Transform state for a rendered page */
+export interface PageTransform {
+	scale: number; // zoom * (CSS px / PDF point)
+	rotation: number; // 0, 90, 180, 270
+	pdfWidth: number; // page width in PDF points
+	pdfHeight: number; // page height in PDF points
+	canvasWidth: number; // rendered width in CSS pixels
+	canvasHeight: number; // rendered height in CSS pixels
+}
+
+/** Active tool in the editor */
+export type EditorTool = 'select' | 'text' | 'draw' | 'highlight' | 'form';
+
 /** Metadata about a loaded PDF file */
 export interface PdfFileInfo {
 	file: File;
