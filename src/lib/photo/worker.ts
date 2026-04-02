@@ -1,11 +1,13 @@
 /// <reference lib="webworker" />
 import * as Comlink from 'comlink';
-import type { BackendType } from './types';
-import { DEFAULT_BG_MODEL, MODEL_CACHE_NAME } from './models';
+import type { BackendType, MaskOptions } from './types';
+import { DEFAULT_MASK_OPTIONS } from './types';
+import { DEFAULT_BG_MODEL, MODEL_CACHE_NAME, AVAILABLE_MODELS } from './models';
 import type { ModelInfo } from './types';
 
 let session: Awaited<ReturnType<typeof import('onnxruntime-web').InferenceSession.create>> | null =
 	null;
+let loadedModelId: string | null = null;
 let currentBackend: BackendType = 'wasm';
 
 type ProgressCallback = (loaded: number, total: number) => void;
@@ -87,7 +89,16 @@ async function fetchModelWithCache(
 	return buffer.buffer;
 }
 
-async function loadModel(onProgress?: ProgressCallback): Promise<BackendType> {
+async function loadModel(modelId?: string, onProgress?: ProgressCallback): Promise<BackendType> {
+	const model = (modelId && AVAILABLE_MODELS.find((m) => m.id === modelId)) || DEFAULT_BG_MODEL;
+
+	// If a different model is requested, dispose the current session
+	if (session && loadedModelId !== model.id) {
+		session.release();
+		session = null;
+		loadedModelId = null;
+	}
+
 	if (session) return currentBackend;
 
 	const ort = await import('onnxruntime-web');
@@ -99,7 +110,7 @@ async function loadModel(onProgress?: ProgressCallback): Promise<BackendType> {
 
 	currentBackend = await detectBackend();
 
-	const modelBuffer = await fetchModelWithCache(DEFAULT_BG_MODEL, onProgress);
+	const modelBuffer = await fetchModelWithCache(model, onProgress);
 
 	try {
 		session = await ort.InferenceSession.create(modelBuffer, {
@@ -118,18 +129,24 @@ async function loadModel(onProgress?: ProgressCallback): Promise<BackendType> {
 		}
 	}
 
+	loadedModelId = model.id;
 	return currentBackend;
 }
 
 async function removeBackground(
 	imageBitmap: ImageBitmap,
-	onProgress?: ProgressCallback
+	onProgress?: ProgressCallback,
+	modelId?: string,
+	maskOptions?: Partial<MaskOptions>
 ): Promise<{ mask: ImageBitmap; backend: BackendType; inferenceMs: number }> {
-	const backend = await loadModel(onProgress);
+	const backend = await loadModel(modelId, onProgress);
 	if (!session) throw new Error('Model not loaded');
 
+	const opts = { ...DEFAULT_MASK_OPTIONS, ...maskOptions };
+	const model = (modelId && AVAILABLE_MODELS.find((m) => m.id === modelId)) || DEFAULT_BG_MODEL;
+
 	const ort = await import('onnxruntime-web');
-	const modelSize = DEFAULT_BG_MODEL.inputSize;
+	const modelSize = model.inputSize;
 
 	// Draw image to OffscreenCanvas and resize to model input
 	const canvas = new OffscreenCanvas(modelSize, modelSize);
@@ -182,8 +199,11 @@ async function removeBackground(
 	}
 	const range = maxVal - minVal || 1;
 
+	const thresholdRange = opts.softness - opts.threshold || 0.001;
 	for (let i = 0; i < outputPixels; i++) {
-		const normalized = (outputData[i] - minVal) / range;
+		let normalized = (outputData[i] - minVal) / range;
+		// Sharpen the mask: push values below threshold to 0, above softness to 1
+		normalized = Math.min(1, Math.max(0, (normalized - opts.threshold) / thresholdRange));
 		const byte = Math.round(normalized * 255);
 		const mi = i * 4;
 		maskImageData.data[mi] = byte;
@@ -200,6 +220,13 @@ async function removeBackground(
 	// Scale mask to original image dimensions
 	maskCtx.drawImage(tempCanvas, 0, 0, imageBitmap.width, imageBitmap.height);
 
+	// Apply feathering (Gaussian-like blur via repeated box blur on the mask)
+	if (opts.feather > 0) {
+		maskCtx.filter = `blur(${opts.feather}px)`;
+		maskCtx.drawImage(maskCanvas, 0, 0);
+		maskCtx.filter = 'none';
+	}
+
 	const mask = await createImageBitmap(maskCanvas);
 
 	// Clean up
@@ -209,24 +236,31 @@ async function removeBackground(
 	return { mask, backend, inferenceMs };
 }
 
-async function isModelCached(): Promise<boolean> {
+async function isModelCached(modelId?: string): Promise<boolean> {
+	const model = (modelId && AVAILABLE_MODELS.find((m) => m.id === modelId)) || DEFAULT_BG_MODEL;
 	try {
 		const cache = await caches.open(MODEL_CACHE_NAME);
-		const cached = await cache.match(DEFAULT_BG_MODEL.url);
+		const cached = await cache.match(model.url);
 		return !!cached;
 	} catch {
 		return false;
 	}
 }
 
-function getModelInfo() {
-	return { ...DEFAULT_BG_MODEL };
+function getModelInfo(modelId?: string) {
+	const model = (modelId && AVAILABLE_MODELS.find((m) => m.id === modelId)) || DEFAULT_BG_MODEL;
+	return { ...model };
+}
+
+function getAvailableModels() {
+	return AVAILABLE_MODELS.map((m) => ({ ...m }));
 }
 
 const workerApi = {
 	removeBackground,
 	isModelCached,
 	getModelInfo,
+	getAvailableModels,
 	detectBackend
 };
 

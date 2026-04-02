@@ -7,7 +7,25 @@ export interface ModelInfo {
 	size: number; // bytes
 	inputSize: number; // square dimension (e.g. 1024)
 	description: string;
+	/** What the model is best at (shown in UI) */
+	bestFor: string;
 }
+
+/** Options for controlling mask post-processing */
+export interface MaskOptions {
+	/** Lower threshold — values below this become fully transparent (0-1, default 0.3) */
+	threshold: number;
+	/** Upper threshold — values above this become fully opaque (0-1, default 0.7) */
+	softness: number;
+	/** Feather radius in pixels for edge smoothing (0 = sharp edges, default 0) */
+	feather: number;
+}
+
+export const DEFAULT_MASK_OPTIONS: MaskOptions = {
+	threshold: 0.3,
+	softness: 0.7,
+	feather: 0
+};
 
 export interface ProcessingResult {
 	/** The mask as an ImageBitmap (grayscale, same size as original) */
