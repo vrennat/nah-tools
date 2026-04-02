@@ -15,6 +15,15 @@
 			"database_id": "e2e045cb-6a54-484c-8041-2fee149d52ea"
 		}
 	],
+	"kv_namespaces": [
+		{
+			"binding": "KV",
+			"id": "e61ce66823e24e5dba2c0a7a9e4556c0"
+		}
+	],
+	"vars": {
+		"CF_ACCOUNT_ID": "5a0a2ffa1e2f5b55c17406b48b489975"
+	},
 	"routes": [
 		{
 			"pattern": "nah.tools",

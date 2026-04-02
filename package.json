@@ -31,8 +31,8 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"deploy": "bun run build && wrangler deploy",
 		"deploy:redirect": "cd redirect-worker && wrangler deploy",
-		"db:migrate:local": "wrangler d1 execute nah-tools-db --local --file=migrations/0001_create_redirects.sql",
-		"db:migrate:prod": "wrangler d1 execute nah-tools-db --file=migrations/0001_create_redirects.sql",
+		"db:migrate:local": "for f in migrations/*.sql; do wrangler d1 execute nah-tools-db --local --file=$f; done",
+		"db:migrate:prod": "for f in migrations/*.sql; do wrangler d1 execute nah-tools-db --remote --file=$f; done",
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},

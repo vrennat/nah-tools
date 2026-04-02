@@ -14,6 +14,36 @@ export function getDB(platform: App.Platform | undefined): D1Database {
 	return db;
 }
 
+/** Extract the KV namespace binding */
+export function getKV(platform: App.Platform | undefined): KVNamespace {
+	const kv = platform?.env?.KV;
+	if (!kv) throw error(500, 'KV not available');
+	return kv;
+}
+
+/** Invalidate KV cache for a redirect (by short_code, and custom_alias if set) */
+export async function invalidateRedirectCache(
+	kv: KVNamespace,
+	db: D1Database,
+	shortCode: string
+): Promise<void> {
+	const row = await db
+		.prepare('SELECT short_code, custom_alias FROM redirects WHERE short_code = ? OR custom_alias = ?')
+		.bind(shortCode, shortCode)
+		.first<{ short_code: string; custom_alias: string | null }>();
+
+	if (!row) return;
+
+	const deletes: Promise<void>[] = [kv.delete(`redirect:${row.short_code}`)];
+	if (row.custom_alias) {
+		deletes.push(kv.delete(`redirect:${row.custom_alias}`));
+	}
+	if (shortCode !== row.short_code && shortCode !== row.custom_alias) {
+		deletes.push(kv.delete(`redirect:${shortCode}`));
+	}
+	await Promise.all(deletes);
+}
+
 /** Look up a redirect and verify the passphrase, or throw */
 export async function authenticateRedirect(
 	db: D1Database,
@@ -149,8 +179,104 @@ export async function isAliasAvailable(db: D1Database, alias: string): Promise<b
 	return !existing;
 }
 
+/** Validate short code for safe interpolation into Analytics Engine SQL */
+function sanitizeCode(value: string): string {
+	if (!/^[a-zA-Z0-9_-]+$/.test(value)) {
+		throw error(400, 'Invalid short code');
+	}
+	return value;
+}
+
+/** Query Analytics Engine via SQL API */
+async function queryAnalytics(
+	accountId: string,
+	apiToken: string,
+	sql: string
+): Promise<{ data: Record<string, unknown>[] }> {
+	const res = await fetch(
+		`https://api.cloudflare.com/client/v4/accounts/${accountId}/analytics_engine/sql`,
+		{
+			method: 'POST',
+			headers: { Authorization: `Bearer ${apiToken}`, 'Content-Type': 'text/plain' },
+			body: sql
+		}
+	);
+	if (!res.ok) {
+		const text = await res.text();
+		throw new Error(`Analytics Engine query failed: ${res.status} ${text}`);
+	}
+	return res.json() as Promise<{ data: Record<string, unknown>[] }>;
+}
+
 /** Get click logs for a short code */
 export async function getClickLogs(
+	platform: App.Platform | undefined,
+	shortCode: string,
+	limit = 100
+): Promise<ClickLog[]> {
+	const accountId = platform?.env?.CF_ACCOUNT_ID;
+	const apiToken = platform?.env?.CF_ANALYTICS_TOKEN;
+
+	if (!accountId || !apiToken) {
+		return getClickLogsFromD1(getDB(platform), shortCode, limit);
+	}
+
+	const code = sanitizeCode(shortCode);
+	const result = await queryAnalytics(accountId, apiToken,
+		`SELECT timestamp as clicked_at, blob1 as country, blob2 as city, blob3 as region, blob4 as device_type, blob5 as referer FROM nah_clicks WHERE index1 = '${code}' ORDER BY timestamp DESC LIMIT ${limit}`
+	);
+
+	return result.data.map((row, i) => ({
+		id: i,
+		short_code: shortCode,
+		clicked_at: row.clicked_at as string,
+		country: (row.country as string) || null,
+		city: (row.city as string) || null,
+		region: (row.region as string) || null,
+		device_type: (row.device_type as string) || null,
+		referer: (row.referer as string) || null
+	}));
+}
+
+/** Get aggregated click statistics */
+export async function getClickStats(
+	platform: App.Platform | undefined,
+	shortCode: string
+): Promise<ClickStats> {
+	const accountId = platform?.env?.CF_ACCOUNT_ID;
+	const apiToken = platform?.env?.CF_ANALYTICS_TOKEN;
+
+	if (!accountId || !apiToken) {
+		return getClickStatsFromD1(getDB(platform), shortCode);
+	}
+
+	const code = sanitizeCode(shortCode);
+	const ds = 'nah_clicks';
+
+	const [totalResult, countryResult, dayResult, deviceResult, refererResult] = await Promise.all([
+		queryAnalytics(accountId, apiToken,
+			`SELECT count() as total FROM ${ds} WHERE index1 = '${code}'`),
+		queryAnalytics(accountId, apiToken,
+			`SELECT blob1 as country, count() as count FROM ${ds} WHERE index1 = '${code}' AND blob1 != '' GROUP BY blob1 ORDER BY count DESC LIMIT 20`),
+		queryAnalytics(accountId, apiToken,
+			`SELECT toDate(timestamp) as date, count() as count FROM ${ds} WHERE index1 = '${code}' GROUP BY date ORDER BY date DESC LIMIT 30`),
+		queryAnalytics(accountId, apiToken,
+			`SELECT blob4 as device, count() as count FROM ${ds} WHERE index1 = '${code}' AND blob4 != '' GROUP BY blob4 ORDER BY count DESC`),
+		queryAnalytics(accountId, apiToken,
+			`SELECT IF(blob5 = '', 'Direct', blob5) as referer, count() as count FROM ${ds} WHERE index1 = '${code}' GROUP BY referer ORDER BY count DESC LIMIT 10`)
+	]);
+
+	return {
+		total: (totalResult.data[0]?.total as number) ?? 0,
+		byCountry: countryResult.data as { country: string; count: number }[],
+		byDay: dayResult.data as { date: string; count: number }[],
+		byDevice: deviceResult.data as { device: string; count: number }[],
+		byReferer: refererResult.data as { referer: string; count: number }[]
+	};
+}
+
+/** D1 fallback for click logs (used when Analytics Engine is not configured) */
+async function getClickLogsFromD1(
 	db: D1Database,
 	shortCode: string,
 	limit = 100
@@ -164,8 +290,8 @@ export async function getClickLogs(
 	return results;
 }
 
-/** Get aggregated click statistics */
-export async function getClickStats(db: D1Database, shortCode: string): Promise<ClickStats> {
+/** D1 fallback for click stats (used when Analytics Engine is not configured) */
+async function getClickStatsFromD1(db: D1Database, shortCode: string): Promise<ClickStats> {
 	const [totalRow, byCountry, byDay, byDevice, byReferer] = await Promise.all([
 		db
 			.prepare('SELECT COUNT(*) as total FROM click_logs WHERE short_code = ?')
