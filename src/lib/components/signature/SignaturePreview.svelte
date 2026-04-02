@@ -1,28 +1,20 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-
 	let { html = '' }: { html: string } = $props();
 
 	let iframeElement: HTMLIFrameElement | null = $state(null);
+	let lastHeight = 0;
 
-	onMount(() => {
-		if (iframeElement) {
-			const resizeObserver = new ResizeObserver(() => {
-				try {
-					const contentHeight = iframeElement?.contentDocument?.documentElement.scrollHeight || 300;
-					if (iframeElement) {
-						iframeElement.style.height = contentHeight + 20 + 'px';
-					}
-				} catch {
-					// Cross-origin iframe access blocked — height stays at default
-				}
-			});
-
-			resizeObserver.observe(iframeElement);
-
-			return () => resizeObserver.disconnect();
+	function syncHeight() {
+		try {
+			const contentHeight = iframeElement?.contentDocument?.documentElement.scrollHeight || 300;
+			if (iframeElement && contentHeight !== lastHeight) {
+				lastHeight = contentHeight;
+				iframeElement.style.height = contentHeight + 20 + 'px';
+			}
+		} catch {
+			// Cross-origin iframe access blocked
 		}
-	});
+	}
 
 	$effect(() => {
 		if (iframeElement && html) {
@@ -46,12 +38,7 @@
 </html>`);
 					doc.close();
 
-					setTimeout(() => {
-						const contentHeight = doc.documentElement.scrollHeight || 300;
-						if (iframeElement) {
-							iframeElement.style.height = contentHeight + 20 + 'px';
-						}
-					}, 100);
+					setTimeout(syncHeight, 100);
 				}
 			} catch {
 				// Rendering into iframe document failed
