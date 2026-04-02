@@ -77,6 +77,13 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ handle: value })
 			});
+
+			if (!res.ok) {
+				handleStatus = 'idle';
+				handleError = '';
+				return;
+			}
+
 			const data = (await res.json()) as { available: boolean; reason?: string };
 
 			if (data.available) {

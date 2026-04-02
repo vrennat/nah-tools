@@ -194,7 +194,7 @@
 					</tr>
 					<tr class="border-b border-border/50">
 						<td class="py-3 pr-4">Shorten a link</td>
-						<td class="py-3 pr-4">~$0.000003 (one redirect)</td>
+						<td class="py-3 pr-4">~$0.0000008 (one redirect)</td>
 						<td class="py-3">$348/year (Bitly Pro)</td>
 					</tr>
 					<tr class="border-b border-border/50">
@@ -222,16 +222,21 @@
 						<td class="py-3 pr-4">$0.00 (your browser)</td>
 						<td class="py-3">$9–26/month (Clideo, Kapwing)</td>
 					</tr>
-					<tr>
+					<tr class="border-b border-border/50">
 						<td class="py-3 pr-4">Generate a privacy policy</td>
 						<td class="py-3 pr-4">$0.00 (your browser)</td>
 						<td class="py-3">$10–20/month (Termly, iubenda)</td>
+						</tr>
+					<tr>
+						<td class="py-3 pr-4">Link in bio page</td>
+						<td class="py-3 pr-4">~$0.0000008 (one visit)</td>
+						<td class="py-3">$5–24/month</td>
 					</tr>
 				</tbody>
 			</table>
 		</div>
 		<p class="mt-6 leading-relaxed text-text-muted">
-			nah.tools runs on <a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Cloudflare Workers</a>. Total infrastructure cost: <strong class="text-text">$5/month</strong> for up to 10 million dynamic requests. Static tools cost nothing to serve because the computation happens on your device, not ours.
+			nah.tools runs on <a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Cloudflare Workers</a> with KV caching and Analytics Engine. Static tools cost nothing to serve. Dynamic features cost about <strong class="text-text">$0.80 per million requests</strong>. The full breakdown is on the <a href="/trust" class="text-accent underline hover:text-accent-hover">how it works</a> page.
 		</p>
 	</section>
 

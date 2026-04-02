@@ -37,7 +37,7 @@
 	<section class="mb-12">
 		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">What it costs us</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
-			nah.tools runs on <a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Cloudflare Workers</a>. Total infrastructure cost: <strong class="text-text">$5/month</strong> for up to 10 million dynamic requests. Static tools cost nothing to serve because the computation happens on your device, not ours.
+			nah.tools runs on <a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Cloudflare Workers</a> with KV caching and Analytics Engine. Static tools (PDF, QR codes, background removal, resumes, invoices) cost nothing to serve because they run entirely on your device. Dynamic features (short links, dynamic QR codes, link in bio) cost about <strong class="text-text">$0.80 per million requests</strong>.
 		</p>
 		<div class="overflow-x-auto">
 			<table class="w-full text-left text-sm">
@@ -71,7 +71,7 @@
 					</tr>
 					<tr class="border-b border-border/50">
 						<td class="py-3 pr-4">Shorten a link</td>
-						<td class="py-3 pr-4">~$0.000003 (one redirect)</td>
+						<td class="py-3 pr-4">~$0.0000008 (one redirect)</td>
 						<td class="py-3">$348/year (Bitly Pro)</td>
 					</tr>
 					<tr class="border-b border-border/50">
@@ -84,9 +84,27 @@
 						<td class="py-3 pr-4">$0.00 (your browser)</td>
 						<td class="py-3">$16–60/month</td>
 					</tr>
+					<tr>
+						<td class="py-3 pr-4">Link in bio page</td>
+						<td class="py-3 pr-4">~$0.0000008 (one visit)</td>
+						<td class="py-3">$5–24/month</td>
+					</tr>
 				</tbody>
 			</table>
 		</div>
+	</section>
+
+	<section class="mb-12">
+		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">Sustainability</h2>
+		<p class="mb-4 leading-relaxed text-text-muted">
+			This is a one-person project. The maintainer personally covers infrastructure costs. At current architecture, that budget handles <strong class="text-text">over a billion dynamic requests per month</strong> before it becomes a conversation. For reference, most funded startups never reach that.
+		</p>
+		<p class="mb-4 leading-relaxed text-text-muted">
+			If nah.tools gets popular enough to matter, the plan is simple: accept donations from people who want to help, and keep running. If that ever stops working, the code is <a href="https://github.com/vrennat/nah-tools" class="text-accent underline hover:text-accent-hover">MIT-licensed</a> — anyone can self-host the whole thing.
+		</p>
+		<p class="mb-4 leading-relaxed text-text-muted">
+			There's no donate button yet. When there is, it'll be here. The tools are free either way.
+		</p>
 	</section>
 
 	<section class="mb-12">
