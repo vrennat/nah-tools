@@ -193,7 +193,7 @@
 					</svg>
 				</div>
 				<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">PDF to SVG</h2>
-				<p class="mt-1 text-sm text-text-muted">Convert PDF pages to scalable vector graphics</p>
+				<p class="mt-1 text-sm text-text-muted">Convert PDF pages to true vector SVG</p>
 			</a>
 
 			<a
