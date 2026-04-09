@@ -122,6 +122,54 @@ export async function pdfToImages(
 	return blobs;
 }
 
+/** Export all PDF pages as SVG files */
+export async function pdfToSVG(
+	source: ArrayBuffer,
+	options?: { scale?: number },
+	onProgress?: ProgressCallback
+): Promise<Blob[]> {
+	const pdfjs = await getPDFJS();
+	const doc = await pdfjs.getDocument({ data: source }).promise;
+	const scale = options?.scale ?? 2;
+	const blobs: Blob[] = [];
+	const canvas = document.createElement('canvas');
+	const ctx = canvas.getContext('2d')!;
+
+	for (let i = 0; i < doc.numPages; i++) {
+		const page = await doc.getPage(i + 1);
+		const viewport = page.getViewport({ scale: 1 });
+
+		// Cap canvas size for iOS Safari (max ~16.7M pixels)
+		const maxDim = 4096;
+		const effectiveScale = Math.min(scale, maxDim / viewport.width, maxDim / viewport.height);
+		const scaled = page.getViewport({ scale: effectiveScale });
+
+		canvas.width = scaled.width;
+		canvas.height = scaled.height;
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		ctx.fillStyle = '#ffffff';
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		await page.render({ canvas, viewport: scaled }).promise;
+
+		const dataUrl = canvas.toDataURL('image/png');
+		const widthPt = viewport.width;
+		const heightPt = viewport.height;
+
+		const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${widthPt} ${heightPt}" width="${widthPt}" height="${heightPt}">
+  <image width="${widthPt}" height="${heightPt}" xlink:href="${dataUrl}"/>
+</svg>`;
+
+		blobs.push(new Blob([svg], { type: 'image/svg+xml' }));
+		page.cleanup();
+		onProgress?.(i + 1, doc.numPages);
+	}
+
+	doc.destroy();
+	return blobs;
+}
+
 /** Extract all embedded images from a PDF */
 export async function extractImages(
 	source: ArrayBuffer,
