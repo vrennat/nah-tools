@@ -15,6 +15,7 @@ const routes: { path: string; changefreq: string; priority: string }[] = [
 	{ path: '/pdf/reorder', changefreq: 'monthly', priority: '0.8' },
 	{ path: '/pdf/images-to-pdf', changefreq: 'monthly', priority: '0.8' },
 	{ path: '/pdf/pdf-to-images', changefreq: 'monthly', priority: '0.8' },
+	{ path: '/pdf/pdf-to-svg', changefreq: 'monthly', priority: '0.8' },
 	{ path: '/pdf/compress', changefreq: 'monthly', priority: '0.7' },
 	{ path: '/pdf/page-numbers', changefreq: 'monthly', priority: '0.7' },
 	{ path: '/pdf/watermark', changefreq: 'monthly', priority: '0.7' },
