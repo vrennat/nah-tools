@@ -28,7 +28,7 @@
 		<footer class="mt-12 border-t border-border pt-8 pb-4">
 			<div class="mb-6 flex items-center justify-between">
 				<p class="text-sm text-text-muted">
-					Part of the <a href="/why" class="text-accent hover:text-accent-hover">nah investigation series</a>
+					Part of the <a href="/why#investigations" class="text-accent hover:text-accent-hover">nah investigation series</a>
 				</p>
 				<a href="/why/protect" class="text-sm text-accent hover:text-accent-hover">
 					Consumer protection resources &rarr;

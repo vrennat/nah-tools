@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getDB, authenticateRedirect } from '$server/db';
+import { getDB, authenticateRedirect, getClickStats } from '$server/db';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -13,12 +13,13 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 
 	const redirect = await authenticateRedirect(db, short_code, passphrase);
+	const stats = await getClickStats(platform, short_code);
 
 	return json({
 		short_code: redirect.short_code,
 		destination_url: redirect.destination_url,
 		label: redirect.label,
-		scan_count: redirect.scan_count,
+		scan_count: stats.total,
 		is_active: redirect.is_active,
 		created_at: redirect.created_at,
 		updated_at: redirect.updated_at

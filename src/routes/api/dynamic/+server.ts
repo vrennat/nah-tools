@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getDB, authenticateRedirect, generateShortCode, createRedirect, updateRedirect, deactivateRedirect } from '$server/db';
+import { getDB, getKV, authenticateRedirect, generateShortCode, createRedirect, updateRedirect, deactivateRedirect, invalidateRedirectCache } from '$server/db';
 import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety } from '$server/safety';
 
@@ -54,6 +54,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 
 	await authenticateRedirect(db, short_code, passphrase);
 	await updateRedirect(db, short_code, url);
+	await invalidateRedirectCache(getKV(platform), db, short_code);
 	return json({ success: true });
 };
 
@@ -69,5 +70,6 @@ export const DELETE: RequestHandler = async ({ request, platform }) => {
 
 	await authenticateRedirect(db, short_code, passphrase);
 	await deactivateRedirect(db, short_code);
+	await invalidateRedirectCache(getKV(platform), db, short_code);
 	return json({ success: true });
 };

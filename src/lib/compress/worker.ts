@@ -3,7 +3,6 @@ import * as Comlink from 'comlink';
 import type { CodecName, CompressionResult } from './types';
 import { getCodec } from './codecs';
 
-// Cache loaded codec modules
 const codecModules = new Map<string, any>();
 
 async function loadCodec(name: CodecName) {
@@ -38,15 +37,8 @@ async function loadCodec(name: CodecName) {
 }
 
 async function decodeImage(buffer: ArrayBuffer, mimeType: string): Promise<ImageData> {
-	// Determine source codec from mime type
-	let codecName: string;
-	if (mimeType.includes('jpeg') || mimeType.includes('jpg')) codecName = 'jpeg';
-	else if (mimeType.includes('webp')) codecName = 'webp';
-	else if (mimeType.includes('avif')) codecName = 'avif';
-	else if (mimeType.includes('png')) codecName = 'png';
-	else if (mimeType.includes('jxl')) codecName = 'jxl';
-	else {
-		// Fallback: decode via createImageBitmap (handles GIF, BMP, TIFF, etc.)
+	if (mimeType.includes('svg') || needsBitmapFallback(mimeType)) {
+		// jsquash codecs don't support these formats — fall back to browser's native decoder
 		const blob = new Blob([buffer], { type: mimeType });
 		const bitmap = await createImageBitmap(blob);
 		const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
@@ -56,8 +48,26 @@ async function decodeImage(buffer: ArrayBuffer, mimeType: string): Promise<Image
 		return ctx.getImageData(0, 0, canvas.width, canvas.height);
 	}
 
-	const mod = await loadCodec(codecName as CodecName);
+	let codecName: CodecName;
+	if (mimeType.includes('jpeg') || mimeType.includes('jpg')) codecName = 'jpeg';
+	else if (mimeType.includes('webp')) codecName = 'webp';
+	else if (mimeType.includes('avif')) codecName = 'avif';
+	else if (mimeType.includes('png')) codecName = 'png';
+	else if (mimeType.includes('jxl')) codecName = 'jxl';
+	else throw new Error(`Unsupported image type: ${mimeType}`);
+
+	const mod = await loadCodec(codecName);
 	return mod.decode(buffer);
+}
+
+function needsBitmapFallback(mimeType: string): boolean {
+	return (
+		mimeType.includes('gif') ||
+		mimeType.includes('bmp') ||
+		mimeType.includes('tiff') ||
+		mimeType.includes('heic') ||
+		mimeType.includes('heif')
+	);
 }
 
 async function encode(
@@ -115,10 +125,29 @@ async function compressFromImageData(
 	return encode(imageData, codec, quality);
 }
 
+async function convert(
+	buffer: ArrayBuffer,
+	sourceMimeType: string,
+	targetCodec: CodecName,
+	quality: number
+): Promise<CompressionResult> {
+	// Special case: HEIC needs heic2any first
+	if (sourceMimeType.includes('heic') || sourceMimeType.includes('heif')) {
+		const heicBlob = new Blob([buffer], { type: sourceMimeType });
+		const { default: heic2any } = await import('heic2any');
+		const result = await heic2any({ blob: heicBlob, toType: 'image/jpeg', quality: 0.95 });
+		const jpegBlob = Array.isArray(result) ? result[0] : result;
+		buffer = await jpegBlob.arrayBuffer();
+		sourceMimeType = 'image/jpeg';
+	}
+	return compress(buffer, sourceMimeType, targetCodec, quality);
+}
+
 const workerApi = {
 	compress,
 	compressFromImageData,
-	decodeImage
+	decodeImage,
+	convert
 };
 
 export type WorkerApi = typeof workerApi;

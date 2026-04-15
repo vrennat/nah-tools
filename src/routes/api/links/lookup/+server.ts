@@ -13,7 +13,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 
 	const redirect = await authenticateRedirect(db, short_code, passphrase);
-	const stats = await getClickStats(db, short_code);
+	const stats = await getClickStats(platform, short_code);
 
 	return json({
 		short_code: redirect.short_code,

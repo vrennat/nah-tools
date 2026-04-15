@@ -88,13 +88,13 @@
 		</a>
 
 		<a
-			href="/photo/rm-bg"
+			href="/photo"
 			class="animate-fade-up group rounded-2xl border border-border bg-surface-alt p-5 transition-all duration-200 hover:border-accent/50 hover:shadow-card-hover sm:p-7"
 			style="animation-delay: 320ms;"
 		>
-			<h2 class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">Background Remover</h2>
+			<h2 class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">Photo & Image Tools</h2>
 			<p class="mt-2 text-sm leading-relaxed text-text-muted">
-				AI-powered, runs entirely in your browser. No upload, no watermark.
+				Convert, compress, remove backgrounds, adjust colors. All in your browser.
 			</p>
 			<span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-accent">
 				Get started
@@ -109,7 +109,7 @@
 	<section class="animate-fade-up mt-10" style="animation-delay: 380ms;">
 		<p class="mb-4 font-mono text-[clamp(0.5rem,1vw,0.75rem)] tracking-widest text-text-muted uppercase">More tools</p>
 
-		<div class="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+		<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
 			<a href="/resume" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
 				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Resume Builder</h3>
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">ATS-optimized, PDF and DOCX export.</p>
@@ -138,6 +138,21 @@
 			<a href="/remove" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
 				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Data Removal</h3>
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">Remove your info from 25+ data brokers.</p>
+			</a>
+
+			<a href="/signature" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
+				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Email Signatures</h3>
+				<p class="mt-1 text-sm leading-relaxed text-text-muted">HTML signatures, free templates.</p>
+			</a>
+
+			<a href="/media" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
+				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Video/Audio Tools</h3>
+				<p class="mt-1 text-sm leading-relaxed text-text-muted">Trim, compress, convert media files.</p>
+			</a>
+
+			<a href="/legal-gen" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
+				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Policy Generator</h3>
+				<p class="mt-1 text-sm leading-relaxed text-text-muted">Privacy policy, ToS, cookie policy.</p>
 			</a>
 
 			<a href="/mcp" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">

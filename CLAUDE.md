@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What is this
 
-nah.tools — free, open-source browser tools that replace predatory SaaS. Tools include: QR code generator (static + dynamic), PDF tools (merge, split, compress, rotate, watermark, etc.), PowerPoint tools (merge, split, compress, extract, watermark, etc.), photo tools (compress, filters, background removal), link shortener with analytics, resume builder with ATS analysis, and data broker removal. Most tools run entirely client-side. Dynamic features (short links, dynamic QR redirects) use Cloudflare Workers + D1, passphrase-protected and editable.
+nah.tools — free, open-source browser tools that replace predatory SaaS. Tools include: QR code generator (static + dynamic), PDF tools (merge, split, compress, rotate, watermark, etc.), PowerPoint tools (merge, split, compress, extract, watermark, etc.), photo tools (compress, filters, background removal), link shortener with analytics, resume builder with ATS analysis, data broker removal, email signature generator, image format converter (HEIC/WebP/AVIF/SVG/etc.), video/audio tools (trim, compress, convert via FFmpeg.wasm), and legal document generator (privacy policy, ToS, cookie policy, DMCA). Most tools run entirely client-side. Dynamic features (short links, dynamic QR redirects) use Cloudflare Workers + D1, passphrase-protected and editable.
 
 ## Commands
 
@@ -52,6 +52,46 @@ All in `src/lib/pptx/` — client-side PPTX manipulation via JSZip + DOMParser:
 - `exporter.ts` — download helpers (downloadPPTX, downloadAsZip)
 
 PPTX files are ZIP archives of XML (ECMA-376 Open XML). The processor opens them with JSZip, parses/modifies XML with DOMParser/XMLSerializer, and re-zips. No new dependencies — uses JSZip (already installed).
+
+### Email signature generation (client-side only)
+
+All in `src/lib/signature/`:
+- `types.ts` — SignatureData, TemplateId, SocialLink, SocialPlatform
+- `templates.ts` — 5 HTML table generators (professional, minimal, creative, corporate, compact)
+- `renderer.ts` — dispatches data + template -> HTML string, XSS-safe escaping, social icon SVG data URIs
+- `exporter.ts` — copyHtml (clipboard text), copyRichText (ClipboardItem text/html for paste-into-Gmail), downloadHtm
+
+All signature HTML uses `<table>` layout with inline styles only — no CSS classes, no `<div>`, no `<style>` blocks. This is required for email client compatibility (Gmail, Outlook, Apple Mail). Fonts are limited to web-safe stacks. Social icons and photos are embedded as base64 data URIs.
+
+### Image format conversion (client-side only)
+
+Extends the existing compression worker at `src/lib/compress/worker.ts` with a `convert()` function. All in `src/lib/convert/`:
+- `types.ts` — ConversionPair, ConversionResult
+- `pairs.ts` — registry of 17 conversion pairs with metadata (slug, accept types, SEO text, codec mapping)
+- `client.ts` — Comlink wrapper calling the extended compress worker
+
+Supported conversion matrix uses `@jsquash/*` codecs (JPEG, PNG, WebP, AVIF, JXL, OxiPNG), `heic2any` for HEIC/HEIF, and `createImageBitmap()` fallback for BMP/GIF/TIFF. SVG rasterization via OffscreenCanvas. The dynamic route `/convert/[pair]` validates slugs against the pairs registry.
+
+### Legal document generation (client-side only)
+
+All in `src/lib/legal-gen/`:
+- `types.ts` — BusinessInfo, DataCollectionConfig, ThirdPartyConfig, LegalGenInput
+- `templates/` — conditional section generators per document type (privacy-policy, terms-of-service, cookie-policy, dmca-notice)
+- `templates/helpers.ts` — shared utilities (date formatting, third-party service descriptions)
+- `renderer.ts` — minimal markdown-to-HTML converter (~60 LOC, handles headings/lists/bold/italic/links)
+- `exporter.ts` — copyText, downloadMarkdown, downloadHtml, downloadPdf (via pdfmake)
+
+Templates are collections of conditional sections, not monolithic strings. Jurisdiction-specific sections (GDPR, CCPA, COPPA, UK) are included based on the selected jurisdiction. Third-party service sections auto-populate when toggled (Google Analytics, Stripe, Mailchimp, etc.).
+
+### Video/audio processing (client-side only, FFmpeg.wasm)
+
+All in `src/lib/media/`:
+- `types.ts` — TrimConfig, VideoCompressConfig, AudioCompressConfig, GifConfig, ProcessingProgress, MediaResult
+- `ffmpeg-loader.ts` — singleton FFmpeg.wasm loader with progress reporting
+- `presets.ts` — video compression presets (email/social/web), audio bitrate options
+- `processor.ts` — 6 processor functions (compressVideo, trimVideo, trimAudio, compressAudio, videoToGif, extractAudio)
+
+Uses `@ffmpeg/ffmpeg` + `@ffmpeg/util`. The WASM binary (~25MB) loads from CDN on first use, cached by browser afterward. FFmpeg.wasm runs its own internal Web Worker — no double-worker wrapping needed. Progress is reported via FFmpeg's `on('progress')` callback. Each processor function registers and deregisters its own progress listener to avoid accumulation bugs.
 
 ### MCP server (Model Context Protocol)
 
@@ -108,6 +148,21 @@ File-based tools (PDF, PPTX) accept/return base64-encoded data. The server is st
 - `/pptx/remove-animations` — strip animations and transitions
 - `/pptx/slide-numbers` — add slide numbers
 - `/pptx/metadata` — view and edit title, author, properties
+- `/signature` — email signature generator (5 templates, live preview, copy/download)
+- `/convert` — image format converter hub (links to all conversion pairs)
+- `/convert/[pair]` — individual conversion page (e.g., `/convert/heic-to-jpg`, `/convert/webp-to-png`)
+- `/media` — video/audio tool hub (links to all media tools)
+- `/media/compress-video` — video compressor with presets (email, social, web, custom)
+- `/media/trim-video` — video trimmer with HTML5 preview and time range selection
+- `/media/trim-audio` — audio trimmer with HTML5 preview
+- `/media/compress-audio` — audio compressor (MP3, AAC, OGG output, bitrate selection)
+- `/media/video-to-gif` — video to GIF with FPS, width, and time range controls
+- `/media/extract-audio` — extract audio track from video
+- `/legal-gen` — legal document generator hub (links to 4 document types)
+- `/legal-gen/privacy-policy` — privacy policy generator with GDPR/CCPA/COPPA sections
+- `/legal-gen/terms-of-service` — terms of service generator
+- `/legal-gen/cookie-policy` — cookie policy generator with third-party service tracking
+- `/legal-gen/dmca-notice` — DMCA notice generator
 - `/remove/agent` — redirects to `/mcp` (301)
 - `/why` — expose article about QR code industry
 - `/compare` — competitor comparison table
@@ -115,7 +170,7 @@ File-based tools (PDF, PPTX) accept/return base64-encoded data. The server is st
 
 ### Path aliases
 
-Defined in `svelte.config.js`: `$components`, `$qr`, `$pdf`, `$pptx`, `$server`, `$utils`
+Defined in `svelte.config.js`: `$components`, `$qr`, `$pdf`, `$pptx`, `$signature`, `$convert`, `$media`, `$legalgen`, `$server`, `$utils`
 
 ### Schema.org / SEO
 

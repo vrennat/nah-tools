@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getDB, getRedirect, reportLink } from '$server/db';
+import { getDB, getKV, getRedirect, reportLink, invalidateRedirectCache } from '$server/db';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -22,6 +22,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 	const ip = request.headers.get('cf-connecting-ip') || undefined;
 	await reportLink(db, short_code, reason, ip);
+
+	// Invalidate KV in case the report triggered auto-deactivation
+	await invalidateRedirectCache(getKV(platform), db, short_code);
 
 	return json({ success: true });
 };

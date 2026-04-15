@@ -19,6 +19,12 @@ async function getPDFJS(): Promise<PDFJSLib> {
 	return pdfjsLib;
 }
 
+/** Load a PDF document for rendering. Shared by editor and standalone tools. */
+export async function loadPdfDocument(data: Uint8Array) {
+	const pdfjs = await getPDFJS();
+	return pdfjs.getDocument({ data }).promise;
+}
+
 /** Render page thumbnails for visual tools (rotate, reorder, remove) */
 export async function renderThumbnails(
 	source: ArrayBuffer,
@@ -114,6 +120,27 @@ export async function pdfToImages(
 
 	doc.destroy();
 	return blobs;
+}
+
+/** Export all PDF pages as true vector SVG files via MuPDF */
+export async function pdfToSVG(
+	source: ArrayBuffer,
+	onProgress?: ProgressCallback
+): Promise<Blob[]> {
+	const { wrap } = await import('comlink');
+	const worker = new Worker(new URL('./mupdf-worker.ts', import.meta.url), { type: 'module' });
+
+	try {
+		const api = wrap<import('./mupdf-worker').MuPDFWorkerAPI>(worker);
+		const progressProxy = onProgress
+			? (await import('comlink')).proxy(onProgress)
+			: undefined;
+
+		const svgs = await api.pdfToSVG(source, progressProxy);
+		return svgs.map((svg) => new Blob([svg], { type: 'image/svg+xml' }));
+	} finally {
+		worker.terminate();
+	}
 }
 
 /** Extract all embedded images from a PDF */

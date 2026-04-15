@@ -301,7 +301,7 @@
 
 	<footer class="mt-12 border-t border-border pt-8 pb-4">
 		<p class="text-sm text-text-muted">
-			Part of the <a href="/why" class="text-accent hover:text-accent-hover">nah investigation series</a>. All tools at <a href="/" class="text-accent hover:text-accent-hover">nah.tools</a> are free, open source, and run in your browser.
+			Part of the <a href="/why#investigations" class="text-accent hover:text-accent-hover">nah investigation series</a>. All tools at <a href="/" class="text-accent hover:text-accent-hover">nah.tools</a> are free, open source, and run in your browser.
 		</p>
 	</footer>
 </article>

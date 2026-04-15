@@ -89,6 +89,46 @@ export const articles: Article[] = [
 		toolCta: 'Use free PowerPoint tools',
 		datePublished: '2026-03-30',
 		dateModified: '2026-03-30'
+	},
+	{
+		slug: 'signature',
+		title: 'The Email Signature Shakedown',
+		summary: '$9-189/month for HTML table concatenation. WiseStamp and its clones charge recurring fees for static markup.',
+		related: ['resume', 'invoice'],
+		toolHref: '/signature',
+		toolCta: 'Create a free email signature',
+		datePublished: '2026-04-01',
+		dateModified: '2026-04-01'
+	},
+	{
+		slug: 'convert',
+		title: 'The Image Converter Shakedown',
+		summary: 'Every iPhone user needs HEIC-to-JPG. Every converter site uploads your photos to their servers first.',
+		related: ['photo', 'pdf'],
+		toolHref: '/convert',
+		toolCta: 'Convert images for free',
+		datePublished: '2026-04-01',
+		dateModified: '2026-04-01'
+	},
+	{
+		slug: 'media',
+		title: 'The Video Compressor Shakedown',
+		summary: 'Your browser has a video encoder. These companies charge you not to use it.',
+		related: ['photo', 'convert'],
+		toolHref: '/media',
+		toolCta: 'Compress videos for free',
+		datePublished: '2026-04-01',
+		dateModified: '2026-04-01'
+	},
+	{
+		slug: 'legal-gen',
+		title: 'The Privacy Policy Shakedown',
+		summary: '$20/month for template mail-merge on a document you are legally required to have.',
+		related: ['invoice', 'resume'],
+		toolHref: '/legal-gen',
+		toolCta: 'Generate policies for free',
+		datePublished: '2026-04-01',
+		dateModified: '2026-04-01'
 	}
 ];
 

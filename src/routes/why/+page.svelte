@@ -194,7 +194,7 @@
 					</tr>
 					<tr class="border-b border-border/50">
 						<td class="py-3 pr-4">Shorten a link</td>
-						<td class="py-3 pr-4">~$0.000003 (one redirect)</td>
+						<td class="py-3 pr-4">~$0.0000008 (one redirect)</td>
 						<td class="py-3">$348/year (Bitly Pro)</td>
 					</tr>
 					<tr class="border-b border-border/50">
@@ -202,16 +202,41 @@
 						<td class="py-3 pr-4">$0.00 (pre-filled templates)</td>
 						<td class="py-3">$78–129/year</td>
 					</tr>
-					<tr>
+					<tr class="border-b border-border/50">
 						<td class="py-3 pr-4">Create an invoice</td>
 						<td class="py-3 pr-4">$0.00 (your browser)</td>
 						<td class="py-3">$16–60/month</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">Generate an email signature</td>
+						<td class="py-3 pr-4">$0.00 (your browser)</td>
+						<td class="py-3">$9–189/month (WiseStamp)</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">Convert HEIC to JPG</td>
+						<td class="py-3 pr-4">$0.00 (your browser)</td>
+						<td class="py-3">$10–25/month (CloudConvert)</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">Compress a video</td>
+						<td class="py-3 pr-4">$0.00 (your browser)</td>
+						<td class="py-3">$9–26/month (Clideo, Kapwing)</td>
+					</tr>
+					<tr class="border-b border-border/50">
+						<td class="py-3 pr-4">Generate a privacy policy</td>
+						<td class="py-3 pr-4">$0.00 (your browser)</td>
+						<td class="py-3">$10–20/month (Termly, iubenda)</td>
+						</tr>
+					<tr>
+						<td class="py-3 pr-4">Link in bio page</td>
+						<td class="py-3 pr-4">~$0.0000008 (one visit)</td>
+						<td class="py-3">$5–24/month</td>
 					</tr>
 				</tbody>
 			</table>
 		</div>
 		<p class="mt-6 leading-relaxed text-text-muted">
-			nah.tools runs on <a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Cloudflare Workers</a>. Total infrastructure cost: <strong class="text-text">$5/month</strong> for up to 10 million dynamic requests. Static tools cost nothing to serve because the computation happens on your device, not ours.
+			nah.tools runs on <a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Cloudflare Workers</a> with KV caching and Analytics Engine. Static tools cost nothing to serve. Dynamic features cost about <strong class="text-text">$0.80 per million requests</strong>. The full breakdown is on the <a href="/trust" class="text-accent underline hover:text-accent-hover">how it works</a> page.
 		</p>
 	</section>
 
@@ -231,6 +256,9 @@
 		<p class="mb-4 leading-relaxed text-text-muted">Because the correct response to a resume builder that holds your work history hostage is "nah."</p>
 		<p class="mb-4 leading-relaxed text-text-muted">Because the correct response to a PDF tool that ranks above government websites and charges $96 for a form fill is "nah."</p>
 		<p class="mb-4 leading-relaxed text-text-muted">Because the correct response to paying $2 per image for something your browser does for free is "nah."</p>
+		<p class="mb-4 leading-relaxed text-text-muted">Because the correct response to $189/month for an HTML email signature is "nah."</p>
+		<p class="mb-4 leading-relaxed text-text-muted">Because the correct response to uploading your photos to a stranger's server to change the file format is "nah."</p>
+		<p class="mb-4 leading-relaxed text-text-muted">Because the correct response to $20/month for a privacy policy template is "nah."</p>
 		<p class="mb-4 leading-relaxed text-text-muted">The internet is full of tools that should be free but aren't. They survive because most people don't know there's an alternative. Now there is.</p>
 	</section>
 

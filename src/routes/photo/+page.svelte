@@ -13,7 +13,7 @@
 		</p>
 	</section>
 
-	<div class="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
+	<div class="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
 		<a
 			href="/photo/rm-bg"
 			class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
@@ -68,6 +68,24 @@
 			<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Color Correction</h2>
 			<p class="mt-1 text-sm text-text-muted">
 				Brightness, contrast, exposure, temperature, and more. Real-time WebGL2.
+			</p>
+		</a>
+		<a
+			href="/convert"
+			class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+		>
+			<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
+				<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+					/>
+				</svg>
+			</div>
+			<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Image Converter</h2>
+			<p class="mt-1 text-sm text-text-muted">
+				HEIC to JPG, WebP to PNG, SVG to PNG, and 14 more conversions.
 			</p>
 		</a>
 	</div>

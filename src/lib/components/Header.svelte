@@ -16,13 +16,16 @@
 	const toolsDropdown = [
 		{ href: '/pdf', label: 'PDF Tools', desc: 'Merge, split, rotate, compress, convert' },
 		{ href: '/pptx', label: 'PowerPoint Tools', desc: 'Merge, split, compress, extract, watermark' },
-		{ href: '/photo/rm-bg', label: 'Background Remover', desc: 'AI-powered, runs in your browser' },
+		{ href: '/photo', label: 'Photo & Image Tools', desc: 'Convert, compress, remove backgrounds, filters' },
 		{ href: '/resume', label: 'Resume Builder', desc: 'ATS-optimized, PDF and DOCX export' },
 		{ href: '/qr', label: 'QR Code Generator', desc: 'Static, dynamic, styled, batch export' },
 		{ href: '/invoice', label: 'Invoice Generator', desc: 'Multi-currency, tax support, PDF export' },
 		{ href: '/links', label: 'Link Shortener', desc: 'Custom aliases, click analytics, UTM builder' },
 		{ href: '/bio', label: 'Link in Bio', desc: 'Your links, your page, no signup' },
 		{ href: '/remove', label: 'Data Removal', desc: 'Remove your info from 25+ data brokers' },
+		{ href: '/signature', label: 'Email Signatures', desc: 'HTML signatures, free templates' },
+		{ href: '/media', label: 'Video/Audio Tools', desc: 'Trim, compress, convert media files' },
+		{ href: '/legal-gen', label: 'Policy Generator', desc: 'Privacy policy, ToS, cookie policy' },
 		{ href: '/mcp', label: 'MCP Server', desc: '30+ tools for AI agents via MCP' }
 	];
 
