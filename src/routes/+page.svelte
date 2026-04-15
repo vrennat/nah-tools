@@ -154,6 +154,11 @@
 				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Policy Generator</h3>
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">Privacy policy, ToS, cookie policy.</p>
 			</a>
+
+			<a href="/mcp" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
+				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">MCP Server</h3>
+				<p class="mt-1 text-sm leading-relaxed text-text-muted">30+ tools for AI agents via MCP.</p>
+			</a>
 		</div>
 	</section>
 </div>

@@ -93,6 +93,20 @@ All in `src/lib/media/`:
 
 Uses `@ffmpeg/ffmpeg` + `@ffmpeg/util`. The WASM binary (~25MB) loads from CDN on first use, cached by browser afterward. FFmpeg.wasm runs its own internal Web Worker — no double-worker wrapping needed. Progress is reported via FFmpeg's `on('progress')` callback. Each processor function registers and deregisters its own progress listener to avoid accumulation bugs.
 
+### MCP server (Model Context Protocol)
+
+Modular MCP server in `src/lib/server/mcp/` exposes 30+ tools to AI agents via streamable HTTP at `/mcp`:
+- `index.ts` — server factory, registers all tool modules
+- `pdf.ts` — 14 PDF tools (merge, split, rotate, reorder, remove pages, watermark, page numbers, protect, unlock, flatten, crop, compress, set metadata, get info) via `@cantoo/pdf-lib`
+- `pptx.ts` — 9 PPTX tools (merge, split, compress, extract text, remove notes, remove animations, watermark, set metadata, get info) via JSZip + DOMParser
+- `qr.ts` — QR encoding for all 7 content types (URL, WiFi, vCard, email, phone, SMS, text)
+- `invoice.ts` — invoice calculation (line items, multi-tax, compound tax, discounts)
+- `removal.ts` — 6 data broker removal tools + resources + prompts
+
+The `/mcp` route has both `+page.svelte` (landing page for browsers) and `+server.ts` (MCP protocol handler for agents). SvelteKit routes browser GETs to the page and JSON/SSE requests to the server.
+
+File-based tools (PDF, PPTX) accept/return base64-encoded data. The server is stateless — no sessions, no storage, no auth required.
+
 ### Server utilities
 
 - `src/lib/server/db.ts` — D1 query helpers for dynamic redirect CRUD
@@ -112,10 +126,12 @@ Uses `@ffmpeg/ffmpeg` + `@ffmpeg/util`. The WASM binary (~25MB) loads from CDN o
 - `POST /api/links/bulk` — bulk create up to 100 links
 - `POST /api/links/report` — report abusive link (auto-deactivates after 3 reports)
 - `GET /sitemap.xml` — generated sitemap
+- `GET|POST|DELETE /mcp` — MCP protocol endpoint (streamable HTTP)
 
 ### Pages
 
 - `/` — tool picker landing page (links to all tools)
+- `/mcp` — MCP server landing page (setup docs, tool listing, capabilities)
 - `/qr` — QR code generator (all 7 types, live preview, style customization, download, batch, dynamic)
 - `/qr/manage/[code]` — passphrase-protected dynamic QR management UI
 - `/qr/wifi`, `/qr/vcard`, `/qr/email`, `/qr/phone`, `/qr/sms` — SEO/GEO landing pages with FAQPage schema
@@ -147,6 +163,7 @@ Uses `@ffmpeg/ffmpeg` + `@ffmpeg/util`. The WASM binary (~25MB) loads from CDN o
 - `/legal-gen/terms-of-service` — terms of service generator
 - `/legal-gen/cookie-policy` — cookie policy generator with third-party service tracking
 - `/legal-gen/dmca-notice` — DMCA notice generator
+- `/remove/agent` — redirects to `/mcp` (301)
 - `/why` — expose article about QR code industry
 - `/compare` — competitor comparison table
 - `/privacy`, `/terms` — legal pages

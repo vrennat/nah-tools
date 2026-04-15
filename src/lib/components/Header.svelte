@@ -24,8 +24,9 @@
 		{ href: '/bio', label: 'Link in Bio', desc: 'Your links, your page, no signup' },
 		{ href: '/remove', label: 'Data Removal', desc: 'Remove your info from 25+ data brokers' },
 		{ href: '/signature', label: 'Email Signatures', desc: 'HTML signatures, free templates' },
-{ href: '/media', label: 'Video/Audio Tools', desc: 'Trim, compress, convert media files' },
-		{ href: '/legal-gen', label: 'Policy Generator', desc: 'Privacy policy, ToS, cookie policy' }
+		{ href: '/media', label: 'Video/Audio Tools', desc: 'Trim, compress, convert media files' },
+		{ href: '/legal-gen', label: 'Policy Generator', desc: 'Privacy policy, ToS, cookie policy' },
+		{ href: '/mcp', label: 'MCP Server', desc: '30+ tools for AI agents via MCP' }
 	];
 
 	function closeDropdown() {

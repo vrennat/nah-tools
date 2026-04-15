@@ -1,4 +1,13 @@
-import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
+/**
+ * MCP Tools — Data Broker Removal
+ *
+ * Tools for finding, filtering, and opting out of data brokers.
+ * Includes email generation (CCPA/GDPR), prioritized removal plans,
+ * and pre-filled search URLs.
+ */
+
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { brokers } from '$lib/remove/brokers';
 import { filterBrokers, sortBrokers } from '$lib/remove/filters';
@@ -53,22 +62,8 @@ const SEARCH_URL_BUILDERS: Record<string, (firstName: string, lastName: string, 
 	mylife: (fn, ln) => `https://www.mylife.com/pub/name/${encodeURIComponent(fn)}+${encodeURIComponent(ln)}`,
 };
 
-export function createMcpServer() {
-	const server = new McpServer(
-		{
-			name: 'nah-tools',
-			version: '1.0.0'
-		},
-		{
-			capabilities: {
-				tools: {},
-				prompts: {},
-				resources: {}
-			}
-		}
-	);
-
-	// ─── Tools ────────────────────────────────────────────────────────
+export function registerRemovalTools(server: McpServer) {
+	// ── Tools ──
 
 	server.registerTool('list_brokers', {
 		title: 'List Data Brokers',
@@ -96,9 +91,7 @@ export function createMcpServer() {
 				.optional()
 				.describe('Sort order (default: priority)')
 		},
-		annotations: {
-			readOnlyHint: true
-		}
+		annotations: { readOnlyHint: true }
 	}, async ({ method, difficulty, priority, category, sort }) => {
 		const filters: BrokerFilters = {
 			method: method ?? 'all',
@@ -134,9 +127,7 @@ export function createMcpServer() {
 		inputSchema: {
 			broker_id: z.string().describe('The broker ID (e.g. "spokeo", "beenverified")')
 		},
-		annotations: {
-			readOnlyHint: true
-		}
+		annotations: { readOnlyHint: true }
 	}, async ({ broker_id }) => {
 		const broker = brokers.find((b) => b.id === broker_id);
 		if (!broker) {
@@ -169,9 +160,7 @@ export function createMcpServer() {
 				.optional()
 				.describe('Legal basis for the request (default: auto-detect from state)')
 		},
-		annotations: {
-			readOnlyHint: true
-		}
+		annotations: { readOnlyHint: true }
 	}, async ({ broker_id, first_name, last_name, email, state, address, city, zip, phone, legal_basis }) => {
 		const broker = brokers.find((b) => b.id === broker_id);
 		if (!broker) {
@@ -202,23 +191,17 @@ export function createMcpServer() {
 		}
 
 		return {
-			content: [
-				{
-					type: 'text' as const,
-					text: JSON.stringify(
-						{
-							to: result.to,
-							subject: result.subject,
-							body: result.body,
-							mailto: result.mailto,
-							broker_name: broker.name,
-							legal_basis: legal_basis === 'gdpr' || (!legal_basis && state === 'outside-us') ? 'GDPR' : 'CCPA'
-						},
-						null,
-						2
-					)
-				}
-			]
+			content: [{
+				type: 'text' as const,
+				text: JSON.stringify({
+					to: result.to,
+					subject: result.subject,
+					body: result.body,
+					mailto: result.mailto,
+					broker_name: broker.name,
+					legal_basis: legal_basis === 'gdpr' || (!legal_basis && state === 'outside-us') ? 'GDPR' : 'CCPA'
+				}, null, 2)
+			}]
 		};
 	});
 
@@ -232,9 +215,7 @@ export function createMcpServer() {
 				.optional()
 				.describe('Maximum difficulty to include (default: all)')
 		},
-		annotations: {
-			readOnlyHint: true
-		}
+		annotations: { readOnlyHint: true }
 	}, async ({ difficulty_max }) => {
 		const difficultyOrder = { easy: 0, medium: 1, hard: 2, 'manual-only': 3 };
 		const maxLevel = difficultyOrder[difficulty_max ?? 'manual-only'];
@@ -242,7 +223,6 @@ export function createMcpServer() {
 		const eligible = brokers.filter((b) => difficultyOrder[b.difficulty] <= maxLevel);
 		const sorted = sortBrokers(eligible, 'priority', {});
 
-		// Group by priority and deduplicate parent/subsidiary relationships
 		const parentsSeen = new Set<string>();
 		const plan: Array<{
 			id: string;
@@ -256,10 +236,7 @@ export function createMcpServer() {
 		}> = [];
 
 		for (const broker of sorted) {
-			// Skip subsidiaries if we already have the parent
-			if (broker.parentCompany && parentsSeen.has(broker.parentCompany)) {
-				continue;
-			}
+			if (broker.parentCompany && parentsSeen.has(broker.parentCompany)) continue;
 
 			const covers = [broker.name];
 			if (broker.subsidiaries) {
@@ -267,9 +244,7 @@ export function createMcpServer() {
 					const sub = brokers.find((b) => b.id === id);
 					return sub?.name ?? id;
 				}));
-				if (broker.parentCompany) {
-					parentsSeen.add(broker.parentCompany);
-				}
+				if (broker.parentCompany) parentsSeen.add(broker.parentCompany);
 			}
 
 			const minutes =
@@ -292,20 +267,10 @@ export function createMcpServer() {
 		const totalMinutes = plan.reduce((sum, b) => sum + b.estimatedMinutes, 0);
 
 		return {
-			content: [
-				{
-					type: 'text' as const,
-					text: JSON.stringify(
-						{
-							total_brokers: plan.length,
-							total_estimated_minutes: totalMinutes,
-							plan
-						},
-						null,
-						2
-					)
-				}
-			]
+			content: [{
+				type: 'text' as const,
+				text: JSON.stringify({ total_brokers: plan.length, total_estimated_minutes: totalMinutes, plan }, null, 2)
+			}]
 		};
 	});
 
@@ -327,9 +292,7 @@ export function createMcpServer() {
 				.optional()
 				.describe('Minimum priority to include (default: all)')
 		},
-		annotations: {
-			readOnlyHint: true
-		}
+		annotations: { readOnlyHint: true }
 	}, async ({ first_name, last_name, email, state, address, city, zip, phone, priority_min }) => {
 		const userInfo: UserInfo = {
 			firstName: first_name,
@@ -345,12 +308,10 @@ export function createMcpServer() {
 		const priorityOrder = { crucial: 0, high: 1, medium: 2, low: 3 };
 		const minLevel = priorityOrder[priority_min ?? 'low'];
 
-		// Find all brokers with email addresses, respecting priority filter
 		const emailBrokers = brokers.filter(
 			(b) => b.emailAddress && priorityOrder[b.priority] <= minLevel
 		);
 
-		// Deduplicate by parent company — skip subsidiaries if parent is included
 		const parentsSeen = new Set<string>();
 		const deduplicated = emailBrokers.filter((b) => {
 			if (b.parentCompany && parentsSeen.has(b.parentCompany)) return false;
@@ -358,7 +319,6 @@ export function createMcpServer() {
 			return true;
 		});
 
-		// Sort by priority
 		deduplicated.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
 		const emails = deduplicated.map((broker) => {
@@ -387,20 +347,14 @@ export function createMcpServer() {
 		});
 
 		return {
-			content: [
-				{
-					type: 'text' as const,
-					text: JSON.stringify(
-						{
-							total_emails: emails.length,
-							note: 'Each email is ready to send. Use the mailto links to open them in your email client, or copy the body to send manually.',
-							emails
-						},
-						null,
-						2
-					)
-				}
-			]
+			content: [{
+				type: 'text' as const,
+				text: JSON.stringify({
+					total_emails: emails.length,
+					note: 'Each email is ready to send. Use the mailto links to open them in your email client, or copy the body to send manually.',
+					emails
+				}, null, 2)
+			}]
 		};
 	});
 
@@ -415,9 +369,7 @@ export function createMcpServer() {
 			state: z.string().optional().describe('US state abbreviation'),
 			city: z.string().optional().describe('City name')
 		},
-		annotations: {
-			readOnlyHint: true
-		}
+		annotations: { readOnlyHint: true }
 	}, async ({ broker_id, first_name, last_name, state, city }) => {
 		const broker = brokers.find((b) => b.id === broker_id);
 		if (!broker) {
@@ -459,7 +411,7 @@ export function createMcpServer() {
 		};
 	});
 
-	// ─── Resources ────────────────────────────────────────────────────
+	// ── Resources ──
 
 	server.registerResource(
 		'broker_list',
@@ -514,7 +466,7 @@ export function createMcpServer() {
 		}
 	);
 
-	// ─── Prompts ──────────────────────────────────────────────────────
+	// ── Prompts ──
 
 	server.registerPrompt('removal_guide', {
 		title: 'Data Broker Removal Guide',
@@ -528,12 +480,11 @@ export function createMcpServer() {
 		}
 	}, async ({ first_name, last_name, email, state }) => {
 		return {
-			messages: [
-				{
-					role: 'user' as const,
-					content: {
-						type: 'text' as const,
-						text: `You are helping ${first_name} ${last_name} (${email}, ${state}) remove their personal data from data broker websites.
+			messages: [{
+				role: 'user' as const,
+				content: {
+					type: 'text' as const,
+					text: `You are helping ${first_name} ${last_name} (${email}, ${state}) remove their personal data from data broker websites.
 
 Use the nah-tools MCP server to:
 
@@ -550,11 +501,8 @@ Important notes:
 - Many brokers relist data after 60-180 days. Recommend setting a calendar reminder.
 - Some require phone verification (WhitePages) or government ID (Epsilon). Flag these to the user.
 - Never submit the user's information to any service without their explicit confirmation.`
-					}
 				}
-			]
+			}]
 		};
 	});
-
-	return server;
 }
