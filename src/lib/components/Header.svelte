@@ -15,6 +15,7 @@
 
 	const toolsDropdown = [
 		{ href: '/dev', label: 'Developer Tools', desc: 'JSON, Base64, JWT, hash, regex, UUID, and more' },
+		{ href: '/text', label: 'Text Tools', desc: 'Word counter, bulk find and replace' },
 		{ href: '/pdf', label: 'PDF Tools', desc: 'Merge, split, rotate, compress, convert' },
 		{ href: '/pptx', label: 'PowerPoint Tools', desc: 'Merge, split, compress, extract, watermark' },
 		{ href: '/photo', label: 'Photo & Image Tools', desc: 'Convert, compress, remove backgrounds, filters' },

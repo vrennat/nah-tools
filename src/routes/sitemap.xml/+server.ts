@@ -1,5 +1,6 @@
 import type { RequestHandler } from '@sveltejs/kit';
 import { devTools } from '$dev/tools';
+import { textTools } from '$text/tools';
 
 const SITE = 'https://nah.tools';
 
@@ -8,8 +9,14 @@ const devRoutes = [
 	...devTools.map((t) => ({ path: `/dev/${t.slug}`, changefreq: 'monthly', priority: '0.9' }))
 ];
 
+const textRoutes = [
+	{ path: '/text', changefreq: 'weekly', priority: '1.0' },
+	...textTools.map((t) => ({ path: `/text/${t.slug}`, changefreq: 'monthly', priority: '0.9' }))
+];
+
 const routes: { path: string; changefreq: string; priority: string }[] = [
 	...devRoutes,
+	...textRoutes,
 	{ path: '/', changefreq: 'weekly', priority: '1.0' },
 	{ path: '/qr', changefreq: 'weekly', priority: '1.0' },
 	{ path: '/links', changefreq: 'weekly', priority: '1.0' },

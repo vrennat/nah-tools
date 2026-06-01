@@ -160,6 +160,11 @@
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">Convert, merge, normalize audio files.</p>
 			</a>
 
+			<a href="/text" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
+				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Text Tools</h3>
+				<p class="mt-1 text-sm leading-relaxed text-text-muted">Word counter, bulk find and replace.</p>
+			</a>
+
 			<a href="/legal-gen" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
 				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Policy Generator</h3>
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">Privacy policy, ToS, cookie policy.</p>
