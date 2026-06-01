@@ -22,6 +22,7 @@
         "heic2any": "^0.0.4",
         "idb-keyval": "^6.2.2",
         "jspdf": "^2.5.2",
+        "jsqr": "^1.4.0",
         "jszip": "^3.10.1",
         "mammoth": "^1.12.0",
         "mupdf": "^1.27.0",
@@ -640,6 +641,8 @@
     "json-schema-typed": ["json-schema-typed@8.0.2", "", {}, "sha512-fQhoXdcvc3V28x7C7BMs4P5+kNlgUURe2jmUT1T//oBRMDrqy1QPelJimwZGo7Hg9VPV3EQV5Bnq4hbFy2vetA=="],
 
     "jspdf": ["jspdf@2.5.2", "", { "dependencies": { "@babel/runtime": "^7.23.2", "atob": "^2.1.2", "btoa": "^1.2.1", "fflate": "^0.8.1" }, "optionalDependencies": { "canvg": "^3.0.6", "core-js": "^3.6.0", "dompurify": "^2.5.4", "html2canvas": "^1.0.0-rc.5" } }, "sha512-myeX9c+p7znDWPk0eTrujCzNjT+CXdXyk7YmJq5nD5V7uLLKmSXnlQ/Jn/kuo3X09Op70Apm0rQSnFWyGK8uEQ=="],
+
+    "jsqr": ["jsqr@1.4.0", "", {}, "sha512-dxLob7q65Xg2DvstYkRpkYtmKm2sPJ9oFhrhmudT1dZvNFFTlroai3AWSpLey/w5vMcLBXRgOJsbXpdN9HzU/A=="],
 
     "jszip": ["jszip@3.10.1", "", { "dependencies": { "lie": "~3.3.0", "pako": "~1.0.2", "readable-stream": "~2.3.6", "setimmediate": "^1.0.5" } }, "sha512-xXDvecyTpGLrqFrvkrUSoxxfJI5AH7U8zxxtVclpsUtMCq4JQ290LY8AW5c7Ggnr/Y/oK+bQMbqK2qmtk3pN4g=="],
 

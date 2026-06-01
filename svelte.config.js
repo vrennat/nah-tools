@@ -28,6 +28,9 @@ const config = {
 			$convert: 'src/lib/convert',
 			$media: 'src/lib/media',
 			$legalgen: 'src/lib/legal-gen',
+			$dev: 'src/lib/dev',
+			$text: 'src/lib/text',
+			$audio: 'src/lib/audio',
 			$server: 'src/lib/server',
 			$utils: 'src/lib/utils'
 		}
