@@ -26,6 +26,13 @@ export const textTools: TextTool[] = [
 		desc: 'Bulk find and replace with regex and case options.',
 		icon: 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6',
 		keywords: ['find', 'replace', 'regex', 'search', 'substitute', 'bulk', 'case sensitive']
+	},
+	{
+		slug: 'summarize',
+		name: 'Text Summarizer',
+		desc: 'Condense long text into its key sentences, offline.',
+		icon: 'M4 6h16M4 10h16M4 14h10M4 18h6',
+		keywords: ['summarize', 'summary', 'tl;dr', 'shorten', 'condense', 'extract', 'key points']
 	}
 ];
 
