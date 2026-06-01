@@ -88,5 +88,66 @@
 				HEIC to JPG, WebP to PNG, SVG to PNG, and 14 more conversions.
 			</p>
 		</a>
+
+		<a
+			href="/photo/exif"
+			class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+		>
+			<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
+				<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+					<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+				</svg>
+			</div>
+			<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">EXIF Viewer &amp; Remover</h2>
+			<p class="mt-1 text-sm text-text-muted">
+				See camera, timestamp, and GPS data — then strip it before sharing.
+			</p>
+		</a>
+
+		<a
+			href="/photo/crop"
+			class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+		>
+			<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
+				<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M7.848 8.25l1.536.887M7.848 8.25a3 3 0 11-5.196-3 3 3 0 015.196 3zM6.75 2.25v4.5m0 0H2.25m13.902 1.487l1.536-.887m-1.536.887a3 3 0 105.196-3 3 3 0 00-5.196 3zm1.536-.887V2.25m0 4.5h4.5" />
+				</svg>
+			</div>
+			<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Social Media Crop</h2>
+			<p class="mt-1 text-sm text-text-muted">
+				Pixel-perfect crops for Instagram, Twitter, LinkedIn, and YouTube.
+			</p>
+		</a>
+
+		<a
+			href="/photo/favicon"
+			class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+		>
+			<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
+				<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+				</svg>
+			</div>
+			<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">Favicon Generator</h2>
+			<p class="mt-1 text-sm text-text-muted">
+				Multi-size favicon.ico plus a full PNG icon set from one image.
+			</p>
+		</a>
+
+		<a
+			href="/photo/svg-optimize"
+			class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
+		>
+			<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
+				<svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+				</svg>
+			</div>
+			<h2 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">SVG Optimizer</h2>
+			<p class="mt-1 text-sm text-text-muted">
+				Strip editor metadata and minify SVG markup to shrink file size.
+			</p>
+		</a>
 	</div>
 </div>
