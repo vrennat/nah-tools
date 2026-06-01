@@ -14,6 +14,7 @@
 	];
 
 	const toolsDropdown = [
+		{ href: '/dev', label: 'Developer Tools', desc: 'JSON, Base64, JWT, hash, regex, UUID, and more' },
 		{ href: '/pdf', label: 'PDF Tools', desc: 'Merge, split, rotate, compress, convert' },
 		{ href: '/pptx', label: 'PowerPoint Tools', desc: 'Merge, split, compress, extract, watermark' },
 		{ href: '/photo', label: 'Photo & Image Tools', desc: 'Convert, compress, remove backgrounds, filters' },
@@ -25,6 +26,7 @@
 		{ href: '/remove', label: 'Data Removal', desc: 'Remove your info from 25+ data brokers' },
 		{ href: '/signature', label: 'Email Signatures', desc: 'HTML signatures, free templates' },
 		{ href: '/media', label: 'Video/Audio Tools', desc: 'Trim, compress, convert media files' },
+		{ href: '/audio', label: 'Audio Tools', desc: 'Convert, merge, normalize audio files' },
 		{ href: '/legal-gen', label: 'Policy Generator', desc: 'Privacy policy, ToS, cookie policy' },
 		{ href: '/mcp', label: 'MCP Server', desc: '30+ tools for AI agents via MCP' }
 	];

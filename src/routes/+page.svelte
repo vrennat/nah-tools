@@ -110,6 +110,11 @@
 		<p class="mb-4 font-mono text-[clamp(0.5rem,1vw,0.75rem)] tracking-widest text-text-muted uppercase">More tools</p>
 
 		<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+			<a href="/dev" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
+				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Developer Tools</h3>
+				<p class="mt-1 text-sm leading-relaxed text-text-muted">JSON, Base64, JWT, hash, regex, UUID, and more.</p>
+			</a>
+
 			<a href="/resume" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
 				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Resume Builder</h3>
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">ATS-optimized, PDF and DOCX export.</p>
@@ -148,6 +153,11 @@
 			<a href="/media" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
 				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Video/Audio Tools</h3>
 				<p class="mt-1 text-sm leading-relaxed text-text-muted">Trim, compress, convert media files.</p>
+			</a>
+
+			<a href="/audio" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
+				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Audio Tools</h3>
+				<p class="mt-1 text-sm leading-relaxed text-text-muted">Convert, merge, normalize audio files.</p>
 			</a>
 
 			<a href="/legal-gen" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">

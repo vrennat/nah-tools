@@ -1,8 +1,15 @@
 import type { RequestHandler } from '@sveltejs/kit';
+import { devTools } from '$dev/tools';
 
 const SITE = 'https://nah.tools';
 
+const devRoutes = [
+	{ path: '/dev', changefreq: 'weekly', priority: '1.0' },
+	...devTools.map((t) => ({ path: `/dev/${t.slug}`, changefreq: 'monthly', priority: '0.9' }))
+];
+
 const routes: { path: string; changefreq: string; priority: string }[] = [
+	...devRoutes,
 	{ path: '/', changefreq: 'weekly', priority: '1.0' },
 	{ path: '/qr', changefreq: 'weekly', priority: '1.0' },
 	{ path: '/links', changefreq: 'weekly', priority: '1.0' },
@@ -77,6 +84,10 @@ const routes: { path: string; changefreq: string; priority: string }[] = [
 	{ path: '/media/compress-audio', changefreq: 'monthly', priority: '0.8' },
 	{ path: '/media/video-to-gif', changefreq: 'monthly', priority: '0.8' },
 	{ path: '/media/extract-audio', changefreq: 'monthly', priority: '0.8' },
+	{ path: '/audio', changefreq: 'weekly', priority: '1.0' },
+	{ path: '/audio/convert', changefreq: 'monthly', priority: '0.9' },
+	{ path: '/audio/merge', changefreq: 'monthly', priority: '0.8' },
+	{ path: '/audio/normalize', changefreq: 'monthly', priority: '0.8' },
 	{ path: '/legal-gen', changefreq: 'weekly', priority: '1.0' },
 	{ path: '/legal-gen/privacy-policy', changefreq: 'monthly', priority: '0.9' },
 	{ path: '/legal-gen/terms-of-service', changefreq: 'monthly', priority: '0.9' },
