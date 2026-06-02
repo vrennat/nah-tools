@@ -29,3 +29,6 @@ gemini-research-eval.md
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Playwright MCP local cache
+.playwright-mcp/
