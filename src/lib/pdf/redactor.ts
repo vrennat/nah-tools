@@ -36,8 +36,10 @@ export async function redactPDF(
 	const pdfjs = await getPDFJS();
 	const { PDFDocument } = await getPDFLib();
 
+	// Each library gets its own copy of the buffer; passing the same ArrayBuffer
+	// to both risks detachment if either library transfers ownership.
 	const srcPdfjs = await pdfjs.getDocument({ data: source }).promise;
-	const srcPdfLib = await PDFDocument.load(source);
+	const srcPdfLib = await PDFDocument.load(source.slice(0));
 	const outDoc = await PDFDocument.create();
 	const redactScale = config.scale ?? 2;
 

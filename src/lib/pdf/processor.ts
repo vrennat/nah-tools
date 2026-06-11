@@ -26,6 +26,29 @@ async function getPDFLib() {
 	return PDFLib;
 }
 
+/**
+ * Load a PDF from an ArrayBuffer and surface a friendly error for encrypted
+ * files so users know to unlock the file first, rather than seeing a cryptic
+ * pdf-lib internal error.
+ *
+ * Pass ignoreEncryption = true only for operations (e.g. flatten, getPageCount)
+ * that intentionally work on encrypted documents without modifying them.
+ */
+async function loadPDF(source: ArrayBuffer, ignoreEncryption = false) {
+	const { PDFDocument } = await getPDFLib();
+	try {
+		return await PDFDocument.load(source, ignoreEncryption ? { ignoreEncryption: true } : {});
+	} catch (e: unknown) {
+		const msg = e instanceof Error ? e.message : String(e);
+		// pdf-lib throws a message containing "encrypted" when it hits a
+		// password-protected file without ignoreEncryption.
+		if (msg.toLowerCase().includes('encrypt')) {
+			throw new Error('This PDF is password-protected. Use the Unlock tool first.');
+		}
+		throw e;
+	}
+}
+
 /** Get page count from a PDF without full parsing */
 export async function getPageCount(source: ArrayBuffer): Promise<number> {
 	const { PDFDocument } = await getPDFLib();
@@ -42,7 +65,7 @@ export async function mergePDFs(
 	const merged = await PDFDocument.create();
 
 	for (let i = 0; i < files.length; i++) {
-		const source = await PDFDocument.load(files[i]);
+		const source = await loadPDF(files[i]);
 		const pages = await merged.copyPages(source, source.getPageIndices());
 		for (const page of pages) {
 			merged.addPage(page);
@@ -59,7 +82,7 @@ export async function splitPDF(
 	ranges: PageRange[]
 ): Promise<Uint8Array[]> {
 	const { PDFDocument } = await getPDFLib();
-	const srcDoc = await PDFDocument.load(source);
+	const srcDoc = await loadPDF(source);
 	const results: Uint8Array[] = [];
 
 	for (const range of ranges) {
@@ -83,8 +106,8 @@ export async function rotatePages(
 	source: ArrayBuffer,
 	rotations: Map<number, number>
 ): Promise<Uint8Array> {
-	const { PDFDocument, degrees } = await getPDFLib();
-	const doc = await PDFDocument.load(source);
+	const { degrees } = await getPDFLib();
+	const doc = await loadPDF(source);
 
 	for (const [pageIndex, rotation] of rotations) {
 		const page = doc.getPage(pageIndex);
@@ -100,8 +123,8 @@ export async function removePages(
 	source: ArrayBuffer,
 	pageIndicesToRemove: number[]
 ): Promise<Uint8Array> {
-	const { PDFDocument } = await getPDFLib();
-	const doc = await PDFDocument.load(source);
+	await getPDFLib();
+	const doc = await loadPDF(source);
 
 	// Remove from end to avoid index shifting
 	const sorted = [...pageIndicesToRemove].sort((a, b) => b - a);
@@ -118,7 +141,7 @@ export async function reorderPages(
 	newOrder: number[]
 ): Promise<Uint8Array> {
 	const { PDFDocument } = await getPDFLib();
-	const srcDoc = await PDFDocument.load(source);
+	const srcDoc = await loadPDF(source);
 	const newDoc = await PDFDocument.create();
 
 	const pages = await newDoc.copyPages(srcDoc, newOrder);
@@ -185,8 +208,8 @@ export async function imagesToPDF(
 
 /** Basic PDF compression — strips metadata and removes duplicate objects */
 export async function compressPDF(source: ArrayBuffer): Promise<Uint8Array> {
-	const { PDFDocument } = await getPDFLib();
-	const doc = await PDFDocument.load(source);
+	await getPDFLib();
+	const doc = await loadPDF(source);
 
 	// Strip metadata
 	doc.setTitle('');
@@ -221,7 +244,7 @@ export async function addPageNumbers(
 	config: PageNumberConfig
 ): Promise<Uint8Array> {
 	const { PDFDocument, rgb, StandardFonts } = await getPDFLib();
-	const doc = await PDFDocument.load(source);
+	const doc = await loadPDF(source);
 	const font = await doc.embedFont(StandardFonts.Helvetica);
 	const pages = doc.getPages();
 	const total = pages.length;
@@ -280,8 +303,8 @@ export async function cropPages(
 	config: CropConfig,
 	pageIndices?: number[]
 ): Promise<Uint8Array> {
-	const { PDFDocument } = await getPDFLib();
-	const doc = await PDFDocument.load(source);
+	await getPDFLib();
+	const doc = await loadPDF(source);
 	const pages = doc.getPages();
 	const indices = pageIndices ?? pages.map((_, i) => i);
 
@@ -314,8 +337,8 @@ export async function protectPDF(
 	ownerPassword: string,
 	permissions: PDFPermissions
 ): Promise<Uint8Array> {
-	const { PDFDocument } = await getPDFLib();
-	const doc = await PDFDocument.load(source);
+	await getPDFLib();
+	const doc = await loadPDF(source);
 
 	doc.encrypt({
 		userPassword,
@@ -357,7 +380,7 @@ export async function addWatermark(
 	config: WatermarkConfig
 ): Promise<Uint8Array> {
 	const { PDFDocument, rgb, StandardFonts, degrees } = await getPDFLib();
-	const doc = await PDFDocument.load(source);
+	const doc = await loadPDF(source);
 	const font = await doc.embedFont(StandardFonts.Helvetica);
 	const pages = doc.getPages();
 
@@ -505,7 +528,7 @@ export async function editPDF(
 	annotations: EditAnnotation[]
 ): Promise<Uint8Array> {
 	const { PDFDocument, rgb, StandardFonts } = await getPDFLib();
-	const doc = await PDFDocument.load(source);
+	const doc = await loadPDF(source);
 	const font = await doc.embedFont(StandardFonts.Helvetica);
 	const pages = doc.getPages();
 
@@ -570,7 +593,7 @@ export async function fillAndSignPDF(
 	signatures: SignatureField[]
 ): Promise<Uint8Array> {
 	const { PDFDocument, rgb, StandardFonts } = await getPDFLib();
-	const doc = await PDFDocument.load(source);
+	const doc = await loadPDF(source);
 	const font = await doc.embedFont(StandardFonts.Helvetica);
 	const pages = doc.getPages();
 

@@ -41,77 +41,86 @@ export async function comparePDFs(
 	const canvas = document.createElement('canvas');
 	const ctx = canvas.getContext('2d')!;
 
-	for (let i = 0; i < maxPages; i++) {
-		const hasOrig = i < origDoc.numPages;
-		const hasRev = i < revDoc.numPages;
+	// Process one page-pair at a time so raw RGBA pixel arrays (~7 MB/page)
+	// are released before moving on rather than accumulating for all pages.
+	try {
+		for (let i = 0; i < maxPages; i++) {
+			const hasOrig = i < origDoc.numPages;
+			const hasRev = i < revDoc.numPages;
 
-		// Render both pages
-		const origImg = hasOrig ? await renderPage(origDoc, i + 1, scale, canvas, ctx) : null;
-		const revImg = hasRev ? await renderPage(revDoc, i + 1, scale, canvas, ctx) : null;
+			// Render both pages and immediately capture their data URLs and pixels
+			const origImg = hasOrig ? await renderPage(origDoc, i + 1, scale, canvas, ctx) : null;
+			const revImg = hasRev ? await renderPage(revDoc, i + 1, scale, canvas, ctx) : null;
 
-		// Determine canvas size (use larger dimensions)
-		const w = Math.max(origImg?.width ?? 0, revImg?.width ?? 0);
-		const h = Math.max(origImg?.height ?? 0, revImg?.height ?? 0);
+			// Determine canvas size (use larger dimensions)
+			const w = Math.max(origImg?.width ?? 0, revImg?.width ?? 0);
+			const h = Math.max(origImg?.height ?? 0, revImg?.height ?? 0);
 
-		// Get data URLs for both
-		const origDataUrl =
-			origImg?.dataUrl ?? makePlaceholder(w, h, 'Page missing', canvas, ctx);
-		const revDataUrl =
-			revImg?.dataUrl ?? makePlaceholder(w, h, 'Page missing', canvas, ctx);
+			// Get data URLs for both
+			const origDataUrl =
+				origImg?.dataUrl ?? makePlaceholder(w, h, 'Page missing', canvas, ctx);
+			const revDataUrl =
+				revImg?.dataUrl ?? makePlaceholder(w, h, 'Page missing', canvas, ctx);
 
-		// Get pixel data, padded to the max dimensions if needed
-		const origPixels = padPixels(origImg?.pixels ?? null, origImg?.width ?? 0, origImg?.height ?? 0, w, h);
-		const revPixels = padPixels(revImg?.pixels ?? null, revImg?.width ?? 0, revImg?.height ?? 0, w, h);
+			// Get pixel data, padded to the max dimensions if needed
+			const origPixels = padPixels(origImg?.pixels ?? null, origImg?.width ?? 0, origImg?.height ?? 0, w, h);
+			const revPixels = padPixels(revImg?.pixels ?? null, revImg?.width ?? 0, revImg?.height ?? 0, w, h);
 
-		// Build diff image
-		canvas.width = w;
-		canvas.height = h;
-		const diffImageData = ctx.createImageData(w, h);
-		const diff = diffImageData.data;
-		let diffCount = 0;
-		const total = w * h;
+			// Build diff image
+			canvas.width = w;
+			canvas.height = h;
+			const diffImageData = ctx.createImageData(w, h);
+			const diff = diffImageData.data;
+			let diffCount = 0;
+			const total = w * h;
 
-		for (let p = 0; p < total; p++) {
-			const idx = p * 4;
-			const dr = Math.abs(origPixels[idx] - revPixels[idx]);
-			const dg = Math.abs(origPixels[idx + 1] - revPixels[idx + 1]);
-			const db = Math.abs(origPixels[idx + 2] - revPixels[idx + 2]);
+			for (let p = 0; p < total; p++) {
+				const idx = p * 4;
+				const dr = Math.abs(origPixels[idx] - revPixels[idx]);
+				const dg = Math.abs(origPixels[idx + 1] - revPixels[idx + 1]);
+				const db = Math.abs(origPixels[idx + 2] - revPixels[idx + 2]);
 
-			if (dr > threshold || dg > threshold || db > threshold) {
-				diff[idx] = diffColor[0];
-				diff[idx + 1] = diffColor[1];
-				diff[idx + 2] = diffColor[2];
-				diff[idx + 3] = 255;
-				diffCount++;
-			} else {
-				// Dimmed original
-				diff[idx] = origPixels[idx];
-				diff[idx + 1] = origPixels[idx + 1];
-				diff[idx + 2] = origPixels[idx + 2];
-				diff[idx + 3] = 60;
+				if (dr > threshold || dg > threshold || db > threshold) {
+					diff[idx] = diffColor[0];
+					diff[idx + 1] = diffColor[1];
+					diff[idx + 2] = diffColor[2];
+					diff[idx + 3] = 255;
+					diffCount++;
+				} else {
+					// Dimmed original
+					diff[idx] = origPixels[idx];
+					diff[idx + 1] = origPixels[idx + 1];
+					diff[idx + 2] = origPixels[idx + 2];
+					diff[idx + 3] = 60;
+				}
 			}
+
+			ctx.putImageData(diffImageData, 0, 0);
+			const diffDataUrl = canvas.toDataURL('image/png');
+
+			// Store only the compressed dataURLs; raw pixel arrays go out of scope here
+			results.push({
+				pageIndex: i,
+				originalDataUrl: origDataUrl,
+				revisedDataUrl: revDataUrl,
+				diffDataUrl,
+				diffPixelCount: diffCount,
+				totalPixelCount: total,
+				diffPercent: Math.round((diffCount / total) * 10000) / 100,
+				width: w,
+				height: h
+			});
+
+			onProgress?.(i + 1, maxPages);
 		}
-
-		ctx.putImageData(diffImageData, 0, 0);
-		const diffDataUrl = canvas.toDataURL('image/png');
-
-		results.push({
-			pageIndex: i,
-			originalDataUrl: origDataUrl,
-			revisedDataUrl: revDataUrl,
-			diffDataUrl,
-			diffPixelCount: diffCount,
-			totalPixelCount: total,
-			diffPercent: Math.round((diffCount / total) * 10000) / 100,
-			width: w,
-			height: h
-		});
-
-		onProgress?.(i + 1, maxPages);
+	} finally {
+		// Always release canvas backing store and both docs
+		canvas.width = 0;
+		canvas.height = 0;
+		origDoc.destroy();
+		revDoc.destroy();
 	}
 
-	origDoc.destroy();
-	revDoc.destroy();
 	return results;
 }
 

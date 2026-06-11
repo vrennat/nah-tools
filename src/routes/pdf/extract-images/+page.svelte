@@ -12,15 +12,18 @@
 	let done = $state(false);
 
 	let file = $derived(files[0]);
+	// Monotonically increasing counter so in-flight extractions can detect that
+	// a newer file has been dropped and silently discard their results.
+	let extractVersion = 0;
 
 	$effect(() => {
-		if (file && !processing) {
-			extract();
+		if (file) {
+			extract(file);
 		}
 	});
 
-	async function extract() {
-		if (!file) return;
+	async function extract(targetFile: File) {
+		const version = ++extractVersion;
 		processing = true;
 		error = '';
 		images = [];
@@ -29,15 +32,22 @@
 
 		try {
 			const { extractImages } = await import('$pdf/renderer');
-			const buf = await file.arrayBuffer();
-			images = await extractImages(buf, (current, total) => {
-				progress = { current, total };
+			const buf = await targetFile.arrayBuffer();
+			// Abort if a newer file was dropped while we were reading
+			if (version !== extractVersion) return;
+			const result = await extractImages(buf, (current, total) => {
+				if (version === extractVersion) progress = { current, total };
 			});
+			// Abort if superseded during extraction
+			if (version !== extractVersion) return;
+			images = result;
 			done = true;
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to extract images';
+			if (version === extractVersion) {
+				error = e instanceof Error ? e.message : 'Failed to extract images';
+			}
 		} finally {
-			processing = false;
+			if (version === extractVersion) processing = false;
 		}
 	}
 
