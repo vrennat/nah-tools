@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { validateAlias, checkRateLimit } from '$server/safety';
+import { validateAlias, checkRateLimit, validateUrlSafety } from '$server/safety';
 
 describe('validateAlias', () => {
 	it('accepts a valid alias like my-link', () => {
@@ -110,5 +110,73 @@ describe('checkRateLimit', () => {
 		}
 		expect(checkRateLimit(ipA)).toBe(false);
 		expect(checkRateLimit(ipB)).toBe(true);
+	});
+
+	it('cost=10 consumes the full quota in one call', () => {
+		const ip = 'ip-cost-full';
+		expect(checkRateLimit(ip, 10)).toBe(true);
+		expect(checkRateLimit(ip, 1)).toBe(false);
+	});
+
+	it('cost=11 is rejected when quota is 10', () => {
+		const ip = 'ip-cost-over';
+		expect(checkRateLimit(ip, 11)).toBe(false);
+	});
+
+	it('cost=5 allows two calls before blocking', () => {
+		const ip = 'ip-cost-five';
+		expect(checkRateLimit(ip, 5)).toBe(true);
+		expect(checkRateLimit(ip, 5)).toBe(true);
+		expect(checkRateLimit(ip, 1)).toBe(false);
+	});
+});
+
+// Minimal D1 stub that always returns null from .first() (no blocked domains)
+function makeStubDb(): D1Database {
+	const stmt = {
+		bind: () => stmt,
+		first: async () => null,
+		all: async () => ({ results: [] }),
+		run: async () => ({ success: true }),
+	};
+	return { prepare: () => stmt } as unknown as D1Database;
+}
+
+describe('validateUrlSafety - SSRF gaps', () => {
+	it('rejects http://localhost', async () => {
+		const result = await validateUrlSafety('http://localhost/foo', makeStubDb());
+		expect(result.safe).toBe(false);
+		expect(result.reason).toMatch(/localhost/);
+	});
+
+	it('rejects http://localhost:8080', async () => {
+		const result = await validateUrlSafety('http://localhost:8080', makeStubDb());
+		expect(result.safe).toBe(false);
+	});
+
+	it('rejects http://sub.localhost', async () => {
+		const result = await validateUrlSafety('http://sub.localhost', makeStubDb());
+		expect(result.safe).toBe(false);
+	});
+
+	it('rejects bracketed IPv6 [::1]', async () => {
+		const result = await validateUrlSafety('http://[::1]/', makeStubDb());
+		expect(result.safe).toBe(false);
+		expect(result.reason).toMatch(/IPv6/);
+	});
+
+	it('rejects bracketed IPv6 [fe80::1]', async () => {
+		const result = await validateUrlSafety('http://[fe80::1]/', makeStubDb());
+		expect(result.safe).toBe(false);
+	});
+
+	it('still allows normal https domains', async () => {
+		const result = await validateUrlSafety('https://example.com', makeStubDb());
+		expect(result.safe).toBe(true);
+	});
+
+	it('still rejects dotted-decimal IPv4', async () => {
+		const result = await validateUrlSafety('http://192.168.1.1', makeStubDb());
+		expect(result.safe).toBe(false);
 	});
 });

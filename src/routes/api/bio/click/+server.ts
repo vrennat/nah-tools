@@ -1,9 +1,16 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getDB } from '$server/db';
-import { logBioClick } from '$server/bio-db';
+import { getProfile, logBioClick } from '$server/bio-db';
+import { checkRateLimit } from '$server/safety';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
+	// Rate-limit click logging to prevent artificial inflation
+	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+	if (!checkRateLimit(ip)) {
+		throw error(429, 'Rate limit exceeded. Try again later.');
+	}
+
 	const db = getDB(platform);
 
 	const body = (await request.json()) as {
@@ -15,6 +22,12 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 	if (!handle || !link_id) {
 		throw error(400, 'handle and link_id are required');
+	}
+
+	// Only log clicks for active profiles — prevents inflating stats for deactivated profiles
+	const profile = await getProfile(db, handle);
+	if (!profile || !profile.is_active) {
+		throw error(404, 'Profile not found');
 	}
 
 	// Extract geo/device from Cloudflare headers

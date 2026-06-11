@@ -1,9 +1,16 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getDB, getKV, getRedirect, reportLink, invalidateRedirectCache } from '$server/db';
+import { checkRateLimit } from '$server/safety';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
+
+	// Rate-limit before touching the database
+	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+	if (!checkRateLimit(ip)) {
+		throw error(429, 'Rate limit exceeded. Try again later.');
+	}
 
 	const body = (await request.json()) as { short_code: string; reason: string };
 	const { short_code, reason } = body;
@@ -20,8 +27,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(404, 'Link not found');
 	}
 
-	const ip = request.headers.get('cf-connecting-ip') || undefined;
-	await reportLink(db, short_code, reason, ip);
+	const reporterIp = request.headers.get('cf-connecting-ip') || undefined;
+	await reportLink(db, short_code, reason, reporterIp);
 
 	// Invalidate KV in case the report triggered auto-deactivation
 	await invalidateRedirectCache(getKV(platform), db, short_code);

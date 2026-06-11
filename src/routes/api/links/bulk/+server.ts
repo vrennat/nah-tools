@@ -34,11 +34,14 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		if (!valid) {
 			throw error(403, 'Turnstile verification failed');
 		}
+	} else {
+		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
 	}
 
-	// Rate limit
+	// Rate limit — count each link in the batch as one token so a 100-link request
+	// consumes the same quota as 100 individual requests.
 	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-	if (!checkRateLimit(ip)) {
+	if (!checkRateLimit(ip, links.length)) {
 		throw error(429, 'Rate limit exceeded. Try again later.');
 	}
 
