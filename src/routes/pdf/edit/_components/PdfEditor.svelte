@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createEditorState } from '$pdf/editor-state.svelte';
-	import { consumePendingFile } from '$pdf/file-transfer';
+	import { consumePendingFile } from '$lib/file-transfer';
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import Toolbar from './Toolbar.svelte';
 	import ThumbnailSidebar from './ThumbnailSidebar.svelte';

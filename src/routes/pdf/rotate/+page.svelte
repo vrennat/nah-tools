@@ -132,7 +132,7 @@
 >
 	<section class="mx-auto max-w-4xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
-			<FileDropZone accept=".pdf" bind:files label="Drop a PDF here or click to browse" />
+			<FileDropZone accept=".pdf" acceptPendingFile={true} bind:files label="Drop a PDF here or click to browse" />
 
 			{#if loading}
 				<div class="mt-4">

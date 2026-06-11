@@ -1,15 +1,49 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { consumePendingFile } from '$lib/file-transfer';
+
 	let {
 		accept = '.pdf',
 		multiple = false,
 		files = $bindable<File[]>([]),
 		maxSizeMB = 100,
-		label = 'Drop files here or click to browse'
+		label = 'Drop files here or click to browse',
+		/**
+		 * When true, check for a pending file on mount and inject it as if the user
+		 * dropped it. Only set this on PDF tool pages — FileDropZone is also used by
+		 * PPTX and image-convert flows where chaining is not wired up.
+		 */
+		acceptPendingFile = false
 	} = $props();
 
 	let dragging = $state(false);
 	let fileInput: HTMLInputElement;
 	let error = $state('');
+	/** Set when a file arrived via the chaining mechanism, cleared when dismissed. */
+	let chainedFrom = $state<string | null>(null);
+
+	onMount(() => {
+		if (!acceptPendingFile) return;
+		const pending = consumePendingFile();
+		if (!pending) return;
+
+		// Synthesise a File and run it through the same validation path as a normal drop.
+		// Cast via Uint8Array so the File constructor receives an unambiguous ArrayBuffer.
+		const syntheticFile = new File([new Uint8Array(pending.bytes)], pending.name, { type: 'application/pdf' });
+		const list = makeFileList([syntheticFile]);
+		validateAndAdd(list);
+
+		if (pending.sourceLabel) {
+			chainedFrom = pending.sourceLabel;
+		}
+	});
+
+	/** Build a minimal FileList-compatible object from an array of Files. */
+	function makeFileList(arr: File[]): FileList {
+		const dt = new DataTransfer();
+		for (const f of arr) dt.items.add(f);
+		return dt.files;
+	}
 
 	function formatSize(bytes: number): string {
 		if (bytes < 1024) return `${bytes} B`;
@@ -59,6 +93,24 @@
 </script>
 
 <div class="space-y-3">
+	{#if chainedFrom}
+		<div class="flex items-center justify-between rounded-lg border border-accent/30 bg-accent/5 px-3 py-2">
+			<p class="text-sm text-text">
+				Continuing with <span class="font-medium">"{files[0]?.name}"</span> from {chainedFrom}
+			</p>
+			<button
+				type="button"
+				aria-label="Dismiss"
+				class="ml-3 text-text-muted transition-colors hover:text-text"
+				onclick={() => (chainedFrom = null)}
+			>
+				<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+				</svg>
+			</button>
+		</div>
+	{/if}
+
 	<button
 		type="button"
 		class="w-full rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors {dragging
