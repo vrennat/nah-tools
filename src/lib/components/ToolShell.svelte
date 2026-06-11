@@ -15,6 +15,14 @@
 		seoTitle,
 		description,
 		faqs = [],
+		// Override the h1 text when the page's intended title differs from the
+		// registry entry name. Dev/text shells pass this so their more descriptive
+		// titles ("JSON Formatter & Validator" vs "JSON Formatter") are preserved.
+		h1,
+		// Override the JSON-LD applicationCategory. Dev tools pass
+		// 'DeveloperApplication'; text tools pass 'UtilityApplication'.
+		// Falls back to 'UtilitiesApplication' for all other families.
+		applicationCategory = 'UtilitiesApplication',
 		children
 	}: {
 		path: string;
@@ -22,6 +30,8 @@
 		seoTitle: string;
 		description: string;
 		faqs?: FAQ[];
+		h1?: string;
+		applicationCategory?: string;
 		children: Snippet;
 	} = $props();
 
@@ -60,6 +70,9 @@
 	]);
 
 	const related = $derived(getRelated(path, 4));
+
+	// Displayed h1: prefer the explicit override, fall back to the registry name
+	const displayH1 = $derived(h1 ?? entry.name);
 </script>
 
 <svelte:head>
@@ -81,10 +94,10 @@
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		'@context': 'https://schema.org',
 		'@type': 'SoftwareApplication',
-		name: entry.name,
+		name: displayH1,
 		url: canonical,
 		description,
-		applicationCategory: 'UtilitiesApplication',
+		applicationCategory,
 		operatingSystem: 'Any',
 		offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
 		creator: { '@type': 'Organization', name: 'nah', url: 'https://nah.tools' }
@@ -112,7 +125,7 @@
 	</nav>
 
 	<header class="space-y-3">
-		<h1 class="font-display text-3xl font-800 tracking-tight sm:text-4xl">{entry.name}</h1>
+		<h1 class="font-display text-3xl font-800 tracking-tight sm:text-4xl">{displayH1}</h1>
 		<p class="max-w-2xl text-lg text-text-muted">{tagline}</p>
 		<p class="inline-flex items-center gap-1.5 text-sm font-medium text-success">
 			<svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

@@ -1,9 +1,42 @@
 <script lang="ts">
 	import { allPairs } from '$convert/pairs';
+	import FAQSchema from '$lib/components/FAQSchema.svelte';
+	import BreadcrumbSchema from '$lib/components/BreadcrumbSchema.svelte';
 
 	const popularPairs = allPairs.filter((p) => p.popular);
 	const allOtherPairs = allPairs.filter((p) => !p.popular);
+
+	const faqs = [
+		{
+			question: 'Is this image converter free?',
+			answer: 'Yes, completely free with no signup, no account, and no limits. All tools are open source and will stay free.'
+		},
+		{
+			question: 'Do my images get uploaded to a server?',
+			answer: 'No. All conversion runs entirely in your browser using WebAssembly codecs. Your images never leave your device.'
+		},
+		{
+			question: 'Is there a file size limit?',
+			answer: 'No enforced limit. Processing is in-browser, so practical limits depend on your device memory. Most images up to hundreds of megabytes convert without issue.'
+		},
+		{
+			question: 'Can I convert multiple images at once?',
+			answer: 'Yes. Each conversion page accepts multiple files and processes them in batch, letting you download results individually or as a ZIP.'
+		},
+		{
+			question: 'Which browsers are supported?',
+			answer: 'Any modern browser with JavaScript enabled: Chrome, Firefox, Safari (16.4+), and Edge. Some formats like AVIF and JXL require newer browser versions — each tool page notes any requirements.'
+		}
+	];
+
+	const breadcrumbItems = [
+		{ name: 'nah', url: 'https://nah.tools' },
+		{ name: 'Image Converter', url: 'https://nah.tools/convert' }
+	];
 </script>
+
+<FAQSchema {faqs} />
+<BreadcrumbSchema items={breadcrumbItems} />
 
 <svelte:head>
 	<title>Free Image Converter — Convert Between Any Format | nah</title>
@@ -26,6 +59,12 @@
 </svelte:head>
 
 <div class="space-y-10">
+	<nav class="flex items-center gap-1.5 text-sm text-text-muted" aria-label="Breadcrumb">
+		<a href="/" class="transition-colors hover:text-accent">nah</a>
+		<span aria-hidden="true">/</span>
+		<span class="text-text">Image Converter</span>
+	</nav>
+
 	<section class="text-center">
 		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">
 			Image Converter. <span class="text-accent">No uploads.</span>
@@ -95,5 +134,24 @@
 				</div>
 			</section>
 		{/if}
+
+		<section class="mx-auto max-w-3xl space-y-4 pt-4">
+			<h2 class="font-display text-xl font-700">Frequently asked questions</h2>
+			<div class="space-y-3">
+				{#each faqs as faq}
+					<details class="group rounded-xl border border-border bg-surface-alt p-4">
+						<summary class="cursor-pointer list-none font-medium text-text marker:hidden">
+							<span class="flex items-center justify-between gap-3">
+								{faq.question}
+								<svg class="h-4 w-4 shrink-0 text-text-muted transition-transform group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+								</svg>
+							</span>
+						</summary>
+						<p class="mt-2 text-sm leading-relaxed text-text-muted">{faq.answer}</p>
+					</details>
+				{/each}
+			</div>
+		</section>
 	</div>
 </div>

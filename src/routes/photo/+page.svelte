@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { getFamilyTools } from '$lib/registry/index';
+	import FAQSchema from '$lib/components/FAQSchema.svelte';
+	import BreadcrumbSchema from '$lib/components/BreadcrumbSchema.svelte';
 
 	const photoFamilyTools = getFamilyTools('photo');
 
@@ -19,7 +21,38 @@
 		convertCard,
 		...photoFamilyTools.slice(3)
 	];
+
+	const faqs = [
+		{
+			question: 'Are these photo tools free?',
+			answer: 'Yes, completely free with no signup, no account, and no limits. All tools are open source and will stay free.'
+		},
+		{
+			question: 'Do my images get uploaded to a server?',
+			answer: 'No. All image processing — compression, background removal, color correction, format conversion — runs entirely in your browser. Your photos never leave your device.'
+		},
+		{
+			question: 'Is there a file size limit?',
+			answer: 'No enforced limit. Processing is in-browser, so practical limits depend on your device memory. Very large images (50+ MP) may be slower but should work on most modern devices.'
+		},
+		{
+			question: 'Which image formats are supported?',
+			answer: 'Input formats vary by tool but commonly include JPEG, PNG, WebP, AVIF, HEIC, GIF, BMP, TIFF, and SVG. See each individual tool for its specific accepted formats.'
+		},
+		{
+			question: 'Which browsers are supported?',
+			answer: 'Any modern browser with JavaScript enabled: Chrome, Firefox, Safari, and Edge. Some advanced codecs (AVIF, JXL) require newer browser versions — each tool page notes any requirements.'
+		}
+	];
+
+	const breadcrumbItems = [
+		{ name: 'nah', url: 'https://nah.tools' },
+		{ name: 'Photo Tools', url: 'https://nah.tools/photo' }
+	];
 </script>
+
+<FAQSchema {faqs} />
+<BreadcrumbSchema items={breadcrumbItems} />
 
 <svelte:head>
 	<title>Photo Tools — nah</title>
@@ -27,12 +60,21 @@
 </svelte:head>
 
 <div class="mx-auto max-w-4xl space-y-10">
+	<nav class="flex items-center gap-1.5 text-sm text-text-muted" aria-label="Breadcrumb">
+		<a href="/" class="transition-colors hover:text-accent">nah</a>
+		<span aria-hidden="true">/</span>
+		<span class="text-text">Photo Tools</span>
+	</nav>
+
 	<section class="text-center">
 		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">
 			Photo <span class="text-accent">Tools</span>
 		</h1>
 		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
 			Image editing that runs entirely in your browser.
+		</p>
+		<p class="mx-auto mt-3 max-w-2xl text-base text-text-muted">
+			Remove backgrounds, compress images for web or email, correct colors, convert between formats, read or strip EXIF metadata, crop to any ratio, and generate favicons — all client-side, all free.
 		</p>
 	</section>
 
@@ -56,4 +98,23 @@
 			</a>
 		{/each}
 	</div>
+
+	<section class="mx-auto max-w-3xl space-y-4 pt-4">
+		<h2 class="font-display text-xl font-700">Frequently asked questions</h2>
+		<div class="space-y-3">
+			{#each faqs as faq}
+				<details class="group rounded-xl border border-border bg-surface-alt p-4">
+					<summary class="cursor-pointer list-none font-medium text-text marker:hidden">
+						<span class="flex items-center justify-between gap-3">
+							{faq.question}
+							<svg class="h-4 w-4 shrink-0 text-text-muted transition-transform group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+							</svg>
+						</span>
+					</summary>
+					<p class="mt-2 text-sm leading-relaxed text-text-muted">{faq.answer}</p>
+				</details>
+			{/each}
+		</div>
+	</section>
 </div>
