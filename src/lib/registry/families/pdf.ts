@@ -9,7 +9,7 @@ export const pdfTools: ToolEntry[] = [
 		name: 'Merge PDFs',
 		description: 'Combine multiple PDFs into one file',
 		icon: 'M12 4v16m8-8H4',
-		keywords: ['merge', 'combine', 'join', 'pdf'],
+		keywords: ['merge', 'combine', 'join', 'concatenate', 'pdf'],
 		related: ['/pdf/split', '/pdf/reorder', '/pdf/compress', '/pdf/rotate'],
 		popular: true,
 		sitemap: { changefreq: 'monthly', priority: 0.9 }
@@ -91,8 +91,9 @@ export const pdfTools: ToolEntry[] = [
 		name: 'Compress PDF',
 		description: 'Reduce file size by stripping metadata',
 		icon: 'M19 14l-7 7m0 0l-7-7m7 7V3',
-		keywords: ['compress', 'reduce', 'size', 'pdf'],
+		keywords: ['compress', 'reduce', 'size', 'shrink', 'smaller', 'pdf'],
 		related: ['/pdf/merge', '/pdf/flatten', '/pdf/watermark', '/pdf/protect'],
+		popular: true,
 		sitemap: { changefreq: 'monthly', priority: 0.7 }
 	},
 	{
@@ -161,7 +162,7 @@ export const pdfTools: ToolEntry[] = [
 		name: 'Protect PDF',
 		description: 'Add password protection to your PDF',
 		icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
-		keywords: ['protect', 'password', 'encrypt', 'secure', 'pdf'],
+		keywords: ['protect', 'password', 'encrypt', 'secure', 'lock', 'pdf'],
 		related: ['/pdf/unlock', '/pdf/flatten', '/pdf/redact', '/pdf/watermark'],
 		sitemap: { changefreq: 'monthly', priority: 0.7 }
 	},
@@ -241,7 +242,7 @@ export const pdfTools: ToolEntry[] = [
 		name: 'Redact PDF',
 		description: 'Permanently black out sensitive content',
 		icon: 'M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l18 18',
-		keywords: ['redact', 'black out', 'sensitive', 'privacy', 'pdf'],
+		keywords: ['redact', 'black out', 'blackout', 'sensitive', 'privacy', 'censor', 'pdf'],
 		related: ['/pdf/flatten', '/pdf/protect', '/pdf/watermark', '/pdf/compare'],
 		sitemap: { changefreq: 'monthly', priority: 0.7 }
 	}

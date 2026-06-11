@@ -1,24 +1,24 @@
 <script lang="ts">
-	import { allFamilies, getTool } from '$lib/registry/index';
+	import { allFamilies, getFamilyTools } from '$lib/registry/index';
+	import ToolSearch from '$components/ToolSearch.svelte';
 
-	// The "More tools" grid shows 13 curated entries in a specific order.
-	// These are family hubs + standalone tools, not individual tool pages.
-	// Order is intentional (mirrors the original landing page).
-	const moreTools = [
-		{ href: '/dev', name: 'Developer Tools', desc: allFamilies.find((f) => f.id === 'dev')?.description ?? '' },
-		{ href: '/resume', name: 'Resume Builder', desc: getTool('/resume')?.description ?? '' },
-		{ href: '/invoice', name: 'Invoice Generator', desc: getTool('/invoice')?.description ?? '' },
-		{ href: '/links', name: 'Link Shortener', desc: getTool('/links')?.description ?? '' },
-		{ href: '/bio', name: 'Link in Bio', desc: getTool('/bio')?.description ?? '' },
-		{ href: '/pptx', name: 'PowerPoint Tools', desc: allFamilies.find((f) => f.id === 'pptx')?.description ?? '' },
-		{ href: '/remove', name: 'Data Removal', desc: getTool('/remove')?.description ?? '' },
-		{ href: '/signature', name: 'Email Signatures', desc: getTool('/signature')?.description ?? '' },
-		{ href: '/media', name: 'Video/Audio Tools', desc: 'Trim, compress, convert media files.' },
-		{ href: '/audio', name: 'Audio Tools', desc: allFamilies.find((f) => f.id === 'audio')?.description ?? '' },
-		{ href: '/text', name: 'Text Tools', desc: allFamilies.find((f) => f.id === 'text')?.description ?? '' },
-		{ href: '/legal-gen', name: 'Policy Generator', desc: 'Privacy policy, ToS, cookie policy.' },
-		{ href: '/mcp', name: 'MCP Server', desc: '30+ tools for AI agents via MCP.' }
-	];
+	// Families displayed in the directory, in intentional order.
+	// QR is first-class, standalone closes the list.
+	const directoryFamilyIds = [
+		'pdf', 'photo', 'convert', 'qr', 'media', 'audio',
+		'pptx', 'dev', 'text', 'legal-gen', 'standalone'
+	] as const;
+
+	// Pre-build sections at module scope — these are all plain data, no side effects.
+	// SvelteKit prerendering serialises this at build time, so every <a> is in the
+	// static HTML before any JS runs (SEO requirement).
+	const sections = directoryFamilyIds.map((id) => {
+		const family = allFamilies.find((f) => f.id === id)!;
+		const tools = getFamilyTools(id);
+		return { family, tools };
+	});
+
+	const totalTools = sections.reduce((n, s) => n + s.tools.length, 0);
 </script>
 
 <svelte:head>
@@ -74,12 +74,17 @@
 		</p>
 	</section>
 
+	<!-- Search -->
+	<section class="animate-fade-up mt-2" style="animation-delay: 200ms;" aria-label="Tool search">
+		<ToolSearch />
+	</section>
+
 	<!-- Featured tools — hardcoded because they have custom call-to-action copy -->
-	<section class="grid gap-5 sm:grid-cols-3 mt-2">
+	<section class="grid gap-5 sm:grid-cols-3 mt-8">
 		<a
 			href="/pdf"
 			class="animate-fade-up group rounded-2xl border border-border bg-surface-alt p-5 transition-all duration-200 hover:border-accent/50 hover:shadow-card-hover sm:p-7"
-			style="animation-delay: 200ms;"
+			style="animation-delay: 240ms;"
 		>
 			<h2 class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">PDF Tools</h2>
 			<p class="mt-2 text-sm leading-relaxed text-text-muted">
@@ -96,7 +101,7 @@
 		<a
 			href="/qr"
 			class="animate-fade-up group rounded-2xl border border-border bg-surface-alt p-5 transition-all duration-200 hover:border-accent/50 hover:shadow-card-hover sm:p-7"
-			style="animation-delay: 260ms;"
+			style="animation-delay: 300ms;"
 		>
 			<h2 class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">QR Codes</h2>
 			<p class="mt-2 text-sm leading-relaxed text-text-muted">
@@ -113,7 +118,7 @@
 		<a
 			href="/photo"
 			class="animate-fade-up group rounded-2xl border border-border bg-surface-alt p-5 transition-all duration-200 hover:border-accent/50 hover:shadow-card-hover sm:p-7"
-			style="animation-delay: 320ms;"
+			style="animation-delay: 360ms;"
 		>
 			<h2 class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">Photo & Image Tools</h2>
 			<p class="mt-2 text-sm leading-relaxed text-text-muted">
@@ -128,17 +133,78 @@
 		</a>
 	</section>
 
-	<!-- More tools -->
-	<section class="animate-fade-up mt-10" style="animation-delay: 380ms;">
-		<p class="mb-4 font-mono text-[clamp(0.5rem,1vw,0.75rem)] tracking-widest text-text-muted uppercase">More tools</p>
-
-		<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-			{#each moreTools as tool}
-				<a href={tool.href} class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-					<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">{tool.name}</h3>
-					<p class="mt-1 text-sm leading-relaxed text-text-muted">{tool.desc}</p>
+	<!-- Tool directory: every registered tool, sectioned by family -->
+	<!-- In-page anchor nav for quick jumping — also helps crawlers understand structure -->
+	<nav class="animate-fade-up mt-12" style="animation-delay: 400ms;" aria-label="Tool categories">
+		<p class="mb-3 font-mono text-[clamp(0.5rem,1vw,0.75rem)] tracking-widest text-text-muted uppercase">
+			{totalTools} tools — jump to category
+		</p>
+		<div class="flex flex-wrap gap-2">
+			{#each sections as { family }}
+				<a
+					href="#{family.id}"
+					class="rounded-full border border-border px-3 py-1 text-xs font-medium text-text-muted transition-colors duration-150 hover:border-accent/50 hover:text-accent"
+				>
+					{family.name}
 				</a>
 			{/each}
 		</div>
-	</section>
+	</nav>
+
+	<!-- Family sections -->
+	<div class="mt-8 space-y-12">
+		{#each sections as { family, tools }}
+			<section id={family.id} aria-labelledby="family-heading-{family.id}">
+				<!-- Section header with optional hub link -->
+				<div class="mb-4 flex items-baseline gap-3">
+					<h2
+						id="family-heading-{family.id}"
+						class="font-display text-lg font-700 tracking-tight text-text"
+					>
+						{family.name}
+					</h2>
+					{#if family.hub}
+						<a
+							href={family.hub}
+							class="text-xs font-medium text-accent hover:underline"
+							aria-label="Go to {family.name} hub"
+						>
+							All {family.name.split(' ')[0]} tools &rarr;
+						</a>
+					{/if}
+				</div>
+
+				<!-- Tool grid: compact link cards, all plain <a> for SSR/SEO -->
+				<div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+					{#each tools as tool}
+						<a
+							href={tool.path}
+							class="group flex items-start gap-3 rounded-xl border border-border p-3.5 transition-colors duration-150 hover:border-accent/50 hover:bg-surface-alt"
+						>
+							{#if tool.icon}
+								<svg
+									class="mt-0.5 h-4 w-4 shrink-0 text-text-muted transition-colors duration-150 group-hover:text-accent"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="1.5"
+									viewBox="0 0 24 24"
+									aria-hidden="true"
+								>
+									<path stroke-linecap="round" stroke-linejoin="round" d={tool.icon} />
+								</svg>
+							{/if}
+							<div class="min-w-0">
+								<div class="text-sm font-medium text-text transition-colors duration-150 group-hover:text-accent truncate">
+									{tool.name}
+								</div>
+								<div class="mt-0.5 text-xs leading-relaxed text-text-muted line-clamp-2">
+									{tool.description}
+								</div>
+							</div>
+						</a>
+					{/each}
+				</div>
+			</section>
+		{/each}
+	</div>
 </div>

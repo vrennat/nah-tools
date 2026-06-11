@@ -11,7 +11,7 @@ export const photoTools: ToolEntry[] = [
 		name: 'Background Remover',
 		description: 'Remove image backgrounds instantly. Free, unlimited, full resolution.',
 		icon: 'M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879M12 12L9.121 9.121m0 5.758a3 3 0 10-4.243 4.243 3 3 0 004.243-4.243zm0-5.758a3 3 0 10-4.243-4.243 3 3 0 004.243 4.243z',
-		keywords: ['background', 'remove', 'transparent', 'png', 'photo'],
+		keywords: ['background', 'remove', 'transparent', 'cutout', 'png', 'photo'],
 		popular: true,
 		related: ['/photo/compress', '/photo/filters', '/convert/png-to-webp', '/photo/exif'],
 		sitemap: { changefreq: 'monthly', priority: 0.8 }
