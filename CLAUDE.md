@@ -19,11 +19,9 @@ bun run db:migrate:local # run D1 migrations locally
 bun run db:migrate:prod  # run D1 migrations in production
 ```
 
-## Stack
+## Stack Additions
 
-- **Tailwind CSS v4** via Vite plugin (theme tokens in `src/app.css` under `@theme`)
 - **Cloudflare D1** (SQLite) for dynamic QR code redirects
-- **Vitest** — `bun run test` (co-located `.test.ts` files)
 
 ## Architecture
 
