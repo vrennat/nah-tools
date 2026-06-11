@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { PageThumbnail } from '$pdf/types';
 
 	let files = $state<File[]>([]);
@@ -84,17 +84,43 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded to rotate a PDF?',
+			answer:
+				'No. Rotation is performed entirely in your browser. Your PDF is never sent to a server — pdf-lib runs locally and rewrites the page orientation in memory.'
+		},
+		{
+			question: 'Can I rotate only specific pages instead of the whole document?',
+			answer:
+				'Yes. After uploading, thumbnails of each page appear. Click the rotate buttons beneath individual pages to set per-page rotations. Use "Rotate all CW/CCW" to apply the same rotation to every page at once.'
+		},
+		{
+			question: 'What rotation increments are supported?',
+			answer:
+				'Pages can be rotated in 90-degree increments: 90, 180, and 270 degrees. The current rotation is shown on each thumbnail so you can see the pending changes before applying.'
+		},
+		{
+			question: 'Will rotation affect the PDF quality or content?',
+			answer:
+				'No. Rotation is a metadata change — it updates the page orientation flag without re-rendering or re-encoding the content. Text, images, and vector graphics remain unchanged.'
+		},
+		{
+			question: 'Can I undo a rotation before downloading?',
+			answer:
+				'Yes. Click the opposite rotate button to return a page to its original orientation. Pages with no rotation applied are not modified when you download.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Rotate PDF Pages Online Free | nah</title>
-	<meta
-		name="description"
-		content="Rotate PDF pages. Rotate all or individual pages 90, 180, or 270 degrees. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout title="Rotate Pages" description="Rotate all or specific pages in your PDF.">
+<ToolShell
+	path="/pdf/rotate"
+	tagline="Rotate all pages or pick individual pages to correct orientation. No upload needed."
+	seoTitle="Rotate PDF Pages Free — Fix Orientation Instantly | nah.tools"
+	description="Rotate PDF pages. Rotate all or individual pages 90, 180, or 270 degrees. Free, no upload — processed in your browser."
+	{faqs}
+>
 	<section class="mx-auto max-w-4xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
 			<FileDropZone accept=".pdf" bind:files label="Drop a PDF here or click to browse" />
@@ -212,8 +238,22 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Fixing PDF orientation without re-scanning</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Scanned documents frequently come out sideways or upside down. Presentations exported to PDF
+				occasionally end up in the wrong orientation. Mobile phone scans default to portrait even
+				when the original was landscape.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool lets you correct those issues without re-scanning or re-exporting. Upload the PDF,
+				select the pages that need correction, and choose 90, 180, or 270 degrees. You can rotate
+				every page in one click or set different rotations per page for mixed-orientation documents.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Because rotation is a metadata operation rather than a re-render, the output is identical in
+				quality to the input. The fix takes seconds regardless of document size.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>

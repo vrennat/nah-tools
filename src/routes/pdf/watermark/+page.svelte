@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 
 	let files = $state<File[]>([]);
 	let text = $state('CONFIDENTIAL');
@@ -39,19 +39,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded to add a watermark?',
+			answer:
+				'No. The watermark is applied entirely in your browser using pdf-lib. Your PDF never leaves your device — no upload, no account, no data retention.'
+		},
+		{
+			question: 'Is the watermark permanent?',
+			answer:
+				'The watermark is drawn as content on each page, making it part of the PDF output. It is not a metadata tag. A determined recipient with a PDF editor could remove it, but it cannot be hidden or toggled off by opening the file normally.'
+		},
+		{
+			question: 'Can I control how visible the watermark is?',
+			answer:
+				'Yes. You can adjust the opacity (5% to 50%), font size (12pt to 120pt), color, and rotation angle. The defaults — "CONFIDENTIAL" at 15% opacity, -45 degrees — are a common choice for document review workflows.'
+		},
+		{
+			question: 'What text can I use as a watermark?',
+			answer:
+				'Any text string. Common choices are CONFIDENTIAL, DRAFT, DO NOT COPY, or a company name. The text is rendered on every page of the document.'
+		},
+		{
+			question: 'Will the watermark cover the readable content?',
+			answer:
+				'At the default 15% opacity the watermark is clearly visible but does not obscure the underlying text. Increasing opacity makes it more prominent; the content remains readable at any setting within the provided range.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Add Watermark to PDF Online Free | nah</title>
-	<meta
-		name="description"
-		content="Add a text watermark to all pages of your PDF. Customize text, opacity, rotation, and color. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="Add Watermark"
-	description="Add a text watermark to all pages of your PDF."
+<ToolShell
+	path="/pdf/watermark"
+	tagline="Stamp every page with a custom text watermark. Control opacity, rotation, and color."
+	seoTitle="Add Watermark to PDF Free — Text Overlay | nah.tools"
+	description="Add a text watermark to all pages of your PDF. Customize text, opacity, rotation, and color. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -150,8 +173,24 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">When to use a PDF watermark</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Watermarks communicate document status at a glance — reviewers know a draft is not final,
+				recipients know a copy is for reference only, and distributed files are clearly marked with
+				ownership information. A diagonal "CONFIDENTIAL" stamp across every page is a standard part
+				of legal and financial document workflows.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool lets you set any text, tune the opacity so the watermark is visible without
+				obscuring the content, and adjust the angle. The result is written directly into the PDF
+				page content, so the stamp appears correctly in every viewer and when the document is
+				printed.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Because everything runs in your browser, sensitive documents — contracts, financial
+				statements, HR files — never leave your device during the watermarking process.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>

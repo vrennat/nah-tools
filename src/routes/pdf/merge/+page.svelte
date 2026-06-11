@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 
 	let files = $state<File[]>([]);
 	let processing = $state(false);
@@ -41,19 +41,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded to a server when I merge PDFs?',
+			answer:
+				'No. All merging happens directly in your browser using JavaScript. Your files never leave your device — no uploads, no server, no account required.'
+		},
+		{
+			question: 'Is there a file size limit?',
+			answer:
+				'There is no enforced file size limit. Very large PDFs (hundreds of megabytes combined) may slow down or run out of browser memory depending on your device, but the tool imposes no hard cap.'
+		},
+		{
+			question: 'How many PDFs can I merge at once?',
+			answer:
+				'You can add as many PDFs as your browser memory allows. The file list shows your current order; drag to reorder before merging.'
+		},
+		{
+			question: 'Can I reorder the files before merging?',
+			answer:
+				'Yes. Once you add two or more files, a drag-and-drop list appears so you can set the exact order before clicking Merge.'
+		},
+		{
+			question: 'Will the merged PDF preserve bookmarks, links, and form fields?',
+			answer:
+				'The merger uses pdf-lib, which preserves the page content and structure of each document. Complex interactive elements like form fields and JavaScript actions may not survive the merge depending on how they were authored.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Merge PDFs Online Free — Combine PDF Files | nah</title>
-	<meta
-		name="description"
-		content="Merge multiple PDF files into one. Free, no upload — files are combined in your browser. Drag to reorder before merging."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="Merge PDFs"
-	description="Combine multiple PDF files into one document. Drag to reorder."
+<ToolShell
+	path="/pdf/merge"
+	tagline="Combine multiple PDF files into one document. Drag to reorder, then download."
+	seoTitle="Merge PDF Files Free — No Upload, No Signup | nah.tools"
+	description="Merge multiple PDF files into one. Free, no upload — files are combined in your browser. Drag to reorder before merging."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -131,8 +154,23 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Why merge PDFs in your browser?</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Most PDF merger tools work by uploading your files to a remote server, processing them there,
+				and sending the result back. That means your documents — contracts, reports, tax forms — pass
+				through a third-party system you have no visibility into.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool does the opposite. When you click Merge, your browser reads the files directly from
+				disk, combines them using the <strong class="font-medium text-text">pdf-lib</strong> library running
+				locally in JavaScript, and offers the result as a download. Nothing is transmitted. The merge
+				completes in seconds on any modern device.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				You can merge invoices, scanned documents, presentations exported as PDF, or any combination.
+				Add as many files as you need, drag them into the right order, and merge in one click.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { PageThumbnail } from '$pdf/types';
 
 	let files = $state<File[]>([]);
@@ -69,19 +69,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded to reorder pages?',
+			answer:
+				'No. Reordering happens entirely in your browser. Your PDF is never transmitted to a server — pdf-lib reads and rewrites the page order locally.'
+		},
+		{
+			question: 'How do I reorder pages?',
+			answer:
+				'After uploading, thumbnails of all pages load automatically. Drag any thumbnail to a new position. The order displayed is the order in which pages will appear in the downloaded file.'
+		},
+		{
+			question: 'Can I undo a drag before downloading?',
+			answer:
+				'Yes. Keep dragging pages until you have the order you want. Nothing is written until you click the download button. You can also re-upload the original file to start over.'
+		},
+		{
+			question: 'Does reordering affect the PDF content?',
+			answer:
+				'No. The tool copies pages in the new order without re-encoding them. Text, images, and links are preserved exactly as in the source.'
+		},
+		{
+			question: 'Is there a page count limit?',
+			answer:
+				'No enforced limit. The tool renders all pages as thumbnails, so very large documents (100+ pages) will take a moment to load, but no cap is imposed.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Reorder PDF Pages Online Free | nah</title>
-	<meta
-		name="description"
-		content="Rearrange PDF pages by dragging and dropping. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="Reorder Pages"
-	description="Drag and drop to rearrange pages in your PDF."
+<ToolShell
+	path="/pdf/reorder"
+	tagline="Drag and drop page thumbnails to rearrange your PDF. No upload needed."
+	seoTitle="Reorder PDF Pages Free — Drag to Rearrange | nah.tools"
+	description="Rearrange PDF pages by dragging and dropping. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-4xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -152,8 +175,24 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Rearrange pages without re-creating the document</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				PDFs created by combining scans, exporting from multiple sources, or assembling from
+				templates often end up with pages in the wrong sequence. Correcting the order used to mean
+				re-creating the entire document from scratch.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool renders every page as a thumbnail so you can see exactly what you are moving.
+				Drag pages into the correct order, verify the sequence visually, and download. The output is
+				a fresh PDF with pages in the order you specified — content, fonts, and images are copied
+				without re-encoding.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Common use cases: correcting a scan that captured pages out of order, resequencing a
+				presentation that was assembled from multiple exports, or moving a cover page or appendix to
+				the right position after merging.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>
