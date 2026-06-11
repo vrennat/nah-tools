@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MediaToolLayout from '$components/media/MediaToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import MediaDropZone from '$components/media/MediaDropZone.svelte';
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
@@ -123,19 +123,42 @@
 			if (gifPreviewUrl) URL.revokeObjectURL(gifPreviewUrl);
 		};
 	});
+
+	const faqs = [
+		{
+			question: 'How does the GIF conversion work?',
+			answer:
+				'The tool uses a two-pass FFmpeg.wasm process for better color quality. Pass 1 extracts a palette from the video segment using the palettegen filter — this gives the GIF a custom 256-color palette tuned to the actual content. Pass 2 renders the GIF using that palette with the paletteuse filter and Lanczos scaling. The result is significantly better than a naive single-pass conversion.'
+		},
+		{
+			question: 'Why are GIF files so large compared to the video?',
+			answer:
+				'GIF is an old format from 1989 that stores each frame as an indexed image with a maximum of 256 colors. It has no inter-frame compression like modern video codecs do. A 5-second clip at 15 fps and 640px wide generates 75 full frames. Keep the clip short (under 10 seconds), lower the FPS, and reduce the width to control file size.'
+		},
+		{
+			question: 'Is my video uploaded to a server?',
+			answer:
+				'No. The entire conversion runs in your browser using FFmpeg.wasm — WebAssembly compiled from FFmpeg. The WASM binary (about 25 MB) downloads from a CDN on first use and is then cached by your browser. No video data leaves your device.'
+		},
+		{
+			question: 'What FPS should I use?',
+			answer:
+				'15 fps is a good default — it produces smooth-looking GIFs at a manageable file size. Drop to 10 fps for maximum compression on simple motion or raise to 24-30 fps for fast action like sports clips. Note that most browsers cap GIF playback at 50 ms per frame (20 fps) regardless of the encoded frame rate.'
+		},
+		{
+			question: 'What video formats can I convert to GIF?',
+			answer:
+				'FFmpeg.wasm reads most common video formats: MP4, MOV, AVI, MKV, WebM, and others. The source video must have a video stream. If your file has no video track (audio-only), the conversion will fail.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Convert Video to GIF Free Online — Animated GIFs | nah</title>
-	<meta
-		name="description"
-		content="Convert video clips to animated GIFs. Adjust FPS, size, and time range. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<MediaToolLayout
-	title="Video to GIF"
-	description="Convert video clips to animated GIFs with adjustable quality and duration."
+<ToolShell
+	path="/media/video-to-gif"
+	tagline="Convert any video clip to a high-quality animated GIF with custom FPS, size, and time range."
+	seoTitle="Video to GIF Converter Free Online — Animated GIFs"
+	description="Convert video clips to animated GIFs. Adjust FPS, size, and time range. Free, no upload — processed in your browser with FFmpeg.wasm."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -238,8 +261,21 @@
 				</div>
 			{/if}
 		</div>
+
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Two-pass GIF rendering for better color quality</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				A simple video-to-GIF converter just dumps frames as images and concatenates them. The color quality is usually poor because GIF only supports 256 colors and a generic palette doesn't represent the specific hues in your video well.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool uses a two-pass approach powered by <strong class="font-medium text-text">FFmpeg.wasm</strong>. The first pass analyzes the video segment and generates a custom 256-color palette optimized for the actual content using FFmpeg's <code class="rounded bg-surface px-1 font-mono text-xs">palettegen</code> filter. The second pass renders the GIF using that palette and Lanczos downscaling, which produces noticeably sharper edges and more accurate colors than the default approach.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Keep clips short — under 10 seconds — for manageable file sizes. Lower the FPS and width if you need a smaller GIF. The preview renders in the browser immediately after creation so you can judge quality before downloading.
+			</p>
+		</div>
 	</section>
-</MediaToolLayout>
+</ToolShell>
 
 <MediaLoadingOverlay state={loadProgress.state} percent={loadProgress.percent} onRetry={handleRetry} />
 

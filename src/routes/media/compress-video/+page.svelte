@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MediaToolLayout from '$components/media/MediaToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import MediaDropZone from '$components/media/MediaDropZone.svelte';
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
@@ -136,19 +136,42 @@
 			initFFmpeg();
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Does my video get uploaded to a server?',
+			answer:
+				'No. Compression runs entirely in your browser using FFmpeg.wasm — a WebAssembly build of FFmpeg. Your video never leaves your device. The first time you use any media tool, the FFmpeg.wasm binary (about 25 MB) downloads from a CDN and is cached by your browser for all future visits.'
+		},
+		{
+			question: 'What codec does the compressor use?',
+			answer:
+				'The tool encodes output as H.264 (libx264) in an MP4 container. H.264 is supported by virtually every device and video player. Audio is re-encoded at the bitrate specified by the preset (96k for Email, 128k for Social and Web).'
+		},
+		{
+			question: 'What do the presets actually do?',
+			answer:
+				'Each preset sets a CRF (Constant Rate Factor) value and maximum resolution. Email (CRF 32, 720p max, 30 fps) targets files under 25 MB for attachments. Social (CRF 26, 1080p max, 30 fps) balances quality and size for platforms like Twitter and Instagram. Web (CRF 23, 1080p max, original fps) keeps the best quality at a reasonable file size. Higher CRF = more compression = smaller file with some quality loss.'
+		},
+		{
+			question: 'What if the compressed file is larger than the original?',
+			answer:
+				'The tool detects this automatically. If the re-encoded output would be larger than the original, it downloads the original file unchanged and shows a note explaining the situation. You can try a more aggressive CRF or lower resolution via the Custom preset.'
+		},
+		{
+			question: 'What video formats can I compress?',
+			answer:
+				'FFmpeg.wasm can read most common video containers: MP4, MOV, AVI, MKV, WebM, and others. The output is always MP4 with H.264 video. If your source format is not recognized, you will see an error message.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Compress Video Free Online — Reduce Video Size | nah</title>
-	<meta
-		name="description"
-		content="Reduce video file size for email or sharing. Choose presets or customize settings. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<MediaToolLayout
-	title="Compress Video"
-	description="Reduce file size without losing much quality. Choose a preset or customize settings."
+<ToolShell
+	path="/media/compress-video"
+	tagline="Reduce video file size for email, sharing, or storage — choose a preset or dial in custom settings."
+	seoTitle="Compress Video Free Online — Reduce Video File Size"
+	description="Reduce video file size for email or sharing. Choose presets or customize settings. Free, no upload — processed in your browser with FFmpeg.wasm."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -276,8 +299,21 @@
 				</div>
 			{/if}
 		</div>
+
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">How video compression works here</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Most online video compressors route your files through a server. Your footage gets uploaded, processed on hardware you don't control, then downloaded back. That approach is slow and exposes your content to a third party.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool runs <strong class="font-medium text-text">FFmpeg.wasm</strong> — a full build of FFmpeg compiled to WebAssembly — directly in your browser tab. The first time you use any media tool on nah.tools, the WASM binary (roughly 25 MB) downloads from a CDN and is stored in your browser cache. Subsequent uses are instant. Nothing leaves your device during compression.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				The three built-in presets cover the most common use cases: shrinking a recording to fit under an email attachment limit, preparing a clip for social media upload, and reducing file size for web embedding while keeping good visual quality. The Custom preset exposes the underlying FFmpeg parameters — CRF, resolution cap, frame rate, and audio bitrate — so you have full control when the presets don't fit your needs.
+			</p>
+		</div>
 	</section>
-</MediaToolLayout>
+</ToolShell>
 
 <MediaLoadingOverlay state={loadProgress.state} percent={loadProgress.percent} onRetry={handleRetry} />
 

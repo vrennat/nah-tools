@@ -1,11 +1,10 @@
 <script lang="ts">
-	import MediaToolLayout from '$components/media/MediaToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import MediaDropZone from '$components/media/MediaDropZone.svelte';
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
 	import { getFFmpeg, cancelFFmpeg } from '$media/ffmpeg-loader';
 	import { extractAudio } from '$media/processor';
-	import { AUDIO_BITRATES } from '$media/presets';
 	import type { LoadProgress, ProcessingProgress as PP } from '$media/types';
 
 	let file = $state<File | null>(null);
@@ -85,19 +84,42 @@
 			initFFmpeg();
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'What output formats does audio extraction support?',
+			answer:
+				'The tool extracts audio as MP3 (via libmp3lame at 192 kbps), AAC in an M4A container (via the FFmpeg aac encoder at 192 kbps), or OGG Vorbis (via libvorbis at 192 kbps). These are the three formats supported by the extraction function. If you need WAV, FLAC, or other formats, use the Convert Audio tool after extracting.'
+		},
+		{
+			question: 'Does extraction re-encode the audio?',
+			answer:
+				'Yes. The extractor uses FFmpeg with -vn (strip video) and re-encodes the audio at 192 kbps in your chosen format. This ensures compatibility across output formats regardless of what codec the original video used. The 192 kbps bitrate preserves high quality while keeping file sizes reasonable.'
+		},
+		{
+			question: 'Is my video uploaded to a server?',
+			answer:
+				'No. Extraction runs in your browser using FFmpeg.wasm — a WebAssembly build of FFmpeg. The WASM binary (about 25 MB) loads from a CDN on first use and is then cached by your browser. Your video files never leave your device.'
+		},
+		{
+			question: 'What video formats can I extract audio from?',
+			answer:
+				'FFmpeg.wasm handles most common video containers: MP4, MOV, AVI, MKV, WebM, and more. The video must contain an audio track. If the file has no audio stream, FFmpeg will report an error.'
+		},
+		{
+			question: 'Can I extract audio from a recording I made on my phone?',
+			answer:
+				'Yes. Phone recordings (typically MP4 with AAC audio on iOS, or MP4 with AAC/AMR on Android) are fully supported. Drop the file, choose your preferred output format, and extract. The result downloads directly to your device.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Extract Audio from Video Free Online — Pull Audio Track | nah</title>
-	<meta
-		name="description"
-		content="Extract audio track from any video file. Choose MP3, AAC, or OGG format. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<MediaToolLayout
-	title="Extract Audio"
-	description="Pull the audio track from any video file and save it as audio."
+<ToolShell
+	path="/media/extract-audio"
+	tagline="Pull the audio track from any video and save it as MP3, AAC, or OGG — entirely in your browser."
+	seoTitle="Extract Audio from Video Free Online — Pull Audio Track"
+	description="Extract audio track from any video file. Choose MP3, AAC, or OGG format. Free, no upload — processed in your browser with FFmpeg.wasm."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -198,8 +220,21 @@
 				</div>
 			{/if}
 		</div>
+
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Pull audio from video — no server, no upload</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Extracting audio from a video is useful in many situations: saving the soundtrack from a music video, pulling the audio from a lecture recording, converting a screen recording to a podcast episode, or separating narration from a presentation. Most tools that do this require you to upload potentially large video files to a remote server.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This extractor uses <strong class="font-medium text-text">FFmpeg.wasm</strong> running directly in your browser. Drop your video, choose the output format (MP3 for maximum compatibility, AAC for better efficiency, OGG for open-source workflows), and extract. The audio is downloaded immediately. Nothing is transmitted to a server.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				The extraction re-encodes the audio at 192 kbps, which is high quality for all three supported formats. If you need the audio in a different format after extraction, the Convert Audio tool on nah.tools can handle the second step.
+			</p>
+		</div>
 	</section>
-</MediaToolLayout>
+</ToolShell>
 
 <MediaLoadingOverlay state={loadProgress.state} percent={loadProgress.percent} onRetry={handleRetry} />
 

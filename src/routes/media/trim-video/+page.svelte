@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MediaToolLayout from '$components/media/MediaToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import MediaDropZone from '$components/media/MediaDropZone.svelte';
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
@@ -111,19 +111,42 @@
 			if (previewUrl) URL.revokeObjectURL(previewUrl);
 		};
 	});
+
+	const faqs = [
+		{
+			question: 'Does trimming re-encode the video?',
+			answer:
+				'No. The trimmer uses FFmpeg\'s stream-copy mode (-c copy), which cuts the video at the requested timestamps without decoding or re-encoding the frames. This makes trimming very fast and preserves the original quality exactly. The tradeoff is that cut points snap to the nearest keyframe, so the actual start or end may be off by a fraction of a second.'
+		},
+		{
+			question: 'Is my video uploaded anywhere?',
+			answer:
+				'No. Trimming runs entirely in your browser using FFmpeg.wasm — WebAssembly compiled from the same FFmpeg codebase used in professional video production. The WASM binary (about 25 MB) downloads once from a CDN on first use, then is cached by your browser. Your video files never leave your device.'
+		},
+		{
+			question: 'What video formats can I trim?',
+			answer:
+				'FFmpeg.wasm supports most common containers: MP4, MOV, AVI, MKV, and WebM. The output is always an MP4 file. If your source container is not compatible with stream copy, FFmpeg will return an error and you may need to compress rather than trim.'
+		},
+		{
+			question: 'How do I set precise start and end times?',
+			answer:
+				'After selecting a video, the HTML5 player appears above the trim controls. Scrub to find your cut points, then type exact values into the start and end time fields. The controls show the selected clip duration so you can confirm the range before trimming.'
+		},
+		{
+			question: 'Why is the trimmed file slightly larger than expected?',
+			answer:
+				'Stream-copy includes any audio or video data between the last keyframe before your start point and the first keyframe after your end point. The extra frames are present in the file but are not displayed during playback. This is normal behavior for keyframe-aligned trimming.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Trim Video Free Online — Cut Video Time Range | nah</title>
-	<meta
-		name="description"
-		content="Trim video to a specific time range. Preview and adjust start/end times. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<MediaToolLayout
-	title="Trim Video"
-	description="Cut video to a specific time range. Set start and end points with visual preview."
+<ToolShell
+	path="/media/trim-video"
+	tagline="Cut a video to exactly the clip you need — set start and end times with a live preview."
+	seoTitle="Trim Video Free Online — Cut Video to Time Range"
+	description="Trim video to a specific time range. Preview and adjust start/end times. Free, no upload — processed in your browser with FFmpeg.wasm."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -188,8 +211,21 @@
 				</div>
 			{/if}
 		</div>
+
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Fast, lossless video trimming in your browser</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Video trimming tools usually work in one of two ways: upload your file to a server, or re-encode every frame locally to get frame-accurate cuts. Both approaches have costs — the first risks your privacy and is slow on large files; the second takes significant CPU time and degrades quality slightly with each encode.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool takes a third path. It uses <strong class="font-medium text-text">FFmpeg.wasm</strong> in stream-copy mode, which cuts the video at keyframe boundaries without touching the encoded data. The result is near-instant trimming that preserves exactly the original codec, resolution, and quality. For most clips, the trim completes in a few seconds regardless of file size, because no video decoding occurs.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Load your video, use the built-in player to identify your start and end points, then set the trim range with the controls below. The clip duration is shown in real time so you know exactly what you'll get before clicking Trim.
+			</p>
+		</div>
 	</section>
-</MediaToolLayout>
+</ToolShell>
 
 <MediaLoadingOverlay state={loadProgress.state} percent={loadProgress.percent} onRetry={handleRetry} />
 

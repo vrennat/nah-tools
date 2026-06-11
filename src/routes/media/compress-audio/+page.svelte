@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MediaToolLayout from '$components/media/MediaToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import MediaDropZone from '$components/media/MediaDropZone.svelte';
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
@@ -95,19 +95,42 @@
 			initFFmpeg();
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'What output formats does audio compression support?',
+			answer:
+				'The compressor outputs MP3 (via libmp3lame), AAC in an M4A container (via the FFmpeg aac encoder), or OGG Vorbis (via libvorbis). All three are lossy formats — the tool re-encodes your audio at the selected bitrate. MP3 is the most universally compatible. AAC offers better quality at the same bitrate. OGG is open-source and works well in web contexts.'
+		},
+		{
+			question: 'What bitrate should I choose?',
+			answer:
+				'64 kbps is suitable for speech-only content where file size matters most. 128 kbps is a good all-purpose setting for podcasts and general audio. 192 kbps is high quality and appropriate for music or anything where fidelity matters. 320 kbps is near-transparent quality for most listeners and produces the largest files.'
+		},
+		{
+			question: 'Is my audio uploaded to a server?',
+			answer:
+				'No. Compression runs in your browser using FFmpeg.wasm — a WebAssembly port of FFmpeg. The WASM binary (about 25 MB) downloads from a CDN the first time you use a media tool, then is cached for future visits. Your audio files never leave your device.'
+		},
+		{
+			question: 'What if the compressed file is larger than the original?',
+			answer:
+				'This can happen when the source file is already highly compressed or at a lower bitrate than your selected target. The tool detects this and downloads the original file instead, with a note explaining what happened. Try selecting a lower bitrate.'
+		},
+		{
+			question: 'Can I compress WAV or FLAC files down to MP3?',
+			answer:
+				'Yes. The input can be any audio format that FFmpeg can read — including WAV, FLAC, M4A, OGG, and more. Select MP3 as the output format and the desired bitrate, and the tool will convert and compress in one step.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Compress Audio Free Online — Reduce Audio Size | nah</title>
-	<meta
-		name="description"
-		content="Reduce audio file size with adjustable bitrate. Choose MP3, AAC, or OGG format. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<MediaToolLayout
-	title="Compress Audio"
-	description="Reduce audio file size by adjusting bitrate and format."
+<ToolShell
+	path="/media/compress-audio"
+	tagline="Shrink audio files by adjusting bitrate and format — choose MP3, AAC, or OGG output."
+	seoTitle="Compress Audio Free Online — Reduce Audio File Size"
+	description="Reduce audio file size with adjustable bitrate. Choose MP3, AAC, or OGG format. Free, no upload — processed in your browser with FFmpeg.wasm."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -208,8 +231,21 @@
 				</div>
 			{/if}
 		</div>
+
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Why compress audio in your browser?</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Large audio files create friction: slow email attachments, storage limits on messaging apps, and long upload times for podcast hosts. Compression reduces file size by re-encoding at a lower bitrate — the perceived quality loss is minimal at 128 kbps or higher for most content.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool runs <strong class="font-medium text-text">FFmpeg.wasm</strong> in your browser, with no server involved. The FFmpeg WASM binary (about 25 MB) downloads from a CDN on first use and is cached for future visits. Compression happens locally — useful for audio containing sensitive or private content you don't want passing through a third-party service.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Choose your output format (MP3 for widest compatibility, AAC for better quality-per-bit, OGG for open-source contexts) and target bitrate, then compress. If your file is already smaller than the target, the original is returned unchanged.
+			</p>
+		</div>
 	</section>
-</MediaToolLayout>
+</ToolShell>
 
 <MediaLoadingOverlay state={loadProgress.state} percent={loadProgress.percent} onRetry={handleRetry} />
 

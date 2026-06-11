@@ -10,7 +10,7 @@ export const mediaTools: ToolEntry[] = [
 		description: 'Reduce file size for email or sharing',
 		icon: 'M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75',
 		keywords: ['compress', 'video', 'reduce', 'size', 'mp4'],
-		related: ['/media/trim-video', '/media/video-to-gif', '/media/extract-audio', '/media/trim-audio'],
+		related: ['/media/trim-video', '/media/video-to-gif', '/media/extract-audio', '/audio/convert'],
 		popular: true,
 		sitemap: { changefreq: 'monthly', priority: 0.9 }
 	},
@@ -21,7 +21,7 @@ export const mediaTools: ToolEntry[] = [
 		description: 'Cut video to a specific time range',
 		icon: 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
 		keywords: ['trim', 'cut', 'video', 'clip', 'time range'],
-		related: ['/media/compress-video', '/media/video-to-gif', '/media/extract-audio', '/media/trim-audio'],
+		related: ['/media/compress-video', '/media/video-to-gif', '/media/extract-audio', '/audio/normalize'],
 		popular: true,
 		sitemap: { changefreq: 'monthly', priority: 0.9 }
 	},
@@ -32,7 +32,7 @@ export const mediaTools: ToolEntry[] = [
 		description: 'Cut audio to a specific time range',
 		icon: 'M7.848 8.25l1.536.887M7.848 8.25a3 3 0 11-5.196-3 3 3 0 015.196 3zm1.536.887a2.165 2.165 0 011.083 1.839c.005.351.054.695.14 1.024M9.384 9.137l2.077 1.199M7.848 15.75l1.536-.887m-1.536.887a3 3 0 11-5.196 3 3 3 0 015.196-3zm1.536-.887a2.165 2.165 0 001.083-1.838c.005-.352.054-.695.14-1.025m-1.223 2.863l2.077-1.199m0-3.328a4.323 4.323 0 012.068-1.379l5.325-1.628a4.5 4.5 0 012.48-.044l.803.215-7.794 4.5m-2.882-1.664A4.331 4.331 0 0010.607 12m1.854-1.664l2.08 1.202m-4.934.462a4.331 4.331 0 00-.455 1.664M13.54 12.538l-2.08 1.2',
 		keywords: ['trim', 'cut', 'audio', 'clip', 'time range'],
-		related: ['/media/compress-audio', '/media/extract-audio', '/media/trim-video', '/audio/merge'],
+		related: ['/media/compress-audio', '/media/extract-audio', '/audio/convert', '/audio/merge'],
 		sitemap: { changefreq: 'monthly', priority: 0.8 }
 	},
 	{
