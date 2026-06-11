@@ -16,6 +16,49 @@ export function escapeHtml(text: string): string {
 		.replace(/'/g, '&#39;');
 }
 
+const ACCENT_COLOR_DEFAULT = '#3b82f6';
+
+/**
+ * Returns the color if it matches a valid CSS hex literal, otherwise the safe default.
+ * Prevents CSS injection via style attribute interpolation.
+ */
+export function sanitizeColor(color: string): string {
+	return /^#[0-9a-fA-F]{3,8}$/.test(color) ? color : ACCENT_COLOR_DEFAULT;
+}
+
+/**
+ * Returns the URL if its scheme is https, http, or data:image/ (for embedded photos/logos).
+ * Returns empty string for anything else (javascript:, vbscript:, etc.) to prevent
+ * attribute injection and script execution in the preview iframe.
+ */
+export function sanitizeImageUrl(url: string): string {
+	const trimmed = url.trim();
+	if (
+		trimmed.startsWith('https://') ||
+		trimmed.startsWith('http://') ||
+		trimmed.startsWith('data:image/')
+	) {
+		return trimmed;
+	}
+	return '';
+}
+
+/**
+ * Returns the URL if its scheme is https, http, or mailto.
+ * Returns empty string for javascript:, vbscript:, and any other scheme.
+ */
+export function sanitizeLinkUrl(url: string): string {
+	const trimmed = url.trim();
+	if (
+		trimmed.startsWith('https://') ||
+		trimmed.startsWith('http://') ||
+		trimmed.startsWith('mailto:')
+	) {
+		return trimmed;
+	}
+	return '';
+}
+
 export function renderSignature(data: SignatureData): string {
 	let html: string;
 

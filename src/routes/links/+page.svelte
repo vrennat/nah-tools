@@ -51,10 +51,11 @@
 	let bulkFileInput = $state<HTMLInputElement>(null!);
 
 	let passphraseValid = $derived(!passphrase || passphrase.length >= 8);
-	let canCreate = $derived(url && !loading && passphraseValid);
+	// Block submission if an alias was entered but hasn't been confirmed as available.
+	let canCreate = $derived(url && !loading && passphraseValid && (!alias || aliasStatus === 'available'));
 	let qrData = $derived(result ? result.short_url : '');
 
-	let taggedUrl = $derived(() => {
+	let taggedUrl = $derived.by(() => {
 		if (!url) return '';
 		try {
 			const u = new URL(normalizeUrl(url));
@@ -123,7 +124,7 @@
 		loading = true;
 		error = '';
 
-		const destinationUrl = hasUtm ? taggedUrl() : normalizeUrl(url);
+		const destinationUrl = hasUtm ? taggedUrl : normalizeUrl(url);
 
 		try {
 			const res = await fetch('/api/links', {
@@ -484,7 +485,7 @@
 							{#if hasUtm && url}
 								<div class="rounded-lg bg-surface-alt p-3">
 									<p class="mb-1 text-xs font-medium text-text-muted">Tagged URL preview</p>
-									<p class="break-all font-mono text-xs text-text">{taggedUrl()}</p>
+									<p class="break-all font-mono text-xs text-text">{taggedUrl}</p>
 								</div>
 							{/if}
 						</div>

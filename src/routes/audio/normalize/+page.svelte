@@ -3,7 +3,7 @@
 	import MediaDropZone from '$components/media/MediaDropZone.svelte';
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
-	import { getFFmpeg } from '$media/ffmpeg-loader';
+	import { getFFmpeg, cancelFFmpeg } from '$media/ffmpeg-loader';
 	import { normalizeAudio } from '$audio/processor';
 	import { AUDIO_FORMATS, type AudioFormat } from '$audio/types';
 	import type { LoadProgress, ProcessingProgress as PP } from '$media/types';
@@ -64,7 +64,9 @@
 			document.body.removeChild(a);
 			URL.revokeObjectURL(url);
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Normalization failed';
+			if (!(e instanceof Error && e.message.includes('terminate'))) {
+				error = e instanceof Error ? e.message : 'Normalization failed';
+			}
 		} finally {
 			processing = false;
 		}
@@ -73,6 +75,12 @@
 	function handleRetry() {
 		loadProgress = { state: 'idle', percent: 0 };
 		initFFmpeg();
+	}
+
+	function handleCancel() {
+		cancelFFmpeg();
+		processing = false;
+		loadProgress = { state: 'idle', percent: 0 };
 	}
 
 	function onFileSelect(selectedFile: File) {
@@ -168,5 +176,5 @@
 <MediaLoadingOverlay state={loadProgress.state} percent={loadProgress.percent} onRetry={handleRetry} />
 
 {#if processing}
-	<ProcessingProgress progress={processingProgress} onCancel={() => (processing = false)} />
+	<ProcessingProgress progress={processingProgress} onCancel={handleCancel} />
 {/if}

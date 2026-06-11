@@ -25,7 +25,13 @@ describe('GET /sitemap.xml', () => {
 	it('contains all expected pages', async () => {
 		const response = await callGET();
 		const body = await response.text();
-		const expectedPaths = ['/', '/qr', '/links', '/why', '/compare', '/privacy', '/terms'];
+		const expectedPaths = [
+			'/', '/qr', '/links', '/why', '/compare', '/privacy', '/terms',
+			'/invoice', '/bio', '/trust', '/remove/agent',
+			'/pdf/compare', '/pdf/crop', '/pdf/edit', '/pdf/extract-images',
+			'/pdf/fill-sign', '/pdf/flatten', '/pdf/ocr', '/pdf/pdf-to-csv',
+			'/pdf/pdfa', '/pdf/protect', '/pdf/redact', '/pdf/unlock', '/pdf/word-to-pdf'
+		];
 		for (const path of expectedPaths) {
 			expect(body).toContain(`<loc>https://nah.tools${path}</loc>`);
 		}

@@ -87,8 +87,24 @@ export function markdownToHtml(markdown: string): string {
 function processInline(text: string): string {
 	text = escapeHtml(text);
 
-	// Links: [text](url) — URL is already escaped by escapeHtml
-	text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+	// Links: [text](url) — URL is already escaped by escapeHtml, but javascript: has no
+	// HTML-special chars so it passes through; validate the scheme before emitting an anchor.
+	text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, label, url) => {
+		// Unescape the URL (escapeHtml above turned & -> &amp; etc.) to check the raw scheme.
+		// Only https/http/mailto are allowed; anything else (javascript:, vbscript:, etc.)
+		// renders as plain text to prevent script execution via {@html} output.
+		const rawUrl = url
+			.replace(/&amp;/g, '&')
+			.replace(/&lt;/g, '<')
+			.replace(/&gt;/g, '>')
+			.replace(/&quot;/g, '"')
+			.replace(/&#39;/g, "'");
+		const lower = rawUrl.trim().toLowerCase();
+		if (lower.startsWith('https://') || lower.startsWith('http://') || lower.startsWith('mailto:')) {
+			return `<a href="${url}">${label}</a>`;
+		}
+		return label;
+	});
 
 	// Bold: **text**
 	text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');

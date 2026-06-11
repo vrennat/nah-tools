@@ -84,29 +84,31 @@
 
 			const info = await res.json() as {
 				destination_url: string;
-				total_clicks: number;
-				clicks_by_day: { date: string; count: number }[];
-				top_countries: { country: string; count: number }[];
-				device_breakdown: { device: string; count: number }[];
-				top_referers: { referer: string; count: number }[];
 				created_at: string;
 				is_active: number;
 				label: string | null;
 				expires_at: string | null;
-				short_url: string;
+				stats: {
+					total: number;
+					byCountry: { country: string; count: number }[];
+					byDay: { date: string; count: number }[];
+					byDevice: { device: string; count: number }[];
+					byReferer: { referer: string; count: number }[];
+				};
 			};
 			destinationUrl = info.destination_url;
 			newUrl = info.destination_url;
-			totalClicks = info.total_clicks;
-			clicksByDay = info.clicks_by_day || [];
-			topCountries = info.top_countries || [];
-			deviceBreakdown = info.device_breakdown || [];
-			topReferers = info.top_referers || [];
+			totalClicks = info.stats?.total ?? 0;
+			clicksByDay = info.stats?.byDay ?? [];
+			topCountries = info.stats?.byCountry ?? [];
+			deviceBreakdown = info.stats?.byDevice ?? [];
+			topReferers = info.stats?.byReferer ?? [];
 			createdAt = info.created_at;
 			isActive = info.is_active === 1;
 			labelText = info.label || '';
 			expiresAt = info.expires_at || '';
-			shortUrl = info.short_url;
+			// Derive the short URL from the code; the API doesn't return it directly.
+			shortUrl = `https://go.nah.tools/${data.code}`;
 			authenticated = true;
 		} catch {
 			authError = 'Network error. Please try again.';

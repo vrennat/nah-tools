@@ -87,7 +87,17 @@ export async function getSlideCount(source: ArrayBuffer): Promise<number> {
 
 // ── Merge ────────────────────────────────────────────────────
 
-/** Merge multiple PPTX files into one */
+/**
+ * KNOWN LIMITATION: mergePPTX copies slide XML from source files but does NOT
+ * copy their slide layouts, slide masters, or themes. All imported slides are
+ * remapped to the first layout found in the base file. This means fonts,
+ * colours, and complex placeholder arrangements from non-base decks will be
+ * lost or shifted. A correct fix requires copying layouts/masters from each
+ * source, deduplicating them, and rewriting all rId references — a significant
+ * rewrite tracked as a follow-up issue.
+ *
+ * For now the UI warns users that merged decks adopt the first file's master.
+ */
 export async function mergePPTX(
 	files: ArrayBuffer[],
 	onProgress?: ProgressCallback
@@ -145,34 +155,24 @@ export async function mergePPTX(
 		const srcZip = await new JSZip().loadAsync(files[fileIdx]);
 		const srcSlides = getSlideEntries(srcZip);
 
-		// Build a map of source media files to new names
+		// Build a map of source media files to new names, checking for collisions
+		// before writing — nextMediaId counts all media but a file named image{N}
+		// may already exist from the base deck.
 		const mediaMap = new Map<string, string>();
 		const srcMediaFiles = Object.keys(srcZip.files).filter((p) => p.startsWith('ppt/media/'));
 		for (const mediaPath of srcMediaFiles) {
 			const ext = mediaPath.split('.').pop() || 'bin';
-			const newName = `image${nextMediaId}.${ext}`;
-			const newPath = `ppt/media/${newName}`;
+			// Increment until we find a free slot in baseZip
+			let newPath: string;
+			do {
+				newPath = `ppt/media/image${nextMediaId}.${ext}`;
+				nextMediaId++;
+			} while (baseZip.file(newPath) !== null);
+
 			mediaMap.set(mediaPath, newPath);
 
 			const data = await srcZip.file(mediaPath)!.async('uint8array');
 			baseZip.file(newPath, data);
-
-			// Add content type override if needed
-			const mimeTypes: Record<string, string> = {
-				png: 'image/png',
-				jpg: 'image/jpeg',
-				jpeg: 'image/jpeg',
-				gif: 'image/gif',
-				svg: 'image/svg+xml',
-				emf: 'image/x-emf',
-				wmf: 'image/x-wmf',
-				tiff: 'image/tiff',
-				tif: 'image/tiff'
-			};
-			if (mimeTypes[ext]) {
-				// Default extensions are usually already declared; skip if present
-			}
-			nextMediaId++;
 		}
 
 		for (const srcSlidePath of srcSlides) {
@@ -297,7 +297,8 @@ export async function splitPPTX(
 			slidesToKeep.add(i);
 		}
 
-		// Remove slides not in range
+		// Remove slides not in range; also clean up their notesSlide files by
+		// following the slide's rels so we don't leave orphaned XML in the zip.
 		const allSlides = getSlideEntries(newZip);
 		const slidesToRemove: number[] = [];
 		for (const slidePath of allSlides) {
@@ -308,8 +309,48 @@ export async function splitPPTX(
 		}
 
 		for (const num of slidesToRemove) {
+			// Discover notesSlide path via the slide's rels before deleting them
+			const relsPath = `ppt/slides/_rels/slide${num}.xml.rels`;
+			const relsDoc = await readXML(newZip, relsPath);
+			if (relsDoc) {
+				const rels = relsDoc.getElementsByTagName('Relationship');
+				for (let r = 0; r < rels.length; r++) {
+					const type = rels[r].getAttribute('Type') || '';
+					const target = rels[r].getAttribute('Target') || '';
+					if (type.includes('/notesSlide')) {
+						// Target is relative to ppt/slides/, resolve to zip path
+						const notesPath = 'ppt/slides/' + target.replace(/^\.\.\//, '../');
+						const resolvedNotes = notesPath.replace('ppt/slides/../', 'ppt/');
+						newZip.remove(resolvedNotes);
+						// Remove notesSlide's own rels file
+						const notesName = resolvedNotes.split('/').pop()!;
+						newZip.remove(`ppt/notesSlides/_rels/${notesName}.rels`);
+					}
+				}
+			}
 			newZip.remove(`ppt/slides/slide${num}.xml`);
 			newZip.remove(`ppt/slides/_rels/slide${num}.xml.rels`);
+		}
+
+		// Remove orphaned notesSlide content-type overrides for removed slides
+		const notesContentTypes = await readXML(newZip, '[Content_Types].xml');
+		if (notesContentTypes) {
+			// Build set of zip paths that still exist
+			const remaining = new Set(Object.keys(newZip.files));
+			const overrides = notesContentTypes.getElementsByTagName('Override');
+			let changed = false;
+			for (let i = overrides.length - 1; i >= 0; i--) {
+				const partName = overrides[i].getAttribute('PartName') || '';
+				if (partName.includes('notesSlide')) {
+					// PartName is /ppt/notesSlides/... — strip leading /
+					const zipPath = partName.replace(/^\//, '');
+					if (!remaining.has(zipPath)) {
+						overrides[i].parentNode?.removeChild(overrides[i]);
+						changed = true;
+					}
+				}
+			}
+			if (changed) writeXML(newZip, '[Content_Types].xml', notesContentTypes);
 		}
 
 		// Renumber remaining slides to be sequential from 1
@@ -422,28 +463,75 @@ export async function compressPPTX(
 	zip.remove('docProps/thumbnail.jpeg');
 	zip.remove('docProps/thumbnail.png');
 
-	// Remove printer settings
-	for (const path of Object.keys(zip.files)) {
-		if (path.includes('printerSettings')) {
-			zip.remove(path);
+	// Remove printer settings files and their Relationship + content-type entries
+	// to avoid dangling references that trigger a repair prompt on open.
+	const printerSettingsPaths = Object.keys(zip.files).filter((p) =>
+		p.includes('printerSettings')
+	);
+	for (const path of printerSettingsPaths) {
+		zip.remove(path);
+	}
+	if (printerSettingsPaths.length > 0) {
+		// Strip relationships pointing to removed printerSettings files.
+		// They can appear in any slide or presentation rels file.
+		const relsPaths = Object.keys(zip.files).filter((p) => p.includes('/_rels/'));
+		for (const relsPath of relsPaths) {
+			const relsDoc = await readXML(zip, relsPath);
+			if (!relsDoc) continue;
+			const rels = relsDoc.getElementsByTagName('Relationship');
+			let changed = false;
+			for (let i = rels.length - 1; i >= 0; i--) {
+				const type = rels[i].getAttribute('Type') || '';
+				if (type.includes('/printerSettings')) {
+					rels[i].parentNode?.removeChild(rels[i]);
+					changed = true;
+				}
+			}
+			if (changed) writeXML(zip, relsPath, relsDoc);
+		}
+
+		// Remove content-type overrides for printerSettings parts
+		const contentTypes = await readXML(zip, '[Content_Types].xml');
+		if (contentTypes) {
+			const overrides = contentTypes.getElementsByTagName('Override');
+			let changed = false;
+			for (let i = overrides.length - 1; i >= 0; i--) {
+				const partName = overrides[i].getAttribute('PartName') || '';
+				if (partName.includes('printerSettings')) {
+					overrides[i].parentNode?.removeChild(overrides[i]);
+					changed = true;
+				}
+			}
+			if (changed) writeXML(zip, '[Content_Types].xml', contentTypes);
 		}
 	}
 
-	// Compress images
+	// Compress images — skip PNGs when running server-side (no canvas API) and
+	// skip PNG re-encoding entirely in the browser: canvas.toBlob with format=png
+	// ignores the quality parameter and typically produces larger files than the
+	// original optimised PNG. Only JPEG benefits from quality-based re-encoding.
+	const isBrowser = typeof document !== 'undefined';
 	const mediaFiles = Object.keys(zip.files).filter((p) => p.startsWith('ppt/media/'));
 	for (const mediaPath of mediaFiles) {
 		const ext = mediaPath.split('.').pop()?.toLowerCase();
-		if (ext === 'png' || ext === 'jpg' || ext === 'jpeg') {
-			try {
-				const imgData = await zip.file(mediaPath)!.async('blob');
-				const compressed = await compressImage(imgData, imageQuality, ext === 'png' ? 'png' : 'jpeg');
-				if (compressed.size < imgData.size) {
-					zip.file(mediaPath, compressed);
-					imagesCompressed++;
-				}
-			} catch {
-				// Skip images that fail to process
+		const isJpeg = ext === 'jpg' || ext === 'jpeg';
+		const isPng = ext === 'png';
+
+		if (!isJpeg && !isPng) continue;
+		// PNGs: canvas re-encode ignores quality and almost always increases size
+		if (isPng) continue;
+		// JPEG compression requires the Canvas API (browser only)
+		if (!isBrowser) continue;
+
+		try {
+			const imgData = await zip.file(mediaPath)!.async('blob');
+			const compressed = await compressImage(imgData, imageQuality, 'jpeg');
+			if (compressed.size < imgData.size) {
+				zip.file(mediaPath, compressed);
+				imagesCompressed++;
 			}
+		} catch {
+			// Skip images that fail to process
 		}
 	}
 
@@ -625,30 +713,72 @@ export async function removeNotes(source: ArrayBuffer): Promise<Uint8Array> {
 		writeXML(zip, relsPath, relsDoc);
 	}
 
-	// Remove content type overrides for notes
+	// Remove content type overrides for notesSlides and notesMasters
 	const contentTypes = await readXML(zip, '[Content_Types].xml');
 	if (contentTypes) {
 		const overrides = contentTypes.getElementsByTagName('Override');
 		for (let i = overrides.length - 1; i >= 0; i--) {
 			const partName = overrides[i].getAttribute('PartName') || '';
-			if (partName.includes('notesSlide')) {
+			if (partName.includes('notesSlide') || partName.includes('notesMaster')) {
 				overrides[i].parentNode?.removeChild(overrides[i]);
 			}
 		}
 		writeXML(zip, '[Content_Types].xml', contentTypes);
 	}
 
-	// Also remove the notesMasters
+	// Remove notesMaster XML files from the zip
 	for (const path of Object.keys(zip.files)) {
 		if (path.startsWith('ppt/notesMasters/')) {
 			zip.remove(path);
 		}
 	}
 
+	// Strip notesMaster relationships from ppt/_rels/presentation.xml.rels so
+	// PowerPoint does not show a repair prompt on open.
+	const presRels = await readXML(zip, 'ppt/_rels/presentation.xml.rels');
+	if (presRels) {
+		const rels = presRels.getElementsByTagName('Relationship');
+		for (let i = rels.length - 1; i >= 0; i--) {
+			const type = rels[i].getAttribute('Type') || '';
+			if (type.includes('/notesMaster')) {
+				rels[i].parentNode?.removeChild(rels[i]);
+			}
+		}
+		writeXML(zip, 'ppt/_rels/presentation.xml.rels', presRels);
+	}
+
 	return zip.generateAsync({ type: 'uint8array' });
 }
 
 // ── Add Watermark ────────────────────────────────────────────
+
+/**
+ * Scan a slide XML document for the highest existing cNvPr id and return
+ * max + 1. Hardcoded ids like 99999 collide when the function is applied more
+ * than once or combined with addSlideNumbers on the same slide.
+ */
+function nextShapeId(doc: Document): number {
+	const cNvPrs = doc.getElementsByTagNameNS(
+		'http://schemas.openxmlformats.org/drawingml/2006/main',
+		'cNvPr'
+	);
+	// cNvPr lives in the p: namespace for shapes; check both namespaces
+	const allCNvPrs = [
+		...Array.from(cNvPrs),
+		...Array.from(
+			doc.getElementsByTagNameNS(
+				'http://schemas.openxmlformats.org/presentationml/2006/main',
+				'cNvPr'
+			)
+		)
+	];
+	let max = 0;
+	for (const el of allCNvPrs) {
+		const id = parseInt(el.getAttribute('id') || '0', 10);
+		if (id > max) max = id;
+	}
+	return max + 1;
+}
 
 /** Add a text watermark to all slides */
 export async function addWatermark(
@@ -676,9 +806,23 @@ export async function addWatermark(
 	// Rotation in 60,000ths of a degree
 	const rotation = config.rotation * 60000;
 
-	const watermarkShape = `<p:sp xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+	for (const slidePath of slides) {
+		const doc = await readXML(zip, slidePath);
+		if (!doc) continue;
+
+		const spTree = doc.getElementsByTagNameNS(
+			'http://schemas.openxmlformats.org/presentationml/2006/main',
+			'spTree'
+		)[0];
+
+		if (!spTree) continue;
+
+		// Use max existing id + 1 to avoid duplicate cNvPr ids (invalid OOXML)
+		const shapeId = nextShapeId(doc);
+
+		const watermarkShape = `<p:sp xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
   <p:nvSpPr>
-    <p:cNvPr id="99999" name="Watermark"/>
+    <p:cNvPr id="${shapeId}" name="Watermark"/>
     <p:cNvSpPr txBox="1"/>
     <p:nvPr/>
   </p:nvSpPr>
@@ -708,17 +852,6 @@ export async function addWatermark(
     </a:p>
   </p:txBody>
 </p:sp>`;
-
-	for (const slidePath of slides) {
-		const doc = await readXML(zip, slidePath);
-		if (!doc) continue;
-
-		const spTree = doc.getElementsByTagNameNS(
-			'http://schemas.openxmlformats.org/presentationml/2006/main',
-			'spTree'
-		)[0];
-
-		if (!spTree) continue;
 
 		// Parse the watermark shape and import it
 		const wmDoc = parseXML(`<root xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">${watermarkShape}</root>`);
@@ -829,10 +962,12 @@ export async function addSlideNumbers(
 		if (!spTree) continue;
 
 		const slideNumber = config.startFrom + idx;
+		// Use max existing id + 1 to avoid duplicate cNvPr ids (invalid OOXML)
+		const shapeId = nextShapeId(doc);
 
 		const numberShape = `<p:sp xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
   <p:nvSpPr>
-    <p:cNvPr id="99998" name="SlideNumber"/>
+    <p:cNvPr id="${shapeId}" name="SlideNumber"/>
     <p:cNvSpPr txBox="1"/>
     <p:nvPr/>
   </p:nvSpPr>

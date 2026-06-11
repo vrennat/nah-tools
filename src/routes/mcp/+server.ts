@@ -26,7 +26,7 @@ function ensureAcceptHeader(request: Request): Request {
 // enableJsonResponse avoids SSE streaming issues on Workers.
 async function handleMcpRequest(request: Request, clientIp: string): Promise<Response> {
 	// 30 requests/min per IP, namespaced so it doesn't interfere with link-creation limits.
-	if (!checkRateLimit(`mcp:${clientIp}`, { windowMs: 60_000, max: 30 })) {
+	if (!checkRateLimit(`mcp:${clientIp}`, 1, { windowMs: 60_000, max: 30 })) {
 		return new Response(JSON.stringify({ error: 'Rate limit exceeded. Try again in a minute.' }), {
 			status: 429,
 			headers: { 'Content-Type': 'application/json' }

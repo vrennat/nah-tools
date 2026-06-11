@@ -93,9 +93,17 @@ export async function validateUrlSafety(
 
 	const hostname = parsed.hostname.toLowerCase();
 
-	// 2. Block IP-only hostnames
+	// 2. Block IP-only hostnames (dotted-decimal IPv4, bracketed IPv6, and localhost variants).
+	// These are SSRF vectors — they can reach internal services not exposed to the public internet.
 	if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
 		return { safe: false, reason: 'IP addresses are not allowed as destinations.' };
+	}
+	if (hostname === 'localhost' || hostname.endsWith('.localhost')) {
+		return { safe: false, reason: 'localhost is not allowed as a destination.' };
+	}
+	// Bracketed IPv6 — e.g. [::1], [fe80::1]
+	if (hostname.startsWith('[')) {
+		return { safe: false, reason: 'IPv6 addresses are not allowed as destinations.' };
 	}
 
 	// 3. Block known bad TLDs
@@ -181,9 +189,11 @@ export interface RateLimitOptions {
 
 /**
  * Returns true if the request is within limits, false if it should be blocked.
+ * cost: how many "tokens" to consume (default 1). Bulk endpoints pass links.length
+ * so that one bulk request consumes proportional quota.
  * The key should be namespaced when called from multiple contexts (e.g. "mcp:1.2.3.4").
  */
-export function checkRateLimit(key: string, opts?: RateLimitOptions): boolean {
+export function checkRateLimit(key: string, cost = 1, opts?: RateLimitOptions): boolean {
 	const windowMs = opts?.windowMs ?? RATE_LIMIT_WINDOW_MS;
 	const max = opts?.max ?? RATE_LIMIT_MAX;
 	const now = Date.now();
@@ -192,12 +202,15 @@ export function checkRateLimit(key: string, opts?: RateLimitOptions): boolean {
 	// Clean old entries
 	const recent = timestamps.filter((t) => now - t < windowMs);
 
-	if (recent.length >= max) {
+	if (recent.length + cost > max) {
 		rateLimitMap.set(key, recent);
 		return false;
 	}
 
-	recent.push(now);
+	// Record one timestamp per cost unit so future checks are consistent
+	for (let i = 0; i < cost; i++) {
+		recent.push(now);
+	}
 	rateLimitMap.set(key, recent);
 	return true;
 }

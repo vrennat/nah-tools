@@ -18,6 +18,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'handle, passphrase, and ordered_ids are required');
 	}
 
+	// Cap batch size to prevent unbounded DB work from a single request
+	if (ordered_ids.length > 200) {
+		throw error(400, 'ordered_ids must not exceed 200 entries');
+	}
+
 	await authenticateProfile(db, handle, passphrase);
 	await reorderBioLinks(db, handle, ordered_ids);
 

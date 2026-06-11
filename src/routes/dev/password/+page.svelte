@@ -26,7 +26,9 @@
 
 	const pwOpts = $derived<PasswordOptions>({
 		length,
-		lowercase: useLower,
+		// If all charsets are off, fall back to lowercase so the generator always
+		// has a valid pool — without mutating state inside the effect that reads it.
+		lowercase: useLower || (!useUpper && !useNumbers && !useSymbols),
 		uppercase: useUpper,
 		numbers: useNumbers,
 		symbols: useSymbols,
@@ -34,10 +36,6 @@
 	});
 
 	function generatePw() {
-		// ensure at least one charset
-		if (!useLower && !useUpper && !useNumbers && !useSymbols) {
-			useLower = true;
-		}
 		password = generatePassword(pwOpts);
 	}
 

@@ -53,7 +53,9 @@ function parseField(
 				return v;
 			};
 			lo = resolve(bounds[0]);
-			hi = bounds.length > 1 ? resolve(bounds[1]) : lo;
+			// When a step is provided but no range end (e.g. "5/15"), the range
+			// extends to the field maximum per standard cron semantics.
+			hi = bounds.length > 1 ? resolve(bounds[1]) : (stepStr ? max : lo);
 		}
 		if (lo < min || hi > max || lo > hi) throw new Error(`Value out of range in "${part}"`);
 		for (let v = lo; v <= hi; v += step) result.add(v === 7 && max === 6 ? 0 : v);

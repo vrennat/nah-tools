@@ -12,6 +12,10 @@ import {
 } from '$server/bio-db';
 import { validateHandle, validateUrlSafety, verifyTurnstile, checkRateLimit } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
+import { themes } from '$bio/themes';
+
+// Derive the allowlist from the canonical theme definitions so this stays in sync automatically
+const VALID_THEME_IDS = new Set(themes.map((t) => t.id));
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -45,6 +49,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'Avatar URL is too long');
 	}
 
+	// Validate theme against allowlist before persisting
+	if (theme !== undefined && !VALID_THEME_IDS.has(theme)) {
+		throw error(400, `Invalid theme. Valid themes: ${[...VALID_THEME_IDS].join(', ')}`);
+	}
+
 	// Verify Turnstile if configured
 	const turnstileSecret = platform?.env?.TURNSTILE_SECRET_KEY;
 	if (turnstileSecret) {
@@ -56,6 +65,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		if (!valid) {
 			throw error(403, 'Turnstile verification failed');
 		}
+	} else {
+		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
 	}
 
 	// Rate limit
@@ -153,6 +164,11 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	}
 	if (fields.bio && fields.bio.length > 500) {
 		throw error(400, 'Bio must be 500 characters or fewer');
+	}
+
+	// Validate theme against allowlist
+	if (fields.theme !== undefined && !VALID_THEME_IDS.has(fields.theme)) {
+		throw error(400, `Invalid theme. Valid themes: ${[...VALID_THEME_IDS].join(', ')}`);
 	}
 
 	// Validate avatar URL if changing

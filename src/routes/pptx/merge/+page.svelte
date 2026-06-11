@@ -132,6 +132,11 @@
 		</div>
 
 		<p class="text-center text-xs text-text-muted">
+			Merged decks adopt the first file's slide master and layout. Fonts, colours,
+			and complex layouts from other files may shift.
+		</p>
+
+		<p class="text-center text-xs text-text-muted">
 			<a href="/pptx" class="underline hover:text-accent">Back to all PowerPoint tools</a>
 		</p>
 	</section>
