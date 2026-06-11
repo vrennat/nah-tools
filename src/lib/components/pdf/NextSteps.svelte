@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { setPendingFile } from '$pdf/file-transfer';
+	import { setPendingFile } from '$lib/file-transfer';
 	import { getTool } from '$lib/registry/index';
 
 	interface Props {
-		/** The current tool path, e.g. '/pdf/merge'. Used to look up suggestions. */
+		/** The current tool path, e.g. '/pdf/merge'. Used to look up suggestions and source label. */
 		path: string;
 		/** Returns the result bytes. Called lazily on button press to avoid holding big buffers reactively. */
 		resultBytes: () => Uint8Array | null;
@@ -12,7 +12,7 @@
 		resultName: string;
 		/**
 		 * Whether the result is a single PDF file. When false (e.g. split producing a
-		 * ZIP of multiple files), the "Open in editor" button is hidden.
+		 * ZIP of multiple files), the "Open in editor" button and chained suggestions are hidden.
 		 */
 		singlePdf?: boolean;
 	}
@@ -60,13 +60,28 @@
 			.slice(0, 2);
 	});
 
+	const currentToolName = $derived(getTool(path)?.name ?? path);
+
 	async function openInEditor() {
 		const bytes = resultBytes();
 		if (!bytes) return;
 		const name = resultName.endsWith('.pdf') ? resultName : `${resultName}.pdf`;
 		const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
-		setPendingFile(arr, name);
+		setPendingFile(arr, name, currentToolName);
 		await goto('/pdf/edit');
+	}
+
+	async function openInTool(targetPath: string, targetName: string) {
+		const bytes = resultBytes();
+		if (!bytes) {
+			// No bytes available (e.g. multi-file ZIP); fall back to plain navigation.
+			await goto(targetPath);
+			return;
+		}
+		const name = resultName.endsWith('.pdf') ? resultName : `${resultName}.pdf`;
+		const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+		setPendingFile(arr, name, currentToolName);
+		await goto(targetPath);
 	}
 </script>
 
@@ -88,9 +103,10 @@
 		{/if}
 
 		{#each suggestions as tool}
-			<a
-				href={tool.path}
+			<button
+				type="button"
 				class="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-4 py-1.5 text-sm font-medium text-text transition-colors hover:border-accent/60 hover:text-accent"
+				onclick={() => openInTool(tool.path, tool.name)}
 			>
 				{#if tool.icon}
 					<svg class="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -98,7 +114,7 @@
 					</svg>
 				{/if}
 				{tool.name}
-			</a>
+			</button>
 		{/each}
 	</div>
 </div>
