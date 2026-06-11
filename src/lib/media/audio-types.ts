@@ -1,5 +1,5 @@
-// Shared types for the standalone audio tools (/audio/*). These build on the
-// FFmpeg.wasm engine already used by the media tools — see $media/ffmpeg-loader.
+// Audio format definitions for the unified FFmpeg engine.
+// Moved from src/lib/audio/types.ts as part of media/audio engine consolidation.
 
 export type AudioFormat = 'mp3' | 'wav' | 'ogg' | 'm4a' | 'flac' | 'aac';
 

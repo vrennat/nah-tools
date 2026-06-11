@@ -30,8 +30,7 @@ const config = {
 			$legalgen: 'src/lib/legal-gen',
 			$dev: 'src/lib/dev',
 			$text: 'src/lib/text',
-			$audio: 'src/lib/audio',
-			$server: 'src/lib/server',
+$server: 'src/lib/server',
 			$utils: 'src/lib/utils'
 		}
 	}
