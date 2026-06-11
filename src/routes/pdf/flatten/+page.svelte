@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 
 	let files = $state<File[]>([]);
 	let processing = $state(false);
@@ -39,19 +39,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'What does flattening a PDF actually do?',
+			answer:
+				'Flattening converts interactive elements — form fields, checkboxes, dropdowns, text inputs — into static page content. After flattening, the values entered in the form become permanent visual elements and the fields themselves no longer exist as interactive objects.'
+		},
+		{
+			question: 'Why would I want to flatten a PDF?',
+			answer:
+				'Flattened PDFs are more portable: some PDF viewers render form fields inconsistently, and some recipients may be able to edit or clear fields in a non-flattened form. Flattening locks in the current values and ensures the document looks the same everywhere.'
+		},
+		{
+			question: 'Does flattening remove annotations?',
+			answer:
+				'The tool uses pdf-lib, which flattens interactive form fields. Standard visual annotations (like comments or highlights) may or may not be affected depending on how the PDF was authored. The intent is to make the document non-interactive, not to remove visible content.'
+		},
+		{
+			question: 'What happens if the PDF has no form fields?',
+			answer:
+				'The PDF will be re-saved with an optimized structure. No visible content changes — it is effectively equivalent to running the compress tool.'
+		},
+		{
+			question: 'Are my files uploaded?',
+			answer:
+				'No. Flattening runs entirely in your browser using pdf-lib. Your file never leaves your device.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Flatten PDF Online Free | nah</title>
-	<meta
-		name="description"
-		content="Remove interactive form fields and annotations from PDFs, baking them into static content. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="Flatten PDF"
-	description="Remove form fields and annotations, baking them into static content."
+<ToolShell
+	path="/pdf/flatten"
+	tagline="Lock form fields and annotations into static content so the PDF looks the same everywhere."
+	seoTitle="Flatten PDF Free — Remove Form Fields | nah.tools"
+	description="Remove interactive form fields and annotations from PDFs, baking them into static content. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -95,8 +118,27 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Why flatten a PDF before sharing?</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Interactive PDF forms are convenient for filling out, but they carry risk once
+				distributed. Recipients can clear or change field values, different PDF viewers
+				render form fields inconsistently, and some email gateways strip interactive
+				elements entirely. Flattening resolves all of this by converting every field
+				into ordinary static content — the values you entered become part of the page
+				itself, as permanent as typed text.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool uses <strong class="font-medium text-text">pdf-lib</strong> to read the
+				PDF's interactive layer and merge it into the page content stream. The process
+				runs in your browser — no upload required. After flattening, the resulting PDF
+				is a clean, static document that renders identically in every viewer and is
+				safe to share as a final record.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				If you want to go further and prevent any modification, combine flattening with
+				the Protect PDF tool to add password protection.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>

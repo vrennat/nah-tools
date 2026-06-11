@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { ExtractedImage } from '$pdf/types';
 
 	let files = $state<File[]>([]);
@@ -74,19 +74,42 @@
 	}
 
 	let pageCount = $derived(new Set(images.map((img) => img.pageNumber)).size);
+
+	const faqs = [
+		{
+			question: 'What images does this extract?',
+			answer:
+				'The tool extracts images that are embedded as discrete image objects in the PDF — photos, illustrations, logos, and other raster graphics stored as XObject streams. It does not capture background colors, drawn shapes, or vector paths.'
+		},
+		{
+			question: 'What format are the extracted images?',
+			answer:
+				'Images are exported as PNG files regardless of the original embedded format (JPEG, PNG, JBIG2, etc.). The tool renders each image object through the browser Canvas API, which outputs PNG.'
+		},
+		{
+			question: 'Why does the page show no images found?',
+			answer:
+				'Some PDFs contain no embedded image objects — for example, text-only documents, or PDFs where visual elements are drawn as vector graphics rather than embedded raster images. Scanned PDFs usually contain images, but the image may be a full-page scan stored as one object rather than individual photos.'
+		},
+		{
+			question: 'Can I download all images at once?',
+			answer:
+				'Yes. When multiple images are found, a "Download All as ZIP" button packages everything into a single ZIP archive with filenames indicating which page each image came from.'
+		},
+		{
+			question: 'Are my files uploaded?',
+			answer:
+				'No. Extraction uses PDF.js running in your browser to parse the image streams. Your file is never transmitted anywhere.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Extract Images from PDF Online Free | nah</title>
-	<meta
-		name="description"
-		content="Pull all embedded images from a PDF. Download individually or as a ZIP. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="Extract Images"
-	description="Pull all embedded images from a PDF."
+<ToolShell
+	path="/pdf/extract-images"
+	tagline="Pull every embedded image out of a PDF and download them individually or as a ZIP."
+	seoTitle="Extract Images from PDF Free — No Upload | nah.tools"
+	description="Pull all embedded images from a PDF. Download individually or as a ZIP. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-4xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -171,8 +194,26 @@
 			{/if}
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Extract embedded images from any PDF</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				PDFs commonly contain images embedded as discrete objects in the file structure —
+				product photos in a catalog, diagrams in a report, logos in a contract. Retrieving
+				those originals is useful when you need to reuse the assets without screenshotting
+				or re-downloading from a source you no longer have.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool uses <strong class="font-medium text-text">PDF.js</strong> to parse the
+				PDF's object graph in your browser and locate image XObjects on each page.
+				Images are rendered to a canvas and exported as PNG files. A thumbnail grid lets
+				you preview what was found and download images individually by clicking them, or
+				grab everything at once as a ZIP archive.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				The tool extracts raster image objects only. Vector graphics drawn as PDF path
+				instructions — such as SVG-style diagrams — are not extracted as images; for
+				those, use the PDF to SVG converter to get a vector representation of the whole page.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>

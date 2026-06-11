@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { PageSize, MarginPreset } from '$pdf/converter';
 
 	let files = $state<File[]>([]);
@@ -78,19 +78,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'What Word formats are supported?',
+			answer:
+				'The tool accepts .docx and .doc files. DOCX (the modern Office Open XML format) is fully supported. Older .doc (binary Word 97-2003) files are accepted but may have limited formatting fidelity depending on the features used.'
+		},
+		{
+			question: 'How faithfully does the conversion preserve formatting?',
+			answer:
+				'The converter handles headings, paragraphs, bold, italic, underline, bullet lists, numbered lists, tables, and embedded images. Complex features like tracked changes, comments, custom styles, text boxes, and advanced table formatting may not convert accurately. The live preview helps you check the result before downloading.'
+		},
+		{
+			question: 'Can I convert multiple files at once?',
+			answer:
+				'Yes. Drop multiple DOCX files to convert them in a batch. If you add more than one file, the results are packaged as a ZIP archive with each PDF named to match its source document.'
+		},
+		{
+			question: 'What do A4 vs Letter and the margin options do?',
+			answer:
+				'These control the output page dimensions and margins. A4 (210 × 297 mm) is standard in most of the world; Letter (8.5 × 11 in) is standard in North America. Normal margins are 1 inch, narrow are 0.5 in, and wide are 1.5 in.'
+		},
+		{
+			question: 'Are my files uploaded?',
+			answer:
+				'No. Conversion runs entirely in your browser using a client-side DOCX parsing library. Your Word documents never leave your device.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Convert Word to PDF Online Free | nah</title>
-	<meta
-		name="description"
-		content="Convert DOCX files to PDF for free. Supports headings, lists, tables, and images. 100% client-side — files never leave your device."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="Word to PDF"
-	description="Convert DOCX files to PDF. Supports text formatting, lists, tables, and images."
+<ToolShell
+	path="/pdf/word-to-pdf"
+	tagline="Convert DOCX files to PDF with formatting preserved. Batch convert multiple files at once."
+	seoTitle="Word to PDF Free — DOCX Converter | nah.tools"
+	description="Convert DOCX files to PDF for free. Supports headings, lists, tables, and images. 100% client-side — files never leave your device."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -183,8 +206,27 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Convert Word documents to PDF without uploading</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Converting a DOCX to PDF is a routine task that most people accomplish either
+				by opening Word and using File > Save As, or by uploading to a conversion service.
+				Both work, but the upload route passes your document — which may contain confidential
+				business content, contracts, or personal data — through a third-party server.
+				This tool converts entirely in your browser, so your documents stay on your device.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				A live preview shows how the document will render before you convert. The converter
+				handles common formatting — headings, paragraphs, bold, italic, bullet and numbered
+				lists, tables, and embedded images. Choose A4 or Letter page size and set margins
+				to Normal, Narrow, or Wide to match your target layout. For batch work, drop
+				multiple files at once and download all the converted PDFs as a ZIP.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Highly complex documents with advanced table styles, tracked changes, or custom
+				theme fonts may have limited fidelity — check the preview to confirm the output
+				looks correct before distributing.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>

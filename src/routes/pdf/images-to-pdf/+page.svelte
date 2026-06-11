@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import { isHeic, convertHeicToJpeg } from '$lib/heic';
 
 	let files = $state<File[]>([]);
@@ -71,19 +71,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Which image formats are supported?',
+			answer:
+				'The tool accepts JPG, PNG, and HEIC/HEIF files. HEIC images (common from iPhone cameras) are automatically converted to JPEG before being embedded in the PDF.'
+		},
+		{
+			question: 'What do the page size options do?',
+			answer:
+				'"Fit to image" creates a PDF where each page is exactly the dimensions of the source image — no borders, no scaling. A4 and Letter size the page to the chosen paper format and center-fit the image within it, which may add white margins for images with different aspect ratios.'
+		},
+		{
+			question: 'Can I set the order of images in the PDF?',
+			answer:
+				'Yes. When you add more than one image, a drag-and-drop list appears. The order you set there is the order pages appear in the final PDF.'
+		},
+		{
+			question: 'Are my images uploaded to a server?',
+			answer:
+				'No. All processing happens in your browser using the pdf-lib library. Your images never leave your device.'
+		},
+		{
+			question: 'Is there a limit on how many images I can convert?',
+			answer:
+				'No hard limit is enforced. Very large batches or high-resolution images may be slow on low-memory devices since all image data is held in memory during conversion.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Convert Images to PDF Online Free | nah</title>
-	<meta
-		name="description"
-		content="Convert JPG and PNG images to PDF. Drag to reorder, choose page size. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="Images to PDF"
-	description="Convert JPG, PNG, or HEIC images to a PDF document."
+<ToolShell
+	path="/pdf/images-to-pdf"
+	tagline="Turn JPG, PNG, or HEIC photos into a single PDF document. Drag to reorder, choose page size."
+	seoTitle="Images to PDF Free — JPG, PNG, HEIC | nah.tools"
+	description="Convert JPG, PNG, or HEIC images to PDF. Drag to reorder, choose page size. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -185,8 +208,26 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Convert images to PDF without uploading</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Whether you're assembling a photo portfolio, packaging scanned documents, or sending
+				iPhone photos as a single attachment, converting images to PDF is a routine task that
+				most tools handle by routing your files through a remote server. This tool does it
+				entirely in your browser using <strong class="font-medium text-text">pdf-lib</strong>,
+				a JavaScript PDF library that runs locally.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Drop any number of JPG, PNG, or HEIC images. HEIC files — the default format from
+				Apple's camera app — are automatically converted to JPEG before embedding, so you
+				don't need to pre-convert them. Set the page size to "Fit to image" for a tight
+				page that matches the source dimensions, or choose A4 or Letter if you need a
+				standard paper size. Drag the file list to control page order before converting.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				The output is a standard PDF with one image per page, ready to email, print, or
+				archive. Nothing is transmitted — the download begins directly from your browser.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>
