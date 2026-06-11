@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
-	import PptxToolLayout from '$components/pptx/PptxToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 
 	let files = $state<File[]>([]);
 	let processing = $state(false);
@@ -31,19 +31,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded to remove speaker notes?',
+			answer:
+				'No. The operation runs entirely in your browser. The PPTX is processed in memory and offered as a download — nothing is sent to any server.'
+		},
+		{
+			question: 'What exactly is removed from the file?',
+			answer:
+				'All notesSlide XML files (ppt/notesSlides/), their relationship entries, all notesMaster files (ppt/notesMasters/), and the corresponding content-type overrides in [Content_Types].xml. The result is a clean PPTX with no notes-related parts that would trigger a repair prompt when opened.'
+		},
+		{
+			question: 'Are the slide contents affected in any way?',
+			answer:
+				'No. Only the notes parts are removed. Slide content, animations, transitions, themes, fonts, and media are all left untouched.'
+		},
+		{
+			question: 'Will the output file still open in all viewers?',
+			answer:
+				'Yes. Removing notes produces a fully valid PPTX. The file opens normally in PowerPoint, Google Slides, Keynote, and LibreOffice Impress.'
+		},
+		{
+			question: 'Can I remove notes from just specific slides?',
+			answer:
+				'Not currently. The tool removes all speaker notes from every slide in one pass. If you need selective removal, split the deck first, remove notes from the relevant portion, and re-merge.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Remove Speaker Notes from PowerPoint Online Free | nah</title>
-	<meta
-		name="description"
-		content="Strip all speaker notes from a PowerPoint presentation before sharing. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PptxToolLayout
-	title="Remove Speaker Notes"
-	description="Strip all speaker notes from your presentation before sharing."
+<ToolShell
+	path="/pptx/remove-notes"
+	tagline="Strip all speaker notes before sharing a deck externally."
+	seoTitle="Remove Speaker Notes from PowerPoint Free | nah.tools"
+	description="Strip all speaker notes from a PowerPoint presentation before sharing. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -84,8 +107,25 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pptx" class="underline hover:text-accent">Back to all PowerPoint tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Why remove speaker notes before sharing?</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Speaker notes are written for the presenter, not the audience. They often contain internal
+				context, talking points with candid language, or references to information that should not
+				be part of the public record — sales strategy, competitive positioning, staffing decisions.
+				Sharing a deck externally without stripping notes is a common source of accidental
+				information disclosure.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				PowerPoint does not surface notes visibly in Slide Show mode, which makes it easy to forget
+				they are in the file. This tool removes them at the file level — the notes are gone from
+				the PPTX itself, not just hidden from view.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				The operation is irreversible on the output file, so keep a copy of the original if you
+				need the notes for future presentations. The tool processes your file locally without
+				uploading anything, so the notes themselves never pass through an external service.
+			</p>
+		</div>
 	</section>
-</PptxToolLayout>
+</ToolShell>

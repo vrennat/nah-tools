@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PptxToolLayout from '$components/pptx/PptxToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { SlideRange } from '$pptx/types';
 
 	let files = $state<File[]>([]);
@@ -90,17 +90,43 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded when I split a presentation?',
+			answer:
+				'No. The split runs entirely in your browser. Your PPTX is read directly from disk, processed with JSZip, and the resulting files are offered as downloads — nothing is sent to a server.'
+		},
+		{
+			question: 'What does "individual slides" mode produce?',
+			answer:
+				'Each slide is extracted into its own PPTX file. Because multiple files result, they are packaged together in a ZIP archive for download. The file names follow the pattern slides-1.pptx, slides-2.pptx, and so on.'
+		},
+		{
+			question: 'How do I specify custom ranges?',
+			answer:
+				'Enter comma-separated ranges in the text field. Each range can be a single slide number (e.g. 5) or a start-end pair (e.g. 3-7). Each range produces a separate PPTX. Example: "1-5, 8, 10-12" produces three output files.'
+		},
+		{
+			question: 'Are slide masters and themes preserved in the output files?',
+			answer:
+				'Yes. Because the split works by removing slides from a copy of the original ZIP rather than reconstructing the file from scratch, the slide masters, layouts, themes, and media from the original deck remain intact in each output file.'
+		},
+		{
+			question: 'What happens to speaker notes when splitting?',
+			answer:
+				'Speaker notes attached to kept slides are preserved. Notes belonging to removed slides are cleaned up: their notesSlide XML files are deleted and their content-type overrides are removed so the output file does not trigger a repair prompt when opened.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Split PowerPoint Online Free — Extract Slides | nah</title>
-	<meta
-		name="description"
-		content="Split PowerPoint files into separate presentations. Extract slide ranges or individual slides. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PptxToolLayout title="Split Presentation" description="Extract slides or split into separate presentations.">
+<ToolShell
+	path="/pptx/split"
+	tagline="Extract slide ranges or individual slides into separate PPTX files."
+	seoTitle="Split PowerPoint Free — Extract Slides | nah.tools"
+	description="Split a PowerPoint presentation into separate files by slide range or individual slides. Free, no upload — processed in your browser."
+	{faqs}
+>
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
 			<FileDropZone accept=".pptx" bind:files label="Drop a PPTX file here or click to browse" />
@@ -180,8 +206,24 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pptx" class="underline hover:text-accent">Back to all PowerPoint tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">When splitting a presentation makes sense</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Large decks built for internal review often contain sections that were never meant to be
+				shared externally — an appendix, a financial model, internal talking points. Splitting lets
+				you hand off only the slides that belong in a given context, without opening the full deck in
+				a presentation app and manually copy-pasting slides.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				The tool works by opening the PPTX (which is a ZIP of XML files), removing slides outside
+				your chosen range, renumbering the remaining slides to be sequential, and updating the
+				internal relationship tables so the output opens cleanly. Themes, fonts, and media embedded
+				in the original are carried over untouched.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				If you need to extract every slide as a standalone file — for use as individual assets or
+				for thumbnail generation — switch to "Individual slides" mode and download the resulting ZIP.
+			</p>
+		</div>
 	</section>
-</PptxToolLayout>
+</ToolShell>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
-	import PptxToolLayout from '$components/pptx/PptxToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 
 	let files = $state<File[]>([]);
 	let processing = $state(false);
@@ -45,19 +45,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded when extracting images?',
+			answer:
+				'No. The extraction runs entirely in your browser. Your PPTX is opened in memory with JSZip, the media files are read out, and the download is offered locally — nothing is sent to a server.'
+		},
+		{
+			question: 'Which image formats can be extracted?',
+			answer:
+				'The tool extracts all files from the ppt/media/ directory inside the PPTX. This includes PNG, JPEG, GIF, SVG, BMP, TIFF, EMF, and WMF assets depending on what was embedded in the presentation.'
+		},
+		{
+			question: 'Why might extracted images look different from what I see on the slide?',
+			answer:
+				'The tool extracts the raw embedded media files as they were stored, without applying any crop, color correction, or artistic effect that PowerPoint renders on top. What you get is the original asset before any in-app transformation.'
+		},
+		{
+			question: 'How are the images delivered?',
+			answer:
+				'If the presentation contains a single image, it downloads directly as that file. If there are multiple images, they are packaged into a ZIP archive named images.zip with the original filenames preserved.'
+		},
+		{
+			question: 'Are chart images and diagram backgrounds extracted too?',
+			answer:
+				'Only files explicitly stored in the ppt/media/ folder are extracted. Charts rendered as vector XML and SmartArt drawn as shapes are not included — those are not stored as media assets inside the PPTX.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Extract Images from PowerPoint Online Free | nah</title>
-	<meta
-		name="description"
-		content="Pull all embedded images from a PowerPoint presentation. Free, no upload — processed entirely in your browser."
-	/>
-</svelte:head>
-
-<PptxToolLayout
-	title="Extract Images"
-	description="Pull all embedded images from a PPTX file."
+<ToolShell
+	path="/pptx/extract-images"
+	tagline="Pull every embedded image out of a presentation and download them all at once."
+	seoTitle="Extract Images from PowerPoint Free | nah.tools"
+	description="Pull all embedded images from a PowerPoint presentation. Free, no upload — processed entirely in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -93,8 +116,25 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pptx" class="underline hover:text-accent">Back to all PowerPoint tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Recovering images from a presentation</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				A PowerPoint file is a ZIP archive containing XML slide definitions and a media folder of
+				all embedded images, audio clips, and video thumbnails. When you or a colleague pastes an
+				image into a slide, PowerPoint stores the original file at full resolution inside that
+				archive — but there is no obvious way to get it back out without right-clicking every image
+				individually.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool opens the PPTX with JSZip, reads every file from the media folder, and offers
+				them all as a download. A single image downloads directly; multiple images come as a ZIP
+				with the original filenames intact. The original PPTX is not modified.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Common use cases include recovering high-resolution photos from a deck you received without
+				the original assets, pulling graphics out of a client presentation to reuse in another
+				document, or archiving all visual assets from a campaign deck before it is deleted.
+			</p>
+		</div>
 	</section>
-</PptxToolLayout>
+</ToolShell>

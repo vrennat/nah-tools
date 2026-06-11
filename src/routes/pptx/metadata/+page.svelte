@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
-	import PptxToolLayout from '$components/pptx/PptxToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { PptxMetadata } from '$pptx/types';
 
 	let files = $state<File[]>([]);
@@ -50,19 +50,42 @@
 			saving = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded to edit metadata?',
+			answer:
+				'No. Both reading and writing metadata happen entirely in your browser. The PPTX is processed in memory and offered as a download — nothing is sent to any server.'
+		},
+		{
+			question: 'Which metadata fields can I edit?',
+			answer:
+				'Title, author (creator), subject, description, category, and keywords. These are the Dublin Core and OOXML core properties stored in docProps/core.xml inside the PPTX. Created and modified timestamps are read-only and are not editable through this tool.'
+		},
+		{
+			question: 'Why would I want to edit presentation metadata?',
+			answer:
+				'Common reasons include: removing the original author\'s name before sharing externally, setting a title and keywords for document management systems that index file properties, or cleaning up default values left by presentation templates.'
+		},
+		{
+			question: 'Does editing metadata affect the slide content?',
+			answer:
+				'No. Only the docProps/core.xml file is modified. Slide content, layouts, themes, animations, and media are all untouched.'
+		},
+		{
+			question: 'Is the modification date updated when I save?',
+			answer:
+				'Yes. The tool automatically sets the dcterms:modified field to the current date and time when you save, which is standard behavior for any application that writes a PPTX file.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Edit PowerPoint Metadata Online Free | nah</title>
-	<meta
-		name="description"
-		content="View and edit PowerPoint file metadata — title, author, subject, keywords, and more. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PptxToolLayout
-	title="Edit Metadata"
-	description="View and edit the title, author, and properties of your presentation."
+<ToolShell
+	path="/pptx/metadata"
+	tagline="View and edit the title, author, and document properties stored inside your PPTX."
+	seoTitle="Edit PowerPoint Metadata Free — Title, Author | nah.tools"
+	description="View and edit PowerPoint file metadata — title, author, subject, keywords, and more. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -179,8 +202,26 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pptx" class="underline hover:text-accent">Back to all PowerPoint tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">What is stored in PPTX metadata?</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Every PPTX file contains a docProps/core.xml file that stores document-level properties
+				defined by the Dublin Core and OOXML specifications. This includes the title, subject,
+				author, description, keywords, category, and timestamps for creation and last modification.
+				These fields are set automatically by PowerPoint when a file is created or saved, and they
+				persist when the file is shared.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Metadata travels with the file and is often indexed by document management systems, email
+				servers, and search tools. A presentation saved under one person's name and shared with a
+				client will still carry that author's name in the properties panel. Cleaning up these fields
+				before distribution is a simple housekeeping step that is easy to overlook.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool reads and writes only the core properties. Slide content, themes, animations, and
+				media are not touched. Your file is processed entirely in the browser — no server, no
+				upload, no account.
+			</p>
+		</div>
 	</section>
-</PptxToolLayout>
+</ToolShell>
