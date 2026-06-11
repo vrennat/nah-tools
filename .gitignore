@@ -32,3 +32,6 @@ vite.config.ts.timestamp-*
 
 # Playwright MCP local cache
 .playwright-mcp/
+
+# Bun cache symlink artifact
+.cache
