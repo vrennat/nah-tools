@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { PageNumberPosition } from '$pdf/types';
 
 	let files = $state<File[]>([]);
@@ -40,19 +40,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded to add page numbers?',
+			answer:
+				'No. Page numbers are added entirely in your browser using pdf-lib. Your PDF never leaves your device.'
+		},
+		{
+			question: 'What position options are available?',
+			answer:
+				'You can place numbers at six positions: bottom-center, bottom-left, bottom-right, top-center, top-left, and top-right. Bottom-center is the standard choice for most documents.'
+		},
+		{
+			question: 'What number formats are supported?',
+			answer:
+				'Four formats are available: the plain number (e.g. "3"), "Page 3", "Page 3 of 12", and "3 / 12". The "of N" formats include the total page count, which is useful for multi-section reports.'
+		},
+		{
+			question: 'Can I start numbering from a number other than 1?',
+			answer:
+				'Yes. The "Start at" field lets you set the first page number. This is useful when you are adding numbers to a section that will be combined with other documents — set the start to the correct offset so the numbers match the final document.'
+		},
+		{
+			question: 'Will page numbers be added on top of existing content?',
+			answer:
+				'Page numbers are placed in the margin area at a configurable distance from the edge (default 36 points). If your PDF has content that extends into the margins it may overlap, but standard margin sizes leave enough room.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Add Page Numbers to PDF Online Free | nah</title>
-	<meta
-		name="description"
-		content="Add page numbers to your PDF. Choose position, format, and starting number. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="Add Page Numbers"
-	description="Add customizable page numbers to your PDF."
+<ToolShell
+	path="/pdf/page-numbers"
+	tagline="Add page numbers to any PDF. Choose position, format, and starting number."
+	seoTitle="Add Page Numbers to PDF Free — Instant Download | nah.tools"
+	description="Add page numbers to your PDF. Choose position, format, and starting number. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -145,8 +168,25 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Why add page numbers after creating a PDF?</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Many PDF generators — presentation exports, word processor defaults, scanned document
+				collections — produce files without page numbers. Once printed or shared, an unnumbered
+				document is hard to reference in meetings, difficult to cite, and easy to reorder incorrectly
+				if printed pages are shuffled.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool stamps page numbers directly into the PDF content layer so they appear in every
+				viewer, in every print, on every device. You can choose from six positions, four formats
+				(including "Page N of M" for documents where readers need to know the total length), and
+				configure the starting number — useful when a section will be assembled into a larger
+				document that already has pages 1 through N covered.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				All processing happens in your browser with no upload required, so you can use this on
+				confidential documents without concern.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>

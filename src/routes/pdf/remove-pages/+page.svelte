@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { PageThumbnail } from '$pdf/types';
 
 	let files = $state<File[]>([]);
@@ -47,6 +47,7 @@
 		if (updated.has(pageIndex)) {
 			updated.delete(pageIndex);
 		} else {
+			// Prevent removing all pages — at least one must remain
 			if (updated.size < thumbnails.length - 1) {
 				updated.add(pageIndex);
 			}
@@ -72,19 +73,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded to remove pages?',
+			answer:
+				'No. Page removal runs entirely in your browser. Your PDF is never sent to a server — pdf-lib processes it locally and the result is downloaded directly to your device.'
+		},
+		{
+			question: 'How do I select pages to delete?',
+			answer:
+				'After uploading, thumbnail previews of all pages load automatically. Click any thumbnail to mark it for removal — it will be highlighted with a red X. Click again to deselect. Once you have selected all pages you want to delete, click the Remove button.'
+		},
+		{
+			question: 'Can I remove all pages?',
+			answer:
+				'No. The tool requires at least one page to remain in the output. If you select all but one page, the last unselected page is always preserved.'
+		},
+		{
+			question: 'Is there a limit on how many pages I can remove?',
+			answer:
+				'No hard limit. You can remove any number of pages as long as at least one remains in the output.'
+		},
+		{
+			question: 'What is the difference between Remove Pages and Split PDF?',
+			answer:
+				'Remove Pages deletes the pages you select and gives you one PDF with those pages gone. Split PDF extracts specific page ranges into separate documents. Use Remove Pages when you want to clean up a document; use Split when you want to create multiple files from one source.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Remove PDF Pages Online Free | nah</title>
-	<meta
-		name="description"
-		content="Remove pages from a PDF. Click to select pages for deletion. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="Remove Pages"
-	description="Click pages to select them for removal."
+<ToolShell
+	path="/pdf/remove-pages"
+	tagline="Click to select pages for deletion, then download the cleaned PDF."
+	seoTitle="Remove PDF Pages Free — Delete Pages Instantly | nah.tools"
+	description="Remove pages from a PDF. Click to select pages for deletion. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-4xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -158,8 +182,24 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Remove specific pages without splitting</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Sometimes you need to delete one or two pages from a document — a cover page that was added
+				by a printer driver, a blank page at the end of a scan, an internal notes page that should
+				not be in the client copy — without splitting the entire document into pieces.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool renders thumbnails of every page so you can visually confirm which pages you are
+				deleting before committing. Select any combination of pages by clicking the thumbnails, then
+				download the result in one step.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				All processing happens locally. For related operations, consider
+				<a href="/pdf/split" class="text-accent hover:underline">Split PDF</a> to extract ranges into
+				separate files, or <a href="/pdf/reorder" class="text-accent hover:underline">Reorder Pages</a>
+				to rearrange without deleting.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>

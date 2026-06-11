@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { PageRange } from '$pdf/types';
 
 	let files = $state<File[]>([]);
@@ -90,17 +90,43 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded when I split a PDF?',
+			answer:
+				'No. Splitting happens entirely in your browser. Your PDF is never transmitted to a server — the tool reads the file locally and processes it with JavaScript.'
+		},
+		{
+			question: 'How do I specify page ranges?',
+			answer:
+				'Enter comma-separated ranges in the format "1-3, 5, 8-12". Each range becomes a separate PDF. If you specify a single range, you get one PDF; multiple ranges are packaged as a ZIP.'
+		},
+		{
+			question: 'What does "Individual pages" mode do?',
+			answer:
+				'Individual pages mode extracts every page as its own PDF and packages them all into a single ZIP file for download. Useful when you need each page separately.'
+		},
+		{
+			question: 'Is there a page count limit?',
+			answer:
+				'There is no enforced limit. The tool reads the full PDF in memory, so very large documents may be slow on low-memory devices, but no hard cap is imposed.'
+		},
+		{
+			question: 'Will my split PDFs have the same quality as the original?',
+			answer:
+				'Yes. The tool uses pdf-lib to copy pages without re-encoding them, so there is no quality loss. Images, fonts, and vector content are preserved exactly as in the source.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Split PDF Online Free — Extract Pages | nah</title>
-	<meta
-		name="description"
-		content="Split PDF files into separate documents. Extract page ranges or individual pages. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout title="Split PDF" description="Extract pages or split into separate documents.">
+<ToolShell
+	path="/pdf/split"
+	tagline="Extract page ranges or individual pages from any PDF. No upload needed."
+	seoTitle="Split PDF Online Free — Extract Pages Instantly | nah.tools"
+	description="Split PDF files into separate documents. Extract page ranges or individual pages. Free, no upload — processed in your browser."
+	{faqs}
+>
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
 			<FileDropZone accept=".pdf" bind:files label="Drop a PDF here or click to browse" />
@@ -182,8 +208,24 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">When do you need to split a PDF?</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				PDFs accumulate pages over time — reports grow, forms get combined, presentations get merged.
+				Splitting lets you extract exactly the pages you need without re-creating the document from
+				scratch.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Common use cases: extracting a single chapter from a large report, separating invoices that
+				were merged for archival, pulling the signature page from a contract, or distributing
+				individual slides from a presentation exported as PDF.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Use <strong class="font-medium text-text">custom ranges</strong> when you need specific sections
+				(e.g. pages 1-5 and 12-18 as two separate files) or
+				<strong class="font-medium text-text">individual pages</strong> when you need every page as its
+				own document. Multiple outputs are automatically packaged as a ZIP.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>
