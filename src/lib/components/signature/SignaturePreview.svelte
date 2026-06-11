@@ -53,6 +53,7 @@
 		<iframe
 			bind:this={iframeElement}
 			title="Email signature preview"
+			sandbox="allow-same-origin"
 			style="border: 0; width: 100%; display: block; min-height: 300px;"
 		></iframe>
 	</div>
