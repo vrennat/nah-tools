@@ -2,13 +2,13 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getDB, getKV, authenticateRedirect, generateShortCode, createRedirect, updateRedirect, deactivateRedirect, invalidateRedirectCache } from '$server/db';
 import { hashPassphrase } from '$server/auth';
-import { validateUrlSafety } from '$server/safety';
+import { validateUrlSafety, verifyTurnstile, checkRateLimit } from '$server/safety';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { url: string; passphrase: string; label?: string };
-	const { url, passphrase, label } = body;
+	const body = (await request.json()) as { url: string; passphrase: string; label?: string; turnstile_token?: string };
+	const { url, passphrase, label, turnstile_token } = body;
 
 	if (!url || typeof url !== 'string') {
 		throw error(400, 'URL is required');
@@ -22,6 +22,27 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 	if (passphrase.length < 8) {
 		throw error(400, 'Passphrase must be at least 8 characters');
+	}
+
+	// Verify Turnstile if configured
+	const turnstileSecret = platform?.env?.TURNSTILE_SECRET_KEY;
+	if (turnstileSecret) {
+		if (!turnstile_token) {
+			throw error(400, 'Turnstile verification is required');
+		}
+		const ip = request.headers.get('cf-connecting-ip') || undefined;
+		const valid = await verifyTurnstile(turnstile_token, turnstileSecret, ip);
+		if (!valid) {
+			throw error(403, 'Turnstile verification failed');
+		}
+	} else {
+		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
+	}
+
+	// Rate limit
+	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
+	if (!checkRateLimit(ip)) {
+		throw error(429, 'Rate limit exceeded. Try again later.');
 	}
 
 	const shortCode = generateShortCode();

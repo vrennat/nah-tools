@@ -45,6 +45,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		if (!valid) {
 			throw error(403, 'Turnstile verification failed');
 		}
+	} else {
+		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
 	}
 
 	// Rate limit
@@ -69,6 +71,29 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		if (!available) {
 			throw error(409, 'This alias is already taken');
 		}
+	}
+
+	// Validate expires_at: must parse to a valid date in the future
+	if (expires_at !== undefined && expires_at !== null && expires_at !== '') {
+		const expiry = new Date(expires_at);
+		if (isNaN(expiry.getTime())) {
+			throw error(400, 'expires_at must be a valid date');
+		}
+		if (expiry <= new Date()) {
+			throw error(400, 'expires_at must be in the future');
+		}
+	}
+
+	// Server-side length caps for optional fields
+	if (label && label.length > 200) {
+		throw error(400, 'label must be 200 characters or fewer');
+	}
+	if (utm) {
+		if (utm.source && utm.source.length > 200) throw error(400, 'utm_source must be 200 characters or fewer');
+		if (utm.medium && utm.medium.length > 200) throw error(400, 'utm_medium must be 200 characters or fewer');
+		if (utm.campaign && utm.campaign.length > 200) throw error(400, 'utm_campaign must be 200 characters or fewer');
+		if (utm.term && utm.term.length > 200) throw error(400, 'utm_term must be 200 characters or fewer');
+		if (utm.content && utm.content.length > 200) throw error(400, 'utm_content must be 200 characters or fewer');
 	}
 
 	// Hash passphrase if provided, otherwise anonymous

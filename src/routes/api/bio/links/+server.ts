@@ -23,6 +23,14 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'handle, passphrase, url, and title are required');
 	}
 
+	// Server-side length caps
+	if (title.length > 200) {
+		throw error(400, 'title must be 200 characters or fewer');
+	}
+	if (icon && icon.length > 500) {
+		throw error(400, 'icon must be 500 characters or fewer');
+	}
+
 	await authenticateProfile(db, handle, passphrase);
 
 	const normalizedUrl = normalizeUrl(url);
@@ -56,6 +64,14 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	}
 
 	await authenticateProfile(db, handle, passphrase);
+
+	// Server-side length caps
+	if (fields.title && fields.title.length > 200) {
+		throw error(400, 'title must be 200 characters or fewer');
+	}
+	if (fields.icon && fields.icon.length > 500) {
+		throw error(400, 'icon must be 500 characters or fewer');
+	}
 
 	// Validate URL if changing
 	if (fields.url) {

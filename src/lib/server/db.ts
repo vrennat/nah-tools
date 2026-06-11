@@ -97,15 +97,15 @@ export async function createRedirect(
 	return result;
 }
 
-/** Look up a dynamic code by short code */
+/** Look up a dynamic code by short_code OR custom_alias so manage operations work for aliased links */
 export async function getRedirect(db: D1Database, shortCode: string): Promise<DynamicCode | null> {
 	return db
-		.prepare('SELECT * FROM redirects WHERE short_code = ?')
-		.bind(shortCode)
+		.prepare('SELECT * FROM redirects WHERE short_code = ? OR custom_alias = ?')
+		.bind(shortCode, shortCode)
 		.first<DynamicCode>();
 }
 
-/** Update the destination URL */
+/** Update the destination URL — matches short_code OR custom_alias */
 export async function updateRedirect(
 	db: D1Database,
 	shortCode: string,
@@ -114,20 +114,20 @@ export async function updateRedirect(
 	await db
 		.prepare(
 			`UPDATE redirects SET destination_url = ?, updated_at = datetime('now')
-			 WHERE short_code = ?`
+			 WHERE short_code = ? OR custom_alias = ?`
 		)
-		.bind(destinationUrl, shortCode)
+		.bind(destinationUrl, shortCode, shortCode)
 		.run();
 }
 
-/** Deactivate (soft delete) a dynamic code */
+/** Deactivate (soft delete) a dynamic code — matches short_code OR custom_alias */
 export async function deactivateRedirect(db: D1Database, shortCode: string): Promise<void> {
 	await db
 		.prepare(
 			`UPDATE redirects SET is_active = 0, updated_at = datetime('now')
-			 WHERE short_code = ?`
+			 WHERE short_code = ? OR custom_alias = ?`
 		)
-		.bind(shortCode)
+		.bind(shortCode, shortCode)
 		.run();
 }
 
@@ -144,29 +144,38 @@ export async function createLink(
 		utm?: UTMParams;
 	}
 ): Promise<DynamicCode> {
-	const result = await db
-		.prepare(
-			`INSERT INTO redirects (short_code, destination_url, passphrase_hash, label, source, custom_alias, expires_at, utm_source, utm_medium, utm_campaign, utm_term, utm_content)
+	try {
+		const result = await db
+			.prepare(
+				`INSERT INTO redirects (short_code, destination_url, passphrase_hash, label, source, custom_alias, expires_at, utm_source, utm_medium, utm_campaign, utm_term, utm_content)
 			 VALUES (?, ?, ?, ?, 'link', ?, ?, ?, ?, ?, ?, ?)
 			 RETURNING *`
-		)
-		.bind(
-			shortCode,
-			destinationUrl,
-			passphraseHash,
-			options?.label ?? null,
-			options?.customAlias ?? null,
-			options?.expiresAt ?? null,
-			options?.utm?.source ?? null,
-			options?.utm?.medium ?? null,
-			options?.utm?.campaign ?? null,
-			options?.utm?.term ?? null,
-			options?.utm?.content ?? null
-		)
-		.first<DynamicCode>();
+			)
+			.bind(
+				shortCode,
+				destinationUrl,
+				passphraseHash,
+				options?.label ?? null,
+				options?.customAlias ?? null,
+				options?.expiresAt ?? null,
+				options?.utm?.source ?? null,
+				options?.utm?.medium ?? null,
+				options?.utm?.campaign ?? null,
+				options?.utm?.term ?? null,
+				options?.utm?.content ?? null
+			)
+			.first<DynamicCode>();
 
-	if (!result) throw new Error('Failed to create link');
-	return result;
+		if (!result) throw new Error('Failed to create link');
+		return result;
+	} catch (err) {
+		// D1 surfaces UNIQUE constraint violations as a generic error containing "UNIQUE constraint failed".
+		// Re-throw as a 409 so callers get a deterministic, user-friendly response instead of a 500.
+		if (err instanceof Error && err.message.includes('UNIQUE constraint failed')) {
+			throw error(409, 'This alias is already taken');
+		}
+		throw err;
+	}
 }
 
 /** Check if a custom alias is available */
@@ -214,6 +223,13 @@ export async function getClickLogs(
 	shortCode: string,
 	limit = 100
 ): Promise<ClickLog[]> {
+	// Analytics Engine SQL does not support parameterized queries — all interpolated values must
+	// be validated before use. `shortCode` passes through sanitizeCode() (alphanumeric/dash/underscore
+	// only). `limit` is asserted to be a safe integer to prevent numeric injection.
+	if (!Number.isInteger(limit) || limit < 1 || limit > 1000) {
+		throw new Error('invalid limit');
+	}
+
 	const accountId = platform?.env?.CF_ACCOUNT_ID;
 	const apiToken = platform?.env?.CF_ANALYTICS_TOKEN;
 
@@ -341,13 +357,28 @@ export async function isDomainBlocked(db: D1Database, domain: string): Promise<b
 	return !!row;
 }
 
-/** Report a link as abusive. Auto-deactivates after 3 reports. */
+/** Report a link as abusive. Auto-deactivates after 3 unique reports.
+ *  One report per IP per short_code — duplicate reports are silently ignored
+ *  to prevent a single IP from bombing a link into deactivation.
+ */
 export async function reportLink(
 	db: D1Database,
 	shortCode: string,
 	reason: string,
 	reporterIp?: string
 ): Promise<void> {
+	// Skip duplicate reports from the same IP to prevent report-bombing.
+	// An unknown IP (null) is always allowed through so anonymous reports still work.
+	if (reporterIp) {
+		const existing = await db
+			.prepare(
+				'SELECT 1 FROM reported_links WHERE short_code = ? AND reporter_ip = ? AND resolved = 0'
+			)
+			.bind(shortCode, reporterIp)
+			.first();
+		if (existing) return;
+	}
+
 	await db
 		.prepare('INSERT INTO reported_links (short_code, reason, reporter_ip) VALUES (?, ?, ?)')
 		.bind(shortCode, reason, reporterIp ?? null)

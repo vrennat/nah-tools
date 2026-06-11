@@ -93,9 +93,17 @@ export async function validateUrlSafety(
 
 	const hostname = parsed.hostname.toLowerCase();
 
-	// 2. Block IP-only hostnames
+	// 2. Block IP-only hostnames (dotted-decimal IPv4, bracketed IPv6, and localhost variants).
+	// These are SSRF vectors — they can reach internal services not exposed to the public internet.
 	if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
 		return { safe: false, reason: 'IP addresses are not allowed as destinations.' };
+	}
+	if (hostname === 'localhost' || hostname.endsWith('.localhost')) {
+		return { safe: false, reason: 'localhost is not allowed as a destination.' };
+	}
+	// Bracketed IPv6 — e.g. [::1], [fe80::1]
+	if (hostname.startsWith('[')) {
+		return { safe: false, reason: 'IPv6 addresses are not allowed as destinations.' };
 	}
 
 	// 3. Block known bad TLDs
@@ -172,19 +180,27 @@ const rateLimitMap = new Map<string, number[]>();
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const RATE_LIMIT_MAX = 10; // 10 creates per IP per hour
 
-export function checkRateLimit(ip: string): boolean {
+/**
+ * Returns false if the IP has exceeded the rate limit.
+ * cost: how many "tokens" to consume (default 1). Bulk endpoints pass links.length
+ * so that one bulk request consumes proportional quota.
+ */
+export function checkRateLimit(ip: string, cost = 1): boolean {
 	const now = Date.now();
 	const timestamps = rateLimitMap.get(ip) ?? [];
 
 	// Clean old entries
 	const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
 
-	if (recent.length >= RATE_LIMIT_MAX) {
+	if (recent.length + cost > RATE_LIMIT_MAX) {
 		rateLimitMap.set(ip, recent);
 		return false;
 	}
 
-	recent.push(now);
+	// Record one timestamp per cost unit so future checks are consistent
+	for (let i = 0; i < cost; i++) {
+		recent.push(now);
+	}
 	rateLimitMap.set(ip, recent);
 	return true;
 }

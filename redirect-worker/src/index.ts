@@ -74,17 +74,24 @@ export default {
 			}
 		}
 
+		// Security headers applied to all non-redirect responses
+		const secureHeaders = {
+			'Content-Type': 'text/plain',
+			'X-Content-Type-Options': 'nosniff',
+			'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
+		};
+
 		if (!row) {
 			return new Response('QR code not found.', {
 				status: 404,
-				headers: { 'Content-Type': 'text/plain' }
+				headers: secureHeaders
 			});
 		}
 
 		if (!row.is_active) {
 			return new Response('This QR code has been deactivated by its owner.', {
 				status: 410,
-				headers: { 'Content-Type': 'text/plain' }
+				headers: secureHeaders
 			});
 		}
 
@@ -92,7 +99,7 @@ export default {
 		if (row.expires_at && new Date(row.expires_at) < new Date()) {
 			return new Response('This link has expired.', {
 				status: 410,
-				headers: { 'Content-Type': 'text/plain' }
+				headers: secureHeaders
 			});
 		}
 
