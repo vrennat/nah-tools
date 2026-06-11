@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
-	import PptxToolLayout from '$components/pptx/PptxToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 
 	let files = $state<File[]>([]);
 	let position = $state<'bottom-left' | 'bottom-center' | 'bottom-right'>('bottom-right');
@@ -31,19 +31,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded to add slide numbers?',
+			answer:
+				'No. The operation runs entirely in your browser. Your PPTX is processed locally and offered as a download — nothing is sent to any server.'
+		},
+		{
+			question: 'How are the slide numbers added to the file?',
+			answer:
+				'A small text box shape is inserted into the shape tree of each slide\'s XML at the bottom-left, bottom-center, or bottom-right position, with a fixed offset of 0.5 inches from the edges. The shape id is computed dynamically to avoid colliding with existing ids in the slide.'
+		},
+		{
+			question: 'Can I start numbering from a number other than 1?',
+			answer:
+				'Yes. Use the "Start from" field to set any starting number. This is useful when this deck is part of a larger presentation and you want the numbers to continue from where another deck left off.'
+		},
+		{
+			question: 'Will the numbers conflict with existing slide number placeholders?',
+			answer:
+				'The tool adds explicit text box shapes rather than activating the native slide number placeholder. If the slide master already has a slide number placeholder configured, both may appear. For clean results, remove the master placeholder first or use this tool on decks without one.'
+		},
+		{
+			question: 'What is the appearance of the added numbers?',
+			answer:
+				'Numbers are rendered in gray (#666666) at the font size you choose (8pt to 24pt, default 12pt). There is no background fill or border on the text box — just the number positioned at the bottom edge of the slide.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Add Slide Numbers to PowerPoint Online Free | nah</title>
-	<meta
-		name="description"
-		content="Add slide numbers to your PowerPoint presentation. Choose position and starting number. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PptxToolLayout
-	title="Add Slide Numbers"
-	description="Automatically number every slide in your presentation."
+<ToolShell
+	path="/pptx/slide-numbers"
+	tagline="Number every slide automatically. Choose position, font size, and starting number."
+	seoTitle="Add Slide Numbers to PowerPoint Free | nah.tools"
+	description="Add slide numbers to your PowerPoint presentation. Choose position and starting number. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -108,7 +131,7 @@
 			<div class="mt-6">
 				<button
 					type="button"
-					class="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed"
+					class="w-full rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 					disabled={!canProcess}
 					onclick={process}
 				>
@@ -123,8 +146,24 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pptx" class="underline hover:text-accent">Back to all PowerPoint tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Why add slide numbers directly to the file?</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				PowerPoint has a built-in slide number placeholder, but it requires the slide master to have
+				it configured and it only activates when "Show on all slides" is enabled through the Header
+				and Footer dialog. That setting is easy to lose when a deck is copied, re-themed, or opened
+				in a different application.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool takes a different approach: it writes the slide number as an explicit text shape
+				directly into each slide's XML. The number is visible in every viewer and survives PDF
+				export, theme changes, and application migrations — because it is just a text box with a
+				number in it, nothing dependent on the master configuration.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				The custom "Start from" field is useful when you have split a larger deck and want each
+				portion to carry sequential numbers that match the original slide order.
+			</p>
+		</div>
 	</section>
-</PptxToolLayout>
+</ToolShell>

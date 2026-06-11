@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PptxToolLayout from '$components/pptx/PptxToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 
 	let files = $state<File[]>([]);
 	let processing = $state(false);
@@ -41,19 +41,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded to a server when I merge presentations?',
+			answer:
+				'No. All merging happens directly in your browser using JavaScript. Your files never leave your device — no uploads, no server, no account required.'
+		},
+		{
+			question: 'Why might fonts or colours look different in the merged deck?',
+			answer:
+				'This is a known limitation. The merge copies slide XML from each source file but does not copy slide layouts, masters, or themes from non-base decks. All imported slides are remapped to the first file\'s default layout. Fonts, colours, and complex placeholder arrangements from other files may shift or be replaced. For best results, ensure all files share the same theme before merging.'
+		},
+		{
+			question: 'Can I reorder files before merging?',
+			answer:
+				'Yes. Once you add two or more files, a drag-and-drop list appears so you can set the exact output order before clicking Merge.'
+		},
+		{
+			question: 'How many presentations can I merge at once?',
+			answer:
+				'There is no hard limit. You can add as many PPTX files as your browser memory allows. Very large decks combined may slow down or exhaust memory on low-RAM devices, but the tool imposes no cap.'
+		},
+		{
+			question: 'Will speaker notes from all files be included?',
+			answer:
+				'Speaker notes attached to slides in the base (first) file are preserved. Notes from slides in subsequent files are removed during the merge because their notesSlide relationships are stripped when the slides are imported. If preserving notes is important, merge files first and then add notes manually.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Merge PowerPoint Files Online Free — Combine PPTX | nah</title>
-	<meta
-		name="description"
-		content="Merge multiple PowerPoint presentations into one. Free, no upload — files are combined in your browser. Drag to reorder before merging."
-	/>
-</svelte:head>
-
-<PptxToolLayout
-	title="Merge Presentations"
-	description="Combine multiple PPTX files into one presentation. Drag to reorder."
+<ToolShell
+	path="/pptx/merge"
+	tagline="Combine multiple PowerPoint files into one deck. Drag to reorder, then download."
+	seoTitle="Merge PowerPoint Files Free — No Upload | nah.tools"
+	description="Merge multiple PowerPoint presentations into one PPTX. Free, no upload — files are combined in your browser. Drag to reorder before merging."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -131,13 +154,26 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			Merged decks adopt the first file's slide master and layout. Fonts, colours,
-			and complex layouts from other files may shift.
-		</p>
-
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pptx" class="underline hover:text-accent">Back to all PowerPoint tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Why merge presentations in your browser?</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Assembling a presentation from multiple decks is a common task before board meetings, client
+				pitches, or training sessions. Most online tools solve this by uploading your files to a
+				server — which means your slides, speaker notes, and embedded data pass through infrastructure
+				you have no visibility into.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool merges PPTX files entirely in your browser. When you click Merge, JavaScript reads
+				each file directly from disk, stitches the slide XML together using JSZip, and offers the
+				result as a download. Nothing is transmitted. The output is a valid PPTX that opens in
+				PowerPoint, Keynote, Google Slides, and LibreOffice.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				One caveat worth knowing: the merger copies slide content but remaps all slides to the first
+				file's slide master. If your decks use different themes or font sets, the merged output will
+				adopt the base deck's styling. For best results, use files that already share the same theme,
+				or accept that a formatting pass may be needed after merging.
+			</p>
+		</div>
 	</section>
-</PptxToolLayout>
+</ToolShell>

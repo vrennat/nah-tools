@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
-	import PptxToolLayout from '$components/pptx/PptxToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 
 	let files = $state<File[]>([]);
 	let quality = $state(0.7);
@@ -42,19 +42,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded to compress the presentation?',
+			answer:
+				'No. Compression runs entirely in your browser. The PPTX is processed in memory and offered as a download — nothing leaves your device.'
+		},
+		{
+			question: 'What does the compressor actually do to reduce file size?',
+			answer:
+				'Three things: it re-encodes JPEG images at your chosen quality level (defaulting to 70%), removes the embedded preview thumbnail stored at docProps/thumbnail.jpeg, and re-zips the archive at maximum DEFLATE compression. PNG images are skipped because canvas re-encoding ignores the quality parameter and typically produces larger files than the originals.'
+		},
+		{
+			question: 'Why is my file barely smaller after compression?',
+			answer:
+				'If the presentation contains mostly text, shapes, or charts with no embedded images, there is little for the compressor to work with. The thumbnail removal and re-compression of the ZIP container may still produce a small reduction, but image-heavy decks see the most benefit.'
+		},
+		{
+			question: 'Will compression affect how the presentation looks?',
+			answer:
+				'At 70% quality the difference is rarely visible on a projected slide. At lower quality settings, heavy photographic content may show JPEG artifacts when zoomed in closely. The presentation structure, text, fonts, and vector graphics are never altered.'
+		},
+		{
+			question: 'What is the quality slider range?',
+			answer:
+				'The slider goes from 30% (smallest file, visible quality loss) to 95% (near lossless, minimal size reduction). The default of 70% is a reasonable balance for most presentation use cases.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Compress PowerPoint Online Free — Reduce PPTX Size | nah</title>
-	<meta
-		name="description"
-		content="Reduce PowerPoint file size by compressing embedded images and stripping unnecessary data. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PptxToolLayout
-	title="Compress PPTX"
-	description="Reduce file size by compressing images and removing unnecessary data."
+<ToolShell
+	path="/pptx/compress"
+	tagline="Shrink oversized presentations by recompressing images and stripping thumbnail data."
+	seoTitle="Compress PowerPoint Free — Reduce PPTX Size | nah.tools"
+	description="Reduce PowerPoint file size by compressing embedded images and stripping unnecessary data. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -117,8 +140,26 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pptx" class="underline hover:text-accent">Back to all PowerPoint tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Why presentations get large — and how to shrink them</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				PowerPoint files accumulate size from three main sources: high-resolution photos pasted
+				directly from a camera or stock library, a hidden preview thumbnail PowerPoint saves inside
+				the file for Windows Explorer previews, and inefficient ZIP compression on the internal XML
+				and asset files.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool addresses all three. JPEG images are re-encoded at your chosen quality level —
+				at 70%, a 4 MB photo typically shrinks to under 500 KB with no perceptible difference on a
+				projected slide. The thumbnail file is deleted. And the entire archive is repackaged at
+				maximum DEFLATE compression. The resulting file opens normally in PowerPoint, Keynote,
+				and Google Slides.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Because everything runs in your browser, your deck — including any confidential charts,
+				customer logos, or unreleased product screenshots — never leaves your device during
+				processing.
+			</p>
+		</div>
 	</section>
-</PptxToolLayout>
+</ToolShell>

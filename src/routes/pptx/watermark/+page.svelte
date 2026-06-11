@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
-	import PptxToolLayout from '$components/pptx/PptxToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 
 	let files = $state<File[]>([]);
 	let text = $state('CONFIDENTIAL');
@@ -39,19 +39,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Are my files uploaded to add a watermark?',
+			answer:
+				'No. The watermark is applied entirely in your browser. Your PPTX never leaves your device — no upload, no account, no data retention.'
+		},
+		{
+			question: 'How is the watermark drawn in the slide?',
+			answer:
+				'The tool inserts a transparent text box spanning the full slide dimensions into the shape tree of each slide\'s XML. The text is center-aligned and rotated at your chosen angle. It uses OOXML\'s alpha transparency to control opacity. The shape id is computed dynamically so it does not collide with existing shape ids.'
+		},
+		{
+			question: 'Is the watermark permanent?',
+			answer:
+				'The watermark is a standard text shape written into the slide XML. A determined recipient with a PPTX editor could select and delete it, but it cannot be toggled off or hidden simply by opening the file. It will appear on screen and in print as part of the slide content.'
+		},
+		{
+			question: 'Can I control how visible the watermark is?',
+			answer:
+				'Yes. You can adjust the opacity (5% to 50%), font size (12pt to 120pt), color, and rotation angle. The defaults — "CONFIDENTIAL" at 15% opacity, -45 degrees — are a standard choice for document review workflows.'
+		},
+		{
+			question: 'What text can I use as a watermark?',
+			answer:
+				'Any text string. Common choices are CONFIDENTIAL, DRAFT, DO NOT COPY, FOR REVIEW ONLY, or a company name. The same text is stamped on every slide in the presentation.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Add Watermark to PowerPoint Online Free | nah</title>
-	<meta
-		name="description"
-		content="Add a text watermark to all slides of your PowerPoint presentation. Customize text, opacity, rotation, and color. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PptxToolLayout
-	title="Add Watermark"
-	description="Add a text watermark to all slides of your presentation."
+<ToolShell
+	path="/pptx/watermark"
+	tagline="Stamp every slide with a custom text watermark. Control opacity, rotation, and color."
+	seoTitle="Add Watermark to PowerPoint Free — Text Overlay | nah.tools"
+	description="Add a text watermark to all slides of your PowerPoint presentation. Customize text, opacity, rotation, and color. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -119,8 +142,24 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pptx" class="underline hover:text-accent">Back to all PowerPoint tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">When to watermark a presentation</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Watermarks communicate document status at a glance — reviewers know a draft is not final,
+				recipients know a copy is for reference only, and distributed files are clearly marked with
+				ownership or classification information. A diagonal "CONFIDENTIAL" stamp across every slide
+				is standard practice in legal, financial, and HR review workflows.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool inserts the watermark as a native OOXML text shape in each slide's shape tree,
+				sized to span the full slide and positioned in the center. The result renders correctly in
+				PowerPoint, Keynote, Google Slides, and when the deck is exported to PDF or printed.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Because everything runs in your browser, sensitive decks — investor materials, board
+				presentations, unreleased product roadmaps — never leave your device during the watermarking
+				process.
+			</p>
+		</div>
 	</section>
-</PptxToolLayout>
+</ToolShell>
