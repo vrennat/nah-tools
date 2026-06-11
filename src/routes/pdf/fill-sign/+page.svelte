@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import SignaturePad from '$components/pdf/SignaturePad.svelte';
 	import type { SignatureField, TextFieldFill } from '$pdf/types';
 
@@ -128,7 +128,6 @@
 	}
 
 	function handlePageClick(e: MouseEvent, pageIndex: number) {
-		// Don't place if we clicked on an existing overlay or are dragging/resizing
 		if (draggingId || resizingId) return;
 		const target = e.target as HTMLElement;
 		if (target.closest('[data-overlay]')) return;
@@ -180,7 +179,6 @@
 	function commitTextEdit() {
 		if (!editingTextId) return;
 		if (!editingTextValue.trim()) {
-			// Remove empty text fields
 			textFields = textFields.filter((t) => t.id !== editingTextId);
 		} else {
 			textFields = textFields.map((t) =>
@@ -195,7 +193,6 @@
 		if (e.key === 'Enter') {
 			commitTextEdit();
 		} else if (e.key === 'Escape') {
-			// Remove the field if empty
 			if (!editingTextValue.trim()) {
 				textFields = textFields.filter((t) => t.id !== editingTextId);
 			}
@@ -323,9 +320,7 @@
 			const { fillAndSignPDF } = await import('$pdf/processor');
 			const { downloadPDF, makeFilename } = await import('$pdf/exporter');
 
-			// Convert all text fields from screen coords to PDF coords
 			const pdfTextFields: TextFieldFill[] = textFields.map((tf) => {
-				// Estimate text height based on font size and scale
 				const scale = renderScales[tf.pageIndex] || 1;
 				const screenTextHeight = tf.fontSize * scale;
 				const { x, y } = screenToPdf(tf.screenX, tf.screenY, tf.pageIndex, screenTextHeight);
@@ -339,7 +334,6 @@
 				};
 			});
 
-			// Convert all signatures from screen coords to PDF coords
 			const pdfSignatures: SignatureField[] = signatures.map((sig) => {
 				const { x, y } = screenToPdf(sig.screenX, sig.screenY, sig.pageIndex, sig.height);
 				const { width, height } = screenSizeToPdf(sig.width, sig.height, sig.pageIndex);
@@ -361,24 +355,66 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'How is a drawn signature embedded in the PDF?',
+			answer:
+				'Your signature is captured on a canvas element and saved as a PNG data URL. When you apply the document, the PNG is embedded directly into the PDF page at the position and scale you set. It is stored as a raster image in the file, not as a vector or cryptographic signature.'
+		},
+		{
+			question: 'Is this a legally binding electronic signature?',
+			answer:
+				'This tool adds a visual representation of your signature as an image. It does not use cryptographic signing (PKCS#7 or PAdES digital signatures), so it does not provide tamper evidence or legally binding digital signature status under eIDAS or ESIGN Act frameworks. For legal documents requiring certified e-signatures, use a compliant signing platform.'
+		},
+		{
+			question: 'Can I fill in existing form fields?',
+			answer:
+				'The tool adds text and signature images as overlaid content on the PDF pages. It does not interact with AcroForm field widgets that are part of the PDF form structure. For structured form fields, use the Fill & Sign or flatten workflow after filling with a PDF reader.'
+		},
+		{
+			question: 'Are my files uploaded?',
+			answer:
+				'No. The PDF is rendered in your browser using pdfjs-dist and the signed output is generated using pdf-lib. Nothing is uploaded to any server. Your signature drawing and document content stay on your device.'
+		},
+		{
+			question: 'Can I move or remove items after placing them?',
+			answer:
+				'Yes. Before clicking Apply, you can drag any placed text or signature to reposition it. Hover over an item to reveal the delete button. Text fields can be double-clicked to edit the content. Nothing is permanent until you click Apply and download the result.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Fill & Sign PDF Online Free | nah</title>
-	<meta
-		name="description"
-		content="Add text and signatures to your PDF. Draw, type, or upload a signature. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="Fill & Sign"
-	description="Add text and signatures to your PDF documents."
+<ToolShell
+	path="/pdf/fill-sign"
+	tagline="Place text and hand-drawn signatures anywhere on your PDF. Click to position, drag to move, then download."
+	seoTitle="Fill & Sign PDF Free — Add Text and Signatures | nah.tools"
+	description="Add text and signatures to your PDF. Draw, type, or upload a signature. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-4xl space-y-6">
 		{#if !file}
 			<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
 				<FileDropZone accept=".pdf" bind:files label="Drop a PDF here or click to browse" />
+			</div>
+
+			<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+				<h2 class="font-display text-lg font-700">Add text and signatures without a PDF editor</h2>
+				<p class="text-sm leading-relaxed text-text-muted">
+					Most situations where you need to "sign" a PDF come down to two things: typing your
+					name, date, or other information into the right spots, and placing a visual representation
+					of your signature. This tool handles both without needing Adobe Acrobat or any other
+					installed software.
+				</p>
+				<p class="text-sm leading-relaxed text-text-muted">
+					Upload the PDF, draw your signature on the pad, then click anywhere on the page to place
+					text or signature elements. Everything is draggable before you apply. The signature is
+					embedded as a PNG image; text is drawn using Helvetica at the size and color you choose.
+				</p>
+				<p class="text-sm leading-relaxed text-text-muted">
+					All processing happens in your browser. Your document and signature never leave your
+					device.
+				</p>
 			</div>
 		{:else}
 			<!-- Toolbar -->
@@ -632,9 +668,5 @@
 		{#if error}
 			<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
 		{/if}
-
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
 	</section>
-</PdfToolLayout>
+</ToolShell>

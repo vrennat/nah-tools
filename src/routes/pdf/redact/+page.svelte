@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { RedactRegion } from '$pdf/types';
 
 	let files = $state<File[]>([]);
@@ -57,7 +57,6 @@
 			if (file !== currentFile) return;
 
 			const { renderThumbnails } = await import('$pdf/renderer');
-			// First get page count
 			const { getPageCount } = await import('$pdf/processor');
 			const count = await getPageCount(buf);
 			if (file !== currentFile) return;
@@ -65,7 +64,6 @@
 			loadProgress = { current: 0, total: count };
 			const images: { dataUrl: string; width: number; height: number }[] = [];
 
-			// Render pages in batches for progress reporting
 			for (let i = 0; i < count; i++) {
 				const result = await renderThumbnails(buf, { maxWidth: 800, pages: [i] });
 				if (file !== currentFile) return;
@@ -122,13 +120,11 @@
 		const target = e.currentTarget as HTMLElement;
 		const rect = target.getBoundingClientRect();
 
-		// Normalize coordinates (handle drawing in any direction)
 		const x = Math.min(drawStart.x, drawCurrent.x);
 		const y = Math.min(drawStart.y, drawCurrent.y);
 		const width = Math.abs(drawCurrent.x - drawStart.x);
 		const height = Math.abs(drawCurrent.y - drawStart.y);
 
-		// Minimum 5px threshold to avoid accidental clicks
 		const minThreshold = 5;
 		const pixelWidth = width * rect.width;
 		const pixelHeight = height * rect.height;
@@ -186,7 +182,6 @@
 			const { downloadPDF, makeFilename } = await import('$pdf/exporter');
 			const buf = await file.arrayBuffer();
 
-			// Build config from redactions map
 			const pages = Array.from(redactions.entries()).map(([pageIndex, regions]) => ({
 				pageIndex,
 				regions
@@ -204,7 +199,6 @@
 		}
 	}
 
-	// Preview rectangle during drawing
 	let previewRect = $derived.by(() => {
 		if (!isDrawing || !drawStart || !drawCurrent) return null;
 		return {
@@ -214,17 +208,43 @@
 			height: Math.abs(drawCurrent.y - drawStart.y)
 		};
 	});
+
+	const faqs = [
+		{
+			question: 'Does redaction permanently remove the underlying text and data?',
+			answer:
+				'Yes — for pages you redact. This tool works by rendering each redacted page to an image, painting solid black rectangles over your marked regions, then embedding that image as the new page content. The original text, vector content, and metadata on those pages are replaced entirely by the rendered image. However, pages without any redaction marks are copied as-is and retain their original text content.'
+		},
+		{
+			question: 'Why are redacted pages converted to images?',
+			answer:
+				'Simply drawing a black box over text in a PDF does not remove the text from the file — the text data remains in the PDF stream and can be extracted by any tool that ignores the visual overlay. By flattening each redacted page to a rasterized image first, this tool ensures the underlying text stream is genuinely replaced, not just covered up.'
+		},
+		{
+			question: 'What are the trade-offs of image-based redaction?',
+			answer:
+				'Text on redacted pages will no longer be selectable or searchable — this is intentional and expected. The file size of redacted pages increases because raster images are larger than the original vector PDF content. Pages without redaction marks are copied directly and retain full text fidelity and original file size.'
+		},
+		{
+			question: 'Are my files uploaded to any server?',
+			answer:
+				'No. All rendering and redaction processing happens in your browser using pdfjs-dist and pdf-lib. Your file never leaves your device.'
+		},
+		{
+			question: 'Can I undo a redaction region before applying?',
+			answer:
+				'Yes. Before clicking Apply, hover over any marked region and click the red X button that appears to remove it. You can also use the "Clear this page" or "Clear all" buttons. Once you click Apply and download the file, the redactions in the downloaded copy are permanent.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Redact PDF Online Free | nah</title>
-	<meta
-		name="description"
-		content="Permanently redact sensitive content from PDFs. Draw rectangles to black out text and images. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout title="Redact PDF" description="Permanently black out sensitive content.">
+<ToolShell
+	path="/pdf/redact"
+	tagline="Draw rectangles to mark sensitive areas, then flatten those pages to images so the underlying text is permanently gone."
+	seoTitle="Redact PDF Online Free — Permanently Remove Content | nah.tools"
+	description="Permanently redact sensitive content from PDFs. Draw rectangles to black out areas — redacted pages are converted to images so text is truly removed. Free, no upload."
+	{faqs}
+>
 	<section class="mx-auto max-w-5xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
 			{#if pageImages.length === 0}
@@ -489,8 +509,26 @@
 			{/if}
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">How this redaction tool actually works</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Most "redaction" tools simply draw black rectangles on top of a PDF. This is not real
+				redaction — the text underneath remains in the file and can be extracted by copying and
+				pasting or by any tool that reads the raw PDF stream. If you have ever seen redacted
+				government documents with accidentally recoverable text, this is why.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool takes a fundamentally different approach for each page you mark. Instead of
+				overlaying a shape, it renders the entire page to a high-resolution raster image (2x
+				scale), paints solid black over the marked regions directly on that image, then replaces
+				the original page content with the flattened image. The original text stream, vectors,
+				and any hidden layers no longer exist in the output.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Pages without any redaction marks are copied directly from the source document and retain
+				all original text, vector content, and metadata. Only the pages you explicitly mark are
+				converted to images.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>
