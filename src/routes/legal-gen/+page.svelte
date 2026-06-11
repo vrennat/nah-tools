@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { getFamilyTools } from '$lib/registry/index';
+	const tools = getFamilyTools('legal-gen');
 </script>
 
 <svelte:head>
@@ -47,102 +49,31 @@
 
 		<!-- Document Cards -->
 		<div class="grid md:grid-cols-2 gap-6">
-			<!-- Privacy Policy -->
-			<a
-				href="/legal-gen/privacy-policy"
-				class="group p-6 rounded-xl bg-surface border border-border hover:border-accent hover:shadow-lg transition-all"
-			>
-				<div class="text-3xl mb-4">
-					<svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-					</svg>
-				</div>
-				<h2 class="text-xl font-semibold text-text mb-2 group-hover:text-accent transition-colors">
-					Privacy Policy
-				</h2>
-				<p class="text-text-muted text-sm mb-4">
-					Explain how you collect, use, and protect user data. Includes GDPR and CCPA compliance.
-				</p>
-				<div class="flex items-center text-accent text-sm font-medium">
-					Generate <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-					</svg>
-				</div>
-			</a>
-
-			<!-- Terms of Service -->
-			<a
-				href="/legal-gen/terms-of-service"
-				class="group p-6 rounded-xl bg-surface border border-border hover:border-accent hover:shadow-lg transition-all"
-			>
-				<div class="text-3xl mb-4">
-					<svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-					</svg>
-				</div>
-				<h2 class="text-xl font-semibold text-text mb-2 group-hover:text-accent transition-colors">
-					Terms of Service
-				</h2>
-				<p class="text-text-muted text-sm mb-4">
-					Protect your business with clear usage terms, liability limits, and dispute resolution.
-				</p>
-				<div class="flex items-center text-accent text-sm font-medium">
-					Generate <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-					</svg>
-				</div>
-			</a>
-
-			<!-- Cookie Policy -->
-			<a
-				href="/legal-gen/cookie-policy"
-				class="group p-6 rounded-xl bg-surface border border-border hover:border-accent hover:shadow-lg transition-all"
-			>
-				<div class="text-3xl mb-4">
-					<svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-						<circle cx="12" cy="12" r="10" stroke-linecap="round" stroke-linejoin="round" />
-						<circle cx="8" cy="9" r="1" fill="currentColor" stroke="none" />
-						<circle cx="13" cy="7" r="1" fill="currentColor" stroke="none" />
-						<circle cx="10" cy="14" r="1" fill="currentColor" stroke="none" />
-						<circle cx="15" cy="12" r="1" fill="currentColor" stroke="none" />
-						<circle cx="7" cy="12" r="1" fill="currentColor" stroke="none" />
-					</svg>
-				</div>
-				<h2 class="text-xl font-semibold text-text mb-2 group-hover:text-accent transition-colors">
-					Cookie Policy
-				</h2>
-				<p class="text-text-muted text-sm mb-4">
-					Disclose your cookie practices and tracking technologies. GDPR and CCPA compliant.
-				</p>
-				<div class="flex items-center text-accent text-sm font-medium">
-					Generate <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-					</svg>
-				</div>
-			</a>
-
-			<!-- DMCA Notice -->
-			<a
-				href="/legal-gen/dmca-notice"
-				class="group p-6 rounded-xl bg-surface border border-border hover:border-accent hover:shadow-lg transition-all"
-			>
-				<div class="text-3xl mb-4">
-					<svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-					</svg>
-				</div>
-				<h2 class="text-xl font-semibold text-text mb-2 group-hover:text-accent transition-colors">
-					DMCA Notice
-				</h2>
-				<p class="text-text-muted text-sm mb-4">
-					Establish your copyright compliance procedures and handling of infringement claims.
-				</p>
-				<div class="flex items-center text-accent text-sm font-medium">
-					Generate <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-					</svg>
-				</div>
-			</a>
+			{#each tools as tool}
+				<a
+					href={tool.path}
+					class="group p-6 rounded-xl bg-surface border border-border hover:border-accent hover:shadow-lg transition-all"
+				>
+					<div class="text-3xl mb-4">
+						{#if tool.icon}
+							<svg class="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={tool.icon} />
+							</svg>
+						{/if}
+					</div>
+					<h2 class="text-xl font-semibold text-text mb-2 group-hover:text-accent transition-colors">
+						{tool.name}
+					</h2>
+					<p class="text-text-muted text-sm mb-4">
+						{tool.description}
+					</p>
+					<div class="flex items-center text-accent text-sm font-medium">
+						Generate <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+						</svg>
+					</div>
+				</a>
+			{/each}
 		</div>
 
 		<!-- Footer Info -->

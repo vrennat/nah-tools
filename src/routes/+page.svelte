@@ -1,3 +1,26 @@
+<script lang="ts">
+	import { allFamilies, getTool } from '$lib/registry/index';
+
+	// The "More tools" grid shows 13 curated entries in a specific order.
+	// These are family hubs + standalone tools, not individual tool pages.
+	// Order is intentional (mirrors the original landing page).
+	const moreTools = [
+		{ href: '/dev', name: 'Developer Tools', desc: allFamilies.find((f) => f.id === 'dev')?.description ?? '' },
+		{ href: '/resume', name: 'Resume Builder', desc: getTool('/resume')?.description ?? '' },
+		{ href: '/invoice', name: 'Invoice Generator', desc: getTool('/invoice')?.description ?? '' },
+		{ href: '/links', name: 'Link Shortener', desc: getTool('/links')?.description ?? '' },
+		{ href: '/bio', name: 'Link in Bio', desc: getTool('/bio')?.description ?? '' },
+		{ href: '/pptx', name: 'PowerPoint Tools', desc: allFamilies.find((f) => f.id === 'pptx')?.description ?? '' },
+		{ href: '/remove', name: 'Data Removal', desc: getTool('/remove')?.description ?? '' },
+		{ href: '/signature', name: 'Email Signatures', desc: getTool('/signature')?.description ?? '' },
+		{ href: '/media', name: 'Video/Audio Tools', desc: 'Trim, compress, convert media files.' },
+		{ href: '/audio', name: 'Audio Tools', desc: allFamilies.find((f) => f.id === 'audio')?.description ?? '' },
+		{ href: '/text', name: 'Text Tools', desc: allFamilies.find((f) => f.id === 'text')?.description ?? '' },
+		{ href: '/legal-gen', name: 'Policy Generator', desc: 'Privacy policy, ToS, cookie policy.' },
+		{ href: '/mcp', name: 'MCP Server', desc: '30+ tools for AI agents via MCP.' }
+	];
+</script>
+
 <svelte:head>
 	<title>nah — Free tools. No catch.</title>
 	<meta name="description" content="QR codes, PDFs, PowerPoint, links, resumes, invoices — all free, private, and open source. No signup, no tracking, most tools run in your browser." />
@@ -51,7 +74,7 @@
 		</p>
 	</section>
 
-	<!-- Featured tools -->
+	<!-- Featured tools — hardcoded because they have custom call-to-action copy -->
 	<section class="grid gap-5 sm:grid-cols-3 mt-2">
 		<a
 			href="/pdf"
@@ -110,70 +133,12 @@
 		<p class="mb-4 font-mono text-[clamp(0.5rem,1vw,0.75rem)] tracking-widest text-text-muted uppercase">More tools</p>
 
 		<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-			<a href="/dev" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Developer Tools</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">JSON, Base64, JWT, hash, regex, UUID, and more.</p>
-			</a>
-
-			<a href="/resume" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Resume Builder</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">ATS-optimized, PDF and DOCX export.</p>
-			</a>
-
-			<a href="/invoice" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Invoice Generator</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">Multi-currency, tax support, PDF export.</p>
-			</a>
-
-			<a href="/links" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Link Shortener</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">Custom aliases, click analytics, UTM builder.</p>
-			</a>
-
-			<a href="/bio" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Link in Bio</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">Your links, your page, no signup.</p>
-			</a>
-
-			<a href="/pptx" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">PowerPoint Tools</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">Merge, split, compress, extract, watermark.</p>
-			</a>
-
-			<a href="/remove" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Data Removal</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">Remove your info from 25+ data brokers.</p>
-			</a>
-
-			<a href="/signature" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Email Signatures</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">HTML signatures, free templates.</p>
-			</a>
-
-			<a href="/media" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Video/Audio Tools</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">Trim, compress, convert media files.</p>
-			</a>
-
-			<a href="/audio" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Audio Tools</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">Convert, merge, normalize audio files.</p>
-			</a>
-
-			<a href="/text" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Text Tools</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">Word counter, bulk find and replace.</p>
-			</a>
-
-			<a href="/legal-gen" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">Policy Generator</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">Privacy policy, ToS, cookie policy.</p>
-			</a>
-
-			<a href="/mcp" class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
-				<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">MCP Server</h3>
-				<p class="mt-1 text-sm leading-relaxed text-text-muted">30+ tools for AI agents via MCP.</p>
-			</a>
+			{#each moreTools as tool}
+				<a href={tool.href} class="group rounded-xl border border-border p-4 transition-colors duration-200 hover:border-accent/50 hover:bg-surface-alt">
+					<h3 class="font-display text-base font-700 text-text transition-colors duration-200 group-hover:text-accent">{tool.name}</h3>
+					<p class="mt-1 text-sm leading-relaxed text-text-muted">{tool.desc}</p>
+				</a>
+			{/each}
 		</div>
 	</section>
 </div>
