@@ -314,8 +314,17 @@ export function registerRemovalTools(server: McpServer) {
 
 		const parentsSeen = new Set<string>();
 		const deduplicated = emailBrokers.filter((b) => {
+			// Skip this broker if its parent company was already included.
 			if (b.parentCompany && parentsSeen.has(b.parentCompany)) return false;
-			if (b.subsidiaries) parentsSeen.add(b.id);
+			// When including a broker that owns subsidiaries, record the values its
+			// subsidiaries use in their parentCompany field so they get filtered out.
+			// Subsidiaries reference their parent by the parent's name (e.g. 'Spokeo')
+			// or by a shared corporate parent string (e.g. 'PeopleConnect Holdings ...').
+			// Adding both broker.name and broker.parentCompany covers all cases.
+			if (b.subsidiaries) {
+				parentsSeen.add(b.name);
+				if (b.parentCompany) parentsSeen.add(b.parentCompany);
+			}
 			return true;
 		});
 

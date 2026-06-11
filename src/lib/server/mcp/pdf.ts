@@ -7,6 +7,7 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { bufferToB64, MAX_BASE64_BYTES, MAX_MERGE_FILES } from './utils';
 
 // Lazy-load pdf-lib to avoid top-level await
 let PDFLib: typeof import('@cantoo/pdf-lib');
@@ -20,12 +21,6 @@ function b64ToBuffer(b64: string): ArrayBuffer {
 	const buf = new Uint8Array(raw.length);
 	for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
 	return buf.buffer;
-}
-
-function bufferToB64(buf: Uint8Array): string {
-	let binary = '';
-	for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
-	return btoa(binary);
 }
 
 function error(message: string) {
@@ -45,7 +40,13 @@ function pdfResult(data: Uint8Array, extra?: Record<string, unknown>) {
 	};
 }
 
-const BASE64_PDF = z.string().describe('Base64-encoded PDF file data');
+// Valid hex color: optional leading #, exactly 6 hex digits.
+const HEX_COLOR_RE = /^#?[0-9A-Fa-f]{6}$/;
+
+const BASE64_PDF = z
+	.string()
+	.max(MAX_BASE64_BYTES, `PDF must be under ${MAX_BASE64_BYTES / 1_000_000} MB (base64)`)
+	.describe('Base64-encoded PDF file data');
 
 export function registerPDFTools(server: McpServer) {
 	// ── Get Info ──
@@ -79,7 +80,8 @@ export function registerPDFTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			return error(`Failed to read PDF: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_get_info error:', e);
+			return error(`Failed to read PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -88,7 +90,13 @@ export function registerPDFTools(server: McpServer) {
 		title: 'Merge PDFs',
 		description: 'Merge multiple PDF files into a single PDF. Provide an array of base64-encoded PDFs.',
 		inputSchema: {
-			pdfs_base64: z.array(z.string()).min(2).describe('Array of base64-encoded PDF files to merge (minimum 2)')
+			pdfs_base64: z
+				.array(
+					z.string().max(MAX_BASE64_BYTES, `Each PDF must be under ${MAX_BASE64_BYTES / 1_000_000} MB (base64)`)
+				)
+				.min(2)
+				.max(MAX_MERGE_FILES, `Cannot merge more than ${MAX_MERGE_FILES} files at once`)
+				.describe(`Array of base64-encoded PDF files to merge (2–${MAX_MERGE_FILES} files)`)
 		}
 	}, async ({ pdfs_base64 }) => {
 		try {
@@ -102,7 +110,8 @@ export function registerPDFTools(server: McpServer) {
 			const data = await merged.save();
 			return pdfResult(data, { files_merged: pdfs_base64.length, page_count: merged.getPageCount() });
 		} catch (e) {
-			return error(`Merge failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_merge error:', e);
+			return error(`Failed to merge PDFs: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -125,11 +134,16 @@ export function registerPDFTools(server: McpServer) {
 		try {
 			const { PDFDocument } = await getPDFLib();
 			const source = await PDFDocument.load(b64ToBuffer(pdf_base64));
+			const pageCount = source.getPageCount();
 			const results: string[] = [];
 			for (const range of ranges) {
+				// Reject ranges that start beyond the document — returning a 0-page PDF is misleading.
+				if (range.start > pageCount) {
+					return error(`Range start ${range.start} exceeds page count ${pageCount}`);
+				}
 				const newDoc = await PDFDocument.create();
 				const indices = [];
-				for (let i = range.start - 1; i < Math.min(range.end, source.getPageCount()); i++) {
+				for (let i = range.start - 1; i < Math.min(range.end, pageCount); i++) {
 					indices.push(i);
 				}
 				const pages = await newDoc.copyPages(source, indices);
@@ -148,7 +162,8 @@ export function registerPDFTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			return error(`Split failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_split error:', e);
+			return error(`Failed to split PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -179,7 +194,8 @@ export function registerPDFTools(server: McpServer) {
 			}
 			return pdfResult(await doc.save(), { pages_rotated: rotations.length });
 		} catch (e) {
-			return error(`Rotate failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_rotate error:', e);
+			return error(`Failed to rotate PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -206,7 +222,8 @@ export function registerPDFTools(server: McpServer) {
 				remaining_pages: newDoc.getPageCount()
 			});
 		} catch (e) {
-			return error(`Remove pages failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_remove_pages error:', e);
+			return error(`Failed to remove pages: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -226,13 +243,23 @@ export function registerPDFTools(server: McpServer) {
 		try {
 			const { PDFDocument } = await getPDFLib();
 			const source = await PDFDocument.load(b64ToBuffer(pdf_base64));
+			const pageCount = source.getPageCount();
+
+			// Validate all page indices before passing to pdf-lib.
+			for (const p of new_order) {
+				if (p > pageCount) {
+					return error(`Page ${p} does not exist (PDF has ${pageCount} pages)`);
+				}
+			}
+
 			const indices = new_order.map((p) => p - 1);
 			const newDoc = await PDFDocument.create();
 			const copied = await newDoc.copyPages(source, indices);
 			for (const page of copied) newDoc.addPage(page);
 			return pdfResult(await newDoc.save(), { page_count: newDoc.getPageCount() });
 		} catch (e) {
-			return error(`Reorder failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_reorder error:', e);
+			return error(`Failed to reorder PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -242,22 +269,29 @@ export function registerPDFTools(server: McpServer) {
 		description: 'Add a text watermark to all pages of a PDF.',
 		inputSchema: {
 			pdf_base64: BASE64_PDF,
-			text: z.string().describe('Watermark text'),
+			text: z.string().max(1000).describe('Watermark text'),
 			font_size: z.number().optional().describe('Font size in points (default: 48)'),
-			color: z.string().optional().describe('Hex color (default: "#999999")'),
+			color: z.string().optional().describe('Hex color, with or without leading # (default: "#999999")'),
 			opacity: z.number().min(0).max(1).optional().describe('Opacity 0-1 (default: 0.3)'),
 			rotation: z.number().optional().describe('Rotation in degrees (default: -45)')
 		}
 	}, async ({ pdf_base64, text, font_size, color, opacity, rotation }) => {
 		try {
 			const { PDFDocument, rgb, StandardFonts, degrees } = await getPDFLib();
-			const doc = await PDFDocument.load(b64ToBuffer(pdf_base64));
-			const font = await doc.embedFont(StandardFonts.Helvetica);
-			const fontSize = font_size ?? 48;
-			const hex = (color ?? '#999999').replace('#', '');
+
+			// Validate hex color before parsing to catch NaN from short/invalid values.
+			const rawColor = color ?? '#999999';
+			if (!HEX_COLOR_RE.test(rawColor)) {
+				return error(`Invalid color "${rawColor}". Use a 6-digit hex color like "#999999" or "999999".`);
+			}
+			const hex = rawColor.replace('#', '');
 			const r = parseInt(hex.slice(0, 2), 16) / 255;
 			const g = parseInt(hex.slice(2, 4), 16) / 255;
 			const b = parseInt(hex.slice(4, 6), 16) / 255;
+
+			const doc = await PDFDocument.load(b64ToBuffer(pdf_base64));
+			const font = await doc.embedFont(StandardFonts.Helvetica);
+			const fontSize = font_size ?? 48;
 
 			for (const page of doc.getPages()) {
 				const { width, height } = page.getSize();
@@ -274,7 +308,8 @@ export function registerPDFTools(server: McpServer) {
 			}
 			return pdfResult(await doc.save(), { pages_watermarked: doc.getPageCount() });
 		} catch (e) {
-			return error(`Watermark failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_add_watermark error:', e);
+			return error(`Failed to add watermark: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -290,6 +325,7 @@ export function registerPDFTools(server: McpServer) {
 				.describe('Position of page numbers (default: bottom-center)'),
 			format: z
 				.string()
+				.max(100)
 				.optional()
 				.describe('Format string — use {n} for page number and {total} for total pages (default: "{n}")'),
 			font_size: z.number().optional().describe('Font size in points (default: 10)'),
@@ -326,7 +362,8 @@ export function registerPDFTools(server: McpServer) {
 			}
 			return pdfResult(await doc.save(), { pages_numbered: total });
 		} catch (e) {
-			return error(`Page numbers failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_add_page_numbers error:', e);
+			return error(`Failed to add page numbers: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -361,7 +398,8 @@ export function registerPDFTools(server: McpServer) {
 			});
 			return pdfResult(await doc.save());
 		} catch (e) {
-			return error(`Protection failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_protect error:', e);
+			return error(`Failed to protect PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -382,7 +420,8 @@ export function registerPDFTools(server: McpServer) {
 			for (const page of pages) newDoc.addPage(page);
 			return pdfResult(await newDoc.save(), { page_count: newDoc.getPageCount() });
 		} catch (e) {
-			return error(`Unlock failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_unlock error:', e);
+			return error(`Failed to unlock PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -401,11 +440,12 @@ export function registerPDFTools(server: McpServer) {
 				const form = doc.getForm();
 				form.flatten();
 			} catch {
-				// No form fields
+				// No form fields — not an error.
 			}
 			return pdfResult(await doc.save());
 		} catch (e) {
-			return error(`Flatten failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_flatten error:', e);
+			return error(`Failed to flatten PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -426,6 +466,17 @@ export function registerPDFTools(server: McpServer) {
 			const { PDFDocument } = await getPDFLib();
 			const doc = await PDFDocument.load(b64ToBuffer(pdf_base64));
 			const allPages = doc.getPages();
+			const pageCount = allPages.length;
+
+			// Validate page numbers before proceeding.
+			if (pageNums) {
+				for (const p of pageNums) {
+					if (p > pageCount) {
+						return error(`Page ${p} does not exist (PDF has ${pageCount} pages)`);
+					}
+				}
+			}
+
 			const indices = pageNums ? pageNums.map((p) => p - 1) : allPages.map((_, i) => i);
 
 			for (const i of indices) {
@@ -441,7 +492,8 @@ export function registerPDFTools(server: McpServer) {
 			}
 			return pdfResult(await doc.save(), { pages_cropped: indices.length });
 		} catch (e) {
-			return error(`Crop failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_crop error:', e);
+			return error(`Failed to crop PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -470,7 +522,8 @@ export function registerPDFTools(server: McpServer) {
 				savings_percent: Math.round((1 - data.length / originalBuf.byteLength) * 100)
 			});
 		} catch (e) {
-			return error(`Compress failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_compress error:', e);
+			return error(`Failed to compress PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -497,7 +550,8 @@ export function registerPDFTools(server: McpServer) {
 			if (creator !== undefined) doc.setCreator(creator);
 			return pdfResult(await doc.save());
 		} catch (e) {
-			return error(`Set metadata failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pdf] pdf_set_metadata error:', e);
+			return error(`Failed to set metadata: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 }

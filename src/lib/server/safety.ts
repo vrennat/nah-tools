@@ -172,19 +172,32 @@ const rateLimitMap = new Map<string, number[]>();
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const RATE_LIMIT_MAX = 10; // 10 creates per IP per hour
 
-export function checkRateLimit(ip: string): boolean {
+export interface RateLimitOptions {
+	/** Time window in milliseconds (default: 1 hour) */
+	windowMs?: number;
+	/** Max requests per window (default: 10) */
+	max?: number;
+}
+
+/**
+ * Returns true if the request is within limits, false if it should be blocked.
+ * The key should be namespaced when called from multiple contexts (e.g. "mcp:1.2.3.4").
+ */
+export function checkRateLimit(key: string, opts?: RateLimitOptions): boolean {
+	const windowMs = opts?.windowMs ?? RATE_LIMIT_WINDOW_MS;
+	const max = opts?.max ?? RATE_LIMIT_MAX;
 	const now = Date.now();
-	const timestamps = rateLimitMap.get(ip) ?? [];
+	const timestamps = rateLimitMap.get(key) ?? [];
 
 	// Clean old entries
-	const recent = timestamps.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+	const recent = timestamps.filter((t) => now - t < windowMs);
 
-	if (recent.length >= RATE_LIMIT_MAX) {
-		rateLimitMap.set(ip, recent);
+	if (recent.length >= max) {
+		rateLimitMap.set(key, recent);
 		return false;
 	}
 
 	recent.push(now);
-	rateLimitMap.set(ip, recent);
+	rateLimitMap.set(key, recent);
 	return true;
 }

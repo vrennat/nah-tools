@@ -1,4 +1,5 @@
 import type { InvoiceData, LineItem, TaxConfig, TaxLine, LineItemCategory } from './types';
+import { getCurrency } from './currency';
 
 export interface LineItemResult {
 	subtotal: number;
@@ -27,6 +28,11 @@ export interface InvoiceSummary {
 	taxLines: TaxLineResult[];
 	totalTax: number;
 	total: number;
+}
+
+function round(value: number, decimals: number): number {
+	const factor = Math.pow(10, decimals);
+	return Math.round(value * factor) / factor;
 }
 
 export function calculateLineItem(item: LineItem): LineItemResult {
@@ -66,7 +72,8 @@ export function calculateDocumentDiscount(
 export function calculateTaxes(
 	afterDiscount: number,
 	taxConfig: TaxConfig,
-	items: LineItem[]
+	items: LineItem[],
+	decimals: number = 2
 ): TaxLineResult[] {
 	if (taxConfig.mode === 'none' || taxConfig.reverseCharge) return [];
 
@@ -99,40 +106,79 @@ export function calculateTaxes(
 
 			const mainTax = taxableAmount * discountRatio * (taxLine.rate / 100);
 			if (mainTax > 0) {
-				results.push({ name: taxLine.name, rate: taxLine.rate, amount: mainTax });
+				results.push({ name: taxLine.name, rate: taxLine.rate, amount: round(mainTax, decimals) });
 			}
 			if (overrideAmount > 0) {
-				results.push({ name: 'Line item taxes', rate: 0, amount: overrideAmount * discountRatio });
+				results.push({ name: 'Line item taxes', rate: 0, amount: round(overrideAmount * discountRatio, decimals) });
 			}
 		} else {
 			if (taxConfig.pricesIncludeTax) {
 				const taxAmount = afterDiscount - afterDiscount / (1 + taxLine.rate / 100);
-				results.push({ name: taxLine.name, rate: taxLine.rate, amount: taxAmount });
+				results.push({ name: taxLine.name, rate: taxLine.rate, amount: round(taxAmount, decimals) });
 			} else {
 				results.push({
 					name: taxLine.name,
 					rate: taxLine.rate,
-					amount: afterDiscount * (taxLine.rate / 100)
+					amount: round(afterDiscount * (taxLine.rate / 100), decimals)
 				});
 			}
 		}
-	} else if (taxConfig.mode === 'multi' || taxConfig.mode === 'compound') {
-		let runningBase = afterDiscount;
+	} else if (taxConfig.mode === 'multi') {
+		if (taxConfig.pricesIncludeTax) {
+			// Correct inclusive multi-tax extraction: all taxes share the same pre-tax base.
+			// Extract the combined tax first, then distribute proportionally by rate.
+			// Using independent extraction per line overstates tax when rates overlap.
+			const totalRate = taxConfig.taxLines.reduce((sum, t) => sum + t.rate, 0);
+			const totalTax = afterDiscount - afterDiscount / (1 + totalRate / 100);
+			const totalRateNonZero = totalRate > 0 ? totalRate : 1;
 
-		for (const taxLine of taxConfig.taxLines) {
-			const base = taxLine.isCompound ? runningBase : afterDiscount;
-			let taxAmount: number;
-
-			if (taxConfig.pricesIncludeTax) {
-				taxAmount = base - base / (1 + taxLine.rate / 100);
-			} else {
-				taxAmount = base * (taxLine.rate / 100);
+			for (const taxLine of taxConfig.taxLines) {
+				const taxAmount = round(totalTax * (taxLine.rate / totalRateNonZero), decimals);
+				results.push({ name: taxLine.name, rate: taxLine.rate, amount: taxAmount });
 			}
+		} else {
+			for (const taxLine of taxConfig.taxLines) {
+				results.push({
+					name: taxLine.name,
+					rate: taxLine.rate,
+					amount: round(afterDiscount * (taxLine.rate / 100), decimals)
+				});
+			}
+		}
+	} else if (taxConfig.mode === 'compound') {
+		if (taxConfig.pricesIncludeTax) {
+			// Correct inclusive compound extraction.
+			// Exclusive compound applies: tax2 is levied on (base + tax1), i.e.
+			// final = base * product((1 + r_i/100)) for compound taxes applied in order.
+			// To invert: compute the exclusive base, then re-apply each tax in order.
+			let compoundFactor = 1;
+			for (const taxLine of taxConfig.taxLines) {
+				if (taxLine.isCompound) {
+					compoundFactor *= (1 + taxLine.rate / 100);
+				}
+			}
+			// For non-compound lines in compound mode, treat as additive on the original base.
+			// In practice compound mode usually means all lines are compound — handle uniformly.
+			const exclusiveBase = afterDiscount / compoundFactor;
+			let runningExclusive = exclusiveBase;
 
-			results.push({ name: taxLine.name, rate: taxLine.rate, amount: taxAmount });
-
-			if (taxConfig.mode === 'compound') {
-				runningBase += taxAmount;
+			for (const taxLine of taxConfig.taxLines) {
+				const taxAmount = round(runningExclusive * (taxLine.rate / 100), decimals);
+				results.push({ name: taxLine.name, rate: taxLine.rate, amount: taxAmount });
+				if (taxLine.isCompound) {
+					runningExclusive += taxAmount;
+				}
+			}
+		} else {
+			// Exclusive compound: each isCompound tax builds on the running total.
+			let runningBase = afterDiscount;
+			for (const taxLine of taxConfig.taxLines) {
+				const base = taxLine.isCompound ? runningBase : afterDiscount;
+				const taxAmount = round(base * (taxLine.rate / 100), decimals);
+				results.push({ name: taxLine.name, rate: taxLine.rate, amount: taxAmount });
+				if (taxLine.isCompound) {
+					runningBase += taxAmount;
+				}
 			}
 		}
 	}
@@ -141,6 +187,9 @@ export function calculateTaxes(
 }
 
 export function calculateInvoiceSummary(invoice: InvoiceData): InvoiceSummary {
+	const currency = getCurrency(invoice.currency);
+	const decimals = currency.decimals;
+
 	const lineResults = new Map<string, LineItemResult>();
 	for (const item of invoice.lineItems) {
 		lineResults.set(item.id, calculateLineItem(item));
@@ -153,14 +202,14 @@ export function calculateInvoiceSummary(invoice: InvoiceData): InvoiceSummary {
 		invoice.discountValue
 	);
 	const afterDiscount = subtotals.total - documentDiscount;
-	const taxLines = calculateTaxes(afterDiscount, invoice.taxConfig, invoice.lineItems);
-	const totalTax = taxLines.reduce((sum, t) => sum + t.amount, 0);
+	const taxLines = calculateTaxes(afterDiscount, invoice.taxConfig, invoice.lineItems, decimals);
+	const totalTax = round(taxLines.reduce((sum, t) => sum + t.amount, 0), decimals);
 
 	let total: number;
 	if (invoice.taxConfig.pricesIncludeTax) {
-		total = afterDiscount;
+		total = round(afterDiscount, decimals);
 	} else {
-		total = afterDiscount + totalTax;
+		total = round(afterDiscount + totalTax, decimals);
 	}
 
 	return {
