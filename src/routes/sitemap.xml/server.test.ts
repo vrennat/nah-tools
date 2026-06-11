@@ -93,6 +93,13 @@ const EXPECTED_PATHS = [
 	'/audio/convert',
 	'/audio/merge',
 	'/audio/normalize',
+	'/audio/speed',
+	'/audio/pitch',
+	'/audio/volume',
+	'/audio/fade',
+	'/audio/reverse',
+	'/audio/silence-remove',
+	'/audio/record',
 	// QR landing pages
 	'/qr/wifi',
 	'/qr/vcard',
