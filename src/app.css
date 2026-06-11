@@ -47,7 +47,7 @@ body {
 	outline-offset: 2px;
 }
 
-/* Staggered entrance animations */
+/* Staggered entrance animations. fill-mode backwards (not both): a forwards fill would keep transform applied after the animation, creating permanent stacking contexts that trap dropdown z-indexes. */
 @keyframes fade-up {
 	from {
 		opacity: 0;
@@ -60,7 +60,7 @@ body {
 }
 
 .animate-fade-up {
-	animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+	animation: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

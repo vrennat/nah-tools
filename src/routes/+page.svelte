@@ -75,7 +75,7 @@
 	</section>
 
 	<!-- Search -->
-	<section class="animate-fade-up mt-2" style="animation-delay: 200ms;" aria-label="Tool search">
+	<section class="animate-fade-up relative z-10 mt-2" style="animation-delay: 200ms;" aria-label="Tool search">
 		<ToolSearch />
 	</section>
 
