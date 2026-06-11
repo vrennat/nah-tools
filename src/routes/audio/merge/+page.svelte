@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MediaToolLayout from '$components/media/MediaToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
 	import { getFFmpeg, cancelFFmpeg } from '$media/ffmpeg-loader';
@@ -111,20 +111,42 @@
 		processing = false;
 		loadProgress = { state: 'idle', percent: 0 };
 	}
+
+	const faqs = [
+		{
+			question: 'Can I merge audio files in different formats?',
+			answer:
+				'Yes. The merger normalizes all inputs to a common sample rate (44100 Hz) and stereo layout before concatenating, so you can mix MP3, WAV, OGG, M4A, FLAC, and other formats in the same merge operation. The output is re-encoded to whichever format you select.'
+		},
+		{
+			question: 'Is there a limit on how many files I can merge?',
+			answer:
+				'There is no hard limit. The practical limit is your browser\'s available memory — each file is loaded into the FFmpeg.wasm virtual filesystem before merging. Very long or high-bitrate tracks will use more memory. Most modern devices handle dozens of typical audio files without issue.'
+		},
+		{
+			question: 'Is my audio uploaded anywhere?',
+			answer:
+				'No. Merging runs entirely in your browser using FFmpeg.wasm — a WebAssembly build of FFmpeg. The WASM binary (about 25 MB) loads from a CDN on first use and is then cached by your browser. Your audio files never leave your device.'
+		},
+		{
+			question: 'Will the merged file have any gaps between tracks?',
+			answer:
+				'No intentional gaps are added. The merger uses FFmpeg\'s concat filter, which places each track immediately after the previous one. Any silence at the beginning or end of your source files will be included. Use the Trim Audio tool to remove unwanted silence before merging if needed.'
+		},
+		{
+			question: 'Can I reorder the files before merging?',
+			answer:
+				'Yes. After adding files, each track appears in a numbered list with up and down arrows for reordering. The output will follow the order shown in the list from top to bottom.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Merge Audio Files Free Online — Join MP3, WAV &amp; More | nah</title>
-	<meta
-		name="description"
-		content="Combine multiple audio files into one track. Reorder, then merge to MP3, WAV, OGG, M4A, FLAC, or AAC. Free, no upload — runs in your browser."
-	/>
-	<link rel="canonical" href="https://nah.tools/audio/merge" />
-</svelte:head>
-
-<MediaToolLayout
-	title="Merge Audio"
-	description="Join multiple audio files into a single track, in the order you choose."
+<ToolShell
+	path="/audio/merge"
+	tagline="Combine multiple audio tracks into a single file — reorder them, pick an output format, and merge."
+	seoTitle="Merge Audio Files Free Online — Join MP3, WAV and More"
+	description="Combine multiple audio files into one track. Reorder, then merge to MP3, WAV, OGG, M4A, FLAC, or AAC. Free, no upload — runs in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -239,8 +261,21 @@
 				</div>
 			{/if}
 		</div>
+
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Join audio files with automatic format normalization</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Merging audio files from different sources is tricky because tracks often have different sample rates, channel layouts, or formats. A naive concatenation without normalization produces glitches, speed changes, or encoding errors at the join points.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This merger uses <strong class="font-medium text-text">FFmpeg.wasm</strong> with an aformat filter that resamples every input to 44100 Hz stereo before concatenating. This means you can mix MP3s, WAV files, OGG clips, and M4A tracks in the same merge without any pre-processing. The output is then encoded to your chosen format — MP3, WAV, OGG, M4A, FLAC, or AAC.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Add your files, drag them into the order you want, select the output format, and merge. Everything runs in your browser — no upload, no account, no file size limit beyond available device memory.
+			</p>
+		</div>
 	</section>
-</MediaToolLayout>
+</ToolShell>
 
 <MediaLoadingOverlay state={loadProgress.state} percent={loadProgress.percent} onRetry={handleRetry} />
 

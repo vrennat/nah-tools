@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MediaToolLayout from '$components/media/MediaToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import MediaDropZone from '$components/media/MediaDropZone.svelte';
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
@@ -111,19 +111,42 @@
 			if (previewUrl) URL.revokeObjectURL(previewUrl);
 		};
 	});
+
+	const faqs = [
+		{
+			question: 'Does trimming re-encode the audio?',
+			answer:
+				'No. The trimmer uses FFmpeg\'s stream-copy mode (-c copy), which cuts the file at the requested timestamps without decoding or re-encoding the audio data. This preserves the original quality and runs very quickly. Cut points snap to the nearest audio keyframe, so the actual boundaries may be off by a few milliseconds.'
+		},
+		{
+			question: 'What audio formats can I trim?',
+			answer:
+				'FFmpeg.wasm supports the most common audio containers: MP3, M4A, OGG, WAV, FLAC, AAC, and WebM audio. The output keeps the same format as your input — trimming an MP3 gives you an MP3, trimming a WAV gives you a WAV.'
+		},
+		{
+			question: 'Is my audio file uploaded anywhere?',
+			answer:
+				'No. Everything runs in your browser using FFmpeg.wasm — a WebAssembly build of FFmpeg. The binary (about 25 MB) loads from a CDN on first use and is then cached by your browser. Your audio never leaves your device.'
+		},
+		{
+			question: 'How accurate are the trim points?',
+			answer:
+				'Stream-copy trimming snaps to keyframe boundaries in the encoded stream, so the actual cut may be within a fraction of a second of your requested time. For most audio formats (MP3, AAC, OGG) the difference is imperceptible. WAV and FLAC are sample-accurate since they are uncompressed.'
+		},
+		{
+			question: 'Can I use this to extract a clip from a long podcast or recording?',
+			answer:
+				'Yes. Load the audio file, use the built-in player to locate the section you want, then set the start and end times with the trim controls. The tool will extract just that segment and download it with "_trimmed" appended to the filename.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Trim Audio Free Online — Cut Audio Time Range | nah</title>
-	<meta
-		name="description"
-		content="Trim audio to a specific time range. Preview and adjust start/end times. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<MediaToolLayout
-	title="Trim Audio"
-	description="Cut audio to a specific time range. Set start and end points with preview."
+<ToolShell
+	path="/media/trim-audio"
+	tagline="Cut an audio file to exactly the clip you need — set start and end points with a live preview."
+	seoTitle="Trim Audio Free Online — Cut Audio to Time Range"
+	description="Trim audio to a specific time range. Preview and adjust start/end times. Free, no upload — processed in your browser with FFmpeg.wasm."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -188,8 +211,21 @@
 				</div>
 			{/if}
 		</div>
+
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Lossless audio trimming — no quality loss, no server</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Trimming audio is a common task: cutting a clip from a long recording, removing silence at the start or end of a track, or isolating a section of a podcast. Most online tools send your file to a server to do this work. That means a potentially large upload, waiting for processing, and trusting a third party with your audio content.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This trimmer uses <strong class="font-medium text-text">FFmpeg.wasm</strong> in stream-copy mode. Stream copy skips the decode-encode cycle entirely — it reads the encoded audio data and cuts it at the requested time boundaries without touching the underlying codec. The output is the same format as your input, at the same quality, and the operation completes in a fraction of the time a full re-encode would take.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Load your file, listen in the browser player to find your cut points, set the range with the trim controls, and download the clip. Works with MP3, M4A, OGG, WAV, FLAC, and most other common audio formats.
+			</p>
+		</div>
 	</section>
-</MediaToolLayout>
+</ToolShell>
 
 <MediaLoadingOverlay state={loadProgress.state} percent={loadProgress.percent} onRetry={handleRetry} />
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MediaToolLayout from '$components/media/MediaToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import MediaDropZone from '$components/media/MediaDropZone.svelte';
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
@@ -88,20 +88,42 @@
 		result = null;
 		if (loadProgress.state === 'idle') initFFmpeg();
 	}
+
+	const faqs = [
+		{
+			question: 'What is EBU R128 loudness normalization?',
+			answer:
+				'EBU R128 is the European Broadcasting Union\'s standard for measuring and controlling loudness in audio and broadcast media. It uses integrated loudness in LUFS (Loudness Units relative to Full Scale) rather than peak level, which better matches how human hearing perceives volume. The standard also specifies a true-peak ceiling of -1 dBTP to prevent clipping after digital-to-analog conversion.'
+		},
+		{
+			question: 'What LUFS target should I use?',
+			answer:
+				'-16 LUFS is the right choice for most streaming content — Spotify targets -14 LUFS, Apple Podcasts recommends -16 LUFS, and most podcast players are calibrated around this range. Use -23 LUFS for broadcast television or radio content that must meet the EBU R128 standard. Use -14 LUFS for YouTube uploads or any context where you want louder playback.'
+		},
+		{
+			question: 'Is this single-pass or two-pass normalization?',
+			answer:
+				'Single-pass. The tool uses FFmpeg\'s loudnorm filter with integrated loudness target, true-peak ceiling of -1.5 dBTP, and a loudness range (LRA) of 11 LU. Single-pass is fast and produces good results for most content. Two-pass normalization (where a first pass measures the actual loudness before the second pass corrects it) would be more accurate but is not implemented here.'
+		},
+		{
+			question: 'Is my audio uploaded anywhere?',
+			answer:
+				'No. Normalization runs entirely in your browser using FFmpeg.wasm — a WebAssembly build of FFmpeg. The WASM binary (about 25 MB) downloads from a CDN on first use and is then cached by your browser. Your audio never leaves your device.'
+		},
+		{
+			question: 'What output formats are supported?',
+			answer:
+				'The normalizer can output MP3, WAV, OGG, M4A, FLAC, or AAC. Lossy formats (MP3, OGG, M4A, AAC) are encoded at 192 kbps. Lossless formats (WAV, FLAC) preserve full sample depth. The input can be any format FFmpeg can read.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Normalize Audio Volume Free Online — Even Out Loudness | nah</title>
-	<meta
-		name="description"
-		content="Normalize audio loudness to a consistent level using the EBU R128 standard. Free, no upload — runs entirely in your browser."
-	/>
-	<link rel="canonical" href="https://nah.tools/audio/normalize" />
-</svelte:head>
-
-<MediaToolLayout
-	title="Normalize Volume"
-	description="Even out loudness across your audio so nothing is too quiet or too loud."
+<ToolShell
+	path="/audio/normalize"
+	tagline="Even out audio loudness to a consistent level using EBU R128 — broadcast, streaming, or YouTube targets."
+	seoTitle="Normalize Audio Volume Free Online — EBU R128 Loudness"
+	description="Normalize audio loudness to a consistent level using the EBU R128 standard. Free, no upload — runs entirely in your browser with FFmpeg.wasm."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -170,8 +192,21 @@
 				</div>
 			{/if}
 		</div>
+
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Consistent loudness with EBU R128</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Volume inconsistency is a common problem when working with audio from multiple sources — field recordings, voiceovers, interviews, or music tracks recorded at different times. One clip sounds quiet; the next blows out the speakers. Peak normalization (raising the loudest peak to 0 dB) doesn't solve this because it doesn't account for the perceptual loudness of a track as a whole.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				EBU R128 integrated loudness normalization measures the average loudness of the entire track in LUFS and adjusts the gain so the output matches your target. This is what streaming platforms do automatically when they ingest your audio — Spotify normalizes to -14 LUFS, Apple Podcasts to -16 LUFS, and broadcast targets -23 LUFS. Matching these targets before upload means your audio won't be silently boosted or attenuated by the platform.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				The normalization runs in your browser using <strong class="font-medium text-text">FFmpeg.wasm</strong>. No upload required. Choose your loudness target, select an output format, and normalize.
+			</p>
+		</div>
 	</section>
-</MediaToolLayout>
+</ToolShell>
 
 <MediaLoadingOverlay state={loadProgress.state} percent={loadProgress.percent} onRetry={handleRetry} />
 
