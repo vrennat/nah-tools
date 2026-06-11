@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { OCRProgress } from '$pdf/ocr';
 
 	const LANGUAGES = [
@@ -82,19 +82,42 @@
 			progress = null;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'What OCR engine does this use?',
+			answer:
+				'The tool uses Tesseract.js, which is a WebAssembly port of the Tesseract OCR engine — the same engine originally developed at HP Labs and now maintained by Google. It runs entirely in your browser; no cloud OCR API is called.'
+		},
+		{
+			question: 'Why does it take so long?',
+			answer:
+				'OCR is computationally intensive. Tesseract.js typically takes 15-60 seconds per page depending on page complexity and your device speed. The first use also downloads language data (~4 MB per language), which is cached for future sessions.'
+		},
+		{
+			question: 'What does the output PDF look like?',
+			answer:
+				'The output is visually identical to the original — your scanned images are preserved exactly as they appear. An invisible text layer is added beneath the images. This makes the text selectable, copyable, and searchable without altering the visual appearance.'
+		},
+		{
+			question: 'Which languages are supported?',
+			answer:
+				'English, Spanish, French, German, Portuguese, Italian, Chinese (Simplified), Japanese, Korean, Arabic, Hindi, and Russian. Select the language that matches your document before processing for best accuracy.'
+		},
+		{
+			question: 'Will OCR work on a PDF that already has text?',
+			answer:
+				'The tool will still process it, adding an additional text layer. For PDFs that already contain selectable text, OCR is unnecessary — use the PDF to CSV tool to extract structured data, or simply open and copy text from the existing text layer.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>OCR PDF — Make Scanned PDFs Searchable | nah</title>
-	<meta
-		name="description"
-		content="Make scanned PDFs searchable by adding an invisible text layer using OCR. Free, no upload — processed entirely in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="OCR PDF"
-	description="Make scanned PDFs searchable by recognizing text and adding a searchable layer."
+<ToolShell
+	path="/pdf/ocr"
+	tagline="Add an invisible text layer to scanned PDFs so they become searchable and selectable."
+	seoTitle="OCR PDF Free — Make Scanned PDFs Searchable | nah.tools"
+	description="Make scanned PDFs searchable by adding an invisible text layer using OCR. Free, no upload — processed entirely in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -169,8 +192,28 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">OCR for scanned PDFs, entirely in your browser</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Scanned PDFs are essentially image files wrapped in a PDF container. The pages
+				look like documents but contain no selectable text — you can't search them,
+				copy from them, or process their content programmatically. OCR (Optical Character
+				Recognition) fixes this by analyzing the image and inferring where text is,
+				then embedding that text as an invisible layer in the PDF.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				This tool uses <strong class="font-medium text-text">Tesseract.js</strong>, a
+				WebAssembly build of the Tesseract OCR engine. Everything runs locally —
+				your scanned pages are never transmitted to a cloud service. On first use,
+				the language data (~4 MB for English) downloads from a CDN and is cached in
+				your browser for subsequent sessions.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Processing is slow by nature — expect 15 to 60 seconds per page depending on
+				complexity. The output PDF looks identical to the input but gains a searchable
+				text layer, making it compatible with PDF search, screen readers, and tools
+				like PDF to CSV.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>
