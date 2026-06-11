@@ -1,7 +1,41 @@
 <script lang="ts">
 	import { getFamilyTools } from '$lib/registry/index';
+	import FAQSchema from '$lib/components/FAQSchema.svelte';
+	import BreadcrumbSchema from '$lib/components/BreadcrumbSchema.svelte';
+
 	const tools = getFamilyTools('pdf');
+
+	const faqs = [
+		{
+			question: 'Are these PDF tools really free?',
+			answer: 'Yes, completely free with no signup, no account, and no limits. All tools are open source and will stay free.'
+		},
+		{
+			question: 'Do my PDF files get uploaded to a server?',
+			answer: 'No. Every tool in this suite runs entirely in your browser using client-side JavaScript. Your files never leave your device.'
+		},
+		{
+			question: 'Is there a file size limit?',
+			answer: 'There is no enforced limit — processing happens in your browser tab. Practical limits depend on your device memory; most documents up to a few hundred MB work fine.'
+		},
+		{
+			question: 'Which browsers are supported?',
+			answer: 'Any modern browser with JavaScript enabled: Chrome, Firefox, Safari, and Edge. Mobile browsers work too, though desktop is recommended for large files.'
+		},
+		{
+			question: 'Can I use these tools offline?',
+			answer: 'After the page loads, most tools work offline because processing is client-side. You will need a network connection only for the initial page load.'
+		}
+	];
+
+	const breadcrumbItems = [
+		{ name: 'nah', url: 'https://nah.tools' },
+		{ name: 'PDF Tools', url: 'https://nah.tools/pdf' }
+	];
 </script>
+
+<FAQSchema {faqs} />
+<BreadcrumbSchema items={breadcrumbItems} />
 
 <svelte:head>
 	<title>Free PDF Tools — Merge, Split, Rotate, Compress | nah</title>
@@ -24,12 +58,21 @@
 </svelte:head>
 
 <div class="space-y-10">
+	<nav class="flex items-center gap-1.5 text-sm text-text-muted" aria-label="Breadcrumb">
+		<a href="/" class="transition-colors hover:text-accent">nah</a>
+		<span aria-hidden="true">/</span>
+		<span class="text-text">PDF Tools</span>
+	</nav>
+
 	<section class="text-center">
 		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">
 			Free PDF Tools. <span class="text-accent">No uploads.</span>
 		</h1>
 		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
 			Everything runs in your browser. Your files never leave your device.
+		</p>
+		<p class="mx-auto mt-3 max-w-2xl text-base text-text-muted">
+			A complete suite for everyday PDF work — merge multiple documents into one, split out specific pages, rotate or reorder, add watermarks and page numbers, protect with a password, and compress for email. No uploads, no accounts, no expiring free trials.
 		</p>
 	</section>
 
@@ -54,5 +97,24 @@
 				</a>
 			{/each}
 		</div>
+
+		<section class="mx-auto max-w-3xl space-y-4 pt-4">
+			<h2 class="font-display text-xl font-700">Frequently asked questions</h2>
+			<div class="space-y-3">
+				{#each faqs as faq}
+					<details class="group rounded-xl border border-border bg-surface-alt p-4">
+						<summary class="cursor-pointer list-none font-medium text-text marker:hidden">
+							<span class="flex items-center justify-between gap-3">
+								{faq.question}
+								<svg class="h-4 w-4 shrink-0 text-text-muted transition-transform group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+								</svg>
+							</span>
+						</summary>
+						<p class="mt-2 text-sm leading-relaxed text-text-muted">{faq.answer}</p>
+					</details>
+				{/each}
+			</div>
+		</section>
 	</div>
 </div>
