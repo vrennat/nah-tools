@@ -4,7 +4,7 @@
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
 	import TrimControls from '$components/media/TrimControls.svelte';
-	import { getFFmpeg } from '$media/ffmpeg-loader';
+	import { getFFmpeg, cancelFFmpeg } from '$media/ffmpeg-loader';
 	import { videoToGif } from '$media/processor';
 	import type { LoadProgress, ProcessingProgress as PP, GifConfig } from '$media/types';
 
@@ -20,7 +20,7 @@
 	let error = $state('');
 	let result = $state<{ blob: Blob; filename: string } | null>(null);
 	let gifPreviewUrl = $state('');
-	let videoRef: HTMLVideoElement | null = $state(null);
+	let previewUrl = $state('');
 
 	let canProcess = $derived(!!file && !processing && loadProgress.state === 'ready' && endTime > startTime);
 
@@ -71,7 +71,9 @@
 			};
 			gifPreviewUrl = URL.createObjectURL(mediaResult.blob);
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'GIF creation failed';
+			if (!(e instanceof Error && e.message.includes('terminate'))) {
+				error = e instanceof Error ? e.message : 'GIF creation failed';
+			}
 		} finally {
 			processing = false;
 		}
@@ -80,6 +82,12 @@
 	function handleRetry() {
 		loadProgress = { state: 'idle', percent: 0 };
 		initFFmpeg();
+	}
+
+	function handleCancel() {
+		cancelFFmpeg();
+		processing = false;
+		loadProgress = { state: 'idle', percent: 0 };
 	}
 
 	function downloadGif() {
@@ -96,20 +104,25 @@
 	}
 
 	function onFileSelect(selectedFile: File) {
-		file = selectedFile;
-		const url = URL.createObjectURL(selectedFile);
-		if (videoRef) {
-			videoRef.src = url;
-			videoRef.onloadedmetadata = () => {
-				duration = videoRef?.duration || 0;
-				endTime = Math.min(5, duration);
-			};
+		// Revoke the previous preview URL before creating a new one to avoid leaks.
+		if (previewUrl) {
+			URL.revokeObjectURL(previewUrl);
 		}
+		file = selectedFile;
+		previewUrl = URL.createObjectURL(selectedFile);
 
 		if (loadProgress.state === 'idle') {
 			initFFmpeg();
 		}
 	}
+
+	// Revoke both preview URLs on component teardown.
+	$effect(() => {
+		return () => {
+			if (previewUrl) URL.revokeObjectURL(previewUrl);
+			if (gifPreviewUrl) URL.revokeObjectURL(gifPreviewUrl);
+		};
+	});
 </script>
 
 <svelte:head>
@@ -135,10 +148,16 @@
 					</div>
 
 					<div class="rounded-lg border border-border bg-surface-alt overflow-hidden">
+						<!-- src bound reactively so the element always exists before the URL is set -->
 						<video
-							bind:this={videoRef}
+							src={previewUrl}
 							controls
 							class="w-full"
+							onloadedmetadata={(e) => {
+								const v = e.currentTarget as HTMLVideoElement;
+								duration = v.duration || 0;
+								endTime = Math.min(5, duration);
+							}}
 						></video>
 					</div>
 
@@ -225,5 +244,5 @@
 <MediaLoadingOverlay state={loadProgress.state} percent={loadProgress.percent} onRetry={handleRetry} />
 
 {#if processing}
-	<ProcessingProgress progress={processingProgress} onCancel={() => (processing = false)} />
+	<ProcessingProgress progress={processingProgress} onCancel={handleCancel} />
 {/if}

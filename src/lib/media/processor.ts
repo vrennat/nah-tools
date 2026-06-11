@@ -1,4 +1,5 @@
 import { getFFmpeg } from './ffmpeg-loader';
+import { getMediaExtension } from './utils';
 import { fetchFile } from '@ffmpeg/util';
 import type {
 	TrimConfig,
@@ -23,16 +24,13 @@ const AUDIO_EXT: Record<AudioFormat, string> = {
 	ogg: '.ogg'
 };
 
+// aac output uses .m4a (MP4 container), so the MIME must match the container.
 const AUDIO_MIME: Record<AudioFormat, string> = {
 	mp3: 'audio/mpeg',
-	aac: 'audio/aac',
+	aac: 'audio/mp4',
 	ogg: 'audio/ogg'
 };
 
-function getExtension(filename: string): string {
-	const match = filename.match(/\.[^.]+$/);
-	return match ? match[0] : '';
-}
 
 function makeProgressHandler(
 	startTime: number,
@@ -50,52 +48,74 @@ function makeProgressHandler(
 	};
 }
 
+// Best-effort VFS delete: a file that was never written (e.g. output on error)
+// will throw — swallow it so cleanup doesn't mask the real error.
+async function tryDelete(ffmpeg: Awaited<ReturnType<typeof getFFmpeg>>, name: string): Promise<void> {
+	try {
+		await ffmpeg.deleteFile(name);
+	} catch {
+		// intentionally swallowed
+	}
+}
+
 export async function compressVideo(
 	file: File,
 	config: VideoCompressConfig,
 	onProgress?: (p: ProcessingProgress) => void
 ): Promise<MediaResult> {
 	const ffmpeg = await getFFmpeg();
-	const inputName = 'input' + getExtension(file.name);
+	const inputName = 'input' + getMediaExtension(file);
 	const outputName = 'output.mp4';
 
 	await ffmpeg.writeFile(inputName, await fetchFile(file));
-
-	const args = ['-i', inputName, '-c:v', 'libx264', '-crf', String(config.crf), '-preset', 'medium', '-b:a', config.audioBitrate];
-
-	if (config.maxWidth && config.maxHeight) {
-		args.push(
-			'-vf',
-			`scale='min(${config.maxWidth},iw)':'min(${config.maxHeight},ih)':force_original_aspect_ratio=decrease`
-		);
-	}
-
-	if (config.fps) {
-		args.push('-r', String(config.fps));
-	}
-
-	args.push('-y', outputName);
 
 	const startTime = Date.now();
 	const handler = makeProgressHandler(startTime, onProgress);
 	ffmpeg.on('progress', handler);
 
-	await ffmpeg.exec(args);
-	ffmpeg.off('progress', handler);
+	try {
+		// -map 0:v:0 selects the first video stream; -map 0:a? maps audio only if
+		// present so this doesn't error on silent/no-audio video inputs.
+		const args = [
+			'-i', inputName,
+			'-map', '0:v:0',
+			'-map', '0:a?',
+			'-c:v', 'libx264',
+			'-crf', String(config.crf),
+			'-preset', 'medium',
+			'-b:a', config.audioBitrate
+		];
 
-	const data = await ffmpeg.readFile(outputName);
-	const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: 'video/mp4' });
+		if (config.maxWidth && config.maxHeight) {
+			args.push(
+				'-vf',
+				`scale='min(${config.maxWidth},iw)':'min(${config.maxHeight},ih)':force_original_aspect_ratio=decrease`
+			);
+		}
 
-	await ffmpeg.deleteFile(inputName);
-	await ffmpeg.deleteFile(outputName);
+		if (config.fps) {
+			args.push('-r', String(config.fps));
+		}
 
-	return {
-		blob,
-		filename: file.name.replace(/\.[^.]+$/, '_compressed.mp4'),
-		originalSize: file.size,
-		resultSize: blob.size,
-		duration: 0
-	};
+		args.push('-y', outputName);
+
+		await ffmpeg.exec(args);
+
+		const data = await ffmpeg.readFile(outputName);
+		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: 'video/mp4' });
+
+		return {
+			blob,
+			filename: file.name.replace(/\.[^.]+$/, '_compressed.mp4'),
+			originalSize: file.size,
+			resultSize: blob.size,
+			duration: 0
+		};
+	} finally {
+		ffmpeg.off('progress', handler);
+		await tryDelete(ffmpeg, inputName);
+		await tryDelete(ffmpeg, outputName);
+	}
 }
 
 export async function trimVideo(
@@ -104,39 +124,41 @@ export async function trimVideo(
 	onProgress?: (p: ProcessingProgress) => void
 ): Promise<MediaResult> {
 	const ffmpeg = await getFFmpeg();
-	const inputName = 'input' + getExtension(file.name);
+	const inputName = 'input' + getMediaExtension(file);
 	const outputName = 'output.mp4';
 
 	await ffmpeg.writeFile(inputName, await fetchFile(file));
-
-	const args = [
-		'-ss', String(config.startTime),
-		'-to', String(config.endTime),
-		'-i', inputName,
-		'-c', 'copy',
-		'-y', outputName
-	];
 
 	const startTime = Date.now();
 	const handler = makeProgressHandler(startTime, onProgress);
 	ffmpeg.on('progress', handler);
 
-	await ffmpeg.exec(args);
-	ffmpeg.off('progress', handler);
+	try {
+		const args = [
+			'-ss', String(config.startTime),
+			'-to', String(config.endTime),
+			'-i', inputName,
+			'-c', 'copy',
+			'-y', outputName
+		];
 
-	const data = await ffmpeg.readFile(outputName);
-	const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: 'video/mp4' });
+		await ffmpeg.exec(args);
 
-	await ffmpeg.deleteFile(inputName);
-	await ffmpeg.deleteFile(outputName);
+		const data = await ffmpeg.readFile(outputName);
+		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: 'video/mp4' });
 
-	return {
-		blob,
-		filename: file.name.replace(/\.[^.]+$/, '_trimmed.mp4'),
-		originalSize: file.size,
-		resultSize: blob.size,
-		duration: config.endTime - config.startTime
-	};
+		return {
+			blob,
+			filename: file.name.replace(/\.[^.]+$/, '_trimmed.mp4'),
+			originalSize: file.size,
+			resultSize: blob.size,
+			duration: config.endTime - config.startTime
+		};
+	} finally {
+		ffmpeg.off('progress', handler);
+		await tryDelete(ffmpeg, inputName);
+		await tryDelete(ffmpeg, outputName);
+	}
 }
 
 export async function trimAudio(
@@ -145,39 +167,56 @@ export async function trimAudio(
 	onProgress?: (p: ProcessingProgress) => void
 ): Promise<MediaResult> {
 	const ffmpeg = await getFFmpeg();
-	const inputName = 'input' + getExtension(file.name);
-	const outputName = 'output.mp3';
+	const inputExt = getMediaExtension(file);
+	const inputName = 'input' + inputExt;
+	// Mirror trimVideo: keep the same container/codec so -c copy is always valid.
+	const outputName = 'output' + inputExt;
+
+	// Derive MIME from the input extension for the result blob.
+	const mimeByExt: Record<string, string> = {
+		'.mp3': 'audio/mpeg',
+		'.m4a': 'audio/mp4',
+		'.aac': 'audio/aac',
+		'.ogg': 'audio/ogg',
+		'.wav': 'audio/wav',
+		'.flac': 'audio/flac',
+		'.weba': 'audio/webm',
+		'.webm': 'audio/webm'
+	};
+	const mime = mimeByExt[inputExt.toLowerCase()] ?? 'audio/mpeg';
 
 	await ffmpeg.writeFile(inputName, await fetchFile(file));
-
-	const args = [
-		'-ss', String(config.startTime),
-		'-to', String(config.endTime),
-		'-i', inputName,
-		'-c', 'copy',
-		'-y', outputName
-	];
 
 	const startTime = Date.now();
 	const handler = makeProgressHandler(startTime, onProgress);
 	ffmpeg.on('progress', handler);
 
-	await ffmpeg.exec(args);
-	ffmpeg.off('progress', handler);
+	try {
+		const args = [
+			'-ss', String(config.startTime),
+			'-to', String(config.endTime),
+			'-i', inputName,
+			'-c', 'copy',
+			'-y', outputName
+		];
 
-	const data = await ffmpeg.readFile(outputName);
-	const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: 'audio/mpeg' });
+		await ffmpeg.exec(args);
 
-	await ffmpeg.deleteFile(inputName);
-	await ffmpeg.deleteFile(outputName);
+		const data = await ffmpeg.readFile(outputName);
+		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: mime });
 
-	return {
-		blob,
-		filename: file.name.replace(/\.[^.]+$/, '_trimmed.mp3'),
-		originalSize: file.size,
-		resultSize: blob.size,
-		duration: config.endTime - config.startTime
-	};
+		return {
+			blob,
+			filename: file.name.replace(/\.[^.]+$/, '_trimmed' + inputExt),
+			originalSize: file.size,
+			resultSize: blob.size,
+			duration: config.endTime - config.startTime
+		};
+	} finally {
+		ffmpeg.off('progress', handler);
+		await tryDelete(ffmpeg, inputName);
+		await tryDelete(ffmpeg, outputName);
+	}
 }
 
 export async function compressAudio(
@@ -186,39 +225,41 @@ export async function compressAudio(
 	onProgress?: (p: ProcessingProgress) => void
 ): Promise<MediaResult> {
 	const ffmpeg = await getFFmpeg();
-	const inputName = 'input' + getExtension(file.name);
+	const inputName = 'input' + getMediaExtension(file);
 	const ext = AUDIO_EXT[config.format];
 	const outputName = 'output' + ext;
 
 	await ffmpeg.writeFile(inputName, await fetchFile(file));
 
-	const args = [
-		'-i', inputName,
-		'-b:a', config.bitrate,
-		'-c:a', AUDIO_CODEC[config.format],
-		'-y', outputName
-	];
-
 	const startTime = Date.now();
 	const handler = makeProgressHandler(startTime, onProgress);
 	ffmpeg.on('progress', handler);
 
-	await ffmpeg.exec(args);
-	ffmpeg.off('progress', handler);
+	try {
+		const args = [
+			'-i', inputName,
+			'-b:a', config.bitrate,
+			'-c:a', AUDIO_CODEC[config.format],
+			'-y', outputName
+		];
 
-	const data = await ffmpeg.readFile(outputName);
-	const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: AUDIO_MIME[config.format] });
+		await ffmpeg.exec(args);
 
-	await ffmpeg.deleteFile(inputName);
-	await ffmpeg.deleteFile(outputName);
+		const data = await ffmpeg.readFile(outputName);
+		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: AUDIO_MIME[config.format] });
 
-	return {
-		blob,
-		filename: file.name.replace(/\.[^.]+$/, `_compressed${ext}`),
-		originalSize: file.size,
-		resultSize: blob.size,
-		duration: 0
-	};
+		return {
+			blob,
+			filename: file.name.replace(/\.[^.]+$/, `_compressed${ext}`),
+			originalSize: file.size,
+			resultSize: blob.size,
+			duration: 0
+		};
+	} finally {
+		ffmpeg.off('progress', handler);
+		await tryDelete(ffmpeg, inputName);
+		await tryDelete(ffmpeg, outputName);
+	}
 }
 
 export async function videoToGif(
@@ -227,7 +268,7 @@ export async function videoToGif(
 	onProgress?: (p: ProcessingProgress) => void
 ): Promise<MediaResult> {
 	const ffmpeg = await getFFmpeg();
-	const inputName = 'input' + getExtension(file.name);
+	const inputName = 'input' + getMediaExtension(file);
 	const paletteFile = 'palette.png';
 	const outputName = 'output.gif';
 
@@ -235,49 +276,57 @@ export async function videoToGif(
 
 	const startTime = Date.now();
 
-	// Pass 1: generate palette (0–50% of progress)
-	const paletteArgs = [
-		'-ss', String(config.startTime),
-		'-to', String(config.endTime),
-		'-i', inputName,
-		'-vf', `fps=${config.fps},scale=${config.width}:-1:flags=lanczos,palettegen`,
-		'-y', paletteFile
-	];
+	try {
+		// Pass 1: generate palette (0–50% of progress)
+		const paletteArgs = [
+			'-ss', String(config.startTime),
+			'-to', String(config.endTime),
+			'-i', inputName,
+			'-vf', `fps=${config.fps},scale=${config.width}:-1:flags=lanczos,palettegen`,
+			'-y', paletteFile
+		];
 
-	const paletteHandler = makeProgressHandler(startTime, onProgress, 0.5, 0);
-	ffmpeg.on('progress', paletteHandler);
-	await ffmpeg.exec(paletteArgs);
-	ffmpeg.off('progress', paletteHandler);
+		const paletteHandler = makeProgressHandler(startTime, onProgress, 0.5, 0);
+		ffmpeg.on('progress', paletteHandler);
+		try {
+			await ffmpeg.exec(paletteArgs);
+		} finally {
+			ffmpeg.off('progress', paletteHandler);
+		}
 
-	// Pass 2: render GIF (50–100% of progress)
-	const gifArgs = [
-		'-ss', String(config.startTime),
-		'-to', String(config.endTime),
-		'-i', inputName,
-		'-i', paletteFile,
-		'-lavfi', `fps=${config.fps},scale=${config.width}:-1:flags=lanczos[x];[x][1:v]paletteuse`,
-		'-y', outputName
-	];
+		// Pass 2: render GIF (50–100% of progress)
+		const gifArgs = [
+			'-ss', String(config.startTime),
+			'-to', String(config.endTime),
+			'-i', inputName,
+			'-i', paletteFile,
+			'-lavfi', `fps=${config.fps},scale=${config.width}:-1:flags=lanczos[x];[x][1:v]paletteuse`,
+			'-y', outputName
+		];
 
-	const gifHandler = makeProgressHandler(startTime, onProgress, 0.5, 50);
-	ffmpeg.on('progress', gifHandler);
-	await ffmpeg.exec(gifArgs);
-	ffmpeg.off('progress', gifHandler);
+		const gifHandler = makeProgressHandler(startTime, onProgress, 0.5, 50);
+		ffmpeg.on('progress', gifHandler);
+		try {
+			await ffmpeg.exec(gifArgs);
+		} finally {
+			ffmpeg.off('progress', gifHandler);
+		}
 
-	const data = await ffmpeg.readFile(outputName);
-	const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: 'image/gif' });
+		const data = await ffmpeg.readFile(outputName);
+		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: 'image/gif' });
 
-	await ffmpeg.deleteFile(inputName);
-	await ffmpeg.deleteFile(paletteFile);
-	await ffmpeg.deleteFile(outputName);
-
-	return {
-		blob,
-		filename: file.name.replace(/\.[^.]+$/, '.gif'),
-		originalSize: file.size,
-		resultSize: blob.size,
-		duration: config.endTime - config.startTime
-	};
+		return {
+			blob,
+			filename: file.name.replace(/\.[^.]+$/, '.gif'),
+			originalSize: file.size,
+			resultSize: blob.size,
+			duration: config.endTime - config.startTime
+		};
+	} finally {
+		await tryDelete(ffmpeg, inputName);
+		await tryDelete(ffmpeg, paletteFile);
+		await tryDelete(ffmpeg, outputName);
+	}
 }
 
 export async function extractAudio(
@@ -286,38 +335,40 @@ export async function extractAudio(
 	onProgress?: (p: ProcessingProgress) => void
 ): Promise<MediaResult> {
 	const ffmpeg = await getFFmpeg();
-	const inputName = 'input' + getExtension(file.name);
+	const inputName = 'input' + getMediaExtension(file);
 	const ext = AUDIO_EXT[format];
 	const outputName = 'output' + ext;
 
 	await ffmpeg.writeFile(inputName, await fetchFile(file));
 
-	const args = [
-		'-i', inputName,
-		'-vn',
-		'-c:a', AUDIO_CODEC[format],
-		'-b:a', '192k',
-		'-y', outputName
-	];
-
 	const startTime = Date.now();
 	const handler = makeProgressHandler(startTime, onProgress);
 	ffmpeg.on('progress', handler);
 
-	await ffmpeg.exec(args);
-	ffmpeg.off('progress', handler);
+	try {
+		const args = [
+			'-i', inputName,
+			'-vn',
+			'-c:a', AUDIO_CODEC[format],
+			'-b:a', '192k',
+			'-y', outputName
+		];
 
-	const data = await ffmpeg.readFile(outputName);
-	const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: AUDIO_MIME[format] });
+		await ffmpeg.exec(args);
 
-	await ffmpeg.deleteFile(inputName);
-	await ffmpeg.deleteFile(outputName);
+		const data = await ffmpeg.readFile(outputName);
+		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: AUDIO_MIME[format] });
 
-	return {
-		blob,
-		filename: file.name.replace(/\.[^.]+$/, `_audio${ext}`),
-		originalSize: file.size,
-		resultSize: blob.size,
-		duration: 0
-	};
+		return {
+			blob,
+			filename: file.name.replace(/\.[^.]+$/, `_audio${ext}`),
+			originalSize: file.size,
+			resultSize: blob.size,
+			duration: 0
+		};
+	} finally {
+		ffmpeg.off('progress', handler);
+		await tryDelete(ffmpeg, inputName);
+		await tryDelete(ffmpeg, outputName);
+	}
 }

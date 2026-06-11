@@ -40,7 +40,7 @@
 
 	function handleEndChange(e: Event) {
 		const input = e.target as HTMLInputElement;
-		endTime = Math.max(parseTime(input.value), startTime + 0.1);
+		endTime = Math.min(Math.max(parseTime(input.value), startTime + 0.1), duration);
 	}
 </script>
 

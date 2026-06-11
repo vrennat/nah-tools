@@ -4,9 +4,9 @@
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
 	import VideoPresetPicker from '$components/media/VideoPresetPicker.svelte';
-	import { getFFmpeg } from '$media/ffmpeg-loader';
+	import { getFFmpeg, cancelFFmpeg } from '$media/ffmpeg-loader';
 	import { compressVideo } from '$media/processor';
-	import { VIDEO_PRESETS, type VideoPreset } from '$media/presets';
+	import { VIDEO_PRESETS } from '$media/presets';
 	import type { VideoCompressConfig, LoadProgress, ProcessingProgress as PP } from '$media/types';
 
 	let file = $state<File | null>(null);
@@ -17,9 +17,31 @@
 	let error = $state('');
 	let result = $state<{ originalSize: number; resultSize: number; keptOriginal: boolean } | null>(null);
 
+	// Local state for the custom preset panel — isolated from the imported constant.
+	let customCrf = $state(28);
+	let customAudioBitrate = $state('128k');
+	let customMaxWidth = $state(1920);
+	let customMaxHeight = $state(1080);
+	let customFps = $state<number | null>(null);
+
 	let canProcess = $derived(!!file && !processing && loadProgress.state === 'ready');
 
 	let currentPreset = $derived(VIDEO_PRESETS.find(p => p.id === preset) || VIDEO_PRESETS[0]);
+
+	// When user picks a named preset, copy its values into custom fields so a
+	// subsequent switch to "custom" starts from something sensible.
+	$effect(() => {
+		if (preset !== 'custom') {
+			const p = VIDEO_PRESETS.find(p => p.id === preset);
+			if (p) {
+				customCrf = p.crf;
+				customAudioBitrate = p.audioBitrate;
+				customMaxWidth = p.maxWidth;
+				customMaxHeight = p.maxHeight;
+				customFps = p.fps;
+			}
+		}
+	});
 
 	function formatSize(bytes: number): string {
 		if (bytes < 1024) return `${bytes} B`;
@@ -46,14 +68,24 @@
 		result = null;
 
 		try {
-			const config: VideoCompressConfig = {
-				preset: preset as VideoCompressConfig['preset'],
-				crf: currentPreset.crf,
-				audioBitrate: currentPreset.audioBitrate,
-				maxWidth: currentPreset.maxWidth,
-				maxHeight: currentPreset.maxHeight,
-				fps: currentPreset.fps
-			};
+			const config: VideoCompressConfig =
+				preset === 'custom'
+					? {
+							preset: 'custom',
+							crf: customCrf,
+							audioBitrate: customAudioBitrate,
+							maxWidth: customMaxWidth,
+							maxHeight: customMaxHeight,
+							fps: customFps
+						}
+					: {
+							preset: preset as VideoCompressConfig['preset'],
+							crf: currentPreset.crf,
+							audioBitrate: currentPreset.audioBitrate,
+							maxWidth: currentPreset.maxWidth,
+							maxHeight: currentPreset.maxHeight,
+							fps: currentPreset.fps
+						};
 
 			const mediaResult = await compressVideo(file, config, p => (processingProgress = p));
 
@@ -76,7 +108,10 @@
 			document.body.removeChild(a);
 			URL.revokeObjectURL(url);
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Compression failed';
+			// Rejection from ffmpeg.terminate() during cancel is expected — don't surface it.
+			if (!(e instanceof Error && e.message.includes('terminate'))) {
+				error = e instanceof Error ? e.message : 'Compression failed';
+			}
 		} finally {
 			processing = false;
 		}
@@ -85,6 +120,14 @@
 	function handleRetry() {
 		loadProgress = { state: 'idle', percent: 0 };
 		initFFmpeg();
+	}
+
+	function handleCancel() {
+		// Terminate the FFmpeg worker so the in-flight exec() actually stops.
+		// The singleton is cleared so the next run reloads it.
+		cancelFFmpeg();
+		processing = false;
+		loadProgress = { state: 'idle', percent: 0 };
 	}
 
 	function onFileSelect(selectedFile: File) {
@@ -129,12 +172,12 @@
 										type="range"
 										min="18"
 										max="40"
-										bind:value={currentPreset.crf}
+										bind:value={customCrf}
 										class="mt-2 w-full"
 									/>
 									<div class="mt-1 flex justify-between text-xs text-text-muted">
 										<span>Higher quality</span>
-										<span class="font-mono">{currentPreset.crf}</span>
+										<span class="font-mono">{customCrf}</span>
 										<span>Smaller file</span>
 									</div>
 								</div>
@@ -144,7 +187,7 @@
 									<input
 										id="ab"
 										type="text"
-										bind:value={currentPreset.audioBitrate}
+										bind:value={customAudioBitrate}
 										class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
 									/>
 									<p class="mt-1 text-xs text-text-muted">e.g., 96k, 128k, 192k</p>
@@ -157,7 +200,7 @@
 									<input
 										id="w"
 										type="number"
-										bind:value={currentPreset.maxWidth}
+										bind:value={customMaxWidth}
 										class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
 									/>
 								</div>
@@ -167,7 +210,7 @@
 									<input
 										id="h"
 										type="number"
-										bind:value={currentPreset.maxHeight}
+										bind:value={customMaxHeight}
 										class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
 									/>
 								</div>
@@ -177,7 +220,7 @@
 									<input
 										id="fps"
 										type="number"
-										bind:value={currentPreset.fps}
+										bind:value={customFps}
 										class="mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
 									/>
 									<p class="mt-1 text-xs text-text-muted">Leave blank for original</p>
@@ -239,5 +282,5 @@
 <MediaLoadingOverlay state={loadProgress.state} percent={loadProgress.percent} onRetry={handleRetry} />
 
 {#if processing}
-	<ProcessingProgress progress={processingProgress} onCancel={() => (processing = false)} />
+	<ProcessingProgress progress={processingProgress} onCancel={handleCancel} />
 {/if}

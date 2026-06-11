@@ -4,7 +4,7 @@
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
 	import TrimControls from '$components/media/TrimControls.svelte';
-	import { getFFmpeg } from '$media/ffmpeg-loader';
+	import { getFFmpeg, cancelFFmpeg } from '$media/ffmpeg-loader';
 	import { trimAudio } from '$media/processor';
 	import type { LoadProgress, ProcessingProgress as PP, TrimConfig } from '$media/types';
 
@@ -17,7 +17,7 @@
 	let processingProgress = $state<PP>({ percent: 0, timeElapsed: 0, estimatedTotal: 0 });
 	let error = $state('');
 	let result = $state<{ originalSize: number; resultSize: number } | null>(null);
-	let audioRef: HTMLAudioElement | null = $state(null);
+	let previewUrl = $state('');
 
 	let canProcess = $derived(!!file && !processing && loadProgress.state === 'ready' && endTime > startTime);
 
@@ -73,7 +73,9 @@
 			document.body.removeChild(a);
 			URL.revokeObjectURL(url);
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Trim failed';
+			if (!(e instanceof Error && e.message.includes('terminate'))) {
+				error = e instanceof Error ? e.message : 'Trim failed';
+			}
 		} finally {
 			processing = false;
 		}
@@ -84,21 +86,31 @@
 		initFFmpeg();
 	}
 
+	function handleCancel() {
+		cancelFFmpeg();
+		processing = false;
+		loadProgress = { state: 'idle', percent: 0 };
+	}
+
 	function onFileSelect(selectedFile: File) {
-		file = selectedFile;
-		const url = URL.createObjectURL(selectedFile);
-		if (audioRef) {
-			audioRef.src = url;
-			audioRef.onloadedmetadata = () => {
-				duration = audioRef?.duration || 0;
-				endTime = Math.min(30, duration);
-			};
+		// Revoke the previous preview URL before creating a new one to avoid leaks.
+		if (previewUrl) {
+			URL.revokeObjectURL(previewUrl);
 		}
+		file = selectedFile;
+		previewUrl = URL.createObjectURL(selectedFile);
 
 		if (loadProgress.state === 'idle') {
 			initFFmpeg();
 		}
 	}
+
+	// Revoke preview URL on component teardown.
+	$effect(() => {
+		return () => {
+			if (previewUrl) URL.revokeObjectURL(previewUrl);
+		};
+	});
 </script>
 
 <svelte:head>
@@ -124,10 +136,16 @@
 					</div>
 
 					<div class="rounded-lg border border-border bg-surface-alt overflow-hidden">
+						<!-- src bound reactively so the element always exists before the URL is set -->
 						<audio
-							bind:this={audioRef}
+							src={previewUrl}
 							controls
 							class="w-full"
+							onloadedmetadata={(e) => {
+								const a = e.currentTarget as HTMLAudioElement;
+								duration = a.duration || 0;
+								endTime = Math.min(30, duration);
+							}}
 						></audio>
 					</div>
 
@@ -176,5 +194,5 @@
 <MediaLoadingOverlay state={loadProgress.state} percent={loadProgress.percent} onRetry={handleRetry} />
 
 {#if processing}
-	<ProcessingProgress progress={processingProgress} onCancel={() => (processing = false)} />
+	<ProcessingProgress progress={processingProgress} onCancel={handleCancel} />
 {/if}
