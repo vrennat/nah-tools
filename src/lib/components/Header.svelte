@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
+	import { allFamilies, getTool } from '$lib/registry/index';
 
 	let pathname = $derived(page.url.pathname as string);
 	let toolsOpen = $state(false);
@@ -13,21 +14,25 @@
 		{ href: '/qr', label: 'QR', match: (p: string) => p.startsWith('/qr') }
 	];
 
+	// Curated nav entries in the original display order.
+	// Each entry either maps to a family hub (desc from allFamilies) or is a
+	// standalone tool (desc from getTool). Hardcoded order is intentional —
+	// the nav is a curated list, not an exhaustive family dump.
 	const toolsDropdown = [
-		{ href: '/dev', label: 'Developer Tools', desc: 'JSON, Base64, JWT, hash, regex, UUID, and more' },
-		{ href: '/text', label: 'Text Tools', desc: 'Word counter, bulk find and replace' },
+		{ href: '/dev', label: 'Developer Tools', desc: allFamilies.find((f) => f.id === 'dev')?.description ?? '' },
+		{ href: '/text', label: 'Text Tools', desc: allFamilies.find((f) => f.id === 'text')?.description ?? '' },
 		{ href: '/pdf', label: 'PDF Tools', desc: 'Merge, split, rotate, compress, convert' },
 		{ href: '/pptx', label: 'PowerPoint Tools', desc: 'Merge, split, compress, extract, watermark' },
 		{ href: '/photo', label: 'Photo & Image Tools', desc: 'Convert, compress, remove backgrounds, filters' },
-		{ href: '/resume', label: 'Resume Builder', desc: 'ATS-optimized, PDF and DOCX export' },
+		{ href: '/resume', label: 'Resume Builder', desc: getTool('/resume')?.description ?? '' },
 		{ href: '/qr', label: 'QR Code Generator', desc: 'Static, dynamic, styled, batch export' },
-		{ href: '/invoice', label: 'Invoice Generator', desc: 'Multi-currency, tax support, PDF export' },
-		{ href: '/links', label: 'Link Shortener', desc: 'Custom aliases, click analytics, UTM builder' },
-		{ href: '/bio', label: 'Link in Bio', desc: 'Your links, your page, no signup' },
-		{ href: '/remove', label: 'Data Removal', desc: 'Remove your info from 25+ data brokers' },
-		{ href: '/signature', label: 'Email Signatures', desc: 'HTML signatures, free templates' },
+		{ href: '/invoice', label: 'Invoice Generator', desc: getTool('/invoice')?.description ?? '' },
+		{ href: '/links', label: 'Link Shortener', desc: getTool('/links')?.description ?? '' },
+		{ href: '/bio', label: 'Link in Bio', desc: getTool('/bio')?.description ?? '' },
+		{ href: '/remove', label: 'Data Removal', desc: getTool('/remove')?.description ?? '' },
+		{ href: '/signature', label: 'Email Signatures', desc: getTool('/signature')?.description ?? '' },
 		{ href: '/media', label: 'Video/Audio Tools', desc: 'Trim, compress, convert media files' },
-		{ href: '/audio', label: 'Audio Tools', desc: 'Convert, merge, normalize audio files' },
+		{ href: '/audio', label: 'Audio Tools', desc: allFamilies.find((f) => f.id === 'audio')?.description ?? '' },
 		{ href: '/legal-gen', label: 'Policy Generator', desc: 'Privacy policy, ToS, cookie policy' },
 		{ href: '/mcp', label: 'MCP Server', desc: '30+ tools for AI agents via MCP' }
 	];
