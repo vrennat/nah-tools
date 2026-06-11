@@ -1,5 +1,5 @@
 // MIME -> extension fallback for files with no extension in their name.
-// Shared between media/processor.ts and audio/processor.ts.
+// Shared by all processor functions in the unified FFmpeg engine.
 const MIME_TO_EXT: Record<string, string> = {
 	'video/mp4': '.mp4',
 	'video/webm': '.webm',

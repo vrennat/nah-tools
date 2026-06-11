@@ -1,5 +1,6 @@
 import { getFFmpeg } from './ffmpeg-loader';
 import { getMediaExtension } from './utils';
+import { makeProgressHandler, tryDelete } from './ffmpeg-run';
 import { fetchFile } from '@ffmpeg/util';
 import type {
 	TrimConfig,
@@ -9,54 +10,34 @@ import type {
 	MediaResult,
 	ProcessingProgress
 } from './types';
+import { getAudioFormat, type AudioFormat, type NormalizeConfig } from './audio-types';
 
-type AudioFormat = 'mp3' | 'aac' | 'ogg';
+// Legacy codec/ext/MIME tables kept for the compress-audio and extract-audio
+// functions that predated the richer AudioFormatInfo registry.  The compress-audio
+// tool only supports mp3/aac/ogg; extract-audio uses the same three.
+type CompressAudioFormat = 'mp3' | 'aac' | 'ogg';
 
-const AUDIO_CODEC: Record<AudioFormat, string> = {
+const COMPRESS_AUDIO_CODEC: Record<CompressAudioFormat, string> = {
 	mp3: 'libmp3lame',
 	aac: 'aac',
 	ogg: 'libvorbis'
 };
 
-const AUDIO_EXT: Record<AudioFormat, string> = {
+const COMPRESS_AUDIO_EXT: Record<CompressAudioFormat, string> = {
 	mp3: '.mp3',
 	aac: '.m4a',
 	ogg: '.ogg'
 };
 
 // aac output uses .m4a (MP4 container), so the MIME must match the container.
-const AUDIO_MIME: Record<AudioFormat, string> = {
+const COMPRESS_AUDIO_MIME: Record<CompressAudioFormat, string> = {
 	mp3: 'audio/mpeg',
 	aac: 'audio/mp4',
 	ogg: 'audio/ogg'
 };
 
-
-function makeProgressHandler(
-	startTime: number,
-	onProgress?: (p: ProcessingProgress) => void,
-	progressScale = 1,
-	progressOffset = 0
-) {
-	return ({ progress }: { progress: number }) => {
-		const elapsed = (Date.now() - startTime) / 1000;
-		onProgress?.({
-			percent: progressOffset + Math.round(progress * 100 * progressScale),
-			timeElapsed: elapsed,
-			estimatedTotal: elapsed / (progress || 0.01)
-		});
-	};
-}
-
-// Best-effort VFS delete: a file that was never written (e.g. output on error)
-// will throw — swallow it so cleanup doesn't mask the real error.
-async function tryDelete(ffmpeg: Awaited<ReturnType<typeof getFFmpeg>>, name: string): Promise<void> {
-	try {
-		await ffmpeg.deleteFile(name);
-	} catch {
-		// intentionally swallowed
-	}
-}
+// Bitrate used when the encoder is lossy and the caller doesn't specify one.
+const DEFAULT_BITRATE = '192k';
 
 export async function compressVideo(
 	file: File,
@@ -226,7 +207,7 @@ export async function compressAudio(
 ): Promise<MediaResult> {
 	const ffmpeg = await getFFmpeg();
 	const inputName = 'input' + getMediaExtension(file);
-	const ext = AUDIO_EXT[config.format];
+	const ext = COMPRESS_AUDIO_EXT[config.format];
 	const outputName = 'output' + ext;
 
 	await ffmpeg.writeFile(inputName, await fetchFile(file));
@@ -239,14 +220,14 @@ export async function compressAudio(
 		const args = [
 			'-i', inputName,
 			'-b:a', config.bitrate,
-			'-c:a', AUDIO_CODEC[config.format],
+			'-c:a', COMPRESS_AUDIO_CODEC[config.format],
 			'-y', outputName
 		];
 
 		await ffmpeg.exec(args);
 
 		const data = await ffmpeg.readFile(outputName);
-		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: AUDIO_MIME[config.format] });
+		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: COMPRESS_AUDIO_MIME[config.format] });
 
 		return {
 			blob,
@@ -331,12 +312,12 @@ export async function videoToGif(
 
 export async function extractAudio(
 	file: File,
-	format: AudioFormat,
+	format: CompressAudioFormat,
 	onProgress?: (p: ProcessingProgress) => void
 ): Promise<MediaResult> {
 	const ffmpeg = await getFFmpeg();
 	const inputName = 'input' + getMediaExtension(file);
-	const ext = AUDIO_EXT[format];
+	const ext = COMPRESS_AUDIO_EXT[format];
 	const outputName = 'output' + ext;
 
 	await ffmpeg.writeFile(inputName, await fetchFile(file));
@@ -349,7 +330,7 @@ export async function extractAudio(
 		const args = [
 			'-i', inputName,
 			'-vn',
-			'-c:a', AUDIO_CODEC[format],
+			'-c:a', COMPRESS_AUDIO_CODEC[format],
 			'-b:a', '192k',
 			'-y', outputName
 		];
@@ -357,11 +338,167 @@ export async function extractAudio(
 		await ffmpeg.exec(args);
 
 		const data = await ffmpeg.readFile(outputName);
-		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: AUDIO_MIME[format] });
+		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: COMPRESS_AUDIO_MIME[format] });
 
 		return {
 			blob,
 			filename: file.name.replace(/\.[^.]+$/, `_audio${ext}`),
+			originalSize: file.size,
+			resultSize: blob.size,
+			duration: 0
+		};
+	} finally {
+		ffmpeg.off('progress', handler);
+		await tryDelete(ffmpeg, inputName);
+		await tryDelete(ffmpeg, outputName);
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Audio tools: convert, merge, normalize
+// Previously in src/lib/audio/processor.ts — unified here so all FFmpeg work
+// lives in one engine directory.
+// ---------------------------------------------------------------------------
+
+function stripExtension(filename: string): string {
+	return filename.replace(/\.[^.]+$/, '');
+}
+
+export async function convertAudio(
+	file: File,
+	format: AudioFormat,
+	onProgress?: (p: ProcessingProgress) => void
+): Promise<MediaResult> {
+	const ffmpeg = await getFFmpeg();
+	const info = getAudioFormat(format);
+	const inputName = 'input' + getMediaExtension(file);
+	const outputName = 'output' + info.ext;
+
+	await ffmpeg.writeFile(inputName, await fetchFile(file));
+
+	const startTime = Date.now();
+	const handler = makeProgressHandler(startTime, onProgress);
+	ffmpeg.on('progress', handler);
+
+	try {
+		const args = ['-i', inputName, '-vn', '-c:a', info.codec];
+		if (!info.lossless) args.push('-b:a', DEFAULT_BITRATE);
+		args.push('-y', outputName);
+
+		await ffmpeg.exec(args);
+
+		const data = await ffmpeg.readFile(outputName);
+		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: info.mime });
+
+		return {
+			blob,
+			filename: stripExtension(file.name) + info.ext,
+			originalSize: file.size,
+			resultSize: blob.size,
+			duration: 0
+		};
+	} finally {
+		ffmpeg.off('progress', handler);
+		await tryDelete(ffmpeg, inputName);
+		await tryDelete(ffmpeg, outputName);
+	}
+}
+
+export async function mergeAudio(
+	files: File[],
+	format: AudioFormat,
+	onProgress?: (p: ProcessingProgress) => void
+): Promise<MediaResult> {
+	if (files.length < 2) throw new Error('Select at least two files to merge.');
+
+	const ffmpeg = await getFFmpeg();
+	const info = getAudioFormat(format);
+	const outputName = 'output' + info.ext;
+
+	const inputNames: string[] = [];
+	for (let i = 0; i < files.length; i++) {
+		const name = `input${i}${getMediaExtension(files[i])}`;
+		await ffmpeg.writeFile(name, await fetchFile(files[i]));
+		inputNames.push(name);
+	}
+
+	const startTime = Date.now();
+	const handler = makeProgressHandler(startTime, onProgress);
+	ffmpeg.on('progress', handler);
+
+	try {
+		// Re-sample every input to a common rate/layout so concat never fails on
+		// mismatched streams, then concatenate.
+		const filterParts: string[] = [];
+		const labels: string[] = [];
+		for (let i = 0; i < files.length; i++) {
+			filterParts.push(`[${i}:a]aformat=sample_rates=44100:channel_layouts=stereo[a${i}]`);
+			labels.push(`[a${i}]`);
+		}
+		const filter = `${filterParts.join(';')};${labels.join('')}concat=n=${files.length}:v=0:a=1[out]`;
+
+		const args: string[] = [];
+		for (const name of inputNames) args.push('-i', name);
+		args.push('-filter_complex', filter, '-map', '[out]', '-c:a', info.codec);
+		if (!info.lossless) args.push('-b:a', DEFAULT_BITRATE);
+		args.push('-y', outputName);
+
+		await ffmpeg.exec(args);
+
+		const data = await ffmpeg.readFile(outputName);
+		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: info.mime });
+
+		const originalSize = files.reduce((sum, f) => sum + f.size, 0);
+
+		return {
+			blob,
+			filename: `merged${info.ext}`,
+			originalSize,
+			resultSize: blob.size,
+			duration: 0
+		};
+	} finally {
+		ffmpeg.off('progress', handler);
+		for (const name of inputNames) await tryDelete(ffmpeg, name);
+		await tryDelete(ffmpeg, outputName);
+	}
+}
+
+export async function normalizeAudio(
+	file: File,
+	config: NormalizeConfig,
+	onProgress?: (p: ProcessingProgress) => void
+): Promise<MediaResult> {
+	const ffmpeg = await getFFmpeg();
+	const info = getAudioFormat(config.format);
+	const inputName = 'input' + getMediaExtension(file);
+	const outputName = 'output' + info.ext;
+
+	await ffmpeg.writeFile(inputName, await fetchFile(file));
+
+	const startTime = Date.now();
+	const handler = makeProgressHandler(startTime, onProgress);
+	ffmpeg.on('progress', handler);
+
+	try {
+		// EBU R128 loudness normalization. Single-pass — fast, good enough for most uses.
+		const args = [
+			'-i', inputName,
+			'-vn',
+			'-af', `loudnorm=I=${config.targetLufs}:TP=-1.5:LRA=11`,
+			'-c:a', info.codec
+		];
+		if (!info.lossless) args.push('-b:a', DEFAULT_BITRATE);
+		args.push('-y', outputName);
+
+		await ffmpeg.exec(args);
+
+		const data = await ffmpeg.readFile(outputName);
+		const blob = new Blob([new Uint8Array(data as Uint8Array)], { type: info.mime });
+
+		return {
+			blob,
+			filename: stripExtension(file.name) + '_normalized' + info.ext,
 			originalSize: file.size,
 			resultSize: blob.size,
 			duration: 0

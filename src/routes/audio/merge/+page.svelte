@@ -3,8 +3,8 @@
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
 	import { getFFmpeg, cancelFFmpeg } from '$media/ffmpeg-loader';
-	import { mergeAudio } from '$audio/processor';
-	import { AUDIO_FORMATS, type AudioFormat } from '$audio/types';
+	import { mergeAudio } from '$media/processor';
+	import { AUDIO_FORMATS, type AudioFormat } from '$media/audio-types';
 	import type { LoadProgress, ProcessingProgress as PP } from '$media/types';
 
 	let files = $state<File[]>([]);

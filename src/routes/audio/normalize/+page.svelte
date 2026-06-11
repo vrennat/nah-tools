@@ -4,8 +4,8 @@
 	import MediaLoadingOverlay from '$components/media/MediaLoadingOverlay.svelte';
 	import ProcessingProgress from '$components/media/ProcessingProgress.svelte';
 	import { getFFmpeg, cancelFFmpeg } from '$media/ffmpeg-loader';
-	import { normalizeAudio } from '$audio/processor';
-	import { AUDIO_FORMATS, type AudioFormat } from '$audio/types';
+	import { normalizeAudio } from '$media/processor';
+	import { AUDIO_FORMATS, type AudioFormat } from '$media/audio-types';
 	import type { LoadProgress, ProcessingProgress as PP } from '$media/types';
 
 	const LOUDNESS_TARGETS = [
