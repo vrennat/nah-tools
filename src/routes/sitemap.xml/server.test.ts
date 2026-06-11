@@ -210,4 +210,11 @@ describe('GET /sitemap.xml', () => {
 			expect(loc).toContain('https://nah.tools');
 		}
 	});
+
+	it('should emit each URL exactly once', async () => {
+		const response = await callGET();
+		const xml = await response.text();
+		const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+		expect(new Set(locs).size).toBe(locs.length);
+	});
 });

@@ -42,7 +42,15 @@ const staticRoutes: { path: string; changefreq: string; priority: string }[] = [
 	{ path: '/terms', changefreq: 'yearly', priority: '0.3' }
 ];
 
-const routes = [...staticRoutes, ...familyHubRoutes, ...toolRoutes];
+// A path can legitimately appear in more than one source (e.g. /qr is both a
+// registry entry and a static route). First occurrence wins so each URL is
+// emitted exactly once.
+const seen = new Set<string>();
+const routes = [...staticRoutes, ...familyHubRoutes, ...toolRoutes].filter((route) => {
+	if (seen.has(route.path)) return false;
+	seen.add(route.path);
+	return true;
+});
 
 export const GET: RequestHandler = () => {
 	const urls = routes
