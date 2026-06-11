@@ -8,7 +8,7 @@ export const standaloneTools: ToolEntry[] = [
 		family: 'standalone',
 		name: 'Resume Builder',
 		description: 'ATS-optimized, PDF and DOCX export.',
-		keywords: ['resume', 'cv', 'ats', 'pdf', 'docx'],
+		keywords: ['resume', 'cv', 'ats', 'pdf', 'docx', 'job application', 'curriculum vitae'],
 		popular: true,
 		sitemap: { changefreq: 'weekly', priority: 1.0 }
 	},
@@ -17,7 +17,7 @@ export const standaloneTools: ToolEntry[] = [
 		family: 'standalone',
 		name: 'Invoice Generator',
 		description: 'Multi-currency, tax support, PDF export.',
-		keywords: ['invoice', 'billing', 'tax', 'pdf'],
+		keywords: ['invoice', 'billing', 'tax', 'pdf', 'receipt', 'freelance', 'payment'],
 		sitemap: { changefreq: 'weekly', priority: 0.9 }
 	},
 	{
@@ -25,7 +25,7 @@ export const standaloneTools: ToolEntry[] = [
 		family: 'standalone',
 		name: 'Email Signatures',
 		description: 'HTML signatures, free templates.',
-		keywords: ['email', 'signature', 'html', 'gmail', 'outlook'],
+		keywords: ['email', 'signature', 'html', 'gmail', 'outlook', 'apple mail', 'email footer'],
 		sitemap: { changefreq: 'weekly', priority: 1.0 }
 	},
 	{
@@ -33,7 +33,7 @@ export const standaloneTools: ToolEntry[] = [
 		family: 'standalone',
 		name: 'Link Shortener',
 		description: 'Custom aliases, click analytics, UTM builder.',
-		keywords: ['link shortener', 'url', 'analytics', 'utm'],
+		keywords: ['link shortener', 'url shortener', 'url', 'analytics', 'utm', 'short url'],
 		popular: true,
 		sitemap: { changefreq: 'weekly', priority: 1.0 }
 	},
@@ -50,7 +50,7 @@ export const standaloneTools: ToolEntry[] = [
 		family: 'standalone',
 		name: 'Data Removal',
 		description: 'Remove your info from 25+ data brokers.',
-		keywords: ['data removal', 'privacy', 'data brokers', 'opt-out'],
+		keywords: ['data removal', 'privacy', 'data brokers', 'opt-out', 'personal information', 'people finder'],
 		sitemap: { changefreq: 'weekly', priority: 1.0 }
 	}
 ];

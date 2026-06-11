@@ -9,7 +9,7 @@ export const pptxTools: ToolEntry[] = [
 		name: 'Merge Presentations',
 		description: 'Combine multiple PPTX files into one',
 		icon: 'M12 4v16m8-8H4',
-		keywords: ['merge', 'combine', 'pptx', 'powerpoint'],
+		keywords: ['merge', 'combine', 'join', 'concatenate', 'pptx', 'powerpoint'],
 		related: ['/pptx/split', '/pptx/compress', '/pptx/remove-notes', '/pptx/watermark'],
 		sitemap: { changefreq: 'monthly', priority: 0.9 }
 	},
@@ -29,7 +29,7 @@ export const pptxTools: ToolEntry[] = [
 		name: 'Compress PPTX',
 		description: 'Reduce file size by compressing images',
 		icon: 'M19 14l-7 7m0 0l-7-7m7 7V3',
-		keywords: ['compress', 'reduce', 'size', 'pptx'],
+		keywords: ['compress', 'reduce', 'size', 'shrink', 'smaller', 'pptx', 'powerpoint'],
 		related: ['/pptx/merge', '/pptx/extract-images', '/pptx/remove-notes', '/pptx/remove-animations'],
 		sitemap: { changefreq: 'monthly', priority: 0.8 }
 	},
