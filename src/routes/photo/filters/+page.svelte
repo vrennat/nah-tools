@@ -5,6 +5,7 @@
 	import AdjustmentPanel from '$components/filters/AdjustmentPanel.svelte';
 	import PresetBar from '$components/filters/PresetBar.svelte';
 	import ExportDialog from '$components/filters/ExportDialog.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import { compressFromImageData, terminate as terminateCompressor } from '$compress/client';
 	import { downloadBlob } from '$qr/exporter';
 	import type { FilterRenderer } from '$filters/renderer';
@@ -94,117 +95,140 @@
 		renderer?.destroy();
 		terminateCompressor();
 	});
+
+	const faqs = [
+		{
+			question: 'Are my photos uploaded when I apply filters?',
+			answer:
+				'No. All adjustments run in your browser using WebGL2 fragment shaders. Your images are never sent to any server — editing and export happen entirely on your device.'
+		},
+		{
+			question: 'What adjustments are available?',
+			answer:
+				'The tool covers the core color correction parameters: brightness, contrast, exposure, highlights, shadows, whites, blacks, saturation, vibrance, temperature, tint, and sharpness. Presets apply preset combinations of these values in one click.'
+		},
+		{
+			question: 'Why is editing so fast?',
+			answer:
+				'Each adjustment is implemented as a GLSL fragment shader that runs on your GPU. The entire image is processed in parallel across GPU cores, so changes render in under 16ms and update at 60fps regardless of image size.'
+		},
+		{
+			question: 'What formats can I export to?',
+			answer:
+				'You can export to WebP, JPEG, AVIF, PNG, OxiPNG, or JPEG XL — the same options available in the image compression tool. The export dialog lets you pick format and quality before downloading.'
+		},
+		{
+			question: 'How do I compare the edited version to the original?',
+			answer:
+				'Hold down the "Hold to compare" button in the editing view. While held, the canvas shows the original image. Release to return to the edited view. This works at full resolution without any reprocessing.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Photo Filters — nah</title>
-	<meta
-		name="description"
-		content="Adjust brightness, contrast, exposure, color temperature, and more. Real-time WebGL2 photo editing in your browser."
-	/>
-</svelte:head>
+<ToolShell
+	path="/photo/filters"
+	tagline="Real-time brightness, contrast, exposure, and color temperature adjustments powered by WebGL2. No upload."
+	seoTitle="Photo Color Correction Free — Real-Time WebGL2 Editor | nah.tools"
+	description="Adjust brightness, contrast, exposure, temperature, and more with real-time WebGL2 rendering. Free photo editor in your browser — no upload, no signup."
+	{faqs}
+>
+	<section class="mx-auto max-w-6xl space-y-6">
+		<!-- Error -->
+		{#if error}
+			<div class="rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
+				{error}
+			</div>
+		{/if}
 
-<div class="mx-auto max-w-6xl space-y-6">
-	<!-- Header -->
-	<div class="text-center">
-		<h1 class="font-display text-3xl font-800 tracking-tight sm:text-4xl md:text-5xl">
-			Photo <span class="text-accent">Filters</span>
-		</h1>
-		<p class="mt-2 text-text-muted">
-			Real-time color correction. Everything runs in your browser via WebGL2.
-		</p>
-	</div>
+		<!-- Upload -->
+		{#if pageState === 'idle'}
+			<div class="mx-auto max-w-3xl">
+				<ImageDropzone onimage={handleImage} />
+			</div>
+		{/if}
 
-	<!-- Error -->
-	{#if error}
-		<div class="rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
-			{error}
-		</div>
-	{/if}
+		<!-- Editor -->
+		{#if pageState === 'editing' && loadedImage}
+			<!-- Presets -->
+			<PresetBar bind:active={activePreset} onapply={applyPreset} />
 
-	<!-- Upload -->
-	{#if pageState === 'idle'}
-		<div class="mx-auto max-w-3xl">
-			<ImageDropzone onimage={handleImage} />
-		</div>
-	{/if}
-
-	<!-- Editor -->
-	{#if pageState === 'editing' && loadedImage}
-		<!-- Presets -->
-		<PresetBar bind:active={activePreset} onapply={applyPreset} />
-
-		<div class="flex flex-col gap-6 lg:flex-row">
-			<!-- Preview canvas -->
-			<div class="min-w-0 flex-1">
-				<div class="relative">
-						<div class:hidden={comparing}>
-						<FilterCanvas
-							image={loadedImage}
-							{params}
-							onrenderer={handleRendererReady}
-						/>
-					</div>
-					{#if comparing}
-						<img
-							src={originalSrc}
-							alt="Original"
-							class="max-h-[60vh] w-full rounded-lg border border-border object-contain"
-						/>
-						<div class="absolute left-3 top-3 rounded-md bg-black/60 px-2 py-1 text-xs font-medium text-white">
-							Original
+			<div class="flex flex-col gap-6 lg:flex-row">
+				<!-- Preview canvas -->
+				<div class="min-w-0 flex-1">
+					<div class="relative">
+							<div class:hidden={comparing}>
+							<FilterCanvas
+								image={loadedImage}
+								{params}
+								onrenderer={handleRendererReady}
+							/>
 						</div>
-					{/if}
-				</div>
+						{#if comparing}
+							<img
+								src={originalSrc}
+								alt="Original"
+								class="max-h-[60vh] w-full rounded-lg border border-border object-contain"
+							/>
+							<div class="absolute left-3 top-3 rounded-md bg-black/60 px-2 py-1 text-xs font-medium text-white">
+								Original
+							</div>
+						{/if}
+					</div>
 
-				<!-- Controls bar -->
-				<div class="mt-3 flex flex-wrap items-center justify-between gap-3">
-					<button
-						type="button"
-						class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-muted transition-colors hover:bg-surface-alt"
-						onpointerdown={() => (comparing = true)}
-						onpointerup={() => (comparing = false)}
-						onpointerleave={() => (comparing = false)}
-					>
-						Hold to compare
-					</button>
-
-					<div class="flex gap-2">
+					<!-- Controls bar -->
+					<div class="mt-3 flex flex-wrap items-center justify-between gap-3">
 						<button
 							type="button"
 							class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-muted transition-colors hover:bg-surface-alt"
-							onclick={reset}
+							onpointerdown={() => (comparing = true)}
+							onpointerup={() => (comparing = false)}
+							onpointerleave={() => (comparing = false)}
 						>
-							New Image
+							Hold to compare
 						</button>
-						<button
-							type="button"
-							class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
-							onclick={() => (exportOpen = true)}
-						>
-							Export
-						</button>
+
+						<div class="flex gap-2">
+							<button
+								type="button"
+								class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text-muted transition-colors hover:bg-surface-alt"
+								onclick={reset}
+							>
+								New Image
+							</button>
+							<button
+								type="button"
+								class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+								onclick={() => (exportOpen = true)}
+							>
+								Export
+							</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- Adjustment sidebar -->
+				<div class="w-full shrink-0 lg:w-72 xl:w-80">
+					<div class="rounded-lg border border-border bg-surface-alt p-4">
+						<AdjustmentPanel bind:params />
 					</div>
 				</div>
 			</div>
+		{/if}
 
-			<!-- Adjustment sidebar -->
-			<div class="w-full shrink-0 lg:w-72 xl:w-80">
-				<div class="rounded-lg border border-border bg-surface-alt p-4">
-					<AdjustmentPanel bind:params />
-				</div>
-			</div>
+		<div class="mx-auto max-w-3xl space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">GPU-accelerated color correction in the browser</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Photo editing tools typically require a desktop app, a subscription, or at minimum a server-side render. This tool runs the entire color pipeline on your GPU using WebGL2 fragment shaders — the same technology used for real-time graphics in games and creative applications.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Each adjustment maps directly to a shader parameter. When you move a slider, the GPU recalculates every pixel in parallel and redraws the canvas in under 16ms. You get 60fps feedback without any round-trips, encoding delays, or quality loss from intermediate steps.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				When you are ready to save, the export step encodes the final adjusted image via WebAssembly codecs — the same pipeline used in the image compression tool. You can choose WebP, JPEG, AVIF, or any other supported format at your preferred quality setting.
+			</p>
 		</div>
-	{/if}
-
-	<!-- Info section -->
-	<div class="mx-auto max-w-3xl rounded-lg border border-border bg-surface-alt p-6">
-		<h2 class="text-sm font-semibold text-text">How it works</h2>
-		<p class="mt-2 text-sm text-text-muted">
-			Adjustments are computed on your GPU using WebGL2 fragment shaders. Changes render in under 16ms, giving you real-time feedback at 60fps. Your images are never uploaded to any server.
-		</p>
-	</div>
-</div>
+	</section>
+</ToolShell>
 
 <!-- Export dialog -->
 <ExportDialog bind:open={exportOpen} {exporting} onexport={handleExport} />

@@ -7,6 +7,7 @@
 	import BackgroundPicker from '$components/photo/BackgroundPicker.svelte';
 	import MaskRefinement from '$components/photo/MaskRefinement.svelte';
 	import ModelPicker from '$components/photo/ModelPicker.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import { removeBackground, isModelCached, terminate } from '$photo/client';
 	import { applyMask, compositeOnBackground, canvasToBlob } from '$photo/canvas-utils';
 	import { downloadBlob, makeFilename } from '$qr/exporter';
@@ -130,121 +131,143 @@
 		if (originalSrc) URL.revokeObjectURL(originalSrc);
 		terminate();
 	});
+
+	const faqs = [
+		{
+			question: 'Are my images uploaded to a server?',
+			answer:
+				'No. The AI model runs entirely inside your browser using WebGPU acceleration (with automatic CPU fallback). Your images never leave your device — no upload, no account, no size limit.'
+		},
+		{
+			question: 'Which AI model is used for background removal?',
+			answer:
+				'Two models are available. "People" uses BRIA RMBG-1.4 (Apache 2.0, ~42 MB quantized ONNX) — optimized for portraits and hair detail. "General" uses IS-Net (Apache 2.0, ~43 MB quantized ONNX) — better for objects, products, and graphics. Both run at 1024x1024 input resolution.'
+		},
+		{
+			question: 'Why does the first run take a moment?',
+			answer:
+				'The model file (~42-43 MB) downloads once from a CDN on first use and is then cached in your browser via the Cache API. Subsequent uses are instant — the model loads from the local cache without any network request.'
+		},
+		{
+			question: 'What is the difference between WebGPU and CPU inference?',
+			answer:
+				'WebGPU runs the neural network on your GPU, which is typically 5-15x faster than CPU inference for ONNX models at 1024x1024. The backend used for each image is shown in the result view. CPU fallback is automatic when WebGPU is unavailable.'
+		},
+		{
+			question: 'Can I adjust the mask after processing?',
+			answer:
+				'Yes. The mask refinement controls let you tune edge smoothing and threshold after the initial result. You can also switch models and click "Re-process" to run the other AI model on the same image without re-uploading.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Remove Background — nah</title>
-	<meta
-		name="description"
-		content="Remove image backgrounds instantly in your browser. Free, unlimited, full resolution. No upload, no signup, no watermark."
-	/>
-</svelte:head>
-
-<div class="mx-auto max-w-3xl space-y-6">
-	<!-- Header -->
-	<div class="text-center">
-		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">
-			Remove <span class="text-accent">Background</span>
-		</h1>
-		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
-			100% in your browser. Images never leave your device.
-		</p>
-	</div>
-
-	<!-- Error -->
-	{#if error}
-		<div class="rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
-			{error}
-		</div>
-	{/if}
-
-	<!-- Upload area (shown when idle or as "try another" in result) -->
-	{#if pageState === 'idle'}
-		<div class="space-y-4">
-			<div class="flex justify-center">
-				<ModelPicker bind:value={selectedModelId} />
+<ToolShell
+	path="/photo/rm-bg"
+	tagline="AI-powered background removal that runs entirely in your browser. No upload, no watermark, full resolution."
+	seoTitle="Remove Image Background Free — On-Device AI | nah.tools"
+	description="Remove image backgrounds instantly using on-device AI. Free, unlimited, full resolution. No upload, no signup — runs in your browser with WebGPU or CPU fallback."
+	{faqs}
+>
+	<section class="mx-auto max-w-3xl space-y-6">
+		<!-- Error -->
+		{#if error}
+			<div class="rounded-lg border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
+				{error}
 			</div>
-			<ImageDropzone onimage={handleImage} />
-		</div>
-	{/if}
+		{/if}
 
-	<!-- Model download progress -->
-	{#if pageState === 'loading-model'}
-		<ModelDownloadProgress loaded={downloadLoaded} total={downloadTotal} />
-	{/if}
+		<!-- Upload area (shown when idle or as "try another" in result) -->
+		{#if pageState === 'idle'}
+			<div class="space-y-4">
+				<div class="flex justify-center">
+					<ModelPicker bind:value={selectedModelId} />
+				</div>
+				<ImageDropzone onimage={handleImage} />
+			</div>
+		{/if}
 
-	<!-- Processing indicator -->
-	{#if pageState === 'processing'}
-		<div class="rounded-lg border border-border bg-surface-alt p-6 text-center">
-			<div class="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent"></div>
-			<p class="mt-3 text-sm text-text-muted">Removing background...</p>
-		</div>
-	{/if}
+		<!-- Model download progress -->
+		{#if pageState === 'loading-model'}
+			<ModelDownloadProgress loaded={downloadLoaded} total={downloadTotal} />
+		{/if}
 
-	<!-- Result -->
-	{#if pageState === 'result' && displayCanvas}
-		<div class="space-y-4">
-			<!-- Before/After Slider -->
-			<BeforeAfterSlider {originalSrc} resultCanvas={displayCanvas} />
+		<!-- Processing indicator -->
+		{#if pageState === 'processing'}
+			<div class="rounded-lg border border-border bg-surface-alt p-6 text-center">
+				<div class="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent"></div>
+				<p class="mt-3 text-sm text-text-muted">Removing background...</p>
+			</div>
+		{/if}
 
-			<!-- Controls bar -->
-			<div class="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface-alt px-4 py-3">
-				<div class="flex items-center gap-3">
-					<BackgroundPicker bind:value={bgColor} />
+		<!-- Result -->
+		{#if pageState === 'result' && displayCanvas}
+			<div class="space-y-4">
+				<!-- Before/After Slider -->
+				<BeforeAfterSlider {originalSrc} resultCanvas={displayCanvas} />
+
+				<!-- Controls bar -->
+				<div class="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-surface-alt px-4 py-3">
+					<div class="flex items-center gap-3">
+						<BackgroundPicker bind:value={bgColor} />
+					</div>
+
+					<div class="flex items-center gap-3">
+						<BackendBadge {backend} />
+						{#if inferenceMs > 0}
+							<span class="text-xs text-text-muted">{inferenceMs}ms</span>
+						{/if}
+					</div>
 				</div>
 
-				<div class="flex items-center gap-3">
-					<BackendBadge {backend} />
-					{#if inferenceMs > 0}
-						<span class="text-xs text-text-muted">{inferenceMs}ms</span>
-					{/if}
+				<!-- Refinement controls -->
+				<div class="rounded-lg border border-border bg-surface-alt px-4 py-3">
+					<div class="space-y-3">
+						<ModelPicker bind:value={selectedModelId} disabled={pageState !== 'result'} />
+						<MaskRefinement bind:value={maskOptions} />
+						<button
+							type="button"
+							class="rounded-md border border-accent bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
+							onclick={reprocess}
+						>
+							Re-process with changes
+						</button>
+					</div>
 				</div>
-			</div>
 
-			<!-- Refinement controls -->
-			<div class="rounded-lg border border-border bg-surface-alt px-4 py-3">
-				<div class="space-y-3">
-					<ModelPicker bind:value={selectedModelId} disabled={pageState !== 'result'} />
-					<MaskRefinement bind:value={maskOptions} />
+				<!-- Download + New Image -->
+				<div class="flex gap-3">
 					<button
 						type="button"
-						class="rounded-md border border-accent bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
-						onclick={reprocess}
+						class="flex-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
+						onclick={download}
 					>
-						Re-process with changes
+						Download PNG
+					</button>
+					<button
+						type="button"
+						class="rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text transition-colors hover:bg-surface-alt"
+						onclick={reset}
+					>
+						New Image
 					</button>
 				</div>
 			</div>
+		{/if}
 
-			<!-- Download + New Image -->
-			<div class="flex gap-3">
-				<button
-					type="button"
-					class="flex-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
-					onclick={download}
-				>
-					Download PNG
-				</button>
-				<button
-					type="button"
-					class="rounded-lg border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text transition-colors hover:bg-surface-alt"
-					onclick={reset}
-				>
-					New Image
-				</button>
-			</div>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">How on-device background removal works</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Most background removal services send your photos to a remote API, charge per image, and retain rights to use uploads for model training. This tool takes the opposite approach: the entire inference pipeline runs inside your browser.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				When you drop an image, the tool checks whether the selected model is already in your browser cache. If not, it downloads the quantized ONNX model (~42-43 MB) once and stores it using the Cache API. All subsequent uses load from local storage — no network request required.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Inference runs via the ONNX Runtime Web backend. On devices with WebGPU support, the model executes on your GPU for fast results. On older hardware, the CPU backend handles it automatically. Both models process images at 1024x1024 resolution. The "People" model (RMBG-1.4) is tuned for portrait hair and skin edges; the "General" model (IS-Net) handles objects, product photos, and graphics more broadly.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				After removal, you can choose a background color, fine-tune the mask edge with the refinement controls, or switch models and reprocess — all without re-uploading your image.
+			</p>
 		</div>
-	{/if}
-
-	<!-- Info section -->
-	<div class="rounded-lg border border-border bg-surface-alt p-6">
-		<h2 class="text-sm font-semibold text-text">How it works</h2>
-		<p class="mt-2 text-sm text-text-muted">
-			An AI model runs directly in your browser using WebGPU (or CPU as fallback). Your images are never uploaded to any server. The model downloads once (~42 MB) and is cached for future use.
-		</p>
-		<div class="mt-3 space-y-1 text-sm text-text-muted">
-			<p><strong class="text-text">People</strong> — Best for portraits, photos of people, hair and skin detail.</p>
-			<p><strong class="text-text">General</strong> — Better for objects, products, logos, and graphics.</p>
-		</div>
-	</div>
-</div>
+	</section>
+</ToolShell>
