@@ -101,7 +101,29 @@ export const audioTools: ToolEntry[] = [
 		description: 'Record from mic, pause, download WebM or MP3',
 		icon: 'M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z',
 		keywords: ['record', 'voice recorder', 'microphone', 'capture audio', 'audio recorder'],
-		related: ['/audio/convert', '/audio/silence-remove', '/audio/normalize', '/audio/fade'],
+		related: ['/audio/transcribe', '/audio/convert', '/audio/silence-remove', '/audio/normalize'],
+		popular: true,
+		sitemap: { changefreq: 'monthly', priority: 0.9 }
+	},
+	{
+		path: '/audio/transcribe',
+		family: 'audio',
+		name: 'Transcribe Audio',
+		description: 'Speech to text with Whisper — text, SRT, VTT, PDF notes',
+		icon: 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12',
+		keywords: [
+			'transcribe',
+			'transcription',
+			'speech to text',
+			'subtitles',
+			'captions',
+			'whisper',
+			'srt',
+			'vtt',
+			'on-device',
+			'ai transcription'
+		],
+		related: ['/audio/record', '/media/extract-audio', '/audio/convert'],
 		popular: true,
 		sitemap: { changefreq: 'monthly', priority: 0.9 }
 	}

@@ -100,6 +100,7 @@ const EXPECTED_PATHS = [
 	'/audio/reverse',
 	'/audio/silence-remove',
 	'/audio/record',
+	'/audio/transcribe',
 	// QR landing pages
 	'/qr/wifi',
 	'/qr/vcard',
