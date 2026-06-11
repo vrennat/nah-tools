@@ -85,6 +85,11 @@
 	<!-- Output -->
 	{#if result === null}
 		<p class="text-sm text-text-muted">Paste text in both fields to see the diff.</p>
+	{:else if result.tooLarge}
+		<p class="rounded-lg bg-warning/10 px-3 py-2 text-sm text-warning">
+			These texts are too large for a detailed diff (each exceeds ~1,400 lines when combined).
+			Try comparing smaller sections.
+		</p>
 	{:else}
 		<!-- Stats -->
 		<div class="flex flex-wrap gap-3 text-sm font-medium">

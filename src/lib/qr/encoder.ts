@@ -25,20 +25,31 @@ export function encodeWiFi(data: WiFiData): string {
 	return parts.join(';') + ';;';
 }
 
+/** Escape special characters per RFC 6350 section 3.4 (backslash, semicolon, comma, newline). */
+function escapeVCard(s: string): string {
+	return s
+		.replace(/\\/g, '\\\\')
+		.replace(/;/g, '\\;')
+		.replace(/,/g, '\\,')
+		.replace(/\n/g, '\\n');
+}
+
 export function encodeVCard(data: VCardData): string {
 	const lines = [
 		'BEGIN:VCARD',
 		'VERSION:3.0',
-		`N:${data.lastName};${data.firstName};;;`,
-		`FN:${data.firstName} ${data.lastName}`
+		// N field uses semicolons as component separators — escape values, not separators.
+		`N:${escapeVCard(data.lastName)};${escapeVCard(data.firstName)};;;`,
+		`FN:${escapeVCard(data.firstName)} ${escapeVCard(data.lastName)}`
 	];
-	if (data.phone) lines.push(`TEL;TYPE=CELL:${data.phone}`);
-	if (data.email) lines.push(`EMAIL:${data.email}`);
-	if (data.org) lines.push(`ORG:${data.org}`);
-	if (data.title) lines.push(`TITLE:${data.title}`);
+	if (data.phone) lines.push(`TEL;TYPE=CELL:${escapeVCard(data.phone)}`);
+	if (data.email) lines.push(`EMAIL:${escapeVCard(data.email)}`);
+	if (data.org) lines.push(`ORG:${escapeVCard(data.org)}`);
+	if (data.title) lines.push(`TITLE:${escapeVCard(data.title)}`);
 	if (data.url) lines.push(`URL:${data.url}`);
 	lines.push('END:VCARD');
-	return lines.join('\n');
+	// RFC 6350 requires CRLF line endings.
+	return lines.join('\r\n');
 }
 
 export function encodeEmail(data: EmailData): string {
@@ -50,6 +61,12 @@ export function encodeEmail(data: EmailData): string {
 }
 
 export function encodeSMS(data: SMSData): string {
+	// SMSTO format: SMSTO:<phone>:<message>
+	// The SMSTO spec has no escape mechanism for colons. When the message
+	// contains a colon, some parsers truncate at the first colon in the body.
+	// Most modern readers (iOS, Android) parse the remainder correctly because
+	// they split on only the second colon. We emit the raw value since
+	// replacing or stripping colons would silently corrupt user data.
 	return `SMSTO:${data.phone}${data.message ? ':' + data.message : ''}`;
 }
 

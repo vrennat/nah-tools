@@ -108,13 +108,38 @@ describe('encodeWiFi', () => {
 describe('encodeVCard', () => {
 	it('produces correct BEGIN/END envelope with required fields only', () => {
 		const result = encodeVCard({ firstName: 'Jane', lastName: 'Doe' });
-		const lines = result.split('\n');
+		const lines = result.split('\r\n');
 		expect(lines[0]).toBe('BEGIN:VCARD');
 		expect(lines[1]).toBe('VERSION:3.0');
 		expect(lines[2]).toBe('N:Doe;Jane;;;');
 		expect(lines[3]).toBe('FN:Jane Doe');
 		expect(lines[lines.length - 1]).toBe('END:VCARD');
 		expect(lines.length).toBe(5);
+	});
+
+	it('uses CRLF line endings per RFC 6350', () => {
+		const result = encodeVCard({ firstName: 'Jane', lastName: 'Doe' });
+		expect(result).toContain('\r\n');
+		expect(result).not.toMatch(/(?<!\r)\n/);
+	});
+
+	it('escapes semicolons in name fields', () => {
+		const result = encodeVCard({ firstName: 'Jo;hn', lastName: 'Sm;ith' });
+		const lines = result.split('\r\n');
+		expect(lines[2]).toBe('N:Sm\\;ith;Jo\\;hn;;;');
+		expect(lines[3]).toBe('FN:Jo\\;hn Sm\\;ith');
+	});
+
+	it('escapes commas in name fields', () => {
+		const result = encodeVCard({ firstName: 'Jo,hn', lastName: 'Sm,ith' });
+		const lines = result.split('\r\n');
+		expect(lines[2]).toBe('N:Sm\\,ith;Jo\\,hn;;;');
+	});
+
+	it('escapes backslashes in name fields', () => {
+		const result = encodeVCard({ firstName: 'A\\B', lastName: 'C' });
+		const lines = result.split('\r\n');
+		expect(lines[2]).toBe('N:C;A\\\\B;;;');
 	});
 
 	it('includes all optional fields when present', () => {
@@ -127,7 +152,7 @@ describe('encodeVCard', () => {
 			title: 'Engineer',
 			url: 'https://example.com'
 		});
-		const lines = result.split('\n');
+		const lines = result.split('\r\n');
 		expect(lines).toContain('TEL;TYPE=CELL:+1234567890');
 		expect(lines).toContain('EMAIL:john@example.com');
 		expect(lines).toContain('ORG:Acme Inc');
@@ -222,6 +247,15 @@ describe('encodeSMS', () => {
 
 	it('produces SMSTO format with empty message string', () => {
 		expect(encodeSMS({ phone: '+1234567890', message: '' })).toBe('SMSTO:+1234567890');
+	});
+
+	it('passes through a message containing a colon (SMSTO has no escape mechanism)', () => {
+		// SMSTO:<phone>:<message> — the colon in the message is emitted as-is.
+		// Most modern readers (iOS, Android) correctly treat everything after the
+		// second colon as the message body.
+		expect(encodeSMS({ phone: '+1234567890', message: 'Time: 3pm' })).toBe(
+			'SMSTO:+1234567890:Time: 3pm'
+		);
 	});
 });
 

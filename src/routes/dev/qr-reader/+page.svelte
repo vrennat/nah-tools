@@ -140,6 +140,11 @@
 		decodeState = { status: 'idle' };
 	}
 
+	// Revoke any open object URL when the component is destroyed (e.g. navigation away).
+	$effect(() => {
+		return () => revokeCurrent();
+	});
+
 	// Clipboard paste support
 	$effect(() => {
 		function handlePaste(e: ClipboardEvent): void {
