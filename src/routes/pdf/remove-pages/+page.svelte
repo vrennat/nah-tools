@@ -2,6 +2,7 @@
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
 	import ToolShell from '$components/ToolShell.svelte';
+	import NextSteps from '$components/pdf/NextSteps.svelte';
 	import type { PageThumbnail } from '$pdf/types';
 
 	let files = $state<File[]>([]);
@@ -10,6 +11,7 @@
 	let loading = $state(false);
 	let processing = $state(false);
 	let error = $state('');
+	let lastResult = $state<{ bytes: Uint8Array; name: string } | null>(null);
 
 	let file = $derived(files[0]);
 
@@ -17,6 +19,7 @@
 		if (!file) {
 			thumbnails = [];
 			selectedPages = new Set();
+			lastResult = null;
 			return;
 		}
 		loadThumbnails();
@@ -61,12 +64,15 @@
 		if (!canRemove || !file) return;
 		processing = true;
 		error = '';
+		lastResult = null;
 		try {
 			const { removePages } = await import('$pdf/processor');
 			const { downloadPDF, makeFilename } = await import('$pdf/exporter');
 			const buf = await file.arrayBuffer();
 			const result = await removePages(buf, [...selectedPages]);
-			downloadPDF(result, makeFilename('pages-removed', 'pdf'));
+			const name = makeFilename('pages-removed', 'pdf');
+			downloadPDF(result, name);
+			lastResult = { bytes: result, name };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to remove pages';
 		} finally {
@@ -181,6 +187,10 @@
 				</button>
 			</div>
 		</div>
+
+		{#if lastResult}
+			<NextSteps path="/pdf/remove-pages" resultBytes={() => lastResult?.bytes ?? null} resultName={lastResult.name} />
+		{/if}
 
 		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
 			<h2 class="font-display text-lg font-700">Remove specific pages without splitting</h2>

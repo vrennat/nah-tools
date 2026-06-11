@@ -2,6 +2,7 @@
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
 	import ToolShell from '$components/ToolShell.svelte';
+	import NextSteps from '$components/pdf/NextSteps.svelte';
 	import type { PageRange } from '$pdf/types';
 
 	let files = $state<File[]>([]);
@@ -10,12 +11,14 @@
 	let processing = $state(false);
 	let error = $state('');
 	let pageCount = $state(0);
+	let lastResult = $state<{ bytes: Uint8Array | null; name: string; singlePdf: boolean } | null>(null);
 
 	let file = $derived(files[0]);
 
 	$effect(() => {
 		if (!file) {
 			pageCount = 0;
+			lastResult = null;
 			return;
 		}
 		const currentFile = file;
@@ -60,6 +63,7 @@
 		if (!canSplit || !file) return;
 		processing = true;
 		error = '';
+		lastResult = null;
 
 		try {
 			const { splitPDF } = await import('$pdf/processor');
@@ -76,13 +80,17 @@
 			const results = await splitPDF(buf, ranges);
 
 			if (results.length === 1) {
-				downloadPDF(results[0], makeFilename('split', 'pdf'));
+				const name = makeFilename('split', 'pdf');
+				downloadPDF(results[0], name);
+				lastResult = { bytes: results[0], name, singlePdf: true };
 			} else {
 				const zipFiles = results.map((data, i) => ({
 					name: `pages-${ranges[i].start}${ranges[i].end !== ranges[i].start ? `-${ranges[i].end}` : ''}.pdf`,
 					data
 				}));
-				await downloadAsZip(zipFiles, makeFilename('split-pages', 'zip'));
+				const zipName = makeFilename('split-pages', 'zip');
+				await downloadAsZip(zipFiles, zipName);
+				lastResult = { bytes: null, name: zipName, singlePdf: false };
 			}
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to split PDF';
@@ -207,6 +215,10 @@
 				</button>
 			</div>
 		</div>
+
+		{#if lastResult}
+			<NextSteps path="/pdf/split" resultBytes={() => lastResult?.bytes ?? null} resultName={lastResult.name} singlePdf={lastResult.singlePdf} />
+		{/if}
 
 		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
 			<h2 class="font-display text-lg font-700">When do you need to split a PDF?</h2>

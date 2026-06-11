@@ -2,6 +2,7 @@
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
 	import ToolShell from '$components/ToolShell.svelte';
+	import NextSteps from '$components/pdf/NextSteps.svelte';
 	import type { PageThumbnail } from '$pdf/types';
 
 	let files = $state<File[]>([]);
@@ -11,6 +12,7 @@
 	let processing = $state(false);
 	let error = $state('');
 	let dragIndex = $state<number | null>(null);
+	let lastResult = $state<{ bytes: Uint8Array; name: string } | null>(null);
 
 	let file = $derived(files[0]);
 
@@ -18,6 +20,7 @@
 		if (!file) {
 			thumbnails = [];
 			order = [];
+			lastResult = null;
 			return;
 		}
 		loadThumbnails();
@@ -57,12 +60,15 @@
 		if (!file || !isReordered) return;
 		processing = true;
 		error = '';
+		lastResult = null;
 		try {
 			const { reorderPages } = await import('$pdf/processor');
 			const { downloadPDF, makeFilename } = await import('$pdf/exporter');
 			const buf = await file.arrayBuffer();
 			const result = await reorderPages(buf, order);
-			downloadPDF(result, makeFilename('reordered', 'pdf'));
+			const name = makeFilename('reordered', 'pdf');
+			downloadPDF(result, name);
+			lastResult = { bytes: result, name };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to reorder pages';
 		} finally {
@@ -174,6 +180,10 @@
 				</button>
 			</div>
 		</div>
+
+		{#if lastResult}
+			<NextSteps path="/pdf/reorder" resultBytes={() => lastResult?.bytes ?? null} resultName={lastResult.name} />
+		{/if}
 
 		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
 			<h2 class="font-display text-lg font-700">Rearrange pages without re-creating the document</h2>
