@@ -789,6 +789,65 @@ export async function reverseAudio(
 	}
 }
 
+// ---------------------------------------------------------------------------
+// PCM extraction for Whisper transcription
+// ---------------------------------------------------------------------------
+
+/**
+ * Decodes any audio or video file to 16 kHz mono float32 PCM — the exact
+ * format Whisper expects as input. Uses the shared FFmpeg engine so the WASM
+ * binary is already cached when the user has used any other audio tool first.
+ *
+ * The output is a Float32Array of raw PCM samples (little-endian IEEE 754
+ * float). Length = duration_seconds * 16000.
+ *
+ * VFS files are cleaned up in the finally block regardless of success/failure.
+ */
+export async function extractPcmForTranscription(
+	file: File,
+	onProgress?: (p: ProcessingProgress) => void
+): Promise<Float32Array> {
+	const ffmpeg = await getFFmpeg();
+	const inputName = 'input' + getMediaExtension(file);
+	const outputName = 'output.pcm';
+
+	await ffmpeg.writeFile(inputName, await fetchFile(file));
+
+	const startTime = Date.now();
+	const handler = makeProgressHandler(startTime, onProgress);
+	ffmpeg.on('progress', handler);
+
+	try {
+		// -ar 16000: resample to 16 kHz (Whisper's expected sample rate)
+		// -ac 1: mix down to mono
+		// -f f32le: raw 32-bit float little-endian
+		// -acodec pcm_f32le: PCM float codec
+		// -vn: discard any video stream
+		await ffmpeg.exec([
+			'-i', inputName,
+			'-vn',
+			'-ar', '16000',
+			'-ac', '1',
+			'-f', 'f32le',
+			'-acodec', 'pcm_f32le',
+			'-y', outputName
+		]);
+
+		const data = await ffmpeg.readFile(outputName);
+		const bytes = data as Uint8Array;
+
+		// Reinterpret the raw bytes as Float32. The Uint8Array buffer may not be
+		// aligned on a 4-byte boundary, so we copy into a fresh ArrayBuffer first.
+		const aligned = new ArrayBuffer(bytes.byteLength);
+		new Uint8Array(aligned).set(bytes);
+		return new Float32Array(aligned);
+	} finally {
+		ffmpeg.off('progress', handler);
+		await tryDelete(ffmpeg, inputName);
+		await tryDelete(ffmpeg, outputName);
+	}
+}
+
 export async function removeSilence(
 	file: File,
 	config: SilenceRemoveConfig,

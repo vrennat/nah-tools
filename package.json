@@ -54,6 +54,7 @@
 	},
 	"dependencies": {
 		"@cantoo/pdf-lib": "^2.6.5",
+		"@huggingface/transformers": "^4.2.0",
 		"@ffmpeg/ffmpeg": "^0.12.15",
 		"@ffmpeg/util": "^0.12.2",
 		"@jsquash/avif": "^2.1.1",
