@@ -83,116 +83,120 @@ export async function ocrPDF(
 		}
 	});
 
-	for (let i = 0; i < numPages; i++) {
-		currentPage = i + 1;
-		const pdfjsPage = await pdfDoc.getPage(i + 1);
+	// try/finally ensures the Tesseract worker and PDF.js doc are always released
+	// even when a page render or OCR call throws mid-loop.
+	try {
+		for (let i = 0; i < numPages; i++) {
+			currentPage = i + 1;
+			const pdfjsPage = await pdfDoc.getPage(i + 1);
 
-		// Check if page already has text
-		const hasText = await pageHasText(pdfjsPage);
-		if (hasText) {
-			pdfjsPage.cleanup();
+			// Check if page already has text
+			const hasText = await pageHasText(pdfjsPage);
+			if (hasText) {
+				pdfjsPage.cleanup();
+				onProgress?.({
+					phase: 'recognizing',
+					page: i + 1,
+					totalPages: numPages,
+					pageProgress: 1
+				});
+				continue;
+			}
+
+			// Render page to canvas
+			onProgress?.({
+				phase: 'rendering',
+				page: i + 1,
+				totalPages: numPages,
+				pageProgress: 0
+			});
+
+			const scaledViewport = pdfjsPage.getViewport({ scale: DPI_SCALE });
+			const canvas = document.createElement('canvas');
+			canvas.width = scaledViewport.width;
+			canvas.height = scaledViewport.height;
+			const ctx = canvas.getContext('2d')!;
+
+			// White background
+			ctx.fillStyle = '#ffffff';
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+			await pdfjsPage.render({ canvas, viewport: scaledViewport }).promise;
+
+			// OCR the rendered page
 			onProgress?.({
 				phase: 'recognizing',
 				page: i + 1,
 				totalPages: numPages,
-				pageProgress: 1
+				pageProgress: 0
 			});
-			continue;
-		}
 
-		// Render page to canvas
-		onProgress?.({
-			phase: 'rendering',
-			page: i + 1,
-			totalPages: numPages,
-			pageProgress: 0
-		});
+			const { data } = await worker.recognize(canvas);
 
-		const scaledViewport = pdfjsPage.getViewport({ scale: DPI_SCALE });
-		const canvas = document.createElement('canvas');
-		canvas.width = scaledViewport.width;
-		canvas.height = scaledViewport.height;
-		const ctx = canvas.getContext('2d')!;
-
-		// White background
-		ctx.fillStyle = '#ffffff';
-		ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-		await pdfjsPage.render({ canvas, viewport: scaledViewport }).promise;
-
-		// OCR the rendered page
-		onProgress?.({
-			phase: 'recognizing',
-			page: i + 1,
-			totalPages: numPages,
-			pageProgress: 0
-		});
-
-		const { data } = await worker.recognize(canvas);
-
-		// Extract words from nested structure: blocks -> paragraphs -> lines -> words
-		const words: { text: string; bbox: { x0: number; y0: number; x1: number; y1: number } }[] = [];
-		if (data.blocks) {
-			for (const block of data.blocks) {
-				if (!block.paragraphs) continue;
-				for (const paragraph of block.paragraphs) {
-					if (!paragraph.lines) continue;
-					for (const line of paragraph.lines) {
-						for (const word of line.words) {
-							words.push(word);
+			// Extract words from nested structure: blocks -> paragraphs -> lines -> words
+			const words: { text: string; bbox: { x0: number; y0: number; x1: number; y1: number } }[] = [];
+			if (data.blocks) {
+				for (const block of data.blocks) {
+					if (!block.paragraphs) continue;
+					for (const paragraph of block.paragraphs) {
+						if (!paragraph.lines) continue;
+						for (const line of paragraph.lines) {
+							for (const word of line.words) {
+								words.push(word);
+							}
 						}
 					}
 				}
 			}
-		}
 
-		// Overlay invisible text on the pdf-lib page
-		onProgress?.({
-			phase: 'embedding',
-			page: i + 1,
-			totalPages: numPages,
-			pageProgress: 0
-		});
+			// Overlay invisible text on the pdf-lib page
+			onProgress?.({
+				phase: 'embedding',
+				page: i + 1,
+				totalPages: numPages,
+				pageProgress: 0
+			});
 
-		const pdfPage = doc.getPage(i);
-		const { width: pdfWidth, height: pdfHeight } = pdfPage.getSize();
+			const pdfPage = doc.getPage(i);
+			const { width: pdfWidth, height: pdfHeight } = pdfPage.getSize();
 
-		for (const word of words) {
-			if (!word.text.trim()) continue;
-			totalWords++;
+			for (const word of words) {
+				if (!word.text.trim()) continue;
+				totalWords++;
 
-			// Convert from pixel coordinates (top-left origin) to PDF coordinates (bottom-left origin)
-			const x = (word.bbox.x0 / scaledViewport.width) * pdfWidth;
-			const wordTop = (word.bbox.y0 / scaledViewport.height) * pdfHeight;
-			const wordBottom = (word.bbox.y1 / scaledViewport.height) * pdfHeight;
-			const y = pdfHeight - wordBottom;
+				// Convert from pixel coordinates (top-left origin) to PDF coordinates (bottom-left origin)
+				const x = (word.bbox.x0 / scaledViewport.width) * pdfWidth;
+				const wordTop = (word.bbox.y0 / scaledViewport.height) * pdfHeight;
+				const wordBottom = (word.bbox.y1 / scaledViewport.height) * pdfHeight;
+				const y = pdfHeight - wordBottom;
 
-			// Estimate font size from word bounding box
-			const wordHeightPdf = wordBottom - wordTop;
-			const fontSize = Math.max(4, Math.min(wordHeightPdf * 0.8, 72));
+				// Estimate font size from word bounding box
+				const wordHeightPdf = wordBottom - wordTop;
+				const fontSize = Math.max(4, Math.min(wordHeightPdf * 0.8, 72));
 
-			try {
-				pdfPage.drawText(word.text, {
-					x,
-					y,
-					size: fontSize,
-					font,
-					color: rgb(0, 0, 0),
-					opacity: 0 // invisible
-				});
-			} catch {
-				// Skip words that can't be embedded (special characters not in font)
+				try {
+					pdfPage.drawText(word.text, {
+						x,
+						y,
+						size: fontSize,
+						font,
+						color: rgb(0, 0, 0),
+						opacity: 0 // invisible
+					});
+				} catch {
+					// Skip words that can't be embedded (special characters not in font)
+				}
 			}
+
+			pdfjsPage.cleanup();
+			// Release canvas backing store
+			canvas.width = 0;
+			canvas.height = 0;
 		}
-
-		pdfjsPage.cleanup();
-		// Release canvas memory
-		canvas.width = 0;
-		canvas.height = 0;
+	} finally {
+		await worker.terminate();
+		pdfDoc.destroy();
 	}
-
-	await worker.terminate();
-	pdfDoc.destroy();
 
 	const pdfBytes = await doc.save();
 

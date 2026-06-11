@@ -37,7 +37,11 @@
 		rendered = false;
 
 		doc.getPage(idx + 1).then((page) => {
-			if (version !== renderVersion) return;
+			if (version !== renderVersion) {
+				// This render was superseded — release the page resources immediately
+				page.cleanup();
+				return;
+			}
 			const viewport = page.getViewport({ scale: z });
 			el.width = viewport.width;
 			el.height = viewport.height;
@@ -45,10 +49,15 @@
 			el.style.height = `${viewport.height}px`;
 
 			const ctx = el.getContext('2d');
-			if (!ctx) return;
+			if (!ctx) { page.cleanup(); return; }
 			const task = page.render({ canvasContext: ctx, viewport } as any);
 			return task.promise.then(() => {
-				if (version === renderVersion) rendered = true;
+				if (version === renderVersion) {
+					rendered = true;
+				} else {
+					// Render completed but was already superseded
+					page.cleanup();
+				}
 			});
 		}).catch(() => {
 			// Page may have been removed or doc changed during render

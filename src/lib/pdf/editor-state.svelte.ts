@@ -165,6 +165,12 @@ export function createEditorState() {
 		error = '';
 		loading = true;
 
+		// Snapshot before pushHistory so we can restore both history array and
+		// index atomically on failure — pushHistory may truncate redo entries and
+		// cap the array, making a simple slice(0, -1) produce the wrong index.
+		const savedHistory = history;
+		const savedHistoryIndex = historyIndex;
+
 		try {
 			// Snapshot current state for undo
 			pushHistory(currentBytes);
@@ -179,11 +185,9 @@ export function createEditorState() {
 			regenerateThumbnails();
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Operation failed';
-			// Revert history push on failure
-			if (historyIndex > 0) {
-				history = history.slice(0, -1);
-				historyIndex = history.length - 1;
-			}
+			// Restore history exactly as it was before pushHistory
+			history = savedHistory;
+			historyIndex = savedHistoryIndex;
 		} finally {
 			loading = false;
 		}
@@ -200,40 +204,48 @@ export function createEditorState() {
 		// Clear existing thumbnails so placeholders show
 		thumbnails = new Map();
 
-		// Fire-and-forget: render thumbnails progressively in the background
+		// Fire-and-forget: render thumbnails progressively in the background.
+		// try/finally ensures the PDF.js document is always released even if a
+		// page render throws or the loop is abandoned due to a version mismatch.
 		(async () => {
 			const thumbDoc = await loadPdfJs(bytes);
-			if (version !== thumbVersion) { thumbDoc.destroy(); return; }
+			try {
+				if (version !== thumbVersion) return;
 
-			const maxWidth = 150;
-			const canvas = document.createElement('canvas');
-			const ctx = canvas.getContext('2d')!;
+				const maxWidth = 150;
+				const canvas = document.createElement('canvas');
+				const ctx = canvas.getContext('2d')!;
 
-			for (let i = 0; i < thumbDoc.numPages; i++) {
-				if (version !== thumbVersion) { thumbDoc.destroy(); return; }
+				for (let i = 0; i < thumbDoc.numPages; i++) {
+					if (version !== thumbVersion) return;
 
-				const page = await thumbDoc.getPage(i + 1);
-				const viewport = page.getViewport({ scale: 1 });
-				const scale = maxWidth / viewport.width;
-				const scaled = page.getViewport({ scale });
+					const page = await thumbDoc.getPage(i + 1);
+					const viewport = page.getViewport({ scale: 1 });
+					const scale = maxWidth / viewport.width;
+					const scaled = page.getViewport({ scale });
 
-				canvas.width = scaled.width;
-				canvas.height = scaled.height;
-				ctx.clearRect(0, 0, canvas.width, canvas.height);
+					canvas.width = scaled.width;
+					canvas.height = scaled.height;
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-				await page.render({ canvas, viewport: scaled }).promise;
+					await page.render({ canvas, viewport: scaled }).promise;
 
-				if (version !== thumbVersion) { thumbDoc.destroy(); return; }
+					if (version !== thumbVersion) { page.cleanup(); return; }
 
-				// Update progressively — each thumbnail appears as it renders
-				const updated = new Map(thumbnails);
-				updated.set(i, canvas.toDataURL('image/png'));
-				thumbnails = updated;
+					// Update progressively — each thumbnail appears as it renders
+					const updated = new Map(thumbnails);
+					updated.set(i, canvas.toDataURL('image/png'));
+					thumbnails = updated;
 
-				page.cleanup();
+					page.cleanup();
+				}
+
+				// Release canvas backing store
+				canvas.width = 0;
+				canvas.height = 0;
+			} finally {
+				thumbDoc.destroy();
 			}
-
-			thumbDoc.destroy();
 		})();
 	}
 

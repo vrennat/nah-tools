@@ -14,26 +14,42 @@ async function pdfToSVG(
 	onProgress?: (current: number, total: number) => void
 ): Promise<string[]> {
 	const mupdf = await loadMuPDF();
-	const doc = mupdf.Document.openDocument(
-		new mupdf.Buffer(new Uint8Array(data)),
-		'application/pdf'
-	);
+
+	// mupdf objects live on the WASM heap and must be explicitly freed;
+	// relying on GC causes OOM for large documents.
+	const inputBuf = new mupdf.Buffer(new Uint8Array(data));
+	const doc = mupdf.Document.openDocument(inputBuf, 'application/pdf');
+	inputBuf.destroy();
+
 	const numPages = doc.countPages();
 	const svgs: string[] = [];
 
-	for (let i = 0; i < numPages; i++) {
-		const page = doc.loadPage(i);
-		const bounds = page.getBounds();
+	try {
+		for (let i = 0; i < numPages; i++) {
+			const page = doc.loadPage(i);
+			const bounds = page.getBounds();
 
-		const buf = new mupdf.Buffer();
-		const writer = new mupdf.DocumentWriter(buf, 'svg', '');
-		const dev = writer.beginPage(bounds);
-		page.run(dev, mupdf.Matrix.identity);
-		writer.endPage();
-		writer.close();
+			const buf = new mupdf.Buffer();
+			const writer = new mupdf.DocumentWriter(buf, 'svg', '');
+			const dev = writer.beginPage(bounds);
 
-		svgs.push(buf.asString());
-		onProgress?.(i + 1, numPages);
+			try {
+				page.run(dev, mupdf.Matrix.identity);
+			} finally {
+				writer.endPage();
+				writer.close();
+				writer.destroy();
+				dev.destroy();
+				page.destroy();
+			}
+
+			svgs.push(buf.asString());
+			buf.destroy();
+
+			onProgress?.(i + 1, numPages);
+		}
+	} finally {
+		doc.destroy();
 	}
 
 	return svgs;
