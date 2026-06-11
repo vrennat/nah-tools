@@ -7,6 +7,10 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { bufferToB64, MAX_BASE64_BYTES, MAX_MERGE_FILES } from './utils';
+
+// Zip-bomb backstop: reject archives with unreasonably many entries.
+const MAX_ZIP_ENTRIES = 10_000;
 
 type JSZipType = typeof import('jszip');
 let JSZipModule: JSZipType;
@@ -25,17 +29,23 @@ function b64ToBuffer(b64: string): ArrayBuffer {
 	return buf.buffer;
 }
 
-function bufferToB64(buf: Uint8Array): string {
-	let binary = '';
-	for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
-	return btoa(binary);
-}
-
 function error(message: string) {
 	return { content: [{ type: 'text' as const, text: message }], isError: true };
 }
 
-const BASE64_PPTX = z.string().describe('Base64-encoded PPTX file data');
+/**
+ * Load a zip and reject it if the entry count looks like a zip bomb.
+ */
+async function safeLoadZip(JSZip: new () => import('jszip'), data: ArrayBuffer): Promise<import('jszip') | null> {
+	const zip = await new JSZip().loadAsync(data);
+	if (Object.keys(zip.files).length > MAX_ZIP_ENTRIES) return null;
+	return zip;
+}
+
+const BASE64_PPTX = z
+	.string()
+	.max(MAX_BASE64_BYTES, `PPTX must be under ${MAX_BASE64_BYTES / 1_000_000} MB (base64)`)
+	.describe('Base64-encoded PPTX file data');
 
 // ── XML helpers ──
 
@@ -73,6 +83,20 @@ function getSlideEntries(zip: import('jszip')): string[] {
 		});
 }
 
+/**
+ * Find the highest existing cNvPr id in the slide document so we can use max+1
+ * for new shapes, avoiding id collisions.
+ */
+function nextShapeId(doc: Document): number {
+	const nvPrs = doc.getElementsByTagName('p:cNvPr');
+	let max = 0;
+	for (let i = 0; i < nvPrs.length; i++) {
+		const id = parseInt(nvPrs[i].getAttribute('id') ?? '0', 10);
+		if (id > max) max = id;
+	}
+	return max + 1;
+}
+
 export function registerPPTXTools(server: McpServer) {
 	// ── Get Info ──
 	server.registerTool('pptx_get_info', {
@@ -83,7 +107,8 @@ export function registerPPTXTools(server: McpServer) {
 	}, async ({ pptx_base64 }) => {
 		try {
 			const JSZip = await getJSZip();
-			const zip = await new JSZip().loadAsync(b64ToBuffer(pptx_base64));
+			const zip = await safeLoadZip(JSZip, b64ToBuffer(pptx_base64));
+			if (!zip) return error('PPTX rejected: archive contains too many entries (possible zip bomb)');
 			const slideCount = getSlideEntries(zip).length;
 
 			// Parse metadata from docProps/core.xml
@@ -105,7 +130,8 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			return error(`Failed to read PPTX: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pptx] pptx_get_info error:', e);
+			return error(`Failed to read PPTX: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -118,7 +144,8 @@ export function registerPPTXTools(server: McpServer) {
 	}, async ({ pptx_base64 }) => {
 		try {
 			const JSZip = await getJSZip();
-			const zip = await new JSZip().loadAsync(b64ToBuffer(pptx_base64));
+			const zip = await safeLoadZip(JSZip, b64ToBuffer(pptx_base64));
+			if (!zip) return error('PPTX rejected: archive contains too many entries (possible zip bomb)');
 			const slides = getSlideEntries(zip);
 			const results: { slide: number; text: string }[] = [];
 
@@ -145,7 +172,8 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			return error(`Extract text failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pptx] pptx_extract_text error:', e);
+			return error(`Failed to extract text: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -157,7 +185,8 @@ export function registerPPTXTools(server: McpServer) {
 	}, async ({ pptx_base64 }) => {
 		try {
 			const JSZip = await getJSZip();
-			const zip = await new JSZip().loadAsync(b64ToBuffer(pptx_base64));
+			const zip = await safeLoadZip(JSZip, b64ToBuffer(pptx_base64));
+			if (!zip) return error('PPTX rejected: archive contains too many entries (possible zip bomb)');
 			let removed = 0;
 
 			// Remove notesSlide files and their references
@@ -198,7 +227,8 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			return error(`Remove notes failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pptx] pptx_remove_notes error:', e);
+			return error(`Failed to remove notes: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -210,7 +240,8 @@ export function registerPPTXTools(server: McpServer) {
 	}, async ({ pptx_base64 }) => {
 		try {
 			const JSZip = await getJSZip();
-			const zip = await new JSZip().loadAsync(b64ToBuffer(pptx_base64));
+			const zip = await safeLoadZip(JSZip, b64ToBuffer(pptx_base64));
+			if (!zip) return error('PPTX rejected: archive contains too many entries (possible zip bomb)');
 			const slides = getSlideEntries(zip);
 
 			for (const slidePath of slides) {
@@ -249,7 +280,8 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			return error(`Remove animations failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pptx] pptx_remove_animations error:', e);
+			return error(`Failed to remove animations: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -259,7 +291,7 @@ export function registerPPTXTools(server: McpServer) {
 		description: 'Add a text watermark to all slides in a PowerPoint file.',
 		inputSchema: {
 			pptx_base64: BASE64_PPTX,
-			text: z.string().describe('Watermark text'),
+			text: z.string().max(1000).describe('Watermark text'),
 			font_size: z.number().optional().describe('Font size in points (default: 48)'),
 			color: z.string().optional().describe('Hex color without # (default: "999999")'),
 			opacity: z.number().min(0).max(100).optional().describe('Opacity 0-100 (default: 30)'),
@@ -268,19 +300,21 @@ export function registerPPTXTools(server: McpServer) {
 	}, async ({ pptx_base64, text, font_size, color, opacity, rotation }) => {
 		try {
 			const JSZip = await getJSZip();
-			const zip = await new JSZip().loadAsync(b64ToBuffer(pptx_base64));
+			const zip = await safeLoadZip(JSZip, b64ToBuffer(pptx_base64));
+			if (!zip) return error('PPTX rejected: archive contains too many entries (possible zip bomb)');
 			const slides = getSlideEntries(zip);
 			const fontSize = font_size ?? 48;
 			const hexColor = (color ?? '999999').replace('#', '');
 			const opacityPct = opacity ?? 30;
 			const rot = rotation ?? -45;
 
-			// Convert to EMUs (914400 EMUs per inch, 72 points per inch)
-			const fontSizeEMU = Math.round(fontSize * 12700); // hundredths of a point
+			// <a:rPr sz> expects hundredths of a point (e.g. 48pt → 4800).
+			// EMUs (914400/inch) are used for xfrm/off/ext, not for font size.
+			const fontSizeHdp = Math.round(fontSize * 100);
 			// Rotation in 60,000ths of a degree
 			const rotEMU = rot * 60000;
-			// Opacity in 1000ths of a percent
-			const opacityEMU = Math.round(opacityPct * 1000);
+			// Opacity in 1000ths of a percent (100% = 100000)
+			const opacityVal = Math.round(opacityPct * 1000);
 
 			for (const slidePath of slides) {
 				const doc = await readXML(zip, slidePath);
@@ -289,10 +323,13 @@ export function registerPPTXTools(server: McpServer) {
 				const spTree = doc.getElementsByTagName('p:spTree')[0];
 				if (!spTree) continue;
 
+				// Use max existing shape id + 1 to avoid id collisions.
+				const shapeId = nextShapeId(doc);
+
 				// Create a watermark shape
 				const watermarkXml = `<p:sp xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
 					<p:nvSpPr>
-						<p:cNvPr id="9999" name="Watermark"/>
+						<p:cNvPr id="${shapeId}" name="Watermark"/>
 						<p:cNvSpPr/>
 						<p:nvPr/>
 					</p:nvSpPr>
@@ -309,10 +346,10 @@ export function registerPPTXTools(server: McpServer) {
 						<a:lstStyle/>
 						<a:p>
 							<a:r>
-								<a:rPr lang="en-US" sz="${fontSizeEMU}" dirty="0">
+								<a:rPr lang="en-US" sz="${fontSizeHdp}" dirty="0">
 									<a:solidFill>
 										<a:srgbClr val="${hexColor}">
-											<a:alpha val="${opacityEMU}"/>
+											<a:alpha val="${opacityVal}"/>
 										</a:srgbClr>
 									</a:solidFill>
 								</a:rPr>
@@ -340,7 +377,8 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			return error(`Watermark failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pptx] pptx_add_watermark error:', e);
+			return error(`Failed to add watermark: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -349,7 +387,13 @@ export function registerPPTXTools(server: McpServer) {
 		title: 'Merge PPTX Files',
 		description: 'Merge multiple PowerPoint files into one. Slides from subsequent files are appended after the first.',
 		inputSchema: {
-			pptxs_base64: z.array(z.string()).min(2).describe('Array of base64-encoded PPTX files to merge (minimum 2)')
+			pptxs_base64: z
+				.array(
+					z.string().max(MAX_BASE64_BYTES, `Each PPTX must be under ${MAX_BASE64_BYTES / 1_000_000} MB (base64)`)
+				)
+				.min(2)
+				.max(MAX_MERGE_FILES, `Cannot merge more than ${MAX_MERGE_FILES} files at once`)
+				.describe(`Array of base64-encoded PPTX files to merge (2–${MAX_MERGE_FILES} files)`)
 		}
 	}, async ({ pptxs_base64 }) => {
 		try {
@@ -368,7 +412,8 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			return error(`Merge failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pptx] pptx_merge error:', e);
+			return error(`Failed to merge PPTX files: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -402,22 +447,33 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			return error(`Split failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pptx] pptx_split error:', e);
+			return error(`Failed to split PPTX: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
 	// ── Compress ──
 	server.registerTool('pptx_compress', {
 		title: 'Compress PPTX',
-		description: 'Reduce PowerPoint file size by compressing images and removing unnecessary data.',
+		// Server-side compression is ZIP re-compression only; image downsampling
+		// requires canvas APIs that are not available in Cloudflare Workers.
+		description: 'Reduce PowerPoint file size by re-compressing the ZIP container. Note: image downsampling is not available server-side — only ZIP-level compression is applied.',
 		inputSchema: {
 			pptx_base64: BASE64_PPTX,
-			image_quality: z.number().min(0.1).max(1).optional().describe('Image quality 0.1-1.0 (default: 0.7)')
+			image_quality: z.number().min(0.1).max(1).optional().describe('Image quality 0.1-1.0 (has no effect server-side; included for API compatibility)')
 		}
-	}, async ({ pptx_base64, image_quality }) => {
+	}, async ({ pptx_base64 }) => {
 		try {
 			const { compressPPTX } = await import('$pptx/processor');
-			const result = await compressPPTX(b64ToBuffer(pptx_base64), image_quality ?? 0.7);
+			const inputBuf = b64ToBuffer(pptx_base64);
+			// image_quality is accepted but not used — canvas is unavailable in Workers.
+			const result = await compressPPTX(inputBuf, 0.7);
+			const savings = result.originalSize > 0
+				? Math.round((1 - result.newSize / result.originalSize) * 100)
+				: 0;
+			const message = savings > 0
+				? `ZIP re-compression saved ${savings}% (${result.originalSize} → ${result.newSize} bytes). Image downsampling was skipped (not available server-side).`
+				: 'File was already optimally compressed; no size reduction achieved.';
 			return {
 				content: [{
 					type: 'text' as const,
@@ -425,13 +481,15 @@ export function registerPPTXTools(server: McpServer) {
 						pptx_base64: bufferToB64(result.data),
 						original_size_bytes: result.originalSize,
 						compressed_size_bytes: result.newSize,
-						savings_percent: Math.round((1 - result.newSize / result.originalSize) * 100),
-						images_compressed: result.imagesCompressed
+						savings_percent: savings,
+						images_compressed: 0,
+						note: message
 					})
 				}]
 			};
 		} catch (e) {
-			return error(`Compress failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pptx] pptx_compress error:', e);
+			return error(`Failed to compress PPTX: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 
@@ -451,7 +509,8 @@ export function registerPPTXTools(server: McpServer) {
 	}, async ({ pptx_base64, title, author, subject, description, keywords, category }) => {
 		try {
 			const JSZip = await getJSZip();
-			const zip = await new JSZip().loadAsync(b64ToBuffer(pptx_base64));
+			const zip = await safeLoadZip(JSZip, b64ToBuffer(pptx_base64));
+			if (!zip) return error('PPTX rejected: archive contains too many entries (possible zip bomb)');
 			const core = await readXML(zip, 'docProps/core.xml');
 			if (!core) return error('No metadata file found in PPTX');
 
@@ -488,7 +547,8 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			return error(`Set metadata failed: ${e instanceof Error ? e.message : e}`);
+			console.error('[mcp/pptx] pptx_set_metadata error:', e);
+			return error(`Failed to set metadata: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
 }
