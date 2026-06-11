@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 
 	let files = $state<File[]>([]);
 	let userPassword = $state('');
@@ -67,19 +67,42 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'What encryption algorithm is used to protect the PDF?',
+			answer:
+				'The tool uses AES-128 encryption via the pdf-lib library, which applies PDF standard security revision 4 (V=4, R=4). This is the encryption level used by standard PDF 1.6/1.7 documents and is compatible with all major PDF viewers including Adobe Acrobat, Preview, and Chrome.'
+		},
+		{
+			question: 'What is the difference between the user password and owner password?',
+			answer:
+				'The user password is required to open the document. The owner password grants full access regardless of any permission restrictions you set. If you do not set a separate owner password, the user password is also used as the owner password.'
+		},
+		{
+			question: 'Can I restrict printing or copying even after setting a password?',
+			answer:
+				'Yes. The permissions panel lets you independently allow or deny printing, copying text, modifying content, and adding annotations. These restrictions are enforced by conforming PDF readers, though they can be bypassed by software that ignores PDF permissions.'
+		},
+		{
+			question: 'What happens if I forget the password?',
+			answer:
+				'There is no password recovery. The password is never stored — all processing happens in your browser and no data is sent to any server. Keep a secure record of the password before protecting your document.'
+		},
+		{
+			question: 'Are my files uploaded to protect them?',
+			answer:
+				'No. The entire protection process runs in your browser using JavaScript. Your PDF and your password are never transmitted to any server.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Protect PDF with Password Online Free | nah</title>
-	<meta
-		name="description"
-		content="Add password protection and encryption to your PDF. Set permissions for printing, copying, and editing. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="Protect PDF"
-	description="Add password protection and encryption to your PDF."
+<ToolShell
+	path="/pdf/protect"
+	tagline="Add AES-128 password encryption to your PDF and control printing, copying, and editing permissions."
+	seoTitle="Protect PDF with Password Free — AES Encryption | nah.tools"
+	description="Password-protect your PDF with AES-128 encryption. Set permissions for printing, copying, and editing. Free, no upload — processed in your browser."
+	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
@@ -207,8 +230,24 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">What password protection actually does</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				PDF password protection uses AES-128 encryption to scramble the document's content. Without
+				the correct password, a reader cannot decode the file. The password is never stored
+				anywhere — not in the file, not on any server. Everything runs locally in your browser.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Beyond the open password, you can separately control what an authenticated reader can do
+				with the document: whether they can print it at high resolution, copy text to the clipboard,
+				modify the content, or add annotations. These restrictions are enforced by conforming
+				readers; tools that ignore PDF permissions can bypass them.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				For the highest security, use a strong password (12+ characters, mixed case, numbers, and
+				symbols) and keep a secure copy. There is no recovery mechanism once a document is
+				protected.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>

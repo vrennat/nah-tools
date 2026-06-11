@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { PageThumbnail } from '$pdf/types';
 
 	type Unit = 'pt' | 'mm' | 'in';
@@ -39,7 +39,6 @@
 	let hasSelection = $derived(applyTo === 'all' || selectedPages.size > 0);
 	let canApply = $derived(!!file && hasMargins && hasSelection && !processing);
 
-	// Preview overlay percentages for the first thumbnail
 	let previewInsets = $derived.by(() => {
 		if (!pageSizes.length) return { top: 0, right: 0, bottom: 0, left: 0 };
 		const page = pageSizes[0];
@@ -124,17 +123,43 @@
 			processing = false;
 		}
 	}
+
+	const faqs = [
+		{
+			question: 'Does cropping remove the content outside the crop area?',
+			answer:
+				'PDF cropping works by adjusting the page\'s MediaBox and CropBox — the rectangles that define the visible area. The content outside the crop area is hidden from view but technically remains in the file. If you need to guarantee content removal, use the Redact tool instead.'
+		},
+		{
+			question: 'What units can I use for the crop margins?',
+			answer:
+				'You can enter margins in points (PDF native units, 72pt = 1 inch), millimeters, or inches. The tool converts to points internally before applying.'
+		},
+		{
+			question: 'Can I crop only specific pages instead of the whole document?',
+			answer:
+				'Yes. Switch the "Apply to" toggle to "Selected pages", then click individual page thumbnails to select them. Only the selected pages will have the crop margins applied.'
+		},
+		{
+			question: 'Will cropping affect the PDF quality?',
+			answer:
+				'No. Cropping is a metadata operation that adjusts the page boundary rectangles. No content is re-rendered or re-encoded, so text, images, and vector graphics remain at their original quality.'
+		},
+		{
+			question: 'Are my files uploaded to crop them?',
+			answer:
+				'No. All processing happens in your browser using pdf-lib. Your files never leave your device.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Crop PDF Online Free | nah</title>
-	<meta
-		name="description"
-		content="Trim margins from PDF pages. Set custom top, right, bottom, left insets in points, mm, or inches. Free, no upload — processed in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout title="Crop PDF" description="Trim margins from all or specific pages.">
+<ToolShell
+	path="/pdf/crop"
+	tagline="Trim margins from all pages or selected pages. Set insets in points, millimeters, or inches with a live preview."
+	seoTitle="Crop PDF Pages Free — Trim Margins in Any Unit | nah.tools"
+	description="Trim margins from PDF pages. Set custom top, right, bottom, left insets in points, mm, or inches. Free, no upload — processed in your browser."
+	{faqs}
+>
 	<section class="mx-auto max-w-4xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
 			<FileDropZone accept=".pdf" bind:files label="Drop a PDF here or click to browse" />
@@ -265,45 +290,22 @@
 									/>
 									<!-- Crop preview overlay on first thumbnail -->
 									{#if isFirst && hasMargins}
-										<div
-											class="pointer-events-none absolute inset-0"
-										>
-											<!-- Top -->
-											<div
-												class="absolute top-0 right-0 left-0 bg-red-500/20"
-												style="height: {previewInsets.top}%"
-											></div>
-											<!-- Bottom -->
-											<div
-												class="absolute right-0 bottom-0 left-0 bg-red-500/20"
-												style="height: {previewInsets.bottom}%"
-											></div>
-											<!-- Left -->
-											<div
-												class="absolute top-0 bottom-0 left-0 bg-red-500/20"
-												style="width: {previewInsets.left}%"
-											></div>
-											<!-- Right -->
-											<div
-												class="absolute top-0 right-0 bottom-0 bg-red-500/20"
-												style="width: {previewInsets.right}%"
-											></div>
-											<!-- Dashed crop border -->
+										<div class="pointer-events-none absolute inset-0">
+											<div class="absolute top-0 right-0 left-0 bg-red-500/20" style="height: {previewInsets.top}%"></div>
+											<div class="absolute right-0 bottom-0 left-0 bg-red-500/20" style="height: {previewInsets.bottom}%"></div>
+											<div class="absolute top-0 bottom-0 left-0 bg-red-500/20" style="width: {previewInsets.left}%"></div>
+											<div class="absolute top-0 right-0 bottom-0 bg-red-500/20" style="width: {previewInsets.right}%"></div>
 											<div
 												class="absolute border-2 border-dashed border-red-500/60"
 												style="top: {previewInsets.top}%; right: {previewInsets.right}%; bottom: {previewInsets.bottom}%; left: {previewInsets.left}%"
 											></div>
 										</div>
 									{/if}
-									<span
-										class="absolute bottom-1 left-1 rounded bg-brand/70 px-1.5 py-0.5 text-xs font-medium text-white"
-									>
+									<span class="absolute bottom-1 left-1 rounded bg-brand/70 px-1.5 py-0.5 text-xs font-medium text-white">
 										{thumb.pageIndex + 1}
 									</span>
 									{#if isClickable && isSelected}
-										<span
-											class="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-white"
-										>
+										<span class="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-white">
 											<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
 											</svg>
@@ -342,8 +344,23 @@
 			</div>
 		</div>
 
-		<p class="text-center text-xs text-text-muted">
-			<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-		</p>
+		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+			<h2 class="font-display text-lg font-700">Trimming PDF margins without re-rendering</h2>
+			<p class="text-sm leading-relaxed text-text-muted">
+				PDF cropping adjusts the page boundary boxes that define the visible area — specifically
+				the MediaBox and CropBox. This is a metadata change, not a re-render, so text, images,
+				and vector content remain at their original quality regardless of how much you crop.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				Common use cases include removing large white margins from scanned documents before
+				printing, trimming oversized borders from exported presentations, or standardizing the
+				visible area across a multi-page document. You can apply the same crop to all pages at once
+				or select individual pages for different margins.
+			</p>
+			<p class="text-sm leading-relaxed text-text-muted">
+				The first page shows a live preview of the crop region as you adjust the margin values.
+				All processing happens locally in your browser — no files are uploaded.
+			</p>
+		</div>
 	</section>
-</PdfToolLayout>
+</ToolShell>

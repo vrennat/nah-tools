@@ -1,7 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
-	import PdfToolLayout from '$components/pdf/PdfToolLayout.svelte';
+	import ToolShell from '$components/ToolShell.svelte';
 	import type { PageCompareResult } from '$pdf/types';
 
 	let originalFiles = $state<File[]>([]);
@@ -85,19 +85,42 @@
 		const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
 		sliderPosition = (x / rect.width) * 100;
 	}
+
+	const faqs = [
+		{
+			question: 'How does the visual diff work?',
+			answer:
+				'Both PDFs are rendered to images page by page. The diff view subtracts pixel values between the original and revised images, highlighting changed pixels in red while dimming unchanged areas. This is a pixel-level visual comparison — it detects any visual difference including text changes, layout shifts, image replacements, and formatting changes.'
+		},
+		{
+			question: 'Are the files uploaded to a server for comparison?',
+			answer:
+				'No. Both PDFs are rendered entirely in your browser using pdfjs-dist. No files are transmitted to any server. The comparison runs locally using canvas pixel math.'
+		},
+		{
+			question: 'What is the overlay view?',
+			answer:
+				'The overlay view shows both versions superimposed, with a draggable slider to reveal the original on the left and the revised version on the right. It is useful for spotting layout and content shifts by sliding between the two versions.'
+		},
+		{
+			question: 'What does the percentage badge mean?',
+			answer:
+				'The percentage shows what fraction of the page\'s pixels changed between the two versions. Under 1% is green (nearly identical), 1–5% is amber (minor changes), and above 5% is red (significant differences). The percentage is approximate and depends on rendering resolution.'
+		},
+		{
+			question: 'Can I compare PDFs with different page counts?',
+			answer:
+				'Yes. Pages are compared by index — page 1 of the original against page 1 of the revised, and so on. If the documents have different page counts, the comparison covers the pages they share in common and notes the difference in total pages.'
+		}
+	];
 </script>
 
-<svelte:head>
-	<title>Compare PDFs Online Free — Visual PDF Diff | nah</title>
-	<meta
-		name="description"
-		content="Compare two PDFs side-by-side with pixel-level visual diff. Free, no upload — files are compared in your browser."
-	/>
-</svelte:head>
-
-<PdfToolLayout
-	title="Compare PDFs"
-	description="Side-by-side visual diff of two PDFs. Spot every change, pixel by pixel."
+<ToolShell
+	path="/pdf/compare"
+	tagline="Upload two PDFs and get a pixel-level visual diff — side-by-side, overlay slider, or highlighted diff view."
+	seoTitle="Compare PDFs Online Free — Visual Side-by-Side Diff | nah.tools"
+	description="Compare two PDFs side-by-side with pixel-level visual diff. Free, no upload — files are compared in your browser."
+	{faqs}
 >
 	{#if !hasResults}
 		<section class="mx-auto max-w-3xl space-y-6">
@@ -141,12 +164,28 @@
 				</div>
 			</div>
 
-			<p class="text-center text-xs text-text-muted">
-				<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-			</p>
+			<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+				<h2 class="font-display text-lg font-700">When you need to know exactly what changed</h2>
+				<p class="text-sm leading-relaxed text-text-muted">
+					Contract revisions, regulatory filings, design proofs, technical documentation — any
+					situation where you need to confirm that two versions of a PDF are either identical or
+					understand precisely what differs. Text-based diff tools miss layout changes and image
+					replacements. A trained eye misses subtle font or spacing shifts.
+				</p>
+				<p class="text-sm leading-relaxed text-text-muted">
+					This tool renders both PDFs to images and computes a pixel-level diff, so it catches
+					every visual difference regardless of whether it is text, an image, a border, or a
+					spacing change. The overlay slider is particularly useful for layout comparisons — drag
+					it back and forth to see exactly how the two versions align.
+				</p>
+				<p class="text-sm leading-relaxed text-text-muted">
+					Both files are processed entirely in your browser. No content is sent to any server.
+				</p>
+			</div>
 		</section>
 	{:else}
-		<section class="mx-auto max-w-6xl space-y-4">
+		<!-- Results view — needs full width for side-by-side display -->
+		<section class="space-y-4">
 			<!-- Toolbar -->
 			<div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 shadow-sm">
 				<!-- View mode tabs -->
@@ -262,14 +301,12 @@
 							aria-valuemax={100}
 							tabindex="0"
 						>
-							<!-- Original (full, behind) -->
 							<img
 								src={currentResult.originalDataUrl}
 								alt="Original page {currentPage + 1}"
 								class="block w-full select-none"
 								draggable="false"
 							/>
-							<!-- Revised (clipped) -->
 							<img
 								src={currentResult.revisedDataUrl}
 								alt="Revised page {currentPage + 1}"
@@ -277,7 +314,6 @@
 								style="clip-path: inset(0 0 0 {sliderPosition}%);"
 								draggable="false"
 							/>
-							<!-- Slider bar -->
 							<div
 								class="absolute top-0 bottom-0 w-1 bg-accent"
 								style="left: {sliderPosition}%; transform: translateX(-50%);"
@@ -288,7 +324,6 @@
 									</svg>
 								</div>
 							</div>
-							<!-- Labels -->
 							<span class="absolute top-2 left-2 rounded bg-black/60 px-2 py-0.5 text-xs text-white">Original</span>
 							<span class="absolute top-2 right-2 rounded bg-black/60 px-2 py-0.5 text-xs text-white">Revised</span>
 						</div>
@@ -339,10 +374,6 @@
 					</div>
 				{/if}
 			{/if}
-
-			<p class="text-center text-xs text-text-muted">
-				<a href="/pdf" class="underline hover:text-accent">Back to all PDF tools</a>
-			</p>
 		</section>
 	{/if}
-</PdfToolLayout>
+</ToolShell>
