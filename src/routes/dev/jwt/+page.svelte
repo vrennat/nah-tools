@@ -96,6 +96,15 @@
 		{#if decoded.ok && decoded.jwt}
 			{@const jwt = decoded.jwt}
 
+			<!-- Warn when the token carries no signature -->
+			{#if String(jwt.header.alg).toLowerCase() === 'none'}
+				<div class="rounded-lg border border-warning/50 bg-warning/10 px-4 py-3 text-sm text-warning">
+					<strong>Unsigned token (alg: none).</strong> This token has no signature — any
+					payload can be crafted and decoded here without a secret. Never trust claims
+					from an unsigned token in a security context.
+				</div>
+			{/if}
+
 			<!-- Header + Payload panels -->
 			<div class="grid gap-4 lg:grid-cols-2">
 				<!-- Header -->

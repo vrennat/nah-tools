@@ -17,6 +17,8 @@ export interface DiffResult {
 	added: number;
 	removed: number;
 	unchanged: number;
+	/** Set when inputs are too large for the LCS algorithm to handle safely. */
+	tooLarge?: boolean;
 }
 
 export function diffLines(
@@ -38,6 +40,12 @@ export function diffLines(
 
 	const m = na.length;
 	const n = nb.length;
+
+	// Guard against OOM: the LCS table is (m+1)×(n+1) integers. At 2M cells
+	// (~16 MB) the browser tab can OOM, especially when recomputed per keystroke.
+	if (m * n > 2_000_000) {
+		return { rows: [], added: 0, removed: 0, unchanged: 0, tooLarge: true };
+	}
 
 	// LCS length table.
 	const dp: number[][] = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));

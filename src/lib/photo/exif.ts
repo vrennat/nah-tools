@@ -55,60 +55,82 @@ const ORIENTATION: Record<number, string> = {
 };
 
 function readValue(view: DataView, entryOffset: number, tiffStart: number, le: boolean): number[] | string {
-	const type = view.getUint16(entryOffset + 2, le);
-	const count = view.getUint32(entryOffset + 4, le);
-	const size = (TYPE_SIZE[type] ?? 1) * count;
-	let valueOffset = entryOffset + 8;
-	if (size > 4) valueOffset = tiffStart + view.getUint32(entryOffset + 8, le);
+	try {
+		const type = view.getUint16(entryOffset + 2, le);
+		const rawCount = view.getUint32(entryOffset + 4, le);
+		// Clamp count to prevent multi-million-iteration loops on crafted files.
+		if (rawCount > 65535) return [];
+		const count = rawCount;
+		const size = (TYPE_SIZE[type] ?? 1) * count;
+		let valueOffset = entryOffset + 8;
+		if (size > 4) {
+			valueOffset = tiffStart + view.getUint32(entryOffset + 8, le);
+		}
+		// Bounds check before reading.
+		if (valueOffset < 0 || valueOffset + size > view.byteLength) return [];
 
-	if (type === 2) {
-		// ASCII string
-		let s = '';
+		if (type === 2) {
+			// ASCII string
+			let s = '';
+			for (let i = 0; i < count; i++) {
+				const c = view.getUint8(valueOffset + i);
+				if (c === 0) break;
+				s += String.fromCharCode(c);
+			}
+			return s.trim();
+		}
+
+		const typeSize = TYPE_SIZE[type] ?? 1;
+		const out: number[] = [];
 		for (let i = 0; i < count; i++) {
-			const c = view.getUint8(valueOffset + i);
-			if (c === 0) break;
-			s += String.fromCharCode(c);
+			const o = valueOffset + i * typeSize;
+			// Bounds check each element before reading.
+			if (o + typeSize > view.byteLength) break;
+			switch (type) {
+				case 1:
+				case 7:
+					out.push(view.getUint8(o));
+					break;
+				case 3:
+					out.push(view.getUint16(o, le));
+					break;
+				case 4:
+					out.push(view.getUint32(o, le));
+					break;
+				case 9:
+					out.push(view.getInt32(o, le));
+					break;
+				case 5:
+					if (o + 8 > view.byteLength) break;
+					out.push(view.getUint32(o, le) / (view.getUint32(o + 4, le) || 1));
+					break;
+				case 10:
+					if (o + 8 > view.byteLength) break;
+					out.push(view.getInt32(o, le) / (view.getInt32(o + 4, le) || 1));
+					break;
+				default:
+					out.push(0);
+			}
 		}
-		return s.trim();
+		return out;
+	} catch {
+		return [];
 	}
-
-	const out: number[] = [];
-	for (let i = 0; i < count; i++) {
-		const o = valueOffset + i * (TYPE_SIZE[type] ?? 1);
-		switch (type) {
-			case 1:
-			case 7:
-				out.push(view.getUint8(o));
-				break;
-			case 3:
-				out.push(view.getUint16(o, le));
-				break;
-			case 4:
-				out.push(view.getUint32(o, le));
-				break;
-			case 9:
-				out.push(view.getInt32(o, le));
-				break;
-			case 5:
-				out.push(view.getUint32(o, le) / (view.getUint32(o + 4, le) || 1));
-				break;
-			case 10:
-				out.push(view.getInt32(o, le) / (view.getInt32(o + 4, le) || 1));
-				break;
-			default:
-				out.push(0);
-		}
-	}
-	return out;
 }
 
 function readIfd(view: DataView, ifdOffset: number, tiffStart: number, le: boolean) {
 	const entries: { tag: number; value: number[] | string }[] = [];
-	const count = view.getUint16(ifdOffset, le);
-	for (let i = 0; i < count; i++) {
-		const entryOffset = ifdOffset + 2 + i * 12;
-		const tag = view.getUint16(entryOffset, le);
-		entries.push({ tag, value: readValue(view, entryOffset, tiffStart, le) });
+	try {
+		if (ifdOffset < 0 || ifdOffset + 2 > view.byteLength) return entries;
+		const count = view.getUint16(ifdOffset, le);
+		for (let i = 0; i < count; i++) {
+			const entryOffset = ifdOffset + 2 + i * 12;
+			if (entryOffset + 12 > view.byteLength) break;
+			const tag = view.getUint16(entryOffset, le);
+			entries.push({ tag, value: readValue(view, entryOffset, tiffStart, le) });
+		}
+	} catch {
+		// Return whatever entries were read before the error.
 	}
 	return entries;
 }
@@ -159,7 +181,10 @@ function findTiffStart(view: DataView): number {
 			}
 		}
 		if (marker === 0xda) break; // start of scan
-		offset += 2 + view.getUint16(offset + 2, false);
+		const segLen = view.getUint16(offset + 2, false);
+		// A segment length < 2 is malformed and would cause an infinite loop.
+		if (segLen < 2) break;
+		offset += 2 + segLen;
 	}
 	return -1;
 }
@@ -239,9 +264,13 @@ export function stripJpegMetadata(buffer: ArrayBuffer): ArrayBuffer | null {
 		}
 
 		const segLen = view.getUint16(offset + 2, false);
+		// A segment length < 2 is malformed; stop to avoid an infinite loop.
+		if (segLen < 2) break;
 		const segEnd = offset + 2 + segLen;
 
 		// Drop metadata-bearing markers: APP1 (EXIF/XMP), APP13 (IPTC), COM.
+		// Preserve APP2 (0xe2) — it carries ICC color profiles; stripping it
+		// washes out wide-gamut photos (Display P3, etc.).
 		const isMetadata = marker === 0xe1 || marker === 0xed || marker === 0xfe;
 		if (!isMetadata) kept.push({ start: offset, end: segEnd });
 
