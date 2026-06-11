@@ -1,6 +1,7 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ToolShell from '$components/ToolShell.svelte';
+	import NextSteps from '$components/pdf/NextSteps.svelte';
 
 	let files = $state<File[]>([]);
 	let text = $state('CONFIDENTIAL');
@@ -10,6 +11,7 @@
 	let rotation = $state(-45);
 	let processing = $state(false);
 	let error = $state('');
+	let lastResult = $state<{ bytes: Uint8Array; name: string } | null>(null);
 
 	let file = $derived(files[0]);
 	let canApply = $derived(!!file && text.trim().length > 0 && !processing);
@@ -18,6 +20,7 @@
 		if (!canApply || !file) return;
 		processing = true;
 		error = '';
+		lastResult = null;
 
 		try {
 			const { addWatermark } = await import('$pdf/processor');
@@ -32,13 +35,19 @@
 				rotation
 			});
 
-			downloadPDF(result, makeFilename('watermarked', 'pdf'));
+			const name = makeFilename('watermarked', 'pdf');
+			downloadPDF(result, name);
+			lastResult = { bytes: result, name };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to add watermark';
 		} finally {
 			processing = false;
 		}
 	}
+
+	$effect(() => {
+		if (!file) lastResult = null;
+	});
 
 	const faqs = [
 		{
@@ -172,6 +181,10 @@
 				</button>
 			</div>
 		</div>
+
+		{#if lastResult}
+			<NextSteps path="/pdf/watermark" resultBytes={() => lastResult?.bytes ?? null} resultName={lastResult.name} />
+		{/if}
 
 		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
 			<h2 class="font-display text-lg font-700">When to use a PDF watermark</h2>

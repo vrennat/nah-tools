@@ -2,12 +2,14 @@
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ProgressBar from '$components/pdf/ProgressBar.svelte';
 	import ToolShell from '$components/ToolShell.svelte';
+	import NextSteps from '$components/pdf/NextSteps.svelte';
 
 	let files = $state<File[]>([]);
 	let processing = $state(false);
 	let progress = $state({ current: 0, total: 0 });
 	let error = $state('');
 	let dragIndex = $state<number | null>(null);
+	let lastResult = $state<{ bytes: Uint8Array; name: string } | null>(null);
 
 	let canMerge = $derived(files.length >= 2 && !processing);
 
@@ -23,6 +25,7 @@
 		if (!canMerge) return;
 		processing = true;
 		error = '';
+		lastResult = null;
 		progress = { current: 0, total: files.length };
 
 		try {
@@ -34,13 +37,19 @@
 				progress = { current, total };
 			});
 
-			downloadPDF(result, makeFilename('merged', 'pdf'));
+			const name = makeFilename('merged', 'pdf');
+			downloadPDF(result, name);
+			lastResult = { bytes: result, name };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to merge PDFs';
 		} finally {
 			processing = false;
 		}
 	}
+
+	$effect(() => {
+		if (files.length === 0) lastResult = null;
+	});
 
 	const faqs = [
 		{
@@ -153,6 +162,10 @@
 				</button>
 			</div>
 		</div>
+
+		{#if lastResult}
+			<NextSteps path="/pdf/merge" resultBytes={() => lastResult?.bytes ?? null} resultName={lastResult.name} />
+		{/if}
 
 		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
 			<h2 class="font-display text-lg font-700">Why merge PDFs in your browser?</h2>

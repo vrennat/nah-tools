@@ -1,11 +1,13 @@
 <script lang="ts">
 	import FileDropZone from '$components/pdf/FileDropZone.svelte';
 	import ToolShell from '$components/ToolShell.svelte';
+	import NextSteps from '$components/pdf/NextSteps.svelte';
 
 	let files = $state<File[]>([]);
 	let processing = $state(false);
 	let error = $state('');
 	let result = $state<{ originalSize: number; newSize: number } | null>(null);
+	let lastResultBytes = $state<{ bytes: Uint8Array; name: string } | null>(null);
 
 	let file = $derived(files[0]);
 	let canCompress = $derived(!!file && !processing);
@@ -21,6 +23,7 @@
 		processing = true;
 		error = '';
 		result = null;
+		lastResultBytes = null;
 
 		try {
 			const { compressPDF } = await import('$pdf/processor');
@@ -32,13 +35,19 @@
 			const newSize = compressed.byteLength;
 
 			result = { originalSize, newSize };
-			downloadPDF(compressed, makeFilename('compressed', 'pdf'));
+			const name = makeFilename('compressed', 'pdf');
+			downloadPDF(compressed, name);
+			lastResultBytes = { bytes: compressed, name };
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to compress PDF';
 		} finally {
 			processing = false;
 		}
 	}
+
+	$effect(() => {
+		if (!file) lastResultBytes = null;
+	});
 
 	const faqs = [
 		{
@@ -118,6 +127,10 @@
 				</button>
 			</div>
 		</div>
+
+		{#if lastResultBytes}
+			<NextSteps path="/pdf/compress" resultBytes={() => lastResultBytes?.bytes ?? null} resultName={lastResultBytes.name} />
+		{/if}
 
 		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
 			<h2 class="font-display text-lg font-700">What client-side PDF compression does</h2>
