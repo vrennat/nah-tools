@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
-	import { allFamilies, getTool } from '$lib/registry/index';
+	import { allFamilies, getFamilyTools } from '$lib/registry/index';
 
 	let pathname = $derived(page.url.pathname as string);
 	let toolsOpen = $state(false);
@@ -14,28 +14,19 @@
 		{ href: '/qr', label: 'QR', match: (p: string) => p.startsWith('/qr') }
 	];
 
-	// Curated nav entries in the original display order.
-	// Each entry either maps to a family hub (desc from allFamilies) or is a
-	// standalone tool (desc from getTool). Hardcoded order is intentional —
-	// the nav is a curated list, not an exhaustive family dump.
-	const toolsDropdown = [
-		{ href: '/dev', label: 'Developer Tools', desc: allFamilies.find((f) => f.id === 'dev')?.description ?? '' },
-		{ href: '/text', label: 'Text Tools', desc: allFamilies.find((f) => f.id === 'text')?.description ?? '' },
-		{ href: '/pdf', label: 'PDF Tools', desc: 'Merge, split, rotate, compress, convert' },
-		{ href: '/pptx', label: 'PowerPoint Tools', desc: 'Merge, split, compress, extract, watermark' },
-		{ href: '/photo', label: 'Photo & Image Tools', desc: 'Convert, compress, remove backgrounds, filters' },
-		{ href: '/resume', label: 'Resume Builder', desc: getTool('/resume')?.description ?? '' },
-		{ href: '/qr', label: 'QR Code Generator', desc: 'Static, dynamic, styled, batch export' },
-		{ href: '/invoice', label: 'Invoice Generator', desc: getTool('/invoice')?.description ?? '' },
-		{ href: '/links', label: 'Link Shortener', desc: getTool('/links')?.description ?? '' },
-		{ href: '/bio', label: 'Link in Bio', desc: getTool('/bio')?.description ?? '' },
-		{ href: '/remove', label: 'Data Removal', desc: getTool('/remove')?.description ?? '' },
-		{ href: '/signature', label: 'Email Signatures', desc: getTool('/signature')?.description ?? '' },
-		{ href: '/media', label: 'Video/Audio Tools', desc: 'Trim, compress, convert media files' },
-		{ href: '/audio', label: 'Audio Tools', desc: allFamilies.find((f) => f.id === 'audio')?.description ?? '' },
-		{ href: '/legal-gen', label: 'Policy Generator', desc: 'Privacy policy, ToS, cookie policy' },
+	// Nav derives from the registry so it never drifts from the homepage
+	// directory: family hubs in canonical order, then standalone tools.
+	// MCP is appended manually — it is a feature page, not a registered tool.
+	const categories = allFamilies
+		.filter((f) => f.hub !== null)
+		.map((f) => ({ href: f.hub as string, label: f.name, desc: f.description }));
+
+	const moreTools = [
+		...getFamilyTools('standalone').map((t) => ({ href: t.path, label: t.name, desc: t.description })),
 		{ href: '/mcp', label: 'MCP Server', desc: '30+ tools for AI agents via MCP' }
 	];
+
+	const menuItemCount = categories.length + moreTools.length;
 
 	function closeDropdown() {
 		toolsOpen = false;
@@ -66,7 +57,7 @@
 	}
 
 	function handleMenuKey(e: KeyboardEvent) {
-		const len = toolsDropdown.length;
+		const len = menuItemCount;
 		switch (e.key) {
 			case 'ArrowDown':
 				e.preventDefault();
@@ -136,23 +127,43 @@
 						<!-- svelte-ignore a11y_interactive_supports_focus -->
 						<div
 							bind:this={menuRef}
-							class="absolute right-0 top-full z-50 mt-3 w-72 rounded-xl border border-border bg-surface p-2 shadow-lg"
+							class="absolute right-0 top-full z-50 mt-3 w-[min(34rem,calc(100vw-2rem))] max-h-[calc(100vh-8rem)] overflow-y-auto rounded-xl border border-border bg-surface p-2 shadow-lg"
 							onclick={(e: MouseEvent) => e.stopPropagation()}
 							onkeydown={handleMenuKey}
 							role="menu"
 						>
-							{#each toolsDropdown as tool, i}
-								<a
-									href={tool.href}
-									class="block rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-alt {focusedIndex === i ? 'bg-surface-alt' : ''}"
-									role="menuitem"
-									tabindex="-1"
-									onclick={closeDropdown}
-								>
-									<div class="text-sm font-medium text-text">{tool.label}</div>
-									<div class="text-xs text-text-muted">{tool.desc}</div>
-								</a>
-							{/each}
+							<div class="grid grid-cols-2 gap-x-2">
+								<div>
+									<p class="px-3 pt-2 pb-1 font-mono text-[11px] tracking-widest text-text-muted uppercase">Categories</p>
+									{#each categories as item, i}
+										<a
+											href={item.href}
+											class="block rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-alt {focusedIndex === i ? 'bg-surface-alt' : ''}"
+											role="menuitem"
+											tabindex="-1"
+											onclick={closeDropdown}
+										>
+											<div class="text-sm font-medium text-text">{item.label}</div>
+											<div class="text-xs text-text-muted line-clamp-1">{item.desc}</div>
+										</a>
+									{/each}
+								</div>
+								<div>
+									<p class="px-3 pt-2 pb-1 font-mono text-[11px] tracking-widest text-text-muted uppercase">More tools</p>
+									{#each moreTools as item, i}
+										<a
+											href={item.href}
+											class="block rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-alt {focusedIndex === categories.length + i ? 'bg-surface-alt' : ''}"
+											role="menuitem"
+											tabindex="-1"
+											onclick={closeDropdown}
+										>
+											<div class="text-sm font-medium text-text">{item.label}</div>
+											<div class="text-xs text-text-muted line-clamp-1">{item.desc}</div>
+										</a>
+									{/each}
+								</div>
+							</div>
 						</div>
 					{/if}
 				</div>
@@ -213,10 +224,19 @@
 	<!-- Mobile menu -->
 	{#if mobileOpen}
 		<nav class="mt-4 flex flex-col gap-1 border-t border-border pt-4 sm:hidden">
-			{#each toolsDropdown as tool}
-				<a href={tool.href} class="rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-alt">
-					<div class="text-sm font-medium text-text">{tool.label}</div>
-					<div class="text-xs text-text-muted">{tool.desc}</div>
+			<p class="px-3 pt-1 pb-1 font-mono text-[11px] tracking-widest text-text-muted uppercase">Categories</p>
+			{#each categories as item}
+				<a href={item.href} class="rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-alt">
+					<div class="text-sm font-medium text-text">{item.label}</div>
+					<div class="text-xs text-text-muted">{item.desc}</div>
+				</a>
+			{/each}
+			<hr class="my-2 border-border" />
+			<p class="px-3 pb-1 font-mono text-[11px] tracking-widest text-text-muted uppercase">More tools</p>
+			{#each moreTools as item}
+				<a href={item.href} class="rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-alt">
+					<div class="text-sm font-medium text-text">{item.label}</div>
+					<div class="text-xs text-text-muted">{item.desc}</div>
 				</a>
 			{/each}
 			<hr class="my-2 border-border" />
