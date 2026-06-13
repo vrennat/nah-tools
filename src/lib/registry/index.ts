@@ -51,16 +51,18 @@ function convertPairsToEntries(): ToolEntry[] {
 	}));
 }
 
+// Canonical display order. The homepage directory, header nav, and footer all
+// render families in this order — change it here and every surface follows.
 export const allFamilies: ToolFamily[] = [
 	{ id: 'pdf', name: 'PDF Tools', hub: '/pdf', description: 'Merge, split, rotate, compress, convert PDFs in your browser.' },
-	{ id: 'pptx', name: 'PowerPoint Tools', hub: '/pptx', description: 'Merge, split, compress, extract, watermark PPTX files.' },
 	{ id: 'photo', name: 'Photo & Image Tools', hub: '/photo', description: 'Convert, compress, remove backgrounds, adjust colors.' },
 	{ id: 'convert', name: 'Image Converter', hub: '/convert', description: 'HEIC to JPG, WebP to PNG, SVG to PNG, and 14 more conversions.' },
+	{ id: 'qr', name: 'QR Code Generator', hub: '/qr', description: 'Static, dynamic, styled, batch export. No expiration. No paywall.' },
 	{ id: 'media', name: 'Video & Audio Tools', hub: '/media', description: 'Trim, compress, convert media files in your browser.' },
 	{ id: 'audio', name: 'Audio Tools', hub: '/audio', description: 'Convert, merge, normalize audio files in your browser.' },
+	{ id: 'pptx', name: 'PowerPoint Tools', hub: '/pptx', description: 'Merge, split, compress, extract, watermark PPTX files.' },
 	{ id: 'dev', name: 'Developer Tools', hub: '/dev', description: 'JSON, Base64, JWT, hash, regex, UUID, and more.' },
 	{ id: 'text', name: 'Text Tools', hub: '/text', description: 'Word counter, bulk find and replace.' },
-	{ id: 'qr', name: 'QR Code Generator', hub: '/qr', description: 'Static, dynamic, styled, batch export. No expiration. No paywall.' },
 	{ id: 'legal-gen', name: 'Policy Generator', hub: '/legal-gen', description: 'Privacy policy, ToS, cookie policy, DMCA notice.' },
 	{ id: 'standalone', name: 'Standalone Tools', hub: null, description: 'Free single-purpose tools — resume, invoice, links, and more.' }
 ];

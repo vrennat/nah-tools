@@ -1,25 +1,29 @@
 <script lang="ts">
-	import { getFamilyTools } from '$lib/registry/index';
+	import { getFamily, getFamilyTools } from '$lib/registry/index';
 	import FAQSchema from '$lib/components/FAQSchema.svelte';
 	import BreadcrumbSchema from '$lib/components/BreadcrumbSchema.svelte';
 
 	const photoFamilyTools = getFamilyTools('photo');
 
 	// The photo hub cross-links to the image converter hub (/convert), which
-	// belongs to a different family. It appears between 'filters' and 'exif'
-	// in the original display order (index 3 in the 8-card grid).
+	// belongs to a different family. Name and description come from the registry
+	// so the card cannot drift from the converter's own hub.
+	const convertFamily = getFamily('convert');
 	const convertCard = {
-		path: '/convert',
-		name: 'Image Converter',
-		description: 'HEIC to JPG, WebP to PNG, SVG to PNG, and 14 more conversions.',
+		path: convertFamily?.hub ?? '/convert',
+		name: convertFamily?.name ?? 'Image Converter',
+		description: convertFamily?.description ?? '',
 		icon: 'M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5'
 	};
 
-	// Reconstruct the original 8-card order: rm-bg, compress, filters, /convert, exif, crop, favicon, svg-optimize
+	// The converter card slots in right after the filters tool. Anchoring to the
+	// path (not an index) keeps the order stable as photo tools are added.
+	const filtersIndex = photoFamilyTools.findIndex((t) => t.path === '/photo/filters');
+	const insertAt = filtersIndex === -1 ? photoFamilyTools.length : filtersIndex + 1;
 	const cards = [
-		...photoFamilyTools.slice(0, 3),
+		...photoFamilyTools.slice(0, insertAt),
 		convertCard,
-		...photoFamilyTools.slice(3)
+		...photoFamilyTools.slice(insertAt)
 	];
 
 	const faqs = [

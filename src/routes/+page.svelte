@@ -2,21 +2,14 @@
 	import { allFamilies, getFamilyTools } from '$lib/registry/index';
 	import ToolSearch from '$components/ToolSearch.svelte';
 
-	// Families displayed in the directory, in intentional order.
-	// QR is first-class, standalone closes the list.
-	const directoryFamilyIds = [
-		'pdf', 'photo', 'convert', 'qr', 'media', 'audio',
-		'pptx', 'dev', 'text', 'legal-gen', 'standalone'
-	] as const;
-
 	// Pre-build sections at module scope — these are all plain data, no side effects.
 	// SvelteKit prerendering serialises this at build time, so every <a> is in the
 	// static HTML before any JS runs (SEO requirement).
-	const sections = directoryFamilyIds.map((id) => {
-		const family = allFamilies.find((f) => f.id === id)!;
-		const tools = getFamilyTools(id);
-		return { family, tools };
-	});
+	// Section order is the registry's canonical family order.
+	const sections = allFamilies.map((family) => ({
+		family,
+		tools: getFamilyTools(family.id)
+	}));
 
 	const totalTools = sections.reduce((n, s) => n + s.tools.length, 0);
 </script>
