@@ -24,7 +24,6 @@ const EXPECTED_PATHS = [
 	'/compare',
 	'/mcp',
 	'/trust',
-	'/remove/agent',
 	'/privacy',
 	'/terms',
 	// Family hubs

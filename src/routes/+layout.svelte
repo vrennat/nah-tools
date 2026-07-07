@@ -3,11 +3,13 @@
 	import Header from '$components/Header.svelte';
 	import Footer from '$components/Footer.svelte';
 	import CommandPalette from '$components/CommandPalette.svelte';
+	import { page } from '$app/state';
 
 	let { children } = $props();
 </script>
 
 <svelte:head>
+	<link rel="canonical" href="https://nah.tools{page.url.pathname}" />
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		"@context": "https://schema.org",
 		"@type": "WebSite",

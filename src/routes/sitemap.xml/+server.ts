@@ -37,7 +37,6 @@ const staticRoutes: { path: string; changefreq: string; priority: string }[] = [
 	{ path: '/compare', changefreq: 'monthly', priority: '0.7' },
 	{ path: '/mcp', changefreq: 'weekly', priority: '0.9' },
 	{ path: '/trust', changefreq: 'monthly', priority: '0.6' },
-	{ path: '/remove/agent', changefreq: 'monthly', priority: '0.7' },
 	{ path: '/privacy', changefreq: 'yearly', priority: '0.3' },
 	{ path: '/terms', changefreq: 'yearly', priority: '0.3' }
 ];
@@ -52,11 +51,16 @@ const routes = [...staticRoutes, ...familyHubRoutes, ...toolRoutes].filter((rout
 	return true;
 });
 
+// Resolved once at build time (the sitemap is prerendered), so every deploy
+// stamps the sitemap with its build date.
+const lastmod = new Date().toISOString().slice(0, 10);
+
 export const GET: RequestHandler = () => {
 	const urls = routes
 		.map(
 			(route) => `  <url>
     <loc>${SITE}${route.path}</loc>
+    <lastmod>${lastmod}</lastmod>
     <changefreq>${route.changefreq}</changefreq>
     <priority>${route.priority}</priority>
   </url>`
