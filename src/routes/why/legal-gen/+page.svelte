@@ -364,7 +364,7 @@
 		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">The free alternative</h2>
 		<p class="mb-4 leading-relaxed text-text-muted">
 			We built the
-			<a href="/legal" class="text-accent underline hover:text-accent-hover"
+			<a href="/legal-gen" class="text-accent underline hover:text-accent-hover"
 				>nah legal document generator</a
 			> because the barrier to a basic privacy policy shouldn't be a monthly subscription.
 		</p>
