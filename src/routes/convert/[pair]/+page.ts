@@ -1,8 +1,10 @@
 import { error } from '@sveltejs/kit';
-import { getPair } from '$convert/pairs';
-import type { PageLoad } from './$types';
+import { allPairs, getPair } from '$convert/pairs';
+import type { EntryGenerator, PageLoad } from './$types';
 
-export const ssr = false;
+export const prerender = true;
+
+export const entries: EntryGenerator = () => allPairs.map((p) => ({ pair: p.slug }));
 
 export const load: PageLoad = ({ params }) => {
 	const pair = getPair(params.pair ?? '');

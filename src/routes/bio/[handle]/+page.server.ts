@@ -3,6 +3,8 @@ import type { PageServerLoad } from './$types';
 import { getDB } from '$server/db';
 import { getProfileWithLinks, incrementViewCount } from '$server/bio-db';
 
+export const prerender = false;
+
 export const load: PageServerLoad = async ({ params, platform }) => {
 	const db = getDB(platform);
 	const result = await getProfileWithLinks(db, params.handle);
