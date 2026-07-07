@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What is this
 
-nah.tools — free, open-source browser tools that replace predatory SaaS. Tools include: QR code generator (static + dynamic), PDF tools (merge, split, compress, rotate, watermark, etc.), PowerPoint tools (merge, split, compress, extract, watermark, etc.), photo tools (compress, filters, background removal), link shortener with analytics, resume builder with ATS analysis, data broker removal, email signature generator, image format converter (HEIC/WebP/AVIF/SVG/etc.), video/audio tools (trim, compress, convert via FFmpeg.wasm), and legal document generator (privacy policy, ToS, cookie policy, DMCA). Most tools run entirely client-side. Dynamic features (short links, dynamic QR redirects) use Cloudflare Workers + D1, passphrase-protected and editable.
+nah.tools — free, open-source browser tools that replace predatory SaaS. Tool families: QR code generator (static + dynamic), PDF tools (merge, split, compress, rotate, watermark, OCR, fill/sign, PDF/A, and more), PowerPoint tools, photo tools (compress, filters, background removal, EXIF, favicon, SVG optimize), image format converter (HEIC/WebP/AVIF/SVG/etc.), video tools (trim, compress, GIF, extract audio via FFmpeg.wasm), audio tools (convert, merge, normalize, speed, pitch, fade, reverse, silence removal, recorder, on-device Whisper transcription), developer tools (~16: JSON, Base64, JWT, URL encoder, hash, UUID, regex, cron, timestamp, color converter, diff, password, markdown, lorem ipsum, case converter, QR reader), text tools (word counter, find & replace, summarizer), legal document generator, link shortener with analytics, link-in-bio pages, resume builder with ATS analysis, invoice generator, data broker removal, email signature generator. Most tools run entirely client-side. Dynamic features (short links, dynamic QR redirects, bio pages) use Cloudflare Workers + D1, passphrase-protected and editable.
 
 ## Commands
 
@@ -89,6 +89,14 @@ All in `src/lib/media/`:
 
 Uses `@ffmpeg/ffmpeg` + `@ffmpeg/util`. The WASM binary (~25MB) loads from CDN on first use, cached by browser afterward. FFmpeg.wasm runs its own internal Web Worker — no double-worker wrapping needed. Progress is reported via FFmpeg's `on('progress')` callback. Each processor function registers and deregisters its own progress listener to avoid accumulation bugs.
 
+### Audio tools (client-side only, FFmpeg.wasm)
+
+Unified audio pipeline in `src/lib/transcribe/` (Whisper) + `src/lib/media/` (FFmpeg):
+- `src/lib/transcribe/` — on-device Whisper transcription: `types.ts`, `models.ts`, `formats.ts`, `worker.ts` (Comlink), `client.ts`, `export-pdf.ts`
+- `/audio/*` routes use FFmpeg.wasm (via `$media` processor) for convert, merge, normalize, speed, pitch, volume, fade, reverse, silence-remove, record
+
+Transcription runs entirely in-browser via WebAssembly; no audio is uploaded. Outputs text, SRT, VTT, and PDF notes.
+
 ### MCP server (Model Context Protocol)
 
 Modular MCP server in `src/lib/server/mcp/` exposes 30+ tools to AI agents via streamable HTTP at `/mcp`:
@@ -102,6 +110,22 @@ Modular MCP server in `src/lib/server/mcp/` exposes 30+ tools to AI agents via s
 The `/mcp` route has both `+page.svelte` (landing page for browsers) and `+server.ts` (MCP protocol handler for agents). SvelteKit routes browser GETs to the page and JSON/SSE requests to the server.
 
 File-based tools (PDF, PPTX) accept/return base64-encoded data. The server is stateless — no sessions, no storage, no auth required.
+
+### Tool registry
+
+`src/lib/registry/` is the single source of truth for every tool and family. It drives the sitemap, homepage tool grid, hub pages, header nav, and ToolShell related-tools. **Adding a new tool requires a registry entry** — omitting it means the tool won't appear in the sitemap or any nav surface.
+
+- `index.ts` — exports `allFamilies`, `allTools`, `getTool`, `getFamily`, `getFamilyTools`, `getRelated`
+- `types.ts` — `ToolEntry`, `ToolFamily`, `FamilyId`
+- `families/` — one file per family (pdf, pptx, photo, media, audio, qr, legal-gen, standalone); dev/text/convert derive from their own local registries via adapters in `index.ts`
+
+### ToolShell pattern
+
+`src/lib/components/ToolShell.svelte` is the standard wrapper for every tool page. It provides breadcrumbs, `FAQPage` schema, `SoftwareApplication` schema, OG tags, and a related-tools grid. New tool pages should use it rather than hand-rolling these concerns.
+
+### Prerendering
+
+All routes prerender by default via `export const prerender = true` in `src/routes/+layout.ts`. Dynamic routes (manage pages, bio profiles, the MCP endpoint) opt out locally with `export const prerender = false`.
 
 ### Server utilities
 
@@ -133,47 +157,34 @@ File-based tools (PDF, PPTX) accept/return base64-encoded data. The server is st
 - `/qr/wifi`, `/qr/vcard`, `/qr/email`, `/qr/phone`, `/qr/sms` — SEO/GEO landing pages with FAQPage schema
 - `/links` — URL shortener / custom link creator with analytics, UTM builder, bulk creation
 - `/links/manage/[code]` — passphrase-protected link management with click analytics dashboard
-- `/pptx` — PowerPoint tool hub (links to all PPTX tools)
-- `/pptx/merge` — merge multiple PPTX files
-- `/pptx/split` — extract slide ranges or individual slides
-- `/pptx/compress` — reduce file size by compressing images
-- `/pptx/extract-images` — pull all embedded images
-- `/pptx/extract-text` — slide-by-slide text extraction
-- `/pptx/remove-notes` — strip speaker notes
-- `/pptx/watermark` — add text watermark to all slides
-- `/pptx/remove-animations` — strip animations and transitions
-- `/pptx/slide-numbers` — add slide numbers
-- `/pptx/metadata` — view and edit title, author, properties
+- `/bio` — link-in-bio builder; `/bio/[handle]` — public profile page; `/bio/manage/[handle]` — passphrase-protected editor
+- `/pdf` — PDF tool hub; tools: merge, split, compress, rotate, reorder, remove-pages, watermark, page-numbers, protect, unlock, flatten, crop, edit, fill-sign, extract-images, images-to-pdf, pdf-to-images, pdf-to-svg, pdf-to-csv, word-to-pdf, ocr, redact, pdfa, compare
+- `/pptx` — PowerPoint tool hub; tools: merge, split, compress, extract-images, extract-text, remove-notes, watermark, remove-animations, slide-numbers, metadata
+- `/photo` — photo tool hub; tools: compress, crop, filters, rm-bg, exif, favicon, svg-optimize
+- `/convert` — image format converter hub; `/convert/[pair]` — individual conversion (e.g., `/convert/heic-to-jpg`)
+- `/media` — video tool hub; tools: compress-video, trim-video, trim-audio, compress-audio, video-to-gif, extract-audio
+- `/audio` — audio tool hub; tools: convert, merge, normalize, speed, pitch, volume, fade, reverse, silence-remove, record, transcribe
+- `/dev` — developer tool hub; tools (16): json, base64, jwt, url, hash, uuid, regex, cron, timestamp, color, diff, password, markdown, lorem, case, qr-reader
+- `/text` — text tool hub; tools: word-count, find-replace, summarize
+- `/legal-gen` — policy generator hub; tools: privacy-policy, terms-of-service, cookie-policy, dmca-notice
+- `/resume` — resume builder (ATS-optimized, PDF + DOCX export)
+- `/invoice` — invoice generator (multi-currency, tax, PDF export)
 - `/signature` — email signature generator (5 templates, live preview, copy/download)
-- `/convert` — image format converter hub (links to all conversion pairs)
-- `/convert/[pair]` — individual conversion page (e.g., `/convert/heic-to-jpg`, `/convert/webp-to-png`)
-- `/media` — video/audio tool hub (links to all media tools)
-- `/media/compress-video` — video compressor with presets (email, social, web, custom)
-- `/media/trim-video` — video trimmer with HTML5 preview and time range selection
-- `/media/trim-audio` — audio trimmer with HTML5 preview
-- `/media/compress-audio` — audio compressor (MP3, AAC, OGG output, bitrate selection)
-- `/media/video-to-gif` — video to GIF with FPS, width, and time range controls
-- `/media/extract-audio` — extract audio track from video
-- `/legal-gen` — legal document generator hub (links to 4 document types)
-- `/legal-gen/privacy-policy` — privacy policy generator with GDPR/CCPA/COPPA sections
-- `/legal-gen/terms-of-service` — terms of service generator
-- `/legal-gen/cookie-policy` — cookie policy generator with third-party service tracking
-- `/legal-gen/dmca-notice` — DMCA notice generator
-- `/remove/agent` — redirects to `/mcp` (301)
-- `/why` — expose article about QR code industry
+- `/remove` — data broker removal guide; `/remove/agent` — redirects to `/mcp` (301)
+- `/why` — expose article about predatory SaaS; `/why/[tool]` — per-family landing pages
 - `/compare` — competitor comparison table
+- `/trust` — trust and privacy page
 - `/privacy`, `/terms` — legal pages
 
 ### Path aliases
 
-Defined in `svelte.config.js`: `$components`, `$qr`, `$pdf`, `$pptx`, `$signature`, `$convert`, `$media`, `$legalgen`, `$server`, `$utils`
+Defined in `svelte.config.js`: `$components`, `$photo`, `$compress`, `$filters`, `$qr`, `$pdf`, `$pptx`, `$remove`, `$resume`, `$bio`, `$invoice`, `$signature`, `$convert`, `$media`, `$legalgen`, `$dev`, `$text`, `$server`, `$transcribe`, `$utils`
 
 ### Schema.org / SEO
 
 - `WebSite` schema in root layout
-- `SoftwareApplication` schema on main page
-- `FAQPage` schema on each landing page (via reusable `FAQSchema.svelte` component)
-- Sitemap at `/sitemap.xml`, referenced in `robots.txt`
+- `SoftwareApplication` and `FAQPage` schema injected per-tool by `ToolShell.svelte`; standalone pages that don't use ToolShell handle their own schema
+- Sitemap generated from the tool registry at `/sitemap.xml`, referenced in `robots.txt`
 
 ### Deployment
 
