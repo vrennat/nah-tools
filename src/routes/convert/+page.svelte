@@ -1,10 +1,24 @@
 <script lang="ts">
 	import { allPairs } from '$convert/pairs';
+	import UniversalConverter from '$components/convert/UniversalConverter.svelte';
 	import FAQSchema from '$lib/components/FAQSchema.svelte';
 	import BreadcrumbSchema from '$lib/components/BreadcrumbSchema.svelte';
 
-	const popularPairs = allPairs.filter((p) => p.popular);
-	const allOtherPairs = allPairs.filter((p) => !p.popular);
+	// Group the pair links by source format — matches how people search
+	// ("I have a HEIC") and gives every SEO page a descriptive internal link.
+	const sourceOrder = [...new Set(allPairs.map((p) => p.sourceFormat))];
+	const groups = sourceOrder.map((source) => ({
+		source,
+		pairs: allPairs.filter((p) => p.sourceFormat === source)
+	}));
+
+	// High-volume conversions served by sibling tool families.
+	const beyondImages = [
+		{ href: '/pdf/images-to-pdf', label: 'JPG to PDF' },
+		{ href: '/pdf/pdf-to-images', label: 'PDF to JPG' },
+		{ href: '/photo/compress', label: 'Compress images' },
+		{ href: '/photo/favicon', label: 'Favicon generator' }
+	];
 
 	const faqs = [
 		{
@@ -16,12 +30,16 @@
 			answer: 'No. All conversion runs entirely in your browser using WebAssembly codecs. Your images never leave your device.'
 		},
 		{
+			question: 'What image formats are supported?',
+			answer: 'HEIC, HEIF, JPG, PNG, WebP, AVIF, JPEG XL, SVG, BMP, GIF, and TIFF as inputs, converting to JPG, PNG, WebP, or AVIF. Drop a file above and the converter detects its format automatically.'
+		},
+		{
 			question: 'Is there a file size limit?',
 			answer: 'No enforced limit. Processing is in-browser, so practical limits depend on your device memory. Most images up to hundreds of megabytes convert without issue.'
 		},
 		{
 			question: 'Can I convert multiple images at once?',
-			answer: 'Yes. Each conversion page accepts multiple files and processes them in batch, letting you download results individually or as a ZIP.'
+			answer: 'Yes. Drop as many files as you like — they convert in batch, and you can download results individually or as a ZIP.'
 		},
 		{
 			question: 'Which browsers are supported?',
@@ -70,70 +88,60 @@
 			Image Converter. <span class="text-accent">No uploads.</span>
 		</h1>
 		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
-			Convert between any image format. Everything runs in your browser. Your files never leave your device.
+			Drop any image — we detect the format and convert it right here in your browser. Your files
+			never leave your device.
 		</p>
 	</section>
 
+	<UniversalConverter />
+
 	<div class="mx-auto max-w-5xl space-y-8">
-		{#if popularPairs.length > 0}
-			<section class="space-y-4">
-				<h2 class="text-xl font-700 text-text">Popular Conversions</h2>
-				<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{#each popularPairs as pair}
-						<a
-							href="/convert/{pair.slug}"
-							class="group rounded-2xl border border-border bg-surface-alt p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-card-hover"
-						>
-							<div
-								class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-accent/10 text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white"
+		<section class="space-y-6">
+			<h2 class="text-xl font-700 text-text">All conversions</h2>
+			{#each groups as group}
+				<div class="space-y-3">
+					<h3 class="text-sm font-600 uppercase tracking-wide text-text-muted">
+						From {group.source}
+					</h3>
+					<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+						{#each group.pairs as pair}
+							<a
+								href="/convert/{pair.slug}"
+								class="group flex items-center justify-between rounded-xl border border-border bg-surface-alt px-4 py-3 transition-all duration-200 hover:border-accent/50 hover:bg-surface"
 							>
-								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-									/>
-								</svg>
-							</div>
-							<div class="flex items-center justify-between">
-								<div>
-									<h3 class="font-display font-700 text-text transition-colors duration-300 group-hover:text-accent">
-										{pair.sourceFormat}
-									</h3>
-									<p class="text-xs text-text-muted">to {pair.targetFormat}</p>
-								</div>
-								<svg class="h-4 w-4 text-text-muted transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<span class="text-sm font-600 text-text transition-colors group-hover:text-accent">
+									{pair.sourceFormat}
+									<span aria-hidden="true" class="mx-1 text-text-muted">→</span>
+									{pair.targetFormat}
+								</span>
+								<svg
+									class="h-4 w-4 shrink-0 text-text-muted transition-transform duration-200 group-hover:translate-x-0.5"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 								</svg>
-							</div>
-						</a>
-					{/each}
+							</a>
+						{/each}
+					</div>
 				</div>
-			</section>
-		{/if}
+			{/each}
+		</section>
 
-		{#if allOtherPairs.length > 0}
-			<section class="space-y-4">
-				<h2 class="text-xl font-700 text-text">All Conversions</h2>
-				<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-					{#each allOtherPairs as pair}
-						<a
-							href="/convert/{pair.slug}"
-							class="group flex items-center gap-3 rounded-xl border border-border bg-surface-alt px-4 py-3 transition-all duration-300 hover:border-accent/50 hover:bg-surface"
-						>
-							<div class="flex-1 min-w-0">
-								<p class="text-xs font-medium text-text-muted">{pair.sourceFormat}</p>
-								<p class="text-sm font-600 text-text">to {pair.targetFormat}</p>
-							</div>
-							<svg class="h-4 w-4 shrink-0 text-text-muted transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-							</svg>
-						</a>
-					{/each}
-				</div>
-			</section>
-		{/if}
+		<section class="space-y-3">
+			<h2 class="text-xl font-700 text-text">Beyond image formats</h2>
+			<div class="flex flex-wrap gap-3">
+				{#each beyondImages as link}
+					<a
+						href={link.href}
+						class="rounded-full border border-border bg-surface-alt px-4 py-2 text-sm font-600 text-text transition-colors hover:border-accent/50 hover:text-accent"
+					>
+						{link.label}
+					</a>
+				{/each}
+			</div>
+		</section>
 
 		<section class="mx-auto max-w-3xl space-y-4 pt-4">
 			<h2 class="font-display text-xl font-700">Frequently asked questions</h2>

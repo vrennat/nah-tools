@@ -17,14 +17,18 @@ function getApi(): Comlink.Remote<WorkerApi> {
 export async function convertFile(
 	file: File,
 	targetCodec: CodecName,
-	quality: number
+	quality: number,
+	// Browsers report an empty File.type for formats the OS doesn't register
+	// (HEIC on Chrome/Windows, TIFF on some platforms). Callers should pass a
+	// registry-resolved MIME via resolveSourceMime() — file.type is a fallback.
+	sourceMimeType: string = file.type
 ): Promise<ConversionResult> {
 	const remote = getApi();
 	const buffer = await file.arrayBuffer();
 
 	const result = await remote.convert(
 		Comlink.transfer(buffer, [buffer]),
-		file.type,
+		sourceMimeType,
 		targetCodec,
 		quality
 	);
