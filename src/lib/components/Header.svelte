@@ -224,6 +224,25 @@
 	<!-- Mobile menu -->
 	{#if mobileOpen}
 		<nav class="mt-4 flex flex-col gap-1 border-t border-border pt-4 sm:hidden">
+			<!-- Mobile has no visible Cmd+K trigger (desktop-only chrome), so this is
+				 the only fast path to another tool from a tool page on mobile. Reuses
+				 the same synthetic-keydown trick as the desktop trigger to open the
+				 existing CommandPalette rather than building a second search UI. -->
+			<button
+				type="button"
+				onclick={(e: MouseEvent) => {
+					e.stopPropagation();
+					mobileOpen = false;
+					document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, bubbles: true }));
+				}}
+				class="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-text transition-colors hover:bg-surface-alt"
+			>
+				<svg class="h-4 w-4 text-text-muted" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+				</svg>
+				Search tools
+			</button>
+			<hr class="my-2 border-border" />
 			<p class="px-3 pt-1 pb-1 font-mono text-[11px] tracking-widest text-text-muted uppercase">Categories</p>
 			{#each categories as item}
 				<a href={item.href} class="rounded-lg px-3 py-2.5 transition-colors hover:bg-surface-alt">

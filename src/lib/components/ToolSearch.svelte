@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { searchTools, popularTools } from '$lib/search/index';
 	import { allFamilies } from '$lib/registry/index';
@@ -15,6 +17,22 @@
 	let listboxId = 'tool-search-listbox';
 
 	const popular = popularTools().slice(0, 5);
+
+	// Seed from a `?q=` URL param (Google Sitelinks Search Box target, or a
+	// shared search link) so the WebSite SearchAction schema in the root
+	// layout resolves to real results instead of a blank homepage. This must
+	// read `page.url.searchParams` inside onMount, not at top level — this
+	// page is prerendered, and SvelteKit throws if `.searchParams` is read
+	// during the prerender/SSR pass. onMount only runs client-side, after
+	// hydration, where the real browser URL is available.
+	onMount(() => {
+		const q = page.url.searchParams.get('q');
+		if (q && q.trim().length > 0) {
+			query = q;
+			results = searchTools(q, RESULT_LIMIT);
+			isOpen = true;
+		}
+	});
 
 	function familyLabel(entry: ToolEntry): string {
 		return allFamilies.find((f) => f.id === entry.family)?.name ?? entry.family;
