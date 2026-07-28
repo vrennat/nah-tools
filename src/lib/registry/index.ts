@@ -7,6 +7,7 @@ import { audioTools } from './families/audio';
 import { qrTools } from './families/qr';
 import { legalGenTools } from './families/legal-gen';
 import { standaloneTools } from './families/standalone';
+import { guideTools } from './families/guides';
 
 // Derive entries from the three existing registries rather than duplicate them.
 // This keeps the registry as the single source of truth while not modifying
@@ -64,7 +65,8 @@ export const allFamilies: ToolFamily[] = [
 	{ id: 'dev', name: 'Developer Tools', hub: '/dev', description: 'JSON, Base64, JWT, hash, regex, UUID, and more.' },
 	{ id: 'text', name: 'Text Tools', hub: '/text', description: 'Word counter, bulk find and replace.' },
 	{ id: 'legal-gen', name: 'Policy Generator', hub: '/legal-gen', description: 'Privacy policy, ToS, cookie policy, DMCA notice.' },
-	{ id: 'standalone', name: 'Standalone Tools', hub: null, description: 'Free single-purpose tools — resume, invoice, links, and more.' }
+	{ id: 'standalone', name: 'Standalone Tools', hub: null, description: 'Free single-purpose tools — resume, invoice, links, and more.' },
+	{ id: 'guides', name: 'Guides', hub: '/guides', description: 'How-to articles for getting things done without the SaaS upsell.' }
 ];
 
 export const allTools: ToolEntry[] = [
@@ -76,6 +78,7 @@ export const allTools: ToolEntry[] = [
 	...qrTools,
 	...legalGenTools,
 	...standaloneTools,
+	...guideTools,
 	...devToolsToEntries(),
 	...textToolsToEntries(),
 	...convertPairsToEntries()

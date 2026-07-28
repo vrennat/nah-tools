@@ -37,6 +37,7 @@ const EXPECTED_PATHS = [
 	'/text',
 	'/qr',
 	'/legal-gen',
+	'/guides',
 	// PDF tools
 	'/pdf/merge',
 	'/pdf/split',
@@ -156,7 +157,14 @@ const EXPECTED_PATHS = [
 	'/convert/jxl-to-png',
 	'/convert/bmp-to-png',
 	'/convert/gif-to-png',
-	'/convert/tiff-to-jpg'
+	'/convert/tiff-to-jpg',
+	// Guides
+	'/guides/how-to-redact-a-pdf-properly',
+	'/guides/compress-video-for-email',
+	'/guides/remove-yourself-from-people-search-sites',
+	'/guides/transcribe-audio-without-uploading',
+	'/guides/format-a-resume-for-ats',
+	'/guides/merge-scanned-and-digital-pdf-pages'
 ];
 
 async function callGET() {

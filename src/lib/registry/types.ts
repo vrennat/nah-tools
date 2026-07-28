@@ -9,7 +9,8 @@ export type FamilyId =
 	| 'text'
 	| 'qr'
 	| 'legal-gen'
-	| 'standalone';
+	| 'standalone'
+	| 'guides';
 
 export interface ToolFamily {
 	id: FamilyId;
