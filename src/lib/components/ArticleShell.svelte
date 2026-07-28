@@ -74,7 +74,19 @@
 	const related = $derived(getRelated(path, 4));
 	const displayH1 = $derived(h1 ?? entry.name);
 
-	const dateFormatter = new Intl.DateTimeFormat('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+	// publishedDate/updatedDate are bare 'YYYY-MM-DD' strings, which the Date
+	// constructor parses as UTC midnight (per spec, date-only ISO forms are
+	// UTC). Intl.DateTimeFormat defaults to the *local* timezone, so without
+	// pinning timeZone: 'UTC' here, any negative-UTC-offset browser (e.g.
+	// US timezones) renders one calendar day early — '2026-07-28' shows as
+	// "July 27" for a viewer at UTC-7. Formatting in UTC matches the UTC
+	// parse, so the displayed date always matches the literal string passed in.
+	const dateFormatter = new Intl.DateTimeFormat('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+		timeZone: 'UTC'
+	});
 	const displayPublished = $derived(dateFormatter.format(new Date(publishedDate)));
 	const displayUpdated = $derived(dateFormatter.format(new Date(effectiveUpdatedDate)));
 </script>
