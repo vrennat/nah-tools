@@ -5,13 +5,23 @@ interface FAQ {
 	answer: string;
 }
 
-/** Templated per-pair FAQs — feeds ToolShell's FAQPage schema on every pair page. */
+/**
+ * Templated per-pair FAQs — feeds ToolShell's FAQPage schema on every pair
+ * page. The first question's answer is pair-specific when `faqOverrides.useCase`
+ * is set (content-authored, see ConversionPair); otherwise it falls back to
+ * the generic template. `faqOverrides.extraQuestion`, when set, is appended
+ * after the templated set. Both are no-ops until a pair opts in.
+ */
 export function faqsForPair(pair: ConversionPair): FAQ[] {
 	const { sourceFormat: src, targetFormat: tgt } = pair;
-	return [
+	const overrides = pair.faqOverrides;
+
+	const faqs: FAQ[] = [
 		{
 			question: `How do I convert ${src} to ${tgt}?`,
-			answer: `Drop your ${src} files on this page, then click Convert. Conversion runs instantly in your browser and each ${tgt} file can be downloaded individually or as a ZIP.`
+			answer:
+				overrides?.useCase ??
+				`Drop your ${src} files on this page, then click Convert. Conversion runs instantly in your browser and each ${tgt} file can be downloaded individually or as a ZIP.`
 		},
 		{
 			question: `Is this ${src} to ${tgt} converter free?`,
@@ -33,4 +43,10 @@ export function faqsForPair(pair: ConversionPair): FAQ[] {
 			answer: `Yes. Drop as many ${src} files as you like — they convert in batch and you can download the results individually or as a single ZIP.`
 		}
 	];
+
+	if (overrides?.extraQuestion) {
+		faqs.push(overrides.extraQuestion);
+	}
+
+	return faqs;
 }
