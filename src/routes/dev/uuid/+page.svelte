@@ -213,4 +213,26 @@
 			</div>
 		{/if}
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How UUID and Nano ID generation work</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			UUID v4 is 122 bits of pure randomness with no inherent order. UUID v7 embeds a 48-bit
+			millisecond timestamp in the first six bytes before the random remainder, which makes IDs
+			sort chronologically as strings — the reason it's increasingly preferred for database
+			primary keys, since sequential inserts land at the end of a B-tree index instead of
+			scattering randomly through it.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Nano ID takes a different tradeoff: a 21-character ID built from a 64-character URL-safe
+			alphabet, generated here with the same crypto.getRandomValues source as the UUIDs. At the
+			default size its collision probability is comparable to UUID v4's, just shorter and
+			dash-free — useful for short IDs in URLs or filenames.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			All three generators draw from the Web Crypto API's cryptographically secure random source,
+			not Math.random. Generation is capped at 1,000 IDs per batch and downloadable as a .txt
+			file, which covers seeding a database or test fixture without needing a script.
+		</p>
+	</div>
 </DevToolShell>

@@ -274,4 +274,27 @@
 			</div>
 		</section>
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How the color conversions and contrast checker work</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			HEX, RGB, and HSL conversion is straightforward math shared by every color tool. OKLCH is
+			the newer addition: it's a perceptually uniform color space, meaning equal numeric steps in
+			lightness or chroma look like equal steps to the human eye — unlike HSL, where a lightness
+			change can look wildly different depending on hue. The conversion follows Björn Ottosson's
+			published OKLab formulas.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			The contrast checker computes the WCAG relative-luminance ratio between your two colors and
+			checks it against four thresholds: AA normal text (4.5:1), AA large text (3:1), AAA normal
+			text (7:1), and AAA large text (4.5:1). Passing AAA is the higher bar most accessibility
+			audits eventually ask for.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			The ratio is calculated only between the two flat colors you enter. It can't see gradients,
+			background images, or partial transparency, all of which change effective contrast in a real
+			interface — treat a passing ratio here as a starting point, not a substitute for checking
+			the rendered page.
+		</p>
+	</div>
 </DevToolShell>

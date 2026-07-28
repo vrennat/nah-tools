@@ -391,4 +391,27 @@
 			</div>
 		{/if}
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How QR code reading works here</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Decoding tries the browser's native BarcodeDetector API first — available in
+			Chromium-based browsers and recent Safari — because it's fast and hardware-accelerated.
+			Where that's unavailable (Firefox, older browsers), it falls back to jsQR, a pure-JavaScript
+			decoder that reads the same image data through an offscreen canvas. Either way, decoding
+			happens entirely on your device.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			After a successful decode, the tool guesses content type from the raw payload — a WIFI:
+			prefix means a WiFi config, BEGIN:VCARD means a contact card, an http(s):// prefix gets an
+			Open button — the same conventions QR-generating tools use to encode structured data as
+			plain text.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Decode quality depends entirely on image clarity. A QR code's error correction can recover
+			from some damage, but a blurry photo, extreme crop, or low-contrast print can lose enough
+			data that neither decoder recovers a result — your phone's camera app does extra
+			multi-frame processing this single-image tool doesn't.
+		</p>
+	</div>
 </DevToolShell>

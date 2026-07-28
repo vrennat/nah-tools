@@ -156,4 +156,25 @@
 			{/if}
 		</div>
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">What the JSON tool actually validates</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Formatting, minifying, and validation all run through the browser's built-in JSON parser —
+			no custom grammar, no partial-JSON tolerance. If your document isn't valid JSON, you get the
+			parser's exact error message and the character position where it gave up, which is usually
+			enough to find a stray trailing comma or unescaped quote.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			The size comparison next to the indent selector is a real byte count, not an estimate — it
+			measures the input and the minified output with the Blob API and shows the percentage saved.
+			That number is what you'd actually save shipping minified JSON over the wire.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Tree view is convenient for exploring nested structures but re-renders the whole tree on
+			every input change, so it can lag on documents in the tens-of-megabytes range. Switch to
+			formatted or minified view for very large files — parsing and formatting stay fast even when
+			the tree view doesn't.
+		</p>
+	</div>
 </DevToolShell>

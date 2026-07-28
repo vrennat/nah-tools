@@ -78,4 +78,26 @@
 			{/each}
 		</div>
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How word splitting works across 13 case styles</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Converting between camelCase, snake_case, and Title Case first requires figuring out where
+			one word ends and the next begins. This tool splits on whitespace, punctuation, underscores,
+			and hyphens, plus a regex pass that detects camelCase and PascalCase boundaries — so
+			myVariableName and my-variable-name both tokenize to the same three words before being
+			rejoined in the target format.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Title Case and Capitalize Each Word look similar but follow different rules. Title Case
+			applies real editorial convention: short function words (a, an, and, the, of, in, and a
+			dozen others) stay lowercase unless they open or close the string. Capitalize Each Word
+			skips that logic and uppercases the first letter of every word, full stop.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Word splitting is a heuristic, not a parser — it doesn't know your project's naming
+			conventions. Acronym-heavy identifiers or a mix of digits and letters can tokenize in ways
+			you didn't expect. Check the output before pasting it into a codebase-wide rename.
+		</p>
+	</div>
 </DevToolShell>

@@ -211,4 +211,25 @@
 			</div>
 		{/if}
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How JWT decoding and verification work</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			A JWT is three Base64URL segments — header, payload, signature — joined by dots. Decoding
+			just reverses that encoding and parses the resulting JSON; no cryptography is involved. This
+			tool also reads the standard iat, nbf, and exp claims and tells you whether the token is
+			currently valid, expired, or not yet active.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Verification is a separate, optional step that actually checks the signature using the Web
+			Crypto API — HMAC for HS256/384/512 with a shared secret, or RSASSA-PKCS1-v1_5 for
+			RS256/384/512 with a public key in PEM format. Everything runs locally: your secret or key
+			never leaves the browser.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Decoding requires no secret at all — that's by design. JWTs are signed, not encrypted, so
+			anyone can read the payload of a token they intercept. Never put anything in a JWT payload
+			that you wouldn't be comfortable showing to whoever holds the token.
+		</p>
+	</div>
 </DevToolShell>

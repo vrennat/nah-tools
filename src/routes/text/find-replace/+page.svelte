@@ -155,4 +155,26 @@
 			></textarea>
 		</div>
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How find and replace works</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Plain-text mode escapes every regex-special character in your search term before matching,
+			so searching for 3.14 finds the literal string, not "3", any character, then "14." Turn on
+			Regex to search with actual regular expression syntax instead — the escaping step is skipped
+			and your pattern is compiled directly.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Capture groups only work in Regex mode: wrap part of your pattern in parentheses and
+			reference it in the replacement with $1, $2, and so on. To swap the two sides of an email
+			address, for example, search (\\w+)@(\\w+) and replace with $2.$1 — a rearrangement a
+			plain-text find-and-replace can't do.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Whole-word matching wraps your term in word boundaries (\\b) so cat matches the word cat but
+			not category — but it only applies in plain-text mode, since a regex pattern might already
+			include boundaries or intentionally match partial words. Add \\b yourself in Regex mode if
+			you need it.
+		</p>
+	</div>
 </TextToolShell>

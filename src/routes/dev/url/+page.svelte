@@ -234,4 +234,27 @@
 			</div>
 		{/if}
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How URL encoding, decoding, and parsing work</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Encode mode wraps the two built-in JavaScript functions people actually need:
+			encodeURIComponent for a single value going into a query string, and encodeURI for a
+			complete URL where you want to preserve the structural characters (: / ? # & =) and only
+			encode the rest. Pick wrong and a fully-encoded query value ends up double-encoded, or a
+			component-encoded full URL gets mangled — the toggle here makes the choice explicit.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Parse mode accepts either a full URL or a bare query string and breaks it into protocol,
+			host, pathname, hash, and a table of every query parameter — built on the native URL and
+			URLSearchParams classes rather than a hand-rolled parser, so edge cases like repeated keys
+			are handled the way browsers actually handle them.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Decode mode intentionally throws on malformed percent-encoding — a bare % or an invalid hex
+			pair — rather than silently passing it through mangled. That's the same behavior
+			decodeURIComponent has in any JavaScript runtime, surfaced here as a readable error instead
+			of a console exception.
+		</p>
+	</div>
 </DevToolShell>

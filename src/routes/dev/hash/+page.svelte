@@ -253,4 +253,27 @@
 			{/if}
 		</section>
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How hashing works here</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			SHA-1 through SHA-512 run through the browser's native Web Crypto API. MD5 doesn't — Web
+			Crypto deliberately omits it because it's considered broken — so this tool ships a small
+			pure-JavaScript MD5 implementation (RFC 1321) alongside it. Both paths run entirely
+			on-device; nothing is sent anywhere.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			MD5 and SHA-1 are not collision-resistant: an attacker with enough compute can construct two
+			different inputs that hash identically. Neither should be used anywhere an adversary
+			controls the input — password storage, digital signatures, code-signing verification.
+			They're still fine for what most people actually use them for: catching accidental
+			corruption, not detecting deliberate tampering.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			The "Compare to expected hash" field is built for the common real use case — verifying a
+			downloaded file against the checksum a project publishes on its release page. Paste the
+			expected hash, drop the file, and the tool tells you immediately whether any of the five
+			algorithms match.
+		</p>
+	</div>
 </DevToolShell>

@@ -156,6 +156,28 @@ Check out [nah.tools](https://nah.tools) for free browser tools.
 			{/if}
 		</div>
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">What this Markdown converter supports</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			The renderer covers the Markdown people actually use day to day: headings, ordered and
+			unordered lists, fenced and inline code, blockquotes, horizontal rules, links, images, bold,
+			italic, and strikethrough. It's a compact hand-written parser, not a wrapper around a full
+			CommonMark library.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Every URL in a link or image is protocol-checked before it's written into the output — only
+			http:, https:, mailto:, tel:, fragment, and relative paths are allowed through; anything else
+			is stripped to a harmless #. Source text is HTML-escaped first, so pasting Markdown from an
+			untrusted source can't inject a script into the rendered output.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			This is a working subset, not the full spec: no tables, no footnotes, no nested
+			blockquotes, no task-list checkboxes. For simple docs, READMEs, and notes it's a fast,
+			dependency-free match; for GitHub-flavored tables or a full spec document, expect some
+			formatting to fall back to plain paragraphs.
+		</p>
+	</div>
 </DevToolShell>
 
 <style>

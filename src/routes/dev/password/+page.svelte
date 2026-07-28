@@ -289,4 +289,28 @@
 			</div>
 		{/if}
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How password and passphrase generation work</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Every character comes from crypto.getRandomValues, the browser's cryptographically secure
+			random source — not Math.random, which is not safe for anything security-sensitive.
+			Selection also avoids modulo bias: instead of taking a random number mod the pool size
+			(which very slightly favors low values), it rejects out-of-range draws and retries, so every
+			character in the pool is equally likely.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			The strength estimate is entropy in bits, computed from what's actually in the password: it
+			detects which character classes you used (lowercase, uppercase, digits, symbols) and
+			multiplies the pool size by the length. Passphrase entropy is log2 of the actual word-list
+			size per word — this tool's list has 199 words, so each word contributes about 7.6 bits, not
+			a marketing number picked to look impressive.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Entropy estimates assume an attacker knows exactly how the password was generated but not
+			the random draws themselves — the standard assumption in password security. They say
+			nothing about reused passwords, phishing, or a compromised device; a high entropy score
+			doesn't make a password immune to those.
+		</p>
+	</div>
 </DevToolShell>

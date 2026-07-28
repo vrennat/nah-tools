@@ -268,4 +268,26 @@
 			{/if}
 		</div>
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How the regex tester works</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Matching runs on the same RegExp engine your browser uses everywhere else — there's no
+			custom parser standing between what you type and how it behaves. The pattern recompiles on
+			every keystroke against all six JavaScript flags (g, i, m, s, u, y), and the preview
+			highlights every match in the test string live.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Named capture groups — (?&lt;name&gt;...) — show up in the match list alongside numbered
+			groups, and you can reference either in the replacement field: $1 for positional, ${'{name}'}
+			for named. This mirrors exactly how String.replace() resolves them in real code, so what you
+			build here is a direct copy-paste.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Because this is JavaScript's regex engine specifically, subtle behavior differs from PCRE,
+			Python's re, or POSIX regex — lookbehind support, Unicode property escapes, and possessive
+			quantifiers all vary by engine. If the pattern is headed for a different language or
+			database, test it there too before trusting this preview completely.
+		</p>
+	</div>
 </DevToolShell>

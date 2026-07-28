@@ -123,4 +123,27 @@
 			</div>
 		{/if}
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How the summarizer works</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			This is extractive summarization, not AI rewriting: the tool scores every sentence by how
+			often its meaningful words (with common stop words like the, and, of filtered out) recur
+			across the whole document, then keeps the highest-scoring sentences in their original order.
+			It doesn't paraphrase or generate new text — every sentence in the output appears verbatim
+			in the input.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Sentences in the first two positions get a small scoring boost, since lead sentences in
+			articles and reports tend to carry more of the actual topic than sentences buried in the
+			middle. The summary length slider controls what fraction of sentences survive that ranking,
+			from a tight 10% down to a looser 60%.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Because it works purely on word frequency and sentence position, the summarizer does best on
+			prose written in complete, self-contained sentences — articles, reports, essays. It's a poor
+			fit for bulleted notes, chat transcripts, or code-heavy text, where the important
+			information isn't concentrated in frequently repeated words.
+		</p>
+	</div>
 </TextToolShell>

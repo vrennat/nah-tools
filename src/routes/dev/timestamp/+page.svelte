@@ -240,4 +240,26 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How timestamp conversion works</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			The tool has to guess whether a number you paste is Unix seconds or milliseconds, since
+			both are common. It uses a simple threshold: absolute values at or above 10^12 are treated
+			as milliseconds, everything below as seconds. That boundary correctly covers every date from
+			1970 through the year 33658, so it won't misfire on any realistic timestamp.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			The timezone viewer uses Intl.DateTimeFormat with your browser's built-in IANA timezone
+			database — the same data your operating system uses — so the list of zones and their
+			current UTC offsets (including DST) stay accurate without the tool bundling its own timezone
+			data.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Free-text date parsing in the "From date" field goes through the browser's native Date
+			constructor, which reliably handles ISO 8601 (2024-06-15T12:00:00Z) but parses
+			locale-ambiguous formats like 06/15/2024 inconsistently across browsers. Stick to ISO 8601
+			if the result needs to be trustworthy.
+		</p>
+	</div>
 </DevToolShell>

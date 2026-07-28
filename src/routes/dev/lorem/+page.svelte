@@ -121,4 +121,23 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How this lorem ipsum generator works</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Generation uses a fixed classical Latin word bank and a seeded pseudo-random generator, so
+			output varies with the count you ask for while staying reproducible rather than truly
+			random. Sentences get 8–17 words with occasional commas; paragraphs bundle 3–6 sentences.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			The "start with Lorem ipsum" toggle prepends the canonical opening line — Lorem ipsum dolor
+			sit amet, consectetur adipiscing elit — before generating the rest, which is the convention
+			most placeholder-text tools follow and most designers expect to see.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Output is capped at 500 units per generation to keep it instant. If you need more, generate
+			a few batches and concatenate them — there's no daily limit, just a per-request one to keep
+			the page responsive.
+		</p>
+	</div>
 </DevToolShell>

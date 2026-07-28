@@ -84,4 +84,26 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How the counts and time estimates are calculated</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Words are split on whitespace; sentences are counted by runs of text ending in ., !, or ?
+			(with repeated punctuation like ?! collapsed into one); paragraphs are blocks separated by
+			one or more blank lines. All four counters plus character counts (with and without spaces)
+			update as you type, entirely client-side.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Reading time assumes 225 words per minute, a commonly cited average for adult silent reading
+			of general prose; speaking time assumes 130 words per minute, a comfortable presentation
+			pace rather than a rushed one. Both are useful as planning estimates — for a talk, a blog
+			post, or a video script — not as a precise measurement of any specific reader.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Sentence counting is punctuation-based, which means abbreviations like Dr., e.g., or U.S.
+			can each register as a sentence boundary and inflate the count slightly. For most prose the
+			error is small; for text dense with abbreviations, treat the sentence count as an estimate
+			rather than exact.
+		</p>
+	</div>
 </TextToolShell>

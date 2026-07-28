@@ -148,4 +148,26 @@
 			</table>
 		</div>
 	{/if}
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How the line diff is computed</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			This is a classic longest-common-subsequence diff: it finds the longest run of lines that
+			appear in the same relative order in both inputs, then marks everything else as added or
+			removed. That's the same underlying approach line-oriented diff tools use, applied line by
+			line rather than word by word.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			LCS is expensive in memory — a diff table with one cell per pair of lines. Two 2,000-line
+			files already means 4 million cells, which starts to strain a browser tab. Past roughly 2
+			million cells the tool stops and reports the inputs as too large rather than freezing the
+			page; split very large files before diffing them here.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Because comparison happens at the line level, a single changed character turns the whole
+			line into a remove-then-add pair rather than an inline highlight. That's a real limitation
+			for prose written as long paragraphs on one line — reformat to one sentence per line first
+			if you want a more granular diff.
+		</p>
+	</div>
 </DevToolShell>

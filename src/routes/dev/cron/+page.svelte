@@ -134,4 +134,25 @@
 			</div>
 		{/if}
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">How cron expressions are parsed</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			This parser handles the standard 5-field cron syntax — minute, hour, day-of-month, month,
+			day-of-week — with wildcards, step values (*/15), ranges (1-5), and comma lists, plus named
+			months and weekdays (jan, mon). It computes the next several run times from the current
+			moment and writes a plain-English description of the schedule.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			One cron behavior trips people up constantly: when both day-of-month and day-of-week are
+			restricted (not *), most cron implementations — including this one — treat them as OR, not
+			AND. <code class="rounded bg-surface px-1 py-0.5 font-mono text-xs">0 0 1 * MON</code> runs at
+			midnight on the 1st of the month or every Monday, not only when the 1st falls on a Monday.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Next-run times are computed from your browser's local clock and timezone. If the cron job
+			actually executes on a server in a different timezone — the common case — verify the
+			schedule against that server's zone before trusting the preview.
+		</p>
+	</div>
 </DevToolShell>

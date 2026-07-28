@@ -219,4 +219,25 @@
 			{/if}
 		</div>
 	</div>
+
+	<div class="mt-6 space-y-4 rounded-xl border border-border bg-surface-alt p-6">
+		<h2 class="font-display text-lg font-700">What this Base64 tool does differently</h2>
+		<p class="text-sm leading-relaxed text-text-muted">
+			Standard Base64 uses 64 printable characters to represent arbitrary bytes as ASCII text,
+			which is why it shows up in data URIs, email attachments, and JWT segments. This tool
+			encodes by converting your text to UTF-8 bytes first, then Base64-encoding those bytes —
+			the reverse of the naive approach most quick implementations use.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			The naive shortcut — calling btoa() directly on a string — only works for Latin-1
+			characters (code points 0–255). Paste in an emoji or a CJK character and btoa() throws,
+			because those characters need more than one byte. Encoding the UTF-8 byte array first
+			sidesteps that failure entirely, so any Unicode input round-trips correctly.
+		</p>
+		<p class="text-sm leading-relaxed text-text-muted">
+			The URL-safe toggle swaps + for -, / for _, and strips = padding, which matters when the
+			output has to sit inside a query string or path segment without additional escaping. Base64
+			is an encoding, not encryption — anyone can decode it, so it isn't a place to hide secrets.
+		</p>
+	</div>
 </DevToolShell>
