@@ -38,7 +38,7 @@
 <BreadcrumbSchema items={breadcrumbItems} />
 
 <svelte:head>
-	<title>Free Audio Tools — Convert, Merge, Normalize | nah</title>
+	<title>Free Audio Tools — Convert, Merge, Normalize | nah.tools</title>
 	<meta
 		name="description"
 		content="Free online audio tools. Convert between MP3, WAV, OGG, M4A, FLAC, and AAC, merge multiple tracks, and normalize volume — all in your browser. Files never leave your device."

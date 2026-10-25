@@ -76,7 +76,7 @@
 </script>
 
 <svelte:head>
-	<title>Free Invoice Generator — nah</title>
+	<title>Free Invoice Generator | nah.tools</title>
 	<meta
 		name="description"
 		content="Create professional invoices, estimates, and receipts for free. No signup, no watermarks, no tracking. PDF export, accounting CSV, e-invoice support. Everything stays in your browser."

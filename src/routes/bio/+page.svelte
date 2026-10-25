@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Link in Bio — nah</title>
+	<title>Link in Bio | nah.tools</title>
 	<meta
 		name="description"
 		content="Create a free link-in-bio page. No signup, no monthly fees, no tracking. Just a clean profile you control."

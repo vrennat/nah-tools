@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>{page.status} — nah</title>
+	<title>{page.status} | nah.tools</title>
 </svelte:head>
 
 <div class="flex flex-col items-center justify-center py-24 text-center">

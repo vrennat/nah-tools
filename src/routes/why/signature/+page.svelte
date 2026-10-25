@@ -12,7 +12,7 @@
 />
 
 <svelte:head>
-	<title>The Email Signature Shakedown — nah</title>
+	<title>The Email Signature Shakedown | nah.tools</title>
 	<meta
 		name="description"
 		content="Email signature builders charge $9–189/month for what is literally an HTML table. Here's how the industry works, who gets hurt, and why your browser can do it for free."

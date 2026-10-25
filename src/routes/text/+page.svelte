@@ -13,7 +13,7 @@
 <BreadcrumbSchema items={breadcrumbItems} />
 
 <svelte:head>
-	<title>Text Tools — Free Online Word Counter &amp; Find Replace | nah</title>
+	<title>Text Tools — Free Online Word Counter &amp; Find Replace | nah.tools</title>
 	<meta
 		name="description"
 		content="Free text and content tools that run entirely in your browser. Word and character counter, bulk find and replace with regex. No signup, no uploads."
@@ -21,7 +21,7 @@
 	<link rel="canonical" href="https://nah.tools/text" />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://nah.tools/text" />
-	<meta property="og:title" content="Text Tools — Free Online Utilities | nah" />
+	<meta property="og:title" content="Text Tools — Free Online Utilities | nah.tools" />
 	<meta
 		property="og:description"
 		content="Free text tools that run entirely in your browser. No signup, no uploads."

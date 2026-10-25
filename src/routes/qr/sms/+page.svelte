@@ -23,7 +23,7 @@
 <FAQSchema {faqs} />
 
 <svelte:head>
-	<title>Free SMS QR Code Generator — Text Message QR Code — nah</title>
+	<title>Free SMS QR Code Generator — Text Message QR Code | nah.tools</title>
 	<meta name="description" content="Create a free QR code that opens a pre-filled text message. Set the phone number and message. Scan to text instantly. No signup, no expiration." />
 </svelte:head>
 

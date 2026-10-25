@@ -13,7 +13,7 @@
 <BreadcrumbSchema items={breadcrumbItems} />
 
 <svelte:head>
-	<title>Guides — How to Get Things Done Without the SaaS Upsell | nah</title>
+	<title>Guides — How to Get Things Done Without the SaaS Upsell | nah.tools</title>
 	<meta
 		name="description"
 		content="Practical how-to guides for PDFs, video, audio, resumes, and online privacy — written around the free tools that do the job, no upload required."
@@ -21,7 +21,7 @@
 	<link rel="canonical" href="https://nah.tools/guides" />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://nah.tools/guides" />
-	<meta property="og:title" content="Guides — How to Get Things Done Without the SaaS Upsell | nah" />
+	<meta property="og:title" content="Guides — How to Get Things Done Without the SaaS Upsell | nah.tools" />
 	<meta
 		property="og:description"
 		content="Practical how-to guides for PDFs, video, audio, resumes, and online privacy — written around the free tools that do the job."

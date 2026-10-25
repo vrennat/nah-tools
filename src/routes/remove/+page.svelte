@@ -49,7 +49,7 @@
 </script>
 
 <svelte:head>
-	<title>Data Broker Opt-Out Requests — nah</title>
+	<title>Data Broker Opt-Out Requests | nah.tools</title>
 	<meta
 		name="description"
 		content="Prepare data broker opt-out requests in your browser. Review and submit requests yourself, with broker-specific guides and progress tracking."

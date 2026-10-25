@@ -12,7 +12,7 @@
 />
 
 <svelte:head>
-	<title>The Privacy Policy Shakedown — nah</title>
+	<title>The Privacy Policy Shakedown | nah.tools</title>
 	<meta
 		name="description"
 		content="$20/month for template mail-merge on a document you are legally required to have."

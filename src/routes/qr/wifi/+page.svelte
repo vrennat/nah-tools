@@ -33,7 +33,7 @@
 <FAQSchema {faqs} />
 
 <svelte:head>
-	<title>Free WiFi QR Code Generator — nah</title>
+	<title>Free WiFi QR Code Generator | nah.tools</title>
 	<meta name="description" content="Create a free WiFi QR code so guests can join your network instantly. No signup, no expiration. Enter your network name and password, download, and print." />
 </svelte:head>
 
