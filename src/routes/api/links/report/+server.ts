@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB, getKV, getRedirect, reportLink, invalidateRedirectCache } from '$server/db';
 import { checkRateLimit } from '$server/safety';
@@ -12,7 +13,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(429, 'Rate limit exceeded. Try again later.');
 	}
 
-	const body = (await request.json()) as { short_code: string; reason: string };
+	const body = (await readJson(request)) as { short_code: string; reason: string };
 	const { short_code, reason } = body;
 
 	if (!short_code || typeof short_code !== 'string') {

@@ -5,18 +5,22 @@
 import { error } from '@sveltejs/kit';
 import type { BioProfile, BioLink, BioClickStats } from '$bio/types';
 import { verifyPassphrase } from '$server/auth';
+import { withPassphraseLimit, type LimitEvent } from '$server/passphrase-limit';
 
 /** Look up a profile and verify passphrase, or throw */
 export async function authenticateProfile(
 	db: D1Database,
 	handle: string,
-	passphrase: string
+	passphrase: string,
+	event: LimitEvent
 ): Promise<BioProfile> {
 	const profile = await getProfile(db, handle);
 	if (!profile) throw error(404, 'Profile not found');
-	const valid = await verifyPassphrase(passphrase, profile.passphrase_hash);
-	if (!valid) throw error(403, 'Invalid passphrase');
-	return profile;
+	return withPassphraseLimit(event, `bio:${profile.handle}`, async () => {
+		const valid = await verifyPassphrase(passphrase, profile.passphrase_hash);
+		if (!valid) throw error(403, 'Invalid passphrase');
+		return profile;
+	});
 }
 
 /** Get a profile by handle */

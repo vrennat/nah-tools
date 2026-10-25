@@ -1,12 +1,13 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB } from '$server/db';
 import { authenticateProfile, reorderBioLinks } from '$server/bio-db';
 
-export const POST: RequestHandler = async ({ request, platform }) => {
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		handle: string;
 		passphrase: string;
 		ordered_ids: number[];
@@ -23,7 +24,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'ordered_ids must not exceed 200 entries');
 	}
 
-	await authenticateProfile(db, handle, passphrase);
+	await authenticateProfile(db, handle, passphrase, { platform, request, locals });
 	await reorderBioLinks(db, handle, ordered_ids);
 
 	return json({ success: true });

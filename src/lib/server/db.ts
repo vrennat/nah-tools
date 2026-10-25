@@ -6,6 +6,7 @@
 import { error } from '@sveltejs/kit';
 import type { DynamicCode, ClickLog, ClickStats, UTMParams } from '$qr/types';
 import { verifyPassphrase } from '$server/auth';
+import { withPassphraseLimit, type LimitEvent } from '$server/passphrase-limit';
 
 /** Extract and validate the D1 database binding */
 export function getDB(platform: App.Platform | undefined): D1Database {
@@ -48,13 +49,17 @@ export async function invalidateRedirectCache(
 export async function authenticateRedirect(
 	db: D1Database,
 	shortCode: string,
-	passphrase: string
+	passphrase: string,
+	event: LimitEvent
 ): Promise<DynamicCode> {
 	const redirect = await getRedirect(db, shortCode);
 	if (!redirect) throw error(404, 'Dynamic code not found');
-	const valid = await verifyPassphrase(passphrase, redirect.passphrase_hash);
-	if (!valid) throw error(403, 'Invalid passphrase');
-	return redirect;
+	// Throttle on the canonical short_code so a code and its custom alias share one counter.
+	return withPassphraseLimit(event, `redirect:${redirect.short_code}`, async () => {
+		const valid = await verifyPassphrase(passphrase, redirect.passphrase_hash);
+		if (!valid) throw error(403, 'Invalid passphrase');
+		return redirect;
+	});
 }
 
 /** Generate an 8-char alphanumeric short code */
