@@ -154,10 +154,13 @@ export function validateHandle(handle: string): { valid: boolean; reason?: strin
 	return { valid: true };
 }
 
-// Simple in-memory rate limiter (resets per Worker isolate)
+// Fallback in-memory rate limiter (per Worker isolate), used when KV is absent
+// (local dev, tests) or a KV call fails.
 const rateLimitMap = new Map<string, number[]>();
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const RATE_LIMIT_MAX = 10; // 10 creates per IP per hour
+/** KV rejects expirations less than 60 seconds out. */
+const MIN_KV_TTL = 60;
 
 export interface RateLimitOptions {
 	/** Time window in milliseconds (default: 1 hour) */
@@ -166,30 +169,98 @@ export interface RateLimitOptions {
 	max?: number;
 }
 
+function checkMemory(key: string, cost: number, windowMs: number, max: number): boolean {
+	const now = Date.now();
+	const recent = (rateLimitMap.get(key) ?? []).filter((t) => now - t < windowMs);
+	if (recent.length + cost > max) {
+		rateLimitMap.set(key, recent);
+		return false;
+	}
+	for (let i = 0; i < cost; i++) recent.push(now);
+	rateLimitMap.set(key, recent);
+	return true;
+}
+
+interface WindowCounter {
+	n: number;
+	/** Epoch ms when this window ends */
+	reset: number;
+}
+
+/**
+ * Per-client-IP limit for a named scope (`create`, `report`, `click:<handle>`),
+ * keyed `<scope>:<CF-Connecting-IP>`. Scopes keep unrelated actions from
+ * spending one shared quota.
+ *
+ * Without CF-Connecting-IP (never on Cloudflare's edge; possible in local or
+ * direct-to-origin requests) every such client would share one fleet-wide KV
+ * bucket, so the limit is skipped, matching passphrase-limit.ts.
+ */
+export async function checkIpRateLimit(
+	platform: App.Platform | undefined,
+	request: Request,
+	scope: string,
+	cost = 1,
+	opts?: RateLimitOptions
+): Promise<boolean> {
+	const ip = request.headers.get('cf-connecting-ip');
+	if (!ip) return true;
+	return checkRateLimit(platform, `${scope}:${ip}`, cost, opts);
+}
+
 /**
  * Returns true if the request is within limits, false if it should be blocked.
  * cost: how many "tokens" to consume (default 1). Bulk endpoints pass links.length
  * so that one bulk request consumes proportional quota.
  * The key should be namespaced when called from multiple contexts (e.g. "mcp:1.2.3.4").
+ *
+ * With platform.env.KV this is a fixed-window counter shared across isolates
+ * (key `rl:<key>`, window starts at the first hit). Trade-offs versus the
+ * per-isolate sliding window it replaces:
+ * - Fixed window: a client can spend `max` at the end of one window and `max`
+ *   again at the start of the next (up to 2x burst at the boundary).
+ * - KV is eventually consistent (~60s across locations) and allows 1 write/sec
+ *   per key, so concurrent or geographically spread requests can undercount.
+ *   This is a coarse brake, not an exact quota.
+ * - The read-then-write is not atomic; racing requests may both pass.
+ * - KV TTLs must be >= 60s, so a counter can linger up to 60s past `reset`;
+ *   expired counters are ignored by comparing `reset`, not by TTL.
+ * When KV is absent (local dev) or a KV call throws, this logs and falls back
+ * to the in-memory sliding window so a KV outage never blocks requests outright.
  */
-export function checkRateLimit(key: string, cost = 1, opts?: RateLimitOptions): boolean {
+export async function checkRateLimit(
+	platform: App.Platform | undefined,
+	key: string,
+	cost = 1,
+	opts?: RateLimitOptions
+): Promise<boolean> {
 	const windowMs = opts?.windowMs ?? RATE_LIMIT_WINDOW_MS;
 	const max = opts?.max ?? RATE_LIMIT_MAX;
+	const kv = platform?.env?.KV;
+	if (!kv) return checkMemory(key, cost, windowMs, max);
+
+	const kvKey = `rl:${key}`;
 	const now = Date.now();
-	const timestamps = rateLimitMap.get(key) ?? [];
-
-	// Clean old entries
-	const recent = timestamps.filter((t) => now - t < windowMs);
-
-	if (recent.length + cost > max) {
-		rateLimitMap.set(key, recent);
-		return false;
+	let prev: WindowCounter | null;
+	try {
+		const c = await kv.get<WindowCounter>(kvKey, 'json');
+		prev = c && c.reset > now ? c : null;
+	} catch (e) {
+		// No project logger exists for server code; console.error is the convention here.
+		console.error('rate-limit: KV read failed, using in-memory limiter', kvKey, e);
+		return checkMemory(key, cost, windowMs, max);
 	}
 
-	// Record one timestamp per cost unit so future checks are consistent
-	for (let i = 0; i < cost; i++) {
-		recent.push(now);
+	const used = prev?.n ?? 0;
+	if (used + cost > max) return false;
+
+	const next: WindowCounter = { n: used + cost, reset: prev?.reset ?? now + windowMs };
+	const ttl = Math.max(MIN_KV_TTL, Math.ceil((next.reset - now) / 1000));
+	try {
+		await kv.put(kvKey, JSON.stringify(next), { expirationTtl: ttl });
+	} catch (e) {
+		console.error('rate-limit: KV write failed, using in-memory limiter', kvKey, e);
+		return checkMemory(key, cost, windowMs, max);
 	}
-	rateLimitMap.set(key, recent);
 	return true;
 }

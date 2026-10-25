@@ -12,6 +12,7 @@
 	import StyleControls from '$components/StyleControls.svelte';
 	import DownloadBar from '$components/DownloadBar.svelte';
 	import BatchGenerator from '$components/BatchGenerator.svelte';
+	import Turnstile, { turnstileEnabled } from '$components/Turnstile.svelte';
 
 	let qrType: QRType = $state('url');
 	let encodedData = $state('');
@@ -63,8 +64,13 @@
 		}
 	});
 
+	let turnstileToken = $state<string | undefined>();
+	let turnstile: Turnstile | undefined = $state();
+
+	let awaitingToken = $derived(turnstileEnabled && !turnstileToken);
+
 	async function createDynamic() {
-		if (!canCreateDynamic) return;
+		if (!canCreateDynamic || awaitingToken) return;
 		dynamicLoading = true;
 		dynamicError = '';
 
@@ -75,7 +81,8 @@
 				body: JSON.stringify({
 					url: encodedData,
 					passphrase,
-					label: dynamicLabel || undefined
+					label: dynamicLabel || undefined,
+					turnstile_token: turnstileToken
 				})
 			});
 			const json = await res.json() as {
@@ -92,6 +99,8 @@
 		} catch {
 			dynamicError = 'Network error. Please try again.';
 		} finally {
+			// Tokens are single-use: fetch a fresh one after every attempt.
+			turnstile?.reset();
 			dynamicLoading = false;
 		}
 	}
@@ -203,18 +212,21 @@
 										/>
 									</div>
 
+									<Turnstile bind:token={turnstileToken} bind:this={turnstile} action="qr-dynamic" />
 									{#if dynamicError}
 										<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{dynamicError}</p>
 									{/if}
 
 									<button
 										type="button"
-										disabled={!canCreateDynamic}
+										disabled={!canCreateDynamic || awaitingToken}
 										onclick={createDynamic}
 										class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 									>
 										{#if dynamicLoading}
 											Creating...
+										{:else if awaitingToken}
+											Verifying…
 										{:else}
 											Create Dynamic QR Code
 										{/if}

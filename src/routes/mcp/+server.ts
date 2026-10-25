@@ -24,9 +24,13 @@ function ensureAcceptHeader(request: Request): Request {
 // Stateless: create a fresh server + transport per request.
 // Cloudflare Workers are stateless, so no session management.
 // enableJsonResponse avoids SSE streaming issues on Workers.
-async function handleMcpRequest(request: Request, clientIp: string): Promise<Response> {
+async function handleMcpRequest(
+	request: Request,
+	clientIp: string,
+	platform: App.Platform | undefined
+): Promise<Response> {
 	// 30 requests/min per IP, namespaced so it doesn't interfere with link-creation limits.
-	if (!checkRateLimit(`mcp:${clientIp}`, 1, { windowMs: 60_000, max: 30 })) {
+	if (!(await checkRateLimit(platform, `mcp:${clientIp}`, 1, { windowMs: 60_000, max: 30 }))) {
 		return new Response(JSON.stringify({ error: 'Rate limit exceeded. Try again in a minute.' }), {
 			status: 429,
 			headers: { 'Content-Type': 'application/json' }
@@ -48,14 +52,14 @@ async function handleMcpRequest(request: Request, clientIp: string): Promise<Res
 	}
 }
 
-export const POST: RequestHandler = async ({ request, getClientAddress }) => {
-	return handleMcpRequest(request, getClientAddress());
+export const POST: RequestHandler = async ({ request, getClientAddress, platform }) => {
+	return handleMcpRequest(request, getClientAddress(), platform);
 };
 
-export const GET: RequestHandler = async ({ request, getClientAddress }) => {
-	return handleMcpRequest(request, getClientAddress());
+export const GET: RequestHandler = async ({ request, getClientAddress, platform }) => {
+	return handleMcpRequest(request, getClientAddress(), platform);
 };
 
-export const DELETE: RequestHandler = async ({ request, getClientAddress }) => {
-	return handleMcpRequest(request, getClientAddress());
+export const DELETE: RequestHandler = async ({ request, getClientAddress, platform }) => {
+	return handleMcpRequest(request, getClientAddress(), platform);
 };

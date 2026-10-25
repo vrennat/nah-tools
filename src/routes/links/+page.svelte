@@ -2,6 +2,7 @@
 	import type { QRStyleOptions } from '$qr/types';
 	import QRPreview from '$components/QRPreview.svelte';
 	import DownloadBar from '$components/DownloadBar.svelte';
+	import Turnstile, { turnstileEnabled } from '$components/Turnstile.svelte';
 	import { debounce } from '$utils/debounce';
 	import { normalizeUrl } from '$utils/url';
 
@@ -119,8 +120,16 @@
 		debouncedCheckAlias(alias);
 	});
 
+	let turnstileToken = $state<string | undefined>();
+	let turnstile: Turnstile | undefined = $state();
+	let bulkTurnstileToken = $state<string | undefined>();
+	let bulkTurnstile: Turnstile | undefined = $state();
+
+	let awaitingToken = $derived(turnstileEnabled && !turnstileToken);
+	let awaitingBulkToken = $derived(turnstileEnabled && !bulkTurnstileToken);
+
 	async function handleCreate() {
-		if (!canCreate) return;
+		if (!canCreate || awaitingToken) return;
 		loading = true;
 		error = '';
 
@@ -135,7 +144,8 @@
 					alias: alias || undefined,
 					passphrase: passphrase || undefined,
 					label: label || undefined,
-					expires_at: expiresAt || undefined
+					expires_at: expiresAt || undefined,
+					turnstile_token: turnstileToken
 				})
 			});
 			const json = await res.json() as {
@@ -152,6 +162,8 @@
 		} catch {
 			error = 'Network error. Please try again.';
 		} finally {
+			// Tokens are single-use: fetch a fresh one after every attempt.
+			turnstile?.reset();
 			loading = false;
 		}
 	}
@@ -295,7 +307,7 @@
 	}
 
 	async function handleBulkCreate() {
-		if (bulkEntries.length === 0 || bulkLoading) return;
+		if (bulkEntries.length === 0 || bulkLoading || awaitingBulkToken) return;
 		bulkLoading = true;
 		bulkError = '';
 		bulkResults = [];
@@ -305,11 +317,14 @@
 			const res = await fetch('/api/links/bulk', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ links: bulkEntries })
+				body: JSON.stringify({ links: bulkEntries, turnstile_token: bulkTurnstileToken })
 			});
-			const json = await res.json() as { results: { short_url: string; destination: string; error?: string }[] };
+			const json = await res.json() as {
+				results: { short_url: string; destination: string; error?: string }[];
+				message?: string;
+			};
 			if (!res.ok) {
-				bulkError = 'Bulk creation failed. Please try again.';
+				bulkError = json.message || 'Bulk creation failed. Please try again.';
 				return;
 			}
 			bulkResults = json.results;
@@ -317,6 +332,7 @@
 		} catch {
 			bulkError = 'Network error. Please try again.';
 		} finally {
+			bulkTurnstile?.reset();
 			bulkLoading = false;
 		}
 	}
@@ -539,18 +555,21 @@
 						</div>
 					</details>
 
+					<Turnstile bind:token={turnstileToken} bind:this={turnstile} action="link" />
 					{#if error}
 						<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{error}</p>
 					{/if}
 
 					<button
 						type="button"
-						disabled={!canCreate}
+						disabled={!canCreate || awaitingToken}
 						onclick={handleCreate}
 						class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 					>
 						{#if loading}
 							Creating...
+						{:else if awaitingToken}
+							Verifying…
 						{:else}
 							Shorten Link
 						{/if}
@@ -757,11 +776,13 @@
 						<button
 							type="button"
 							class="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
-							disabled={bulkLoading}
+							disabled={bulkLoading || awaitingBulkToken}
 							onclick={handleBulkCreate}
 						>
 							{#if bulkLoading}
 								Creating {bulkProgress.current}/{bulkProgress.total}...
+							{:else if awaitingBulkToken}
+								Verifying…
 							{:else}
 								Create All Links
 							{/if}
@@ -777,6 +798,7 @@
 					</div>
 				{/if}
 
+				<Turnstile bind:token={bulkTurnstileToken} bind:this={bulkTurnstile} action="link-bulk" />
 				{#if bulkError}
 					<p class="text-sm text-error">{bulkError}</p>
 				{/if}

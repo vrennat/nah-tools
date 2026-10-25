@@ -3,15 +3,12 @@ import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB } from '$server/db';
 import { getProfile, logBioClick } from '$server/bio-db';
-import { checkRateLimit } from '$server/safety';
+import { checkIpRateLimit } from '$server/safety';
+
+/** Clicks logged per IP per profile per hour. */
+const CLICK_LIMIT_PER_HOUR = 60;
 
 export const POST: RequestHandler = async ({ request, platform }) => {
-	// Rate-limit click logging to prevent artificial inflation
-	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-	if (!checkRateLimit(ip)) {
-		throw error(429, 'Rate limit exceeded. Try again later.');
-	}
-
 	const db = getDB(platform);
 
 	const body = (await readJson(request)) as {
@@ -21,8 +18,22 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 	const { handle, link_id } = body;
 
-	if (!handle || !link_id) {
+	if (!handle || typeof handle !== 'string' || !link_id) {
 		throw error(400, 'handle and link_id are required');
+	}
+	if (handle.length > 32) {
+		throw error(400, 'Invalid handle');
+	}
+
+	// Rate-limit click logging to prevent artificial inflation. Scoped per
+	// profile so a visitor (or a shared NAT) browsing several bio pages is not
+	// throttled across them, and kept separate from the create quota.
+	if (
+		!(await checkIpRateLimit(platform, request, `click:${handle.toLowerCase()}`, 1, {
+			max: CLICK_LIMIT_PER_HOUR
+		}))
+	) {
+		throw error(429, 'Rate limit exceeded. Try again later.');
 	}
 
 	// Only log clicks for active profiles — prevents inflating stats for deactivated profiles
