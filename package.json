@@ -33,6 +33,7 @@
 		"deploy:redirect": "cd redirect-worker && wrangler deploy",
 		"db:migrate:local": "for f in migrations/*.sql; do wrangler d1 execute nah-tools-db --local --file=$f; done",
 		"db:migrate:prod": "for f in migrations/*.sql; do wrangler d1 execute nah-tools-db --remote --file=$f; done",
+		"cf-typegen": "wrangler types --strict-vars=false --include-runtime=false",
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},
