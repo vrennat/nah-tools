@@ -95,9 +95,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'Passphrase must be at least 8 characters');
 	}
 
-	// Validate avatar URL if provided
-	if (avatar_url) {
-		const safety = await validateUrlSafety(normalizeUrl(avatar_url), db);
+	// Validate avatar URL if provided; store the same normalized value that was checked
+	const normalizedAvatar = avatar_url ? normalizeUrl(avatar_url) : null;
+	if (normalizedAvatar) {
+		const safety = await validateUrlSafety(normalizedAvatar, db);
 		if (!safety.safe) {
 			throw error(400, safety.reason || 'Avatar URL is not allowed');
 		}
@@ -110,7 +111,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		normalizedHandle,
 		display_name,
 		bio ?? null,
-		avatar_url ?? null,
+		normalizedAvatar,
 		theme ?? 'minimal',
 		passphraseHash
 	);
@@ -172,9 +173,10 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		throw error(400, `Invalid theme. Valid themes: ${[...VALID_THEME_IDS].join(', ')}`);
 	}
 
-	// Validate avatar URL if changing
+	// Validate avatar URL if changing; store the same normalized value that was checked
 	if (fields.avatar_url) {
-		const safety = await validateUrlSafety(normalizeUrl(fields.avatar_url), db);
+		fields.avatar_url = normalizeUrl(fields.avatar_url);
+		const safety = await validateUrlSafety(fields.avatar_url, db);
 		if (!safety.safe) {
 			throw error(400, safety.reason || 'Avatar URL is not allowed');
 		}
