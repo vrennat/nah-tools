@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import ToolShell from '$components/ToolShell.svelte';
 	import MediaDropZone from '$components/media/MediaDropZone.svelte';
@@ -52,6 +53,11 @@
 	const selectedModel = $derived(
 		AVAILABLE_TRANSCRIBE_MODELS.find((m) => m.id === selectedModelId) ?? DEFAULT_TRANSCRIBE_MODEL
 	);
+
+	onDestroy(() => {
+		// Dynamic import keeps the worker bundle out of the initial page load.
+		void import('$transcribe/client').then((m) => m.terminate());
+	});
 
 	const canTranscribe = $derived(!!file && phase === 'idle');
 
