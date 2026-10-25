@@ -87,7 +87,7 @@
 </script>
 
 <svelte:head>
-	<title>DMCA Notice Generator — nah</title>
+	<title>DMCA Notice Generator | nah.tools</title>
 	<meta name="description" content="Generate a DMCA compliance statement for your website to handle copyright infringement claims." />
 </svelte:head>
 

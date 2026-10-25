@@ -105,7 +105,7 @@
 </script>
 
 <svelte:head>
-	<title>Free QR Code Generator — nah</title>
+	<title>Free QR Code Generator | nah.tools</title>
 	<meta name="description" content="Free QR code generator for URLs, WiFi, vCards, email, phone and SMS. Runs in your browser, no signup, codes never expire. Download PNG, SVG or PDF." />
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		"@context": "https://schema.org",

@@ -89,7 +89,7 @@
 </script>
 
 <svelte:head>
-	<title>Privacy Policy Generator — nah</title>
+	<title>Privacy Policy Generator | nah.tools</title>
 	<meta name="description" content="Generate a professional privacy policy that complies with GDPR, CCPA, and other regulations." />
 </svelte:head>
 

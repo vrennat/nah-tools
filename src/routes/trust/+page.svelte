@@ -1,10 +1,10 @@
 <svelte:head>
-	<title>How it works — nah</title>
+	<title>How it works | nah.tools</title>
 	<meta
 		name="description"
 		content="How nah.tools stays free: client-side architecture, $5/month infrastructure, no accounts, no tracking, open source. Here's the proof."
 	/>
-	<meta property="og:title" content="How it works — nah" />
+	<meta property="og:title" content="How it works | nah.tools" />
 	<meta property="og:description" content="How nah.tools stays free forever. Client-side tools, $5/month infrastructure, open source code." />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://nah.tools/trust" />
