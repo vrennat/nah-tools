@@ -66,7 +66,7 @@ Extends the existing compression worker at `src/lib/compress/worker.ts` with a `
 - `pairs.ts` — registry of 17 conversion pairs with metadata (slug, accept types, SEO text, codec mapping)
 - `client.ts` — Comlink wrapper calling the extended compress worker
 
-Supported conversion matrix uses `@jsquash/*` codecs (JPEG, PNG, WebP, AVIF, JXL, OxiPNG), `heic2any` for HEIC/HEIF, and `createImageBitmap()` fallback for BMP/GIF/TIFF. SVG rasterization via OffscreenCanvas. The dynamic route `/convert/[pair]` validates slugs against the pairs registry.
+Supported conversion matrix uses `@jsquash/*` codecs (JPEG, PNG, WebP, AVIF, JXL, OxiPNG), `heic2any` for HEIC/HEIF, and `createImageBitmap()` fallback for BMP/GIF/TIFF. SVG is rasterized on the main thread (`src/lib/compress/svg-raster.ts`, img -> canvas) because `createImageBitmap()` rejects SVG inside workers. The dynamic route `/convert/[pair]` validates slugs against the pairs registry.
 
 ### Legal document generation (client-side only)
 

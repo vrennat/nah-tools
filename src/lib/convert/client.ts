@@ -1,6 +1,7 @@
 import * as Comlink from 'comlink';
 import type { WorkerApi } from '$compress/worker';
 import type { CodecName, CompressionResult } from '$compress/types';
+import { isSvg, rasterizeSvg } from '$compress/svg-raster';
 import type { ConversionResult } from './types';
 
 let worker: Worker | null = null;
@@ -26,12 +27,22 @@ export async function convertFile(
 	const remote = getApi();
 	const buffer = await file.arrayBuffer();
 
-	const result = await remote.convert(
-		Comlink.transfer(buffer, [buffer]),
-		sourceMimeType,
-		targetCodec,
-		quality
-	);
+	let result: CompressionResult;
+	if (isSvg(sourceMimeType)) {
+		const imageData = await rasterizeSvg(buffer);
+		result = await remote.compressFromImageData(
+			Comlink.transfer(imageData, [imageData.data.buffer]),
+			targetCodec,
+			quality
+		);
+	} else {
+		result = await remote.convert(
+			Comlink.transfer(buffer, [buffer]),
+			sourceMimeType,
+			targetCodec,
+			quality
+		);
+	}
 
 	const blob = new Blob([result.buffer], { type: result.mimeType });
 
