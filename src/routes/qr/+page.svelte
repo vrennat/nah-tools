@@ -12,7 +12,7 @@
 	import StyleControls from '$components/StyleControls.svelte';
 	import DownloadBar from '$components/DownloadBar.svelte';
 	import BatchGenerator from '$components/BatchGenerator.svelte';
-	import Turnstile from '$components/Turnstile.svelte';
+	import Turnstile, { turnstileEnabled } from '$components/Turnstile.svelte';
 
 	let qrType: QRType = $state('url');
 	let encodedData = $state('');
@@ -67,8 +67,10 @@
 	let turnstileToken = $state<string | undefined>();
 	let turnstile: Turnstile | undefined = $state();
 
+	let awaitingToken = $derived(turnstileEnabled && !turnstileToken);
+
 	async function createDynamic() {
-		if (!canCreateDynamic) return;
+		if (!canCreateDynamic || awaitingToken) return;
 		dynamicLoading = true;
 		dynamicError = '';
 
@@ -217,12 +219,14 @@
 
 									<button
 										type="button"
-										disabled={!canCreateDynamic}
+										disabled={!canCreateDynamic || awaitingToken}
 										onclick={createDynamic}
 										class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 									>
 										{#if dynamicLoading}
 											Creating...
+										{:else if awaitingToken}
+											Verifying…
 										{:else}
 											Create Dynamic QR Code
 										{/if}

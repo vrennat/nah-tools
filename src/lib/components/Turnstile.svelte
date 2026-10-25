@@ -2,7 +2,8 @@
 	Cloudflare Turnstile widget (explicit rendering, appearance: interaction-only,
 	so most visitors never see it).
 
-	Usage: <Turnstile bind:token bind:this={ts} /> then send `turnstile_token: token`
+	Usage: <Turnstile bind:token bind:this={ts} /> then send `turnstile_token: token`.
+	While `turnstileEnabled && !token`, keep submit disabled ("Verifying…").
 	and call ts.reset() after every submission (tokens are single-use, 300s TTL).
 
 	When PUBLIC_TURNSTILE_SITE_KEY is unset at build time this renders nothing and
@@ -10,6 +11,16 @@
 	TURNSTILE_SECRET_KEY is also unset, so set the site key first when deploying.
 -->
 <script lang="ts" module>
+	import * as publicEnv from '$env/static/public';
+	// Namespace import: a named import of an unset variable fails the build, and
+	// $env/dynamic/public is unavailable on these prerendered pages. The cast is
+	// needed because the generated type omits unset variables.
+	const siteKey: string | undefined =
+		(publicEnv as Record<string, string | undefined>).PUBLIC_TURNSTILE_SITE_KEY || undefined;
+
+	/** True when the widget renders; forms should wait for a token before submitting. */
+	export const turnstileEnabled = !!siteKey;
+
 	interface TurnstileApi {
 		render(el: HTMLElement, opts: Record<string, unknown>): string;
 		reset(id: string): void;
@@ -40,12 +51,6 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import * as publicEnv from '$env/static/public';
-	// Namespace import: a named import of an unset variable fails the build, and
-	// $env/dynamic/public is unavailable on these prerendered pages. The cast is
-	// needed because the generated type omits unset variables.
-	const siteKey: string | undefined =
-		(publicEnv as Record<string, string | undefined>).PUBLIC_TURNSTILE_SITE_KEY || undefined;
 
 	let {
 		token = $bindable<string | undefined>(undefined),

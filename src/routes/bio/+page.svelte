@@ -10,7 +10,7 @@
 	import { debounce } from '$utils/debounce';
 	import { themes } from '$bio/themes';
 	import BioPreview from '$components/bio/BioPreview.svelte';
-	import Turnstile from '$components/Turnstile.svelte';
+	import Turnstile, { turnstileEnabled } from '$components/Turnstile.svelte';
 
 	let handle = $state('');
 	let displayName = $state('');
@@ -118,8 +118,11 @@
 	let turnstileToken = $state<string | undefined>();
 	let turnstile: Turnstile | undefined = $state();
 
+	let awaitingToken = $derived(turnstileEnabled && !turnstileToken);
+
 	async function handleSubmit(e: SubmitEvent) {
 		e.preventDefault();
+		if (awaitingToken) return;
 		formError = '';
 		loading = true;
 
@@ -415,11 +418,13 @@
 
 			<button
 				type="submit"
-				disabled={!canCreate}
+				disabled={!canCreate || awaitingToken}
 				class="w-full rounded-full bg-accent px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 			>
 				{#if loading}
 					Creating...
+				{:else if awaitingToken}
+					Verifying…
 				{:else}
 					Create page
 				{/if}

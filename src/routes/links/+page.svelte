@@ -2,7 +2,7 @@
 	import type { QRStyleOptions } from '$qr/types';
 	import QRPreview from '$components/QRPreview.svelte';
 	import DownloadBar from '$components/DownloadBar.svelte';
-	import Turnstile from '$components/Turnstile.svelte';
+	import Turnstile, { turnstileEnabled } from '$components/Turnstile.svelte';
 	import { debounce } from '$utils/debounce';
 	import { normalizeUrl } from '$utils/url';
 
@@ -125,8 +125,11 @@
 	let bulkTurnstileToken = $state<string | undefined>();
 	let bulkTurnstile: Turnstile | undefined = $state();
 
+	let awaitingToken = $derived(turnstileEnabled && !turnstileToken);
+	let awaitingBulkToken = $derived(turnstileEnabled && !bulkTurnstileToken);
+
 	async function handleCreate() {
-		if (!canCreate) return;
+		if (!canCreate || awaitingToken) return;
 		loading = true;
 		error = '';
 
@@ -304,7 +307,7 @@
 	}
 
 	async function handleBulkCreate() {
-		if (bulkEntries.length === 0 || bulkLoading) return;
+		if (bulkEntries.length === 0 || bulkLoading || awaitingBulkToken) return;
 		bulkLoading = true;
 		bulkError = '';
 		bulkResults = [];
@@ -559,12 +562,14 @@
 
 					<button
 						type="button"
-						disabled={!canCreate}
+						disabled={!canCreate || awaitingToken}
 						onclick={handleCreate}
 						class="w-full rounded-full bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
 					>
 						{#if loading}
 							Creating...
+						{:else if awaitingToken}
+							Verifying…
 						{:else}
 							Shorten Link
 						{/if}
@@ -771,11 +776,13 @@
 						<button
 							type="button"
 							class="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
-							disabled={bulkLoading}
+							disabled={bulkLoading || awaitingBulkToken}
 							onclick={handleBulkCreate}
 						>
 							{#if bulkLoading}
 								Creating {bulkProgress.current}/{bulkProgress.total}...
+							{:else if awaitingBulkToken}
+								Verifying…
 							{:else}
 								Create All Links
 							{/if}
