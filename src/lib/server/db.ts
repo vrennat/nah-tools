@@ -234,7 +234,7 @@ export async function getClickLogs(
 	const apiToken = platform?.env?.CF_ANALYTICS_TOKEN;
 
 	if (!accountId || !apiToken) {
-		return getClickLogsFromD1(getDB(platform), shortCode, limit);
+		return [];
 	}
 
 	const code = sanitizeCode(shortCode);
@@ -263,7 +263,7 @@ export async function getClickStats(
 	const apiToken = platform?.env?.CF_ANALYTICS_TOKEN;
 
 	if (!accountId || !apiToken) {
-		return getClickStatsFromD1(getDB(platform), shortCode);
+		return { available: false, total: 0, byCountry: [], byDay: [], byDevice: [], byReferer: [] };
 	}
 
 	const code = sanitizeCode(shortCode);
@@ -283,68 +283,12 @@ export async function getClickStats(
 	]);
 
 	return {
+		available: true,
 		total: (totalResult.data[0]?.total as number) ?? 0,
 		byCountry: countryResult.data as { country: string; count: number }[],
 		byDay: dayResult.data as { date: string; count: number }[],
 		byDevice: deviceResult.data as { device: string; count: number }[],
 		byReferer: refererResult.data as { referer: string; count: number }[]
-	};
-}
-
-/** D1 fallback for click logs (used when Analytics Engine is not configured) */
-async function getClickLogsFromD1(
-	db: D1Database,
-	shortCode: string,
-	limit = 100
-): Promise<ClickLog[]> {
-	const { results } = await db
-		.prepare(
-			'SELECT id, short_code, clicked_at, country, city, region, device_type, referer FROM click_logs WHERE short_code = ? ORDER BY clicked_at DESC LIMIT ?'
-		)
-		.bind(shortCode, limit)
-		.all<ClickLog>();
-	return results;
-}
-
-/** D1 fallback for click stats (used when Analytics Engine is not configured) */
-async function getClickStatsFromD1(db: D1Database, shortCode: string): Promise<ClickStats> {
-	const [totalRow, byCountry, byDay, byDevice, byReferer] = await Promise.all([
-		db
-			.prepare('SELECT COUNT(*) as total FROM click_logs WHERE short_code = ?')
-			.bind(shortCode)
-			.first<{ total: number }>(),
-		db
-			.prepare(
-				'SELECT country, COUNT(*) as count FROM click_logs WHERE short_code = ? AND country IS NOT NULL GROUP BY country ORDER BY count DESC LIMIT 20'
-			)
-			.bind(shortCode)
-			.all<{ country: string; count: number }>(),
-		db
-			.prepare(
-				"SELECT date(clicked_at) as date, COUNT(*) as count FROM click_logs WHERE short_code = ? GROUP BY date(clicked_at) ORDER BY date DESC LIMIT 30"
-			)
-			.bind(shortCode)
-			.all<{ date: string; count: number }>(),
-		db
-			.prepare(
-				'SELECT device_type as device, COUNT(*) as count FROM click_logs WHERE short_code = ? AND device_type IS NOT NULL GROUP BY device_type ORDER BY count DESC'
-			)
-			.bind(shortCode)
-			.all<{ device: string; count: number }>(),
-		db
-			.prepare(
-				"SELECT COALESCE(referer, 'Direct') as referer, COUNT(*) as count FROM click_logs WHERE short_code = ? GROUP BY referer ORDER BY count DESC LIMIT 10"
-			)
-			.bind(shortCode)
-			.all<{ referer: string; count: number }>()
-	]);
-
-	return {
-		total: totalRow?.total ?? 0,
-		byCountry: byCountry.results,
-		byDay: byDay.results,
-		byDevice: byDevice.results,
-		byReferer: byReferer.results
 	};
 }
 
