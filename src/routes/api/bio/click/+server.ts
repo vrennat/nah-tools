@@ -8,7 +8,7 @@ import { checkRateLimit } from '$server/safety';
 export const POST: RequestHandler = async ({ request, platform }) => {
 	// Rate-limit click logging to prevent artificial inflation
 	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-	if (!checkRateLimit(ip)) {
+	if (!(await checkRateLimit(platform, ip))) {
 		throw error(429, 'Rate limit exceeded. Try again later.');
 	}
 
