@@ -136,7 +136,7 @@
 		</svg>
 		<p class="text-sm font-medium text-text">{label}</p>
 		<p class="mt-1 text-xs text-text-muted">
-			{accept === '.pdf' ? 'PDF files' : accept.replace(/\./g, '').toUpperCase()} up to {maxSizeMB}MB
+			{accept === '.pdf' ? 'PDF files' : accept.replace(/\./g, '').replace(/,\s*/g, ', ').toUpperCase()} up to {maxSizeMB}MB
 		</p>
 	</button>
 
