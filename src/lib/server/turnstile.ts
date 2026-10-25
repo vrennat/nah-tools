@@ -1,5 +1,4 @@
 import { error } from '@sveltejs/kit';
-import { dev } from '$app/environment';
 
 /** Verify a Cloudflare Turnstile token */
 export async function verifyTurnstile(
@@ -24,8 +23,12 @@ export async function verifyTurnstile(
 
 /**
  * Enforce Turnstile on a create endpoint.
- * Fails closed: without TURNSTILE_SECRET_KEY outside dev, the request is refused
- * with 503 rather than silently skipping bot protection. In dev it is skipped.
+ *
+ * Bot protection is OFF until both a client Turnstile widget (sending
+ * turnstile_token) and TURNSTILE_SECRET_KEY exist. No client widget exists
+ * yet, so failing closed would break every create; when the secret is missing
+ * this skips verification and warns. With the secret set, a missing token is
+ * 400 and a rejected token is 403.
  */
 export async function requireTurnstile(
 	platform: App.Platform | undefined,
@@ -34,9 +37,9 @@ export async function requireTurnstile(
 ): Promise<void> {
 	const secret = platform?.env?.TURNSTILE_SECRET_KEY;
 	if (!secret) {
-		if (dev) return;
-		console.error('TURNSTILE_SECRET_KEY not configured - refusing request');
-		throw error(503, 'Bot protection is not configured on this server');
+		// No project logger exists for server code; console.warn is the convention here.
+		console.warn('TURNSTILE_SECRET_KEY not configured - Turnstile bot protection is disabled');
+		return;
 	}
 	if (!token) {
 		throw error(400, 'Turnstile verification is required');

@@ -1,13 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { isHttpError } from '@sveltejs/kit';
 
-const env = vi.hoisted(() => ({ dev: false }));
-vi.mock('$app/environment', () => ({
-	get dev() {
-		return env.dev;
-	}
-}));
-
 import { requireTurnstile } from '$server/turnstile';
 
 const platform = (secret?: string) =>
@@ -17,10 +10,9 @@ const request = () => new Request('http://x/', { headers: { 'cf-connecting-ip': 
 const fetchMock = vi.fn();
 
 beforeEach(() => {
-	env.dev = false;
 	fetchMock.mockReset();
 	vi.stubGlobal('fetch', fetchMock);
-	vi.spyOn(console, 'error').mockImplementation(() => {});
+	vi.spyOn(console, 'warn').mockImplementation(() => {});
 });
 afterEach(() => {
 	vi.unstubAllGlobals();
@@ -28,16 +20,10 @@ afterEach(() => {
 });
 
 describe('requireTurnstile', () => {
-	it('fails closed with 503 when the secret is missing outside dev', async () => {
-		const e = await requireTurnstile(platform(), request(), 'tok').catch((x) => x);
-		expect(isHttpError(e, 503)).toBe(true);
-		expect(fetchMock).not.toHaveBeenCalled();
-	});
-
-	it('skips verification in dev when the secret is missing', async () => {
-		env.dev = true;
+	it('skips verification and warns when the secret is missing', async () => {
 		await expect(requireTurnstile(platform(), request(), undefined)).resolves.toBeUndefined();
 		expect(fetchMock).not.toHaveBeenCalled();
+		expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('TURNSTILE_SECRET_KEY'));
 	});
 
 	it('returns 400 when the token is missing', async () => {
