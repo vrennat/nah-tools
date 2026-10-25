@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB } from '$server/db';
 import { hashPassphrase } from '$server/auth';
@@ -20,7 +21,7 @@ const VALID_THEME_IDS = new Set(themes.map((t) => t.id));
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		handle: string;
 		display_name: string;
 		bio?: string;
@@ -141,7 +142,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 export const PUT: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		handle: string;
 		passphrase: string;
 		display_name?: string;
@@ -187,7 +188,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 export const DELETE: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { handle: string; passphrase: string };
+	const body = (await readJson(request)) as { handle: string; passphrase: string };
 	const { handle, passphrase } = body;
 
 	if (!handle || !passphrase) {

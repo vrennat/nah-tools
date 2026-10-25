@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB, generateShortCode, createLink, isAliasAvailable } from '$server/db';
 import { hashPassphrase } from '$server/auth';
@@ -8,7 +9,7 @@ import { normalizeUrl } from '$utils/url';
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		links: Array<{ url: string; alias?: string; label?: string }>;
 		passphrase?: string;
 		turnstile_token?: string;

@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB } from '$server/db';
 import { authenticateProfile, reorderBioLinks } from '$server/bio-db';
@@ -6,7 +7,7 @@ import { authenticateProfile, reorderBioLinks } from '$server/bio-db';
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		handle: string;
 		passphrase: string;
 		ordered_ids: number[];

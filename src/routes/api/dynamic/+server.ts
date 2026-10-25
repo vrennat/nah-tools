@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB, getKV, authenticateRedirect, generateShortCode, createRedirect, updateRedirect, deactivateRedirect, invalidateRedirectCache } from '$server/db';
 import { hashPassphrase } from '$server/auth';
@@ -7,7 +8,7 @@ import { validateUrlSafety, verifyTurnstile, checkRateLimit } from '$server/safe
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { url: string; passphrase: string; label?: string; turnstile_token?: string };
+	const body = (await readJson(request)) as { url: string; passphrase: string; label?: string; turnstile_token?: string };
 	const { url, passphrase, label, turnstile_token } = body;
 
 	if (!url || typeof url !== 'string') {
@@ -62,7 +63,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 export const PUT: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { short_code: string; passphrase: string; url: string };
+	const body = (await readJson(request)) as { short_code: string; passphrase: string; url: string };
 	const { short_code, passphrase, url } = body;
 
 	if (!short_code || !passphrase || !url) {
@@ -82,7 +83,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 export const DELETE: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { short_code: string; passphrase: string };
+	const body = (await readJson(request)) as { short_code: string; passphrase: string };
 	const { short_code, passphrase } = body;
 
 	if (!short_code || !passphrase) {

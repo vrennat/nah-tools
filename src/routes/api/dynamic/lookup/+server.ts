@@ -1,11 +1,12 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB, authenticateRedirect, getClickStats } from '$server/db';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { short_code: string; passphrase: string };
+	const body = (await readJson(request)) as { short_code: string; passphrase: string };
 	const { short_code, passphrase } = body;
 
 	if (!short_code || !passphrase) {

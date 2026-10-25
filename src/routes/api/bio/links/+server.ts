@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB } from '$server/db';
 import { authenticateProfile, addBioLink, updateBioLink, deleteBioLink } from '$server/bio-db';
@@ -8,7 +9,7 @@ import { normalizeUrl } from '$utils/url';
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		handle: string;
 		passphrase: string;
 		url: string;
@@ -47,7 +48,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 export const PUT: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		handle: string;
 		passphrase: string;
 		link_id: number;
@@ -91,7 +92,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 export const DELETE: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		handle: string;
 		passphrase: string;
 		link_id: number;

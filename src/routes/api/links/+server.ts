@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import {
 	getDB,
@@ -17,7 +18,7 @@ import { normalizeUrl } from '$utils/url';
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		url: string;
 		passphrase?: string;
 		alias?: string;
@@ -130,7 +131,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 export const PUT: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		short_code: string;
 		passphrase: string;
 		url: string;
@@ -177,7 +178,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 export const DELETE: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { short_code: string; passphrase: string };
+	const body = (await readJson(request)) as { short_code: string; passphrase: string };
 	const { short_code, passphrase } = body;
 
 	if (!short_code || !passphrase) {

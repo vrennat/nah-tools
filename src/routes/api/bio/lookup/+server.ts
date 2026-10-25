@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB } from '$server/db';
 import { authenticateProfile, getAllBioLinks, getBioClickStats } from '$server/bio-db';
@@ -6,7 +7,7 @@ import { authenticateProfile, getAllBioLinks, getBioClickStats } from '$server/b
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { handle: string; passphrase: string };
+	const body = (await readJson(request)) as { handle: string; passphrase: string };
 	const { handle, passphrase } = body;
 
 	if (!handle || !passphrase) {
