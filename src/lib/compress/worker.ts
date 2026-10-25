@@ -37,7 +37,11 @@ async function loadCodec(name: CodecName) {
 }
 
 async function decodeImage(buffer: ArrayBuffer, mimeType: string): Promise<ImageData> {
-	if (mimeType.includes('svg') || needsBitmapFallback(mimeType)) {
+	if (mimeType.includes('svg')) {
+		// createImageBitmap() cannot decode SVG off the main thread; clients rasterize first.
+		throw new Error('SVG must be rasterized on the main thread before reaching the worker');
+	}
+	if (needsBitmapFallback(mimeType)) {
 		// jsquash codecs don't support these formats — fall back to browser's native decoder
 		const blob = new Blob([buffer], { type: mimeType });
 		const bitmap = await createImageBitmap(blob);

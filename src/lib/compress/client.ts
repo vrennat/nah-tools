@@ -1,6 +1,7 @@
 import * as Comlink from 'comlink';
 import type { WorkerApi } from './worker';
 import type { CodecName, CompressionResult } from './types';
+import { isSvg, rasterizeSvg } from './svg-raster';
 
 let worker: Worker | null = null;
 let api: Comlink.Remote<WorkerApi> | null = null;
@@ -19,6 +20,7 @@ export async function compress(
 	codec: CodecName,
 	quality: number
 ): Promise<CompressionResult> {
+	if (isSvg(mimeType)) return compressFromImageData(await rasterizeSvg(buffer), codec, quality);
 	const remote = getApi();
 	return remote.compress(Comlink.transfer(buffer, [buffer]), mimeType, codec, quality);
 }
