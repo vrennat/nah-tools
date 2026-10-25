@@ -4,7 +4,7 @@
 </script>
 
 <svelte:head>
-	<title>Free Privacy Policy and ToS Generator — nah</title>
+	<title>Free Privacy Policy and ToS Generator | nah.tools</title>
 	<meta name="description" content="Generate professional privacy policies, terms of service, cookie policies, and DMCA notices. Free, no sign-up required." />
 </svelte:head>
 

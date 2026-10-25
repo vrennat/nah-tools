@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { withSiteSuffix } from '$utils/title';
 	import type { Snippet } from 'svelte';
 	import { getTool, getFamily, getRelated } from '$lib/registry/index';
 	import FAQSchema from '$components/FAQSchema.svelte';
@@ -39,6 +40,8 @@
 		h1?: string;
 		children: Snippet;
 	} = $props();
+
+	const fullTitle = $derived(withSiteSuffix(seoTitle));
 
 	const entry = $derived.by(() => {
 		const found = getTool(path);
@@ -92,17 +95,17 @@
 </script>
 
 <svelte:head>
-	<title>{seoTitle}</title>
+	<title>{fullTitle}</title>
 	<meta name="description" content={description} />
 
 	<meta property="og:type" content="article" />
 	<meta property="og:url" content={canonical} />
-	<meta property="og:title" content={seoTitle} />
+	<meta property="og:title" content={fullTitle} />
 	<meta property="og:description" content={description} />
 	<meta property="og:image" content="https://nah.tools/og.png" />
 
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content={seoTitle} />
+	<meta name="twitter:title" content={fullTitle} />
 	<meta name="twitter:description" content={description} />
 	<meta name="twitter:image" content="https://nah.tools/og.png" />
 

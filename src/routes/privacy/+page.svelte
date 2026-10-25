@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Privacy Policy — nah</title>
+	<title>Privacy Policy | nah.tools</title>
 	<meta name="description" content="nah privacy policy. Static QR codes are generated entirely in your browser. We never see your data." />
 </svelte:head>
 

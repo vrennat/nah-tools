@@ -33,7 +33,7 @@
 <FAQSchema {faqs} />
 
 <svelte:head>
-	<title>Free vCard QR Code Generator — Business Card QR Code — nah</title>
+	<title>Free vCard QR Code Generator — Business Card QR Code | nah.tools</title>
 	<meta name="description" content="Create a free QR code for your business card. Add name, phone, email, company, and more. Scan to save contact info instantly. No signup, no expiration." />
 </svelte:head>
 

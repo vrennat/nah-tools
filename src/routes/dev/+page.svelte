@@ -13,7 +13,7 @@
 <BreadcrumbSchema items={breadcrumbItems} />
 
 <svelte:head>
-	<title>Developer Tools — Free Online Utilities | nah</title>
+	<title>Developer Tools — Free Online Utilities | nah.tools</title>
 	<meta
 		name="description"
 		content="Free developer tools that run entirely in your browser. JSON formatter, Base64, JWT decoder, hash generator, UUID, regex tester, cron, color converter, and more. No signup, no uploads."
@@ -21,7 +21,7 @@
 	<link rel="canonical" href="https://nah.tools/dev" />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://nah.tools/dev" />
-	<meta property="og:title" content="Developer Tools — Free Online Utilities | nah" />
+	<meta property="og:title" content="Developer Tools — Free Online Utilities | nah.tools" />
 	<meta
 		property="og:description"
 		content="Free developer tools that run entirely in your browser. No signup, no uploads."

@@ -73,7 +73,7 @@
 </script>
 
 <svelte:head>
-	<title>MCP Server \u2014 nah.tools</title>
+	<title>MCP Server | nah.tools</title>
 	<meta
 		name="description"
 		content="Give your AI agent {totalTools} tools: PDF processing, PowerPoint manipulation, QR encoding, invoice calculations, and data broker removal. Open-source MCP server \u2014 no account, no tracking."

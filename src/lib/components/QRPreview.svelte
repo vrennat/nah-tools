@@ -48,15 +48,15 @@
 	});
 </script>
 
-<div class="flex items-center justify-center rounded-xl border border-border bg-surface-alt p-4">
+<div class="flex items-center justify-center rounded-xl border border-border bg-surface-alt p-3 sm:p-4">
 	{#if !data}
-		<div class="flex h-[300px] w-[300px] items-center justify-center text-sm text-text-muted">
+		<div class="flex h-[220px] w-[220px] sm:h-[300px] sm:w-[300px] items-center justify-center text-sm text-text-muted">
 			Enter content to generate a QR code
 		</div>
 	{:else}
 		<div
 			bind:this={container}
-			class="flex items-center justify-center [&>canvas]:max-h-[300px] [&>canvas]:max-w-[300px] [&>svg]:max-h-[300px] [&>svg]:max-w-[300px]"
+			class="flex items-center justify-center [&>canvas]:max-h-[220px] [&>canvas]:max-w-[220px] [&>svg]:max-h-[220px] [&>svg]:max-w-[220px] sm:[&>canvas]:max-h-[300px] sm:[&>canvas]:max-w-[300px] sm:[&>svg]:max-h-[300px] sm:[&>svg]:max-w-[300px]"
 		></div>
 	{/if}
 </div>

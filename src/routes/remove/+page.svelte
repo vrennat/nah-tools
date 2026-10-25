@@ -49,7 +49,7 @@
 </script>
 
 <svelte:head>
-	<title>Remove Your Data from Data Brokers — nah</title>
+	<title>Remove Your Data from Data Brokers | nah.tools</title>
 	<meta
 		name="description"
 		content="Free, open-source data broker removal tool. Generate opt-out requests and follow step-by-step guides to remove your personal information from 25+ data brokers. 100% client-side."

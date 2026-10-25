@@ -28,7 +28,7 @@
 </script>
 
 <svelte:head>
-	<title>Compare QR Code Generators — nah vs Paid Alternatives</title>
+	<title>Compare QR Code Generators: nah vs Paid Alternatives | nah.tools</title>
 	<meta
 		name="description"
 		content="See how nah compares to QR Code Generator Pro, QR Tiger, Flowcode, and Uniqode. Every feature, side by side."

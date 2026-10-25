@@ -38,7 +38,7 @@
 <BreadcrumbSchema items={breadcrumbItems} />
 
 <svelte:head>
-	<title>Free PDF Tools — Merge, Split, Rotate, Compress | nah</title>
+	<title>Free PDF Tools — Merge, Split, Rotate, Compress | nah.tools</title>
 	<meta
 		name="description"
 		content="Free online PDF tools. Merge, split, rotate, compress, convert, and more. 100% client-side — files never leave your device. No signup, no limits."

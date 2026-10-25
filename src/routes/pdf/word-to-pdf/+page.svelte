@@ -13,7 +13,8 @@
 	let previewHtml = $state('');
 	let loadingPreview = $state(false);
 
-	let canConvert = $derived(files.length > 0 && !processing);
+	let hasLegacyDoc = $derived(files.some((f) => /\.doc$/i.test(f.name)));
+	let canConvert = $derived(files.length > 0 && !processing && !hasLegacyDoc);
 
 	// Load preview when first file changes
 	$effect(() => {
@@ -52,7 +53,7 @@
 				const file = files[0];
 				const buf = await file.arrayBuffer();
 				const blob = await docxToPDF(buf, pageSize, marginPreset);
-				const pdfName = file.name.replace(/\.(docx?|DOCX?)$/, '.pdf');
+				const pdfName = file.name.replace(/\.(docx|DOCX)$/, '.pdf');
 				downloadBlob(blob, pdfName);
 				progress = { current: 1, total: 1 };
 			} else {
@@ -83,7 +84,7 @@
 		{
 			question: 'What Word formats are supported?',
 			answer:
-				'The tool accepts .docx and .doc files. DOCX (the modern Office Open XML format) is fully supported. Older .doc (binary Word 97-2003) files are accepted but may have limited formatting fidelity depending on the features used.'
+				'The tool accepts .docx files (the modern Office Open XML format). Older .doc files (binary Word 97-2003) are not supported; open them in Word and save as .docx first.'
 		},
 		{
 			question: 'How faithfully does the conversion preserve formatting?',
@@ -118,7 +119,7 @@
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
 			<FileDropZone
-				accept=".docx,.doc"
+				accept=".docx"
 				multiple={true}
 				bind:files
 				label="Drop Word documents here or click to browse"
@@ -174,6 +175,12 @@
 					></div>
 					Loading preview...
 				</div>
+			{/if}
+
+			{#if hasLegacyDoc}
+				<p class="mt-4 rounded-lg bg-error/10 px-3 py-2 text-sm text-error">
+					Old .doc files aren't supported — save as .docx in Word first.
+				</p>
 			{/if}
 
 			{#if error}

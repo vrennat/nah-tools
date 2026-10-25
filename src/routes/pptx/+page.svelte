@@ -38,7 +38,7 @@
 <BreadcrumbSchema items={breadcrumbItems} />
 
 <svelte:head>
-	<title>Free PowerPoint Tools — Merge, Split, Compress PPTX | nah</title>
+	<title>Free PowerPoint Tools — Merge, Split, Compress PPTX | nah.tools</title>
 	<meta
 		name="description"
 		content="Free online PowerPoint tools. Merge, split, compress, extract images, add watermarks, and more. 100% client-side — files never leave your device. No signup, no limits."

@@ -59,7 +59,7 @@
 <BreadcrumbSchema items={breadcrumbItems} />
 
 <svelte:head>
-	<title>Photo Tools — nah</title>
+	<title>Photo Tools | nah.tools</title>
 	<meta name="description" content="Free, client-side photo editing tools. Background removal, image compression, color correction, and more. No upload, no signup." />
 </svelte:head>
 

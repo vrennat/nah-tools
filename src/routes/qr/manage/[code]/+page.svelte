@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Manage QR Code — nah</title>
+	<title>Manage QR Code | nah.tools</title>
 </svelte:head>
 
 <script lang="ts">

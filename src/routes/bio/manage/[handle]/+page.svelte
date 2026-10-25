@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Manage Bio — nah</title>
+	<title>Manage Bio | nah.tools</title>
 </svelte:head>
 
 <script lang="ts">
