@@ -12,6 +12,7 @@
 	import StyleControls from '$components/StyleControls.svelte';
 	import DownloadBar from '$components/DownloadBar.svelte';
 	import BatchGenerator from '$components/BatchGenerator.svelte';
+	import Turnstile from '$components/Turnstile.svelte';
 
 	let qrType: QRType = $state('url');
 	let encodedData = $state('');
@@ -63,6 +64,9 @@
 		}
 	});
 
+	let turnstileToken = $state<string | undefined>();
+	let turnstile: Turnstile | undefined = $state();
+
 	async function createDynamic() {
 		if (!canCreateDynamic) return;
 		dynamicLoading = true;
@@ -75,7 +79,8 @@
 				body: JSON.stringify({
 					url: encodedData,
 					passphrase,
-					label: dynamicLabel || undefined
+					label: dynamicLabel || undefined,
+					turnstile_token: turnstileToken
 				})
 			});
 			const json = await res.json() as {
@@ -92,6 +97,8 @@
 		} catch {
 			dynamicError = 'Network error. Please try again.';
 		} finally {
+			// Tokens are single-use: fetch a fresh one after every attempt.
+			turnstile?.reset();
 			dynamicLoading = false;
 		}
 	}
@@ -203,6 +210,7 @@
 										/>
 									</div>
 
+									<Turnstile bind:token={turnstileToken} bind:this={turnstile} action="qr-dynamic" />
 									{#if dynamicError}
 										<p class="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">{dynamicError}</p>
 									{/if}

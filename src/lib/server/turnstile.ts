@@ -24,11 +24,11 @@ export async function verifyTurnstile(
 /**
  * Enforce Turnstile on a create endpoint.
  *
- * Bot protection is OFF until both a client Turnstile widget (sending
- * turnstile_token) and TURNSTILE_SECRET_KEY exist. No client widget exists
- * yet, so failing closed would break every create; when the secret is missing
- * this skips verification and warns. With the secret set, a missing token is
- * 400 and a rejected token is 403.
+ * The client widget ($components/Turnstile.svelte) only renders when
+ * PUBLIC_TURNSTILE_SITE_KEY was set at build time. When TURNSTILE_SECRET_KEY
+ * is missing this skips verification and warns, so creates keep working
+ * before the keys are configured. With the secret set, a missing token is 400
+ * and a rejected token is 403 — so deploy the site key before the secret.
  */
 export async function requireTurnstile(
 	platform: App.Platform | undefined,

@@ -1,0 +1,12 @@
+# Copy to .dev.vars for `wrangler dev`. Never commit .dev.vars.
+#
+# Server-side Turnstile secret (a Worker secret in production:
+# `wrangler secret put TURNSTILE_SECRET_KEY`). When unset, create endpoints
+# skip Turnstile verification and log a warning.
+# Cloudflare's documented test secret that always passes:
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+
+# PUBLIC_TURNSTILE_SITE_KEY is NOT read from this file. It is inlined into the
+# client bundle at build time from the build environment (shell env or .env):
+#   PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA bun run build
+# (Cloudflare's documented always-pass test site key.) Unset = no widget.
