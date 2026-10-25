@@ -2,7 +2,7 @@
  * Failed-passphrase throttle, backed by Workers KV.
  *
  * Two fixed-window counters per attempt: one for the target (short code or bio
- * handle) and one for the client IP (CF-Connecting-IP). While either is at its
+ * handle) and one for the client IP (CF-Connecting-IP; skipped when the header is absent). While either is at its
  * cap the request gets 429 + Retry-After and bcrypt is never run. A correct
  * passphrase clears the target counter (not the IP counter).
  *
@@ -60,12 +60,14 @@ export async function withPassphraseLimit<T>(
 	const kv = event.platform?.env?.KV;
 	if (!kv) return authenticate();
 
-	const ip = event.request.headers.get('cf-connecting-ip') || 'unknown';
+	// Without CF-Connecting-IP every such client would share one bucket, so the
+	// per-IP counter is skipped and only the per-target counter applies.
+	const ip = event.request.headers.get('cf-connecting-ip');
 	const targetKey = `pplimit:t:${target}`;
-	const ipKey = `pplimit:ip:${ip}`;
+	const ipKey = ip ? `pplimit:ip:${ip}` : null;
 	const now = Date.now();
 
-	const [t, i] = await Promise.all([read(kv, targetKey, now), read(kv, ipKey, now)]);
+	const [t, i] = await Promise.all([read(kv, targetKey, now), ipKey ? read(kv, ipKey, now) : null]);
 	const blocking = [
 		t && t.n >= MAX_FAILURES_PER_TARGET ? t : null,
 		i && i.n >= MAX_FAILURES_PER_IP ? i : null
@@ -89,7 +91,7 @@ export async function withPassphraseLimit<T>(
 		return result;
 	} catch (e) {
 		if (isHttpError(e, 403)) {
-			await Promise.all([bump(kv, targetKey, t, now), bump(kv, ipKey, i, now)]);
+			await Promise.all([bump(kv, targetKey, t, now), ipKey && bump(kv, ipKey, i, now)]);
 		}
 		throw e;
 	}

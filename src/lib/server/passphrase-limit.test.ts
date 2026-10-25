@@ -25,10 +25,10 @@ function fakeKV() {
 	return kv;
 }
 
-function event(kv: ReturnType<typeof fakeKV> | undefined, ip = '1.1.1.1') {
+function event(kv: ReturnType<typeof fakeKV> | undefined, ip: string | null = '1.1.1.1') {
 	return {
 		platform: { env: { KV: kv } } as unknown as App.Platform,
-		request: new Request('http://x/', { headers: { 'cf-connecting-ip': ip } }),
+		request: new Request('http://x/', { headers: ip ? { 'cf-connecting-ip': ip } : {} }),
 		locals: {} as App.Locals
 	};
 }
@@ -121,5 +121,14 @@ describe('withPassphraseLimit', () => {
 		kv.put.mockRejectedValue(new Error('KV PUT failed: 429'));
 		vi.spyOn(console, 'error').mockImplementation(() => {});
 		expect(isHttpError(await fail(event(kv), 'redirect:a'), 403)).toBe(true);
+	});
+
+	it('skips the per-IP counter when CF-Connecting-IP is missing', async () => {
+		for (let i = 0; i < MAX_FAILURES_PER_IP + 1; i++) await fail(event(kv, null), `redirect:t${i}`);
+		expect([...kv.store.keys()].some((k) => k.startsWith('pplimit:ip:'))).toBe(false);
+		expect(await withPassphraseLimit(event(kv, null), 'redirect:fresh', right)).toBe('ok');
+		// Per-target counting still applies
+		for (let i = 0; i < MAX_FAILURES_PER_TARGET; i++) await fail(event(kv, null), 'redirect:a');
+		expect(isHttpError(await fail(event(kv, null), 'redirect:a'), 429)).toBe(true);
 	});
 });
