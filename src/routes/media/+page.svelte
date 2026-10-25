@@ -38,7 +38,7 @@
 <BreadcrumbSchema items={breadcrumbItems} />
 
 <svelte:head>
-	<title>Free Video and Audio Tools — nah</title>
+	<title>Free Video and Audio Tools | nah.tools</title>
 	<meta
 		name="description"
 		content="Free online video and audio tools. Compress, trim, convert, and process media files in your browser. 100% client-side — files never leave your device."

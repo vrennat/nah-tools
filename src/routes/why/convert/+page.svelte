@@ -12,7 +12,7 @@
 />
 
 <svelte:head>
-	<title>The Image Converter Shakedown — nah</title>
+	<title>The Image Converter Shakedown | nah.tools</title>
 	<meta
 		name="description"
 		content="Every iPhone user needs HEIC-to-JPG conversion. Every converter site uploads your photos to their servers first."

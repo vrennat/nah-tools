@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Privacy Policy — nah</title>
+	<title>Privacy Policy | nah.tools</title>
 	<meta name="description" content="How nah handles local file processing, hosted links and bio pages, browser storage and third-party requests." />
 </svelte:head>
 

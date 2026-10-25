@@ -62,7 +62,7 @@
 </script>
 
 <svelte:head>
-	<title>Free Email Signature Generator — nah</title>
+	<title>Free Email Signature Generator | nah.tools</title>
 	<meta name="description" content="Free, open-source email signature generator. Design professional signatures in seconds. No signup, no tracking." />
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		"@context": "https://schema.org",

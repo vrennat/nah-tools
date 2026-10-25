@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Manage Link — nah</title>
+	<title>Manage Link | nah.tools</title>
 </svelte:head>
 
 <script lang="ts">

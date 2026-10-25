@@ -27,7 +27,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.profile.display_name} — nah.tools</title>
+	<title>{data.profile.display_name} | nah.tools</title>
 	<meta name="description" content={data.profile.bio || `${data.profile.display_name}'s links`} />
 
 	<!-- Open Graph -->

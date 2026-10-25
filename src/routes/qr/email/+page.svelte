@@ -23,7 +23,7 @@
 <FAQSchema {faqs} />
 
 <svelte:head>
-	<title>Free Email QR Code Generator — nah</title>
+	<title>Free Email QR Code Generator | nah.tools</title>
 	<meta name="description" content="Create a free QR code that opens a pre-filled email. Set the recipient, subject line, and body text. Scan to compose instantly. No signup, no expiration." />
 </svelte:head>
 

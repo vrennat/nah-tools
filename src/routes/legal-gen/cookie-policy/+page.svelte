@@ -88,7 +88,7 @@
 </script>
 
 <svelte:head>
-	<title>Cookie Policy Generator — nah</title>
+	<title>Cookie Policy Generator | nah.tools</title>
 	<meta name="description" content="Create a customizable cookie policy draft describing your tracking practices and third-party services." />
 </svelte:head>
 
