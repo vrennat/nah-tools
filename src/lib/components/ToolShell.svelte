@@ -164,7 +164,7 @@
 				{#each related as tool}
 					<a
 						href={tool.path}
-						class="group flex items-start gap-3 rounded-xl border border-border p-4 transition-all duration-200 hover:border-accent/50 hover:bg-surface-alt"
+						class="group flex min-w-0 items-start gap-3 rounded-xl border border-border p-4 transition-all duration-200 hover:border-accent/50 hover:bg-surface-alt"
 					>
 						{#if tool.icon}
 							<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent transition-colors group-hover:bg-accent group-hover:text-white">
