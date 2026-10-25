@@ -1,9 +1,10 @@
 import { json, error } from '@sveltejs/kit';
 import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
+import { requireTurnstile } from '$server/turnstile';
 import { getDB, generateShortCode, createLink, isAliasAvailable } from '$server/db';
 import { hashPassphrase } from '$server/auth';
-import { validateUrlSafety, validateAlias, verifyTurnstile, checkRateLimit } from '$server/safety';
+import { validateUrlSafety, validateAlias, checkRateLimit } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
@@ -24,20 +25,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'Maximum 100 links per request');
 	}
 
-	// Verify Turnstile if configured
-	const turnstileSecret = platform?.env?.TURNSTILE_SECRET_KEY;
-	if (turnstileSecret) {
-		if (!turnstile_token) {
-			throw error(400, 'Turnstile verification is required');
-		}
-		const ip = request.headers.get('cf-connecting-ip') || undefined;
-		const valid = await verifyTurnstile(turnstile_token, turnstileSecret, ip);
-		if (!valid) {
-			throw error(403, 'Turnstile verification failed');
-		}
-	} else {
-		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
-	}
+	await requireTurnstile(platform, request, turnstile_token);
 
 	// Rate limit — count each link in the batch as one token so a 100-link request
 	// consumes the same quota as 100 individual requests.
