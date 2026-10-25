@@ -28,7 +28,7 @@ interface Counter {
 	reset: number;
 }
 
-type LimitEvent = Pick<RequestEvent, 'platform' | 'request' | 'locals'>;
+export type LimitEvent = Pick<RequestEvent, 'platform' | 'request' | 'locals'>;
 
 async function read(kv: KVNamespace, key: string, now: number): Promise<Counter | null> {
 	const c = await kv.get<Counter>(key, 'json');

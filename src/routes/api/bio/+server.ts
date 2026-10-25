@@ -1,7 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
-import { withPassphraseLimit } from '$server/passphrase-limit';
 import { requireTurnstile } from '$server/turnstile';
 import { getDB } from '$server/db';
 import { hashPassphrase } from '$server/auth';
@@ -147,9 +146,7 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 		throw error(400, 'handle and passphrase are required');
 	}
 
-	await withPassphraseLimit({ platform, request, locals }, `bio:${handle}`, () =>
-		authenticateProfile(db, handle, passphrase)
-	);
+	await authenticateProfile(db, handle, passphrase, { platform, request, locals });
 
 	// Input length limits
 	if (fields.display_name && fields.display_name.length > 100) {
@@ -188,9 +185,7 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
 		throw error(400, 'handle and passphrase are required');
 	}
 
-	await withPassphraseLimit({ platform, request, locals }, `bio:${handle}`, () =>
-		authenticateProfile(db, handle, passphrase)
-	);
+	await authenticateProfile(db, handle, passphrase, { platform, request, locals });
 	await deactivateProfile(db, handle);
 
 	return json({ success: true });

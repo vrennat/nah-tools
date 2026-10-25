@@ -1,7 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
-import { withPassphraseLimit } from '$server/passphrase-limit';
 import { getDB } from '$server/db';
 import { authenticateProfile, getAllBioLinks, getBioClickStats } from '$server/bio-db';
 
@@ -15,9 +14,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		throw error(400, 'handle and passphrase are required');
 	}
 
-	const profile = await withPassphraseLimit({ platform, request, locals }, `bio:${handle}`, () =>
-		authenticateProfile(db, handle, passphrase)
-	);
+	const profile = await authenticateProfile(db, handle, passphrase, { platform, request, locals });
 	const links = await getAllBioLinks(db, handle);
 	const stats = await getBioClickStats(db, handle);
 
