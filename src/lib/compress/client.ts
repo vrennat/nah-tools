@@ -1,17 +1,12 @@
 import * as Comlink from 'comlink';
+import { createWorkerClient } from '$utils/worker-client';
 import type { WorkerApi } from './worker';
 import type { CodecName, CompressionResult } from './types';
+import { isSvg, rasterizeSvg } from './svg-raster';
 
-let worker: Worker | null = null;
-let api: Comlink.Remote<WorkerApi> | null = null;
-
-function getApi(): Comlink.Remote<WorkerApi> {
-	if (api) return api;
-
-	worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
-	api = Comlink.wrap<WorkerApi>(worker);
-	return api;
-}
+const client = createWorkerClient<WorkerApi>(
+	() => new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' })
+);
 
 export async function compress(
 	buffer: ArrayBuffer,
@@ -19,8 +14,10 @@ export async function compress(
 	codec: CodecName,
 	quality: number
 ): Promise<CompressionResult> {
-	const remote = getApi();
-	return remote.compress(Comlink.transfer(buffer, [buffer]), mimeType, codec, quality);
+	if (isSvg(mimeType)) return compressFromImageData(await rasterizeSvg(buffer), codec, quality);
+	return client.call((api) =>
+		api.compress(Comlink.transfer(buffer, [buffer]), mimeType, codec, quality)
+	);
 }
 
 export async function compressFromImageData(
@@ -28,19 +25,10 @@ export async function compressFromImageData(
 	codec: CodecName,
 	quality: number
 ): Promise<CompressionResult> {
-	const remote = getApi();
 	const buffer = imageData.data.buffer;
-	return remote.compressFromImageData(
-		Comlink.transfer(imageData, [buffer]),
-		codec,
-		quality
+	return client.call((api) =>
+		api.compressFromImageData(Comlink.transfer(imageData, [buffer]), codec, quality)
 	);
 }
 
-export function terminate() {
-	if (worker) {
-		worker.terminate();
-		worker = null;
-		api = null;
-	}
-}
+export const terminate = client.terminate;

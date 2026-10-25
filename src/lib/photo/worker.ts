@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 import * as Comlink from 'comlink';
+import { createOffscreenCanvas } from '$utils/offscreen-canvas';
 import type { BackendType, MaskOptions } from './types';
 import { DEFAULT_MASK_OPTIONS } from './types';
 import { DEFAULT_BG_MODEL, MODEL_CACHE_NAME, AVAILABLE_MODELS } from './models';
@@ -149,7 +150,7 @@ async function removeBackground(
 	const modelSize = model.inputSize;
 
 	// Draw image to OffscreenCanvas and resize to model input
-	const canvas = new OffscreenCanvas(modelSize, modelSize);
+	const canvas = createOffscreenCanvas(modelSize, modelSize);
 	const ctx = canvas.getContext('2d')!;
 	ctx.drawImage(imageBitmap, 0, 0, modelSize, modelSize);
 	const imageData = ctx.getImageData(0, 0, modelSize, modelSize);
@@ -185,7 +186,7 @@ async function removeBackground(
 	const outputPixels = outputH * outputW;
 
 	// Apply sigmoid and convert to grayscale ImageData
-	const maskCanvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
+	const maskCanvas = createOffscreenCanvas(imageBitmap.width, imageBitmap.height);
 	const maskCtx = maskCanvas.getContext('2d')!;
 	const maskImageData = maskCtx.createImageData(outputW, outputH);
 
@@ -213,7 +214,7 @@ async function removeBackground(
 	}
 
 	// Draw mask at output size, then scale to original image size
-	const tempCanvas = new OffscreenCanvas(outputW, outputH);
+	const tempCanvas = createOffscreenCanvas(outputW, outputH);
 	const tempCtx = tempCanvas.getContext('2d')!;
 	tempCtx.putImageData(maskImageData, 0, 0);
 

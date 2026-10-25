@@ -1,18 +1,13 @@
 import * as Comlink from 'comlink';
+import { createWorkerClient } from '$utils/worker-client';
 import type { WorkerApi } from '$compress/worker';
 import type { CodecName, CompressionResult } from '$compress/types';
+import { isSvg, rasterizeSvg } from '$compress/svg-raster';
 import type { ConversionResult } from './types';
 
-let worker: Worker | null = null;
-let api: Comlink.Remote<WorkerApi> | null = null;
-
-function getApi(): Comlink.Remote<WorkerApi> {
-	if (api) return api;
-
-	worker = new Worker(new URL('$compress/worker.ts', import.meta.url), { type: 'module' });
-	api = Comlink.wrap<WorkerApi>(worker);
-	return api;
-}
+const client = createWorkerClient<WorkerApi>(
+	() => new Worker(new URL('$compress/worker.ts', import.meta.url), { type: 'module' })
+);
 
 export async function convertFile(
 	file: File,
@@ -23,15 +18,23 @@ export async function convertFile(
 	// registry-resolved MIME via resolveSourceMime() — file.type is a fallback.
 	sourceMimeType: string = file.type
 ): Promise<ConversionResult> {
-	const remote = getApi();
 	const buffer = await file.arrayBuffer();
 
-	const result = await remote.convert(
-		Comlink.transfer(buffer, [buffer]),
-		sourceMimeType,
-		targetCodec,
-		quality
-	);
+	let result: CompressionResult;
+	if (isSvg(sourceMimeType)) {
+		const imageData = await rasterizeSvg(buffer);
+		result = await client.call((api) =>
+			api.compressFromImageData(
+				Comlink.transfer(imageData, [imageData.data.buffer]),
+				targetCodec,
+				quality
+			)
+		);
+	} else {
+		result = await client.call((api) =>
+			api.convert(Comlink.transfer(buffer, [buffer]), sourceMimeType, targetCodec, quality)
+		);
+	}
 
 	const blob = new Blob([result.buffer], { type: result.mimeType });
 
@@ -49,10 +52,4 @@ function getConvertedFilename(originalName: string, newExtension: string): strin
 	return nameParts.join('.') + '.' + newExtension;
 }
 
-export function terminate() {
-	if (worker) {
-		worker.terminate();
-		worker = null;
-		api = null;
-	}
-}
+export const terminate = client.terminate;
