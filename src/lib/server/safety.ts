@@ -188,6 +188,27 @@ interface WindowCounter {
 }
 
 /**
+ * Per-client-IP limit for a named scope (`create`, `report`, `click:<handle>`),
+ * keyed `<scope>:<CF-Connecting-IP>`. Scopes keep unrelated actions from
+ * spending one shared quota.
+ *
+ * Without CF-Connecting-IP (never on Cloudflare's edge; possible in local or
+ * direct-to-origin requests) every such client would share one fleet-wide KV
+ * bucket, so the limit is skipped, matching passphrase-limit.ts.
+ */
+export async function checkIpRateLimit(
+	platform: App.Platform | undefined,
+	request: Request,
+	scope: string,
+	cost = 1,
+	opts?: RateLimitOptions
+): Promise<boolean> {
+	const ip = request.headers.get('cf-connecting-ip');
+	if (!ip) return true;
+	return checkRateLimit(platform, `${scope}:${ip}`, cost, opts);
+}
+
+/**
  * Returns true if the request is within limits, false if it should be blocked.
  * cost: how many "tokens" to consume (default 1). Bulk endpoints pass links.length
  * so that one bulk request consumes proportional quota.

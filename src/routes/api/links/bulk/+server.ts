@@ -4,7 +4,7 @@ import type { RequestHandler } from './$types';
 import { requireTurnstile } from '$server/turnstile';
 import { getDB, generateShortCode, createLink, isAliasAvailable } from '$server/db';
 import { hashPassphrase } from '$server/auth';
-import { validateUrlSafety, validateAlias, checkRateLimit } from '$server/safety';
+import { validateUrlSafety, validateAlias, checkIpRateLimit } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
@@ -29,8 +29,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 	// Rate limit — count each link in the batch as one token so a 100-link request
 	// consumes the same quota as 100 individual requests.
-	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-	if (!(await checkRateLimit(platform, ip, links.length))) {
+	if (!(await checkIpRateLimit(platform, request, 'create', links.length))) {
 		throw error(429, 'Rate limit exceeded. Try again later.');
 	}
 

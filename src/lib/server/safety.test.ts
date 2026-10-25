@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { validateAlias, checkRateLimit, validateUrlSafety } from '$server/safety';
+import { validateAlias, checkRateLimit, checkIpRateLimit, validateUrlSafety } from '$server/safety';
 
 describe('validateAlias', () => {
 	it('accepts a valid alias like my-link', () => {
@@ -213,6 +213,66 @@ describe('checkRateLimit KV specifics', () => {
 		for (let i = 0; i < 10; i++) expect(await checkRateLimit(withKV(kv), 'putfail')).toBe(true);
 		expect(await checkRateLimit(withKV(kv), 'putfail')).toBe(false);
 		expect(console.error).toHaveBeenCalled();
+	});
+});
+
+describe('checkIpRateLimit', () => {
+	const req = (ip?: string) =>
+		new Request('http://x/', { headers: ip ? { 'cf-connecting-ip': ip } : {} });
+
+	beforeEach(() => {
+		vi.useFakeTimers();
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+	});
+
+	it('keys the counter as <scope>:<ip>', async () => {
+		const kv = fakeKV();
+		await checkIpRateLimit(withKV(kv), req('9.9.9.9'), 'create');
+		expect([...kv.store.keys()]).toEqual(['rl:create:9.9.9.9']);
+	});
+
+	it('skips limiting (and never touches KV) when CF-Connecting-IP is missing', async () => {
+		const kv = fakeKV();
+		for (let i = 0; i < 50; i++) {
+			expect(await checkIpRateLimit(withKV(kv), req(), 'create')).toBe(true);
+		}
+		expect(kv.get).not.toHaveBeenCalled();
+		expect(kv.put).not.toHaveBeenCalled();
+		expect(kv.store.has('rl:unknown')).toBe(false);
+	});
+
+	it('does not let one IP missing the header share a bucket with another', async () => {
+		const kv = fakeKV();
+		for (let i = 0; i < 10; i++) await checkIpRateLimit(withKV(kv), req(), 'create');
+		expect(await checkIpRateLimit(withKV(kv), req('8.8.8.8'), 'create')).toBe(true);
+	});
+
+	it('keeps scopes separate: exhausting clicks and reports does not block creates', async () => {
+		const kv = fakeKV();
+		const p = withKV(kv);
+		const ip = '7.7.7.7';
+		for (let i = 0; i < 60; i++) await checkIpRateLimit(p, req(ip), 'click:alice', 1, { max: 60 });
+		for (let i = 0; i < 10; i++) await checkIpRateLimit(p, req(ip), 'report');
+		expect(await checkIpRateLimit(p, req(ip), 'click:alice', 1, { max: 60 })).toBe(false);
+		expect(await checkIpRateLimit(p, req(ip), 'report')).toBe(false);
+		expect(await checkIpRateLimit(p, req(ip), 'create')).toBe(true);
+	});
+
+	it('scopes clicks per profile', async () => {
+		const p = withKV(fakeKV());
+		const ip = '6.6.6.6';
+		for (let i = 0; i < 60; i++) await checkIpRateLimit(p, req(ip), 'click:alice', 1, { max: 60 });
+		expect(await checkIpRateLimit(p, req(ip), 'click:alice', 1, { max: 60 })).toBe(false);
+		expect(await checkIpRateLimit(p, req(ip), 'click:bob', 1, { max: 60 })).toBe(true);
+	});
+
+	it('passes cost through (bulk create)', async () => {
+		const p = withKV(fakeKV());
+		expect(await checkIpRateLimit(p, req('5.5.5.5'), 'create', 10)).toBe(true);
+		expect(await checkIpRateLimit(p, req('5.5.5.5'), 'create')).toBe(false);
 	});
 });
 

@@ -12,7 +12,7 @@ import {
 	isHandleAvailable,
 	addBioLink
 } from '$server/bio-db';
-import { validateHandle, validateUrlSafety, checkRateLimit } from '$server/safety';
+import { validateHandle, validateUrlSafety, checkIpRateLimit } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
 import { themes } from '$bio/themes';
 
@@ -59,8 +59,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	await requireTurnstile(platform, request, turnstile_token);
 
 	// Rate limit
-	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-	if (!(await checkRateLimit(platform, ip))) {
+	if (!(await checkIpRateLimit(platform, request, 'create'))) {
 		throw error(429, 'Rate limit exceeded. Try again later.');
 	}
 

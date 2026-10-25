@@ -13,7 +13,7 @@ import {
 	invalidateRedirectCache
 } from '$server/db';
 import { hashPassphrase } from '$server/auth';
-import { validateUrlSafety, validateAlias, checkRateLimit } from '$server/safety';
+import { validateUrlSafety, validateAlias, checkIpRateLimit } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
@@ -39,8 +39,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	await requireTurnstile(platform, request, turnstile_token);
 
 	// Rate limit
-	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-	if (!(await checkRateLimit(platform, ip))) {
+	if (!(await checkIpRateLimit(platform, request, 'create'))) {
 		throw error(429, 'Rate limit exceeded. Try again later.');
 	}
 

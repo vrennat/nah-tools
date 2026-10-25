@@ -2,14 +2,13 @@ import { json, error } from '@sveltejs/kit';
 import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB, getKV, getRedirect, reportLink, invalidateRedirectCache } from '$server/db';
-import { checkRateLimit } from '$server/safety';
+import { checkIpRateLimit } from '$server/safety';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
 	// Rate-limit before touching the database
-	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-	if (!(await checkRateLimit(platform, ip))) {
+	if (!(await checkIpRateLimit(platform, request, 'report'))) {
 		throw error(429, 'Rate limit exceeded. Try again later.');
 	}
 
