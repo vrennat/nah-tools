@@ -97,6 +97,8 @@ export interface ClickLog {
 
 /** Aggregated click statistics */
 export interface ClickStats {
+	/** False when Analytics Engine credentials are not configured; counts are then placeholders, not real zeros. */
+	available: boolean;
 	total: number;
 	byCountry: { country: string; count: number }[];
 	byDay: { date: string; count: number }[];
