@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 import * as Comlink from 'comlink';
+import { createOffscreenCanvas } from '$utils/offscreen-canvas';
 import type { CodecName, CompressionResult } from './types';
 import { getCodec } from './codecs';
 
@@ -45,7 +46,7 @@ async function decodeImage(buffer: ArrayBuffer, mimeType: string): Promise<Image
 		// jsquash codecs don't support these formats — fall back to browser's native decoder
 		const blob = new Blob([buffer], { type: mimeType });
 		const bitmap = await createImageBitmap(blob);
-		const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+		const canvas = createOffscreenCanvas(bitmap.width, bitmap.height);
 		const ctx = canvas.getContext('2d')!;
 		ctx.drawImage(bitmap, 0, 0);
 		bitmap.close();
