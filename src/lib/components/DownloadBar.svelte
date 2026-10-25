@@ -48,15 +48,15 @@
 	}
 
 	const primaryClass =
-		'rounded-full px-5 py-2.5 text-sm font-medium transition-colors bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed';
+		'rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-sm font-medium transition-colors bg-accent text-white hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed';
 	const secondaryClass =
-		'rounded-full px-5 py-2.5 text-sm font-medium transition-colors border border-border text-text hover:bg-surface-alt disabled:opacity-40 disabled:cursor-not-allowed';
+		'rounded-full px-4 py-2 sm:px-5 sm:py-2.5 text-sm font-medium transition-colors border border-border text-text hover:bg-surface-alt disabled:opacity-40 disabled:cursor-not-allowed';
 </script>
 
 <div class="flex flex-wrap items-center gap-2">
-	<button type="button" class={primaryClass} {disabled} onclick={downloadPNG}>PNG</button>
-	<button type="button" class={secondaryClass} {disabled} onclick={downloadSVG}>SVG</button>
-	<button type="button" class={secondaryClass} {disabled} onclick={downloadPDF}>PDF</button>
+	<button type="button" class={primaryClass} {disabled} onclick={downloadPNG}>Download PNG</button>
+	<button type="button" class={secondaryClass} {disabled} onclick={downloadSVG}>Download SVG</button>
+	<button type="button" class={secondaryClass} {disabled} onclick={downloadPDF}>Download PDF</button>
 	{#if showShare}
 		<button type="button" class={secondaryClass} {disabled} onclick={share}>Share</button>
 	{/if}

@@ -106,7 +106,7 @@
 
 <svelte:head>
 	<title>Free QR Code Generator — nah</title>
-	<meta name="description" content="Free, open-source QR code generator. No signup, no expiration, no tracking." />
+	<meta name="description" content="Free QR code generator for URLs, WiFi, vCards, email, phone and SMS. Runs in your browser, no signup, codes never expire. Download PNG, SVG or PDF." />
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		"@context": "https://schema.org",
 		"@type": "SoftwareApplication",
@@ -128,21 +128,21 @@
 	})}</script>`}
 </svelte:head>
 
-<div class="space-y-8">
+<div class="space-y-6 sm:space-y-8">
 	<section class="text-center">
-		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">
-			Free QR Codes. <span class="text-accent">No expiration.</span>
+		<h1 class="font-display text-3xl font-800 tracking-tight sm:text-5xl md:text-6xl">
+			Free QR Code Generator. <span class="text-accent">No expiration.</span>
 		</h1>
-		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
+		<p class="mx-auto mt-2 hidden max-w-2xl text-base sm:block sm:mt-4 sm:text-lg text-text-muted">
 			Generated in your browser — your data never touches our servers.
 		</p>
 	</section>
 
-	<section class="rounded-xl border border-border bg-surface p-6 shadow-sm">
+	<section class="rounded-xl border border-border bg-surface p-4 shadow-sm sm:p-6">
 		<TypeSelector bind:selected={qrType} />
 
-		<div class="mt-6 grid gap-8 lg:grid-cols-2">
-			<div class="space-y-6">
+		<div class="mt-4 grid gap-6 sm:mt-6 sm:gap-8 lg:grid-cols-2">
+			<div class="space-y-4 sm:space-y-6">
 				<div>
 					{#if qrType === 'url'}
 						<URLInput bind:value={encodedData} defaultUrl="https://example.com" />
