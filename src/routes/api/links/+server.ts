@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
+import { withPassphraseLimit } from '$server/passphrase-limit';
 import { requireTurnstile } from '$server/turnstile';
 import {
 	getDB,
@@ -116,7 +117,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	return json(response, { status: 201 });
 };
 
-export const PUT: RequestHandler = async ({ request, platform }) => {
+export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
 	const body = (await readJson(request)) as {
@@ -139,7 +140,9 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
 
-	await authenticateRedirect(db, short_code, passphrase);
+	await withPassphraseLimit({ platform, request, locals }, `redirect:${short_code}`, () =>
+		authenticateRedirect(db, short_code, passphrase)
+	);
 
 	// Update destination URL
 	await db
@@ -163,7 +166,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	return json({ success: true });
 };
 
-export const DELETE: RequestHandler = async ({ request, platform }) => {
+export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
 	const body = (await readJson(request)) as { short_code: string; passphrase: string };
@@ -173,7 +176,9 @@ export const DELETE: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'short_code and passphrase are required');
 	}
 
-	await authenticateRedirect(db, short_code, passphrase);
+	await withPassphraseLimit({ platform, request, locals }, `redirect:${short_code}`, () =>
+		authenticateRedirect(db, short_code, passphrase)
+	);
 	await deactivateRedirect(db, short_code);
 	await invalidateRedirectCache(getKV(platform), db, short_code);
 	return json({ success: true });

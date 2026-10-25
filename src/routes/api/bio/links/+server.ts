@@ -1,12 +1,13 @@
 import { json, error } from '@sveltejs/kit';
 import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
+import { withPassphraseLimit } from '$server/passphrase-limit';
 import { getDB } from '$server/db';
 import { authenticateProfile, addBioLink, updateBioLink, deleteBioLink } from '$server/bio-db';
 import { validateUrlSafety } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
 
-export const POST: RequestHandler = async ({ request, platform }) => {
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
 	const body = (await readJson(request)) as {
@@ -32,7 +33,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'icon must be 500 characters or fewer');
 	}
 
-	await authenticateProfile(db, handle, passphrase);
+	await withPassphraseLimit({ platform, request, locals }, `bio:${handle}`, () =>
+		authenticateProfile(db, handle, passphrase)
+	);
 
 	const normalizedUrl = normalizeUrl(url);
 	const safety = await validateUrlSafety(normalizedUrl, db);
@@ -45,7 +48,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	return json({ link }, { status: 201 });
 };
 
-export const PUT: RequestHandler = async ({ request, platform }) => {
+export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
 	const body = (await readJson(request)) as {
@@ -64,7 +67,9 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'handle, passphrase, and link_id are required');
 	}
 
-	await authenticateProfile(db, handle, passphrase);
+	await withPassphraseLimit({ platform, request, locals }, `bio:${handle}`, () =>
+		authenticateProfile(db, handle, passphrase)
+	);
 
 	// Server-side length caps
 	if (fields.title && fields.title.length > 200) {
@@ -89,7 +94,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	return json({ success: true });
 };
 
-export const DELETE: RequestHandler = async ({ request, platform }) => {
+export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
 	const body = (await readJson(request)) as {
@@ -104,7 +109,9 @@ export const DELETE: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'handle, passphrase, and link_id are required');
 	}
 
-	await authenticateProfile(db, handle, passphrase);
+	await withPassphraseLimit({ platform, request, locals }, `bio:${handle}`, () =>
+		authenticateProfile(db, handle, passphrase)
+	);
 	await deleteBioLink(db, handle, link_id);
 
 	return json({ success: true });

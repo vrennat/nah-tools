@@ -1,9 +1,10 @@
 import { json, error } from '@sveltejs/kit';
 import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
+import { withPassphraseLimit } from '$server/passphrase-limit';
 import { getDB, authenticateRedirect, getClickStats } from '$server/db';
 
-export const POST: RequestHandler = async ({ request, platform }) => {
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
 	const body = (await readJson(request)) as { short_code: string; passphrase: string };
@@ -13,7 +14,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'short_code and passphrase are required');
 	}
 
-	const redirect = await authenticateRedirect(db, short_code, passphrase);
+	const redirect = await withPassphraseLimit({ platform, request, locals }, `redirect:${short_code}`, () =>
+		authenticateRedirect(db, short_code, passphrase)
+	);
 	const stats = await getClickStats(platform, short_code);
 
 	return json({

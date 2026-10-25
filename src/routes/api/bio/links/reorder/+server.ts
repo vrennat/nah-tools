@@ -1,10 +1,11 @@
 import { json, error } from '@sveltejs/kit';
 import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
+import { withPassphraseLimit } from '$server/passphrase-limit';
 import { getDB } from '$server/db';
 import { authenticateProfile, reorderBioLinks } from '$server/bio-db';
 
-export const POST: RequestHandler = async ({ request, platform }) => {
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
 	const body = (await readJson(request)) as {
@@ -24,7 +25,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'ordered_ids must not exceed 200 entries');
 	}
 
-	await authenticateProfile(db, handle, passphrase);
+	await withPassphraseLimit({ platform, request, locals }, `bio:${handle}`, () =>
+		authenticateProfile(db, handle, passphrase)
+	);
 	await reorderBioLinks(db, handle, ordered_ids);
 
 	return json({ success: true });
