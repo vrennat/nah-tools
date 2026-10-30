@@ -135,7 +135,12 @@
 			oninput={handleInput}
 			onkeydown={handleKeydown}
 			onblur={handleBlur}
-			onfocus={() => { if (query.trim()) isOpen = true; }}
+			onfocus={() => {
+				if (query.trim()) {
+					results = searchTools(query, RESULT_LIMIT);
+					isOpen = true;
+				}
+			}}
 			type="search"
 			placeholder="Search 100+ free tools..."
 			class="w-full rounded-xl border border-border bg-surface-alt py-3.5 pl-12 pr-12 text-base text-text placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
