@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { searchTools, popularTools } from '$lib/search/index';
@@ -52,8 +52,18 @@
 	}
 
 	function close() {
+		runSearch.cancel();
 		isOpen = false;
 		activeIndex = -1;
+	}
+
+	onDestroy(() => runSearch.cancel());
+
+	function clear() {
+		close();
+		query = '';
+		results = [];
+		inputEl?.focus();
 	}
 
 	function navigate(path: string) {
@@ -64,6 +74,14 @@
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
+		if (!isOpen && e.key === 'ArrowDown' && query.trim()) {
+			e.preventDefault();
+			runSearch.cancel();
+			results = searchTools(query, RESULT_LIMIT);
+			isOpen = true;
+			activeIndex = results.length > 0 ? 0 : -1;
+			return;
+		}
 		if (!isOpen) return;
 
 		switch (e.key) {
@@ -117,12 +135,14 @@
 			oninput={handleInput}
 			onkeydown={handleKeydown}
 			onblur={handleBlur}
+			onfocus={() => { if (query.trim()) isOpen = true; }}
 			type="search"
 			placeholder="Search 100+ free tools..."
-			class="w-full rounded-xl border border-border bg-surface-alt py-3.5 pl-12 pr-4 text-base text-text placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
+			class="w-full rounded-xl border border-border bg-surface-alt py-3.5 pl-12 pr-12 text-base text-text placeholder:text-text-muted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition-colors duration-150"
 			autocomplete="off"
 			spellcheck={false}
 			role="combobox"
+			aria-label="Search tools"
 			aria-expanded={isOpen}
 			aria-controls={listboxId}
 			aria-autocomplete="list"
@@ -132,7 +152,7 @@
 		{#if query.length > 0}
 			<button
 				class="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-text-muted hover:text-text transition-colors"
-				onclick={() => { query = ''; results = []; isOpen = false; inputEl?.focus(); }}
+				onclick={clear}
 				aria-label="Clear search"
 				tabindex="-1"
 			>
@@ -163,13 +183,13 @@
 					onmouseenter={() => { activeIndex = i; }}
 				>
 					<div class="min-w-0 flex-1">
-						<div class="flex items-center gap-2">
-							<span class="text-sm font-medium text-text truncate">{result.name}</span>
+						<div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+							<span class="text-sm font-medium text-text">{result.name}</span>
 							<span class="shrink-0 rounded-full bg-surface-alt px-2 py-0.5 text-[11px] text-text-muted border border-border">
 								{familyLabel(result)}
 							</span>
 						</div>
-						<p class="mt-0.5 text-xs text-text-muted truncate">{result.description}</p>
+						<p class="mt-0.5 text-xs text-text-muted">{result.description}</p>
 					</div>
 				</a>
 			{/each}
@@ -179,6 +199,7 @@
 	{#if isOpen && query.trim().length > 0 && results.length === 0}
 		<div
 			data-tool-search-dropdown
+			role="status"
 			class="absolute left-0 right-0 top-full z-50 mt-2 rounded-xl border border-border bg-surface px-4 py-3 shadow-lg"
 		>
 			<p class="text-sm text-text-muted">No tools found for "{query}".</p>

@@ -14,6 +14,7 @@
 	let activeIndex = $state(-1);
 	let inputEl: HTMLInputElement | undefined = $state(undefined);
 	let dialogEl: HTMLDivElement | undefined = $state(undefined);
+	let returnFocus: HTMLElement | null = null;
 
 	function familyLabel(entry: ToolEntry): string {
 		return allFamilies.find((f) => f.id === entry.family)?.name ?? entry.family;
@@ -26,21 +27,42 @@
 	}) as (...args: unknown[]) => unknown, 100);
 
 	function open() {
+		returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 		isOpen = true;
 		// Focus input on next frame after the DOM has rendered
 		requestAnimationFrame(() => inputEl?.focus());
 	}
 
-	function close() {
+	function close(restoreFocus = true) {
+		runSearch.cancel();
 		isOpen = false;
 		query = '';
 		results = [];
 		activeIndex = -1;
+		if (restoreFocus && returnFocus?.isConnected) returnFocus.focus();
 	}
 
 	function navigate(path: string) {
-		close();
+		close(false);
 		goto(path);
+	}
+
+	function handleDialogKey(e: KeyboardEvent) {
+		if (e.key === 'Escape') {
+			e.preventDefault();
+			close();
+		} else if (e.key === 'Tab' && dialogEl) {
+			const items = [...dialogEl.querySelectorAll<HTMLElement>('input, button, a[href]')];
+			const first = items[0];
+			const last = items[items.length - 1];
+			if (e.shiftKey && document.activeElement === first) {
+				e.preventDefault();
+				last?.focus();
+			} else if (!e.shiftKey && document.activeElement === last) {
+				e.preventDefault();
+				first?.focus();
+			}
+		}
 	}
 
 	function handleInput() {
@@ -86,7 +108,10 @@
 		}
 
 		document.addEventListener('keydown', handleGlobalKeydown);
-		return () => document.removeEventListener('keydown', handleGlobalKeydown);
+		return () => {
+			document.removeEventListener('keydown', handleGlobalKeydown);
+			runSearch.cancel();
+		};
 	});
 
 	// Prevent body scroll while the palette is open
@@ -109,7 +134,7 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh] px-4"
-		onclick={(e) => { if (e.target === e.currentTarget) close(); }}
+		onclick={(e) => { if (!dialogEl?.contains(e.target as Node)) close(); }}
 	>
 		<!-- Backdrop -->
 		<div class="absolute inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true"></div>
@@ -120,6 +145,8 @@
 			role="dialog"
 			aria-modal="true"
 			aria-label="Command palette"
+			onkeydown={handleDialogKey}
+			tabindex="-1"
 			class="relative z-10 w-full max-w-xl rounded-2xl border border-border bg-surface shadow-xl overflow-hidden"
 		>
 			<!-- Search input -->
@@ -146,18 +173,21 @@
 					autocomplete="off"
 					spellcheck={false}
 					role="combobox"
+					aria-label="Search tools"
 					aria-expanded={results.length > 0}
 					aria-controls="cp-listbox"
 					aria-autocomplete="list"
 					aria-activedescendant={activeIndex >= 0 ? `cp-result-${activeIndex}` : undefined}
 				/>
 
-				<kbd
-					class="hidden shrink-0 rounded border border-border px-1.5 py-0.5 font-mono text-[11px] text-text-muted sm:block"
-					aria-label="Press Escape to close"
+				<button
+					type="button"
+					onclick={() => close()}
+					class="shrink-0 rounded border border-border px-2 py-1 text-xs text-text-muted hover:text-text"
+					aria-label="Close search"
 				>
-					esc
-				</kbd>
+					Close
+				</button>
 			</div>
 
 			<!-- Results list -->
@@ -180,20 +210,20 @@
 								onmouseenter={() => { activeIndex = i; }}
 							>
 								<div class="min-w-0 flex-1">
-									<div class="flex items-center gap-2">
-										<span class="text-sm font-medium text-text truncate">{result.name}</span>
+									<div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+										<span class="text-sm font-medium text-text">{result.name}</span>
 										<span class="shrink-0 rounded-full bg-surface-alt px-2 py-0.5 text-[11px] text-text-muted border border-border">
 											{familyLabel(result)}
 										</span>
 									</div>
-									<p class="mt-0.5 text-xs text-text-muted truncate">{result.description}</p>
+									<p class="mt-0.5 text-xs text-text-muted">{result.description}</p>
 								</div>
 							</a>
 						</li>
 					{/each}
 				</ul>
 			{:else if query.trim().length > 0}
-				<div class="px-4 py-6 text-center text-sm text-text-muted">
+				<div role="status" class="px-4 py-6 text-center text-sm text-text-muted">
 					No tools found for "{query}".
 				</div>
 			{:else}

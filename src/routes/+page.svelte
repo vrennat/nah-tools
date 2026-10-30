@@ -60,10 +60,11 @@
 		</h1>
 
 		<p
-			class="animate-fade-up mt-6 text-[clamp(0.8rem,1.8vw,1.375rem)] text-text-muted sm:mt-8"
+			class="animate-fade-up mt-6 max-w-2xl text-base leading-relaxed text-text-muted sm:mt-8 sm:text-xl"
 			style="animation-delay: 160ms;"
 		>
-			Everything is free. Forever. <a href="/trust" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent">Here's&nbsp;how.</a>
+			QR codes, PDFs, images and everyday utilities. Free, open source, and ready in your browser.
+			<a href="/trust" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent">Here's&nbsp;how.</a>
 		</p>
 	</section>
 
