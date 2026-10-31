@@ -56,7 +56,7 @@
 		</div>
 
 		<p class="mt-10 border-t border-border pt-6 text-center text-sm text-text-muted">
-			<a href="https://github.com/vrennat/nah-tools" class="underline decoration-border underline-offset-4 transition-colors hover:decoration-accent hover:text-accent">Open source</a>. No accounts. No tracking.
+			<a href="https://github.com/vrennat/nah-tools" class="underline decoration-border underline-offset-4 transition-colors hover:decoration-accent hover:text-accent">Open source</a>. Free tools. No subscriptions.
 		</p>
 	</div>
 </footer>

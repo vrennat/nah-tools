@@ -5,31 +5,31 @@
 		{
 			question: 'What is the actual attachment size limit for email?',
 			answer:
-				'It varies by provider, but 25MB has been Gmail\'s long-standing cap, and most other major providers sit at or below that. Treat 25MB as the safe upper bound to aim for unless you know your recipient\'s exact limit.'
+				'Personal Gmail accounts allow up to 25 MB of attachments in total. Work accounts and other providers can have different limits, including lower receiving limits. Check both ends and leave headroom.'
 		},
 		{
 			question: 'How does video compression actually shrink the file?',
 			answer:
-				'Three levers: a lower constant rate factor target (which controls how aggressively each frame is compressed), a capped resolution so there are fewer pixels to encode, and a lower audio bitrate. The "Email-friendly" preset caps resolution at 1280×720 and drops audio to 96kbps.'
+				'Three levers: a higher constant rate factor target (which controls how aggressively each frame is compressed), a capped resolution so there are fewer pixels to encode, and a lower audio bitrate. The "Email-friendly" preset caps resolution at 1280×720 and drops audio to 96kbps.'
 		},
 		{
 			question: 'Will my video look noticeably worse?',
 			answer:
-				'Some quality loss is unavoidable when the goal is a specific target size rather than a specific quality. For talking-head or screen-recording footage the difference is usually minor; for high-motion or highly detailed footage it\'s more visible.'
+				'This preset uses a quality target rather than enforcing a specific file size. Re-encoding at these settings can lose detail. For talking-head or screen-recording footage the difference is usually minor; for high-motion or highly detailed footage it\'s more visible.'
 		},
 		{
 			question: 'Is this actually free and private?',
 			answer:
-				'Yes. Compression runs through FFmpeg.wasm entirely in your browser. The one-time ~25MB WASM binary downloads from a CDN on first use and is cached afterward — your video itself is never uploaded.'
+				'Yes. Compression runs through FFmpeg.wasm entirely in your browser. The FFmpeg JavaScript and WASM runtime download from a CDN when needed; browser caching may reduce later downloads — your video itself is never uploaded.'
 		}
 	];
 </script>
 
 <ArticleShell
 	path="/guides/compress-video-for-email"
-	dek="Most email providers cap attachments around 25MB. Here's how video compression actually works, and how to shrink a clip to fit without turning it to mush."
+	dek="Email attachment limits vary by provider and account. Here's how video compression actually works, and how to shrink a clip to fit without turning it to mush."
 	seoTitle="How to Compress a Video for Email (Free, No Upload) | nah"
-	description="Gmail and most providers cap attachments around 25MB. Learn how video compression actually works and shrink your video to fit, free and entirely in your browser."
+	description="Personal Gmail accounts allow 25 MB total attachments; other limits vary. Learn how video compression actually works and shrink your video to fit, free and entirely in your browser."
 	publishedDate="2026-07-28"
 	{faqs}
 >
@@ -37,8 +37,8 @@
 		<h2 class="font-display text-2xl font-700 text-text">Why your video is too big to email</h2>
 		<p class="leading-relaxed text-text-muted">
 			A phone-shot video at 1080p or 4K can easily run 100–300MB per minute of footage, depending
-			on the device and lighting. Email attachment limits haven't kept pace — Gmail has capped
-			attachments at 25MB for years, and most other providers sit at or below that. A 30-second clip
+			on the device and lighting. Personal Gmail accounts allow 25 MB of attachments in total; other accounts and recipients
+			may have different limits. A 30-second clip
 			from a modern phone can blow past that limit on its own.
 		</p>
 	</section>
@@ -56,8 +56,8 @@
 		<p class="leading-relaxed text-text-muted">
 			nah.tools' <a href="/media/compress-video" class="text-accent underline hover:text-accent-hover">video compressor</a>
 			has an "Email-friendly" preset that combines all three: it caps resolution at 1280×720,
-			targets a CRF of 32 (moderately aggressive), and drops audio to 96kbps — tuned specifically to
-			land most clips under 25MB without needing to guess at settings yourself.
+			targets a CRF of 32 (moderately aggressive), and drops audio to 96kbps — and limits frame rate to 30 fps. It does not enforce a 25 MB output size; duration and
+			content still determine the result.
 		</p>
 	</section>
 
@@ -81,4 +81,5 @@
 			compression settings changes that trade-off.
 		</p>
 	</section>
+	<p class="leading-relaxed text-text-muted">Source: <a href="https://support.google.com/mail/answer/6584?hl=en" class="text-accent underline hover:text-accent-hover">Gmail attachment limits</a>.</p>
 </ArticleShell>

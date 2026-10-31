@@ -5,7 +5,7 @@
 
 <svelte:head>
 	<title>Free Privacy Policy and ToS Generator — nah</title>
-	<meta name="description" content="Generate professional privacy policies, terms of service, cookie policies, and DMCA notices. Free, no sign-up required." />
+	<meta name="description" content="Create customizable privacy policy, terms, cookie policy, and copyright statement drafts. Free, no sign-up required." />
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-br from-surface to-surface-alt">
@@ -16,7 +16,7 @@
 				Free Legal Document Generator
 			</h1>
 			<p class="text-lg text-text-muted max-w-2xl mx-auto mb-6">
-				Create professional privacy policies, terms of service, cookie policies, and DMCA notices in minutes. No sign-up required.
+				Create customizable drafts describing your business practices: privacy policies, terms of service, cookie policies, and copyright statements. No sign-up required.
 			</p>
 			<div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200">
 				<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -26,7 +26,7 @@
 						clip-rule="evenodd"
 					/>
 				</svg>
-				<span class="text-sm font-medium">100% private. Runs in your browser.</span>
+				<span class="text-sm font-medium">Drafts are generated in your browser.</span>
 			</div>
 		</div>
 
@@ -42,7 +42,7 @@
 				</svg>
 				<div>
 					<strong class="block">Important Disclaimer</strong>
-					<p class="text-sm mt-1">These templates are starting points, not legal advice. Have a lawyer review documents for your specific situation.</p>
+					<p class="text-sm mt-1">These templates are starting points, not legal advice or a guarantee of compliance. Have a lawyer review documents for your specific situation.</p>
 				</div>
 			</div>
 		</div>
@@ -88,8 +88,8 @@
 					<p class="text-sm text-text-muted">Everything is processed locally in your browser.</p>
 				</div>
 				<div>
-					<h3 class="font-semibold text-text mb-2">Professional Quality</h3>
-					<p class="text-sm text-text-muted">Templates that work for most businesses.</p>
+					<h3 class="font-semibold text-text mb-2">Customizable Drafts</h3>
+					<p class="text-sm text-text-muted">Review each draft against your actual practices and requirements.</p>
 				</div>
 			</div>
 		</div>

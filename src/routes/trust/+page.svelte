@@ -1,141 +1,76 @@
 <svelte:head>
 	<title>How it works — nah</title>
-	<meta
-		name="description"
-		content="How nah.tools stays free: client-side architecture, $5/month infrastructure, no accounts, no tracking, open source. Here's the proof."
-	/>
+	<meta name="description" content="How nah.tools works: local browser processing, hosted links and bio pages, model downloads and practical limits." />
 	<meta property="og:title" content="How it works — nah" />
-	<meta property="og:description" content="How nah.tools stays free forever. Client-side tools, $5/month infrastructure, open source code." />
+	<meta property="og:description" content="Local browser tools, hosted redirects and public bio pages. What runs where and what to expect." />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://nah.tools/trust" />
 	<meta name="twitter:card" content="summary_large_image" />
 </svelte:head>
 
-<article class="mx-auto max-w-3xl py-8">
-	<header class="mb-12">
-		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">
-			How it works
-		</h1>
-		<p class="mt-4 text-xl text-text-muted">
-			Other "free" tools upload your files, limit your usage, then paywall the download. We don't. Here's how.
-		</p>
+<article class="mx-auto max-w-3xl space-y-10 py-8">
+	<header class="space-y-4">
+		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl">How it works</h1>
+		<p class="text-xl text-text-muted">Most tools run on your device. A few need a hosted service. Here is what that means in practice.</p>
 	</header>
-
-	<section class="mb-12">
-		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">Your files stay on your device</h2>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			PDF merges, QR codes, background removal, resume builds, invoice generation — all of it runs in your browser. There is no upload. There is no server processing your files. The computation happens on your device using JavaScript and WebAssembly.
+	<section class="space-y-3">
+		<h2 class="font-display text-2xl font-700">Local file processing</h2>
+		<p class="leading-relaxed text-text-muted">
+			PDF editing, image conversion, background removal, media processing and transcription run in
+			your browser using JavaScript, WebAssembly and, where supported, WebGPU. Resume and invoice
+			generation also happen locally. These browser tools do not upload your source files for processing.
+			Drafts and progress may be stored in this browser, so export a backup before clearing site data.
 		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			This isn't a privacy policy. It's architecture. You can verify it yourself: open the browser's network tab while using any tool. No file data leaves your machine.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			The only features that touch a server are dynamic QR codes and short links, which need a database to store redirect URLs. Those use <a href="https://developers.cloudflare.com/d1/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Cloudflare D1</a> with passphrase-based auth — no accounts, no email collection.
-		</p>
-	</section>
-
-	<section class="mb-12">
-		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">What it costs us</h2>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			nah.tools runs on <a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Cloudflare Workers</a> with KV caching and Analytics Engine. Static tools (PDF, QR codes, background removal, resumes, invoices) cost nothing to serve because they run entirely on your device. Dynamic features (short links, dynamic QR codes, link in bio) cost about <strong class="text-text">$0.80 per million requests</strong>.
-		</p>
-		<div class="overflow-x-auto">
-			<table class="w-full text-left text-sm">
-				<thead>
-					<tr class="border-b border-border">
-						<th class="py-3 pr-4 font-semibold text-text">What nah does</th>
-						<th class="py-3 pr-4 font-semibold text-text">What it costs us</th>
-						<th class="py-3 font-semibold text-text">What others charge</th>
-					</tr>
-				</thead>
-				<tbody class="text-text-muted">
-					<tr class="border-b border-border/50">
-						<td class="py-3 pr-4">Generate a QR code</td>
-						<td class="py-3 pr-4">$0.00 (your browser)</td>
-						<td class="py-3">$120–564/year</td>
-					</tr>
-					<tr class="border-b border-border/50">
-						<td class="py-3 pr-4">Merge a PDF</td>
-						<td class="py-3 pr-4">$0.00 (your browser)</td>
-						<td class="py-3">$96/year</td>
-					</tr>
-					<tr class="border-b border-border/50">
-						<td class="py-3 pr-4">Remove a background</td>
-						<td class="py-3 pr-4">$0.00 (your browser)</td>
-						<td class="py-3">$2/image or $99/month</td>
-					</tr>
-					<tr class="border-b border-border/50">
-						<td class="py-3 pr-4">Build a resume</td>
-						<td class="py-3 pr-4">$0.00 (your browser)</td>
-						<td class="py-3">$24/month (every 4 weeks)</td>
-					</tr>
-					<tr class="border-b border-border/50">
-						<td class="py-3 pr-4">Shorten a link</td>
-						<td class="py-3 pr-4">~$0.0000008 (one redirect)</td>
-						<td class="py-3">$348/year (Bitly Pro)</td>
-					</tr>
-					<tr class="border-b border-border/50">
-						<td class="py-3 pr-4">Remove data broker listings</td>
-						<td class="py-3 pr-4">$0.00 (pre-filled templates)</td>
-						<td class="py-3">$78–129/year</td>
-					</tr>
-					<tr>
-						<td class="py-3 pr-4">Create an invoice</td>
-						<td class="py-3 pr-4">$0.00 (your browser)</td>
-						<td class="py-3">$16–60/month</td>
-					</tr>
-					<tr>
-						<td class="py-3 pr-4">Link in bio page</td>
-						<td class="py-3 pr-4">~$0.0000008 (one visit)</td>
-						<td class="py-3">$5–24/month</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-	</section>
-
-	<section class="mb-12">
-		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">Sustainability</h2>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			This is a one-person project. The maintainer personally covers infrastructure costs. At current architecture, that budget handles <strong class="text-text">over a billion dynamic requests per month</strong> before it becomes a conversation. For reference, most funded startups never reach that.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			If nah.tools gets popular enough to matter, the plan is simple: accept donations from people who want to help, and keep running. If that ever stops working, the code is <a href="https://github.com/vrennat/nah-tools" class="text-accent underline hover:text-accent-hover">MIT-licensed</a> — anyone can self-host the whole thing.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			There's no donate button yet. When there is, it'll be here. The tools are free either way.
+		<p class="leading-relaxed text-text-muted">
+			Your device supplies the memory and processing power. Large files, long recordings and bigger
+			AI models can be slow or exceed available memory, especially on a phone. Lossy conversion and
+			compression can reduce quality; inspect the output and keep the original.
 		</p>
 	</section>
-
-	<section class="mb-12">
-		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">The rules</h2>
-		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No accounts.</strong> If a tool doesn't need to know who you are, it won't ask.</p>
-		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No tracking.</strong> No cookies, no fingerprinting. Basic <a href="https://www.cloudflare.com/web-analytics/" target="_blank" rel="noopener noreferrer" class="text-accent underline hover:text-accent-hover">Cloudflare Web Analytics</a> that count page views without identifying visitors.</p>
-		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No ads.</strong> Not now, not later.</p>
-		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">No paywall.</strong> Every feature free for every user. No premium tiers, no daily limits, no watermarks.</p>
-		<p class="mb-4 leading-relaxed text-text-muted"><strong class="text-text">Open source.</strong> The <a href="https://github.com/vrennat/nah-tools" class="text-accent underline hover:text-accent-hover">full codebase</a> is MIT-licensed. Read every line, verify every claim, self-host the whole thing.</p>
-	</section>
-
-	<section class="mb-12">
-		<h2 class="mb-4 mt-12 font-display text-2xl font-700 text-text">Why these tools cost $0</h2>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			Over <strong class="text-text">$2.2 billion in venture capital</strong> has gone into companies that charge subscriptions for things your browser already does for free. The Better Business Bureau has documented <a href="https://www.bbb.org/all/scamstudies/free_trial_scams/free_trial_scams_full_study" target="_blank" rel="noopener noreferrer" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent"><strong>$1.3 billion in consumer losses</strong></a> from the free trial traps these companies use.
+	<section class="space-y-3">
+		<h2 class="font-display text-2xl font-700">Downloads and connections</h2>
+		<p class="leading-relaxed text-text-muted">
+			Local processing still needs software. FFmpeg downloads from unpkg, transcription models from
+			Hugging Face and background-removal models from a Cloudflare R2 host. The site also loads
+			Google Fonts. Downloads contact those providers without turning file processing into a server upload.
 		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			The tools exist because the underlying technology is free. QR codes are an open ISO standard. PDF manipulation uses open-source JavaScript libraries. Background removal runs on open-source AI models. None of this requires a server, a subscription, or your credit card.
-		</p>
-		<p class="mb-4 leading-relaxed text-text-muted">
-			Read the full investigation: <a href="/why" class="text-accent underline hover:text-accent-hover">Why nah exists</a>.
+		<p class="leading-relaxed text-text-muted">
+			A tool may keep working offline after its code and resources have loaded, but this depends on
+			browser caching and the tool. First use and missing resources need a connection. Offline use
+			is not guaranteed across reloads or after clearing browser data.
 		</p>
 	</section>
-
-	<div class="mt-12 rounded-xl border border-border bg-surface p-8 text-center">
-		<p class="mb-4 text-lg text-text">Ready to try tools that are actually free?</p>
-		<a
-			href="/"
-			class="inline-block rounded-lg bg-accent px-6 py-3 font-semibold text-white hover:bg-accent-hover"
-		>
-			Explore all tools
-		</a>
+	<section class="space-y-3">
+		<h2 class="font-display text-2xl font-700">Hosted features</h2>
+		<p class="leading-relaxed text-text-muted">
+			Short links and dynamic QR codes store redirect destinations and settings on Cloudflare D1
+			with KV caching. Link-in-bio pages store and publish the profile and links you provide.
+			These features depend on the hosted service; a static QR code instead contains its data directly.
+			Management uses passphrases stored as bcrypt hashes, without an account signup.
+		</p>
+		<p class="leading-relaxed text-text-muted">
+			Protected redirects record click details including location fields, device category, referrer
+			and a shortened user-agent string. Bio pages count views and record link-click details.
+			Rate limiting and optional Turnstile verification also use request information. Deactivation
+			disables a hosted record rather than deleting it. Read the <a href="/privacy" class="text-accent underline">privacy policy</a>
+			for the stored fields and the limits of what is known about infrastructure logging and retention.
+		</p>
+	</section>
+	<section class="space-y-3">
+		<h2 class="font-display text-2xl font-700">Cost and availability</h2>
+		<p class="leading-relaxed text-text-muted">
+			Running computation in your browser reduces server processing work, but hosting, bandwidth,
+			model delivery and databases still have costs. The source code does not verify a current
+			monthly bill or guarantee future capacity, pricing or availability. Hosted APIs also apply rate limits.
+		</p>
+		<p class="leading-relaxed text-text-muted">
+			The <a href="https://github.com/vrennat/nah-tools" class="text-accent underline">MIT-licensed source</a>
+			is available to inspect and self-host. Self-hosting hosted features requires configuring their
+			infrastructure and dependencies. You can also use your browser’s network tools to inspect the
+			requests made by the feature you are using; source code alone cannot reveal every live hosting setting.
+		</p>
+	</section>
+	<div class="rounded-xl border border-border bg-surface p-8 text-center">
+		<a href="/" class="inline-block rounded-lg bg-accent px-6 py-3 font-semibold text-white hover:bg-accent-hover">Explore all tools</a>
 	</div>
 </article>

@@ -49,17 +49,17 @@
 </script>
 
 <svelte:head>
-	<title>Remove Your Data from Data Brokers — nah</title>
+	<title>Data Broker Opt-Out Requests — nah</title>
 	<meta
 		name="description"
-		content="Free, open-source data broker removal tool. Generate opt-out requests and follow step-by-step guides to remove your personal information from 25+ data brokers. 100% client-side."
+		content="Prepare data broker opt-out requests in your browser. Review and submit requests yourself, with broker-specific guides and progress tracking."
 	/>
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		'@context': 'https://schema.org',
 		'@type': 'SoftwareApplication',
-		name: 'nah — Data Broker Removal Tool',
+		name: 'nah — Data Broker Opt-Out Requests',
 		url: 'https://nah.tools/remove',
-		description: 'Free, open-source tool to remove your personal information from data brokers. Generates opt-out emails and provides step-by-step removal guides.',
+		description: 'Free tool to prepare opt-out emails and follow broker-specific submission guides. You review and submit each request.',
 		applicationCategory: 'UtilityApplication',
 		operatingSystem: 'Any',
 		offers: {
@@ -79,10 +79,10 @@
 	<!-- Hero -->
 	<section class="text-center">
 		<h1 class="font-display text-4xl font-800 tracking-tight sm:text-5xl md:text-6xl">
-			Remove your data <span class="text-accent">from the internet.</span>
+			Prepare data broker <span class="text-accent">opt-out requests.</span>
 		</h1>
 		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
-			Generate opt-out requests for data brokers. Everything runs in your browser — we never see your information.
+			Prepare requests in your browser, then review and submit them yourself. Brokers decide how to respond and may require verification; exemptions can apply, and listings can reappear.
 		</p>
 		<div class="mt-4 inline-flex items-center gap-2 rounded-full bg-success/10 px-4 py-1.5 text-sm font-medium text-success">
 			<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +91,7 @@
 			100% client-side — zero data sent to our servers
 		</div>
 		<p class="mt-3 text-sm text-text-muted">
-			Want to automate this? <a href="/mcp" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">Connect an AI agent</a> to handle it for you.
+			Using an AI assistant? <a href="/mcp" class="text-accent underline decoration-border underline-offset-4 hover:decoration-accent">Connect an AI agent</a> to help prepare requests. Review submissions before sending.
 		</p>
 	</section>
 

@@ -88,7 +88,7 @@
 
 <svelte:head>
 	<title>Terms of Service Generator — nah</title>
-	<meta name="description" content="Generate professional terms of service to protect your business and clarify user obligations." />
+	<meta name="description" content="Create a customizable terms of service draft describing service rules and user obligations." />
 </svelte:head>
 
 <div class="min-h-screen bg-surface">
@@ -101,7 +101,8 @@
 				</a>
 			</div>
 			<h1 class="text-3xl font-bold text-text font-display">Terms of Service Generator</h1>
-			<p class="text-text-muted mt-2">Define your service terms and user obligations</p>
+			<p class="text-text-muted mt-2">Draft your service terms and user obligations</p>
+			<p class="mt-2 text-sm text-text-muted">Review the draft against your actual practices. Generated text does not guarantee legal compliance.</p>
 		</div>
 	</div>
 

@@ -61,7 +61,7 @@
 		{
 			question: 'How many presentations can I merge at once?',
 			answer:
-				'There is no hard limit. You can add as many PPTX files as your browser memory allows. Very large decks combined may slow down or exhaust memory on low-RAM devices, but the tool imposes no cap.'
+				'There is no fixed file-count cap. Each PPTX must be 100 MB or smaller. The combined decks must fit in browser memory; large presentations or many embedded images can slow down or fail on devices with limited memory.'
 		},
 		{
 			question: 'Will speaker notes from all files be included?',

@@ -10,17 +10,17 @@
 		{
 			question: 'Will OCR mess up the pages that are already digital text?',
 			answer:
-				'No. The OCR tool checks each page for existing text content first and skips any page that already has meaningful text — it only processes pages that are effectively images. Run it on the whole merged file and it leaves your already-digital pages untouched.'
+				'The tool skips pages with more than 50 extracted characters. That is a heuristic: a short digital page may still be processed, and a scanned page with a text header may be skipped. Review the output, especially for mixed-content pages.'
 		},
 		{
 			question: 'Does OCR replace the scanned page with plain text?',
 			answer:
-				'No, and this matters: it keeps the original scanned image exactly as it looks, and adds an invisible, searchable text layer underneath it. Visually nothing changes — you can now select and search the text that\'s really there.'
+				'It preserves the original page and attempts to add invisible recognized text. OCR can misread words or omit characters, so verify search and copy results in the downloaded PDF.'
 		},
 		{
 			question: 'How long does OCR take?',
 			answer:
-				'Roughly 15–60 seconds per page depending on how complex the page is and how fast your device is. The OCR engine\'s language data (~4MB) downloads once and is cached for next time.'
+				'Processing time varies with page complexity, language, and device. The OCR engine and selected language data may need network downloads; browser caching is not guaranteed.'
 		}
 	];
 </script>
@@ -59,21 +59,19 @@
 		<p class="leading-relaxed text-text-muted">
 			Take the merged file to <a href="/pdf/ocr" class="text-accent underline hover:text-accent-hover">/pdf/ocr</a>.
 			It runs Tesseract.js — a WebAssembly build of the same open-source OCR engine originally built
-			at HP Labs — entirely in your browser, adding an invisible text layer under each scanned page
-			so it becomes searchable and selectable while looking exactly the same. Expect roughly
-			15–60 seconds per page depending on complexity and your device.
+			at HP Labs — entirely in your browser, attempting to add invisible recognized text to pages it processes. OCR results can contain
+			errors or missing characters; test search and copy in the downloaded PDF. Processing time
+			depends on page complexity and your device.
 		</p>
 	</section>
 
 	<section class="space-y-4">
 		<h2 class="font-display text-2xl font-700 text-text">Why merge first, then OCR the whole thing</h2>
 		<p class="leading-relaxed text-text-muted">
-			It's tempting to OCR the scanned file separately before merging, but there's no need — and
-			running OCR on the combined file is actually simpler. The OCR tool checks each page for
-			existing text before processing it, and skips any page that already has real text. Run it once
-			on the merged file: the already-digital pages pass through untouched, and only the genuinely
-			scanned pages get the OCR text layer added. One pass, correct result, no risk of degrading the
-			pages that didn't need it.
+			You can run OCR on the combined file, but its page detection is approximate: it skips a page
+			when more than 50 characters can already be extracted. A short digital page may receive
+			duplicate text, while a scan with a digital header may be skipped. For mixed documents,
+			consider OCR on the scanned file first, review its output, and then merge. Keep your originals.
 		</p>
 	</section>
 </ArticleShell>

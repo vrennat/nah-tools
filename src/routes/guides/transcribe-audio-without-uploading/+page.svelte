@@ -5,17 +5,17 @@
 		{
 			question: 'Does any of my audio get uploaded?',
 			answer:
-				'No. The only network request is a one-time download of the Whisper model itself (from Hugging Face), which the browser caches afterward. Your recording is processed locally and never leaves the device.'
+				'No. The page, runtime, and model assets may download over the network; browser caching can reduce later downloads. Your recording is processed locally and never leaves the device.'
 		},
 		{
 			question: 'Which model should I pick?',
 			answer:
-				'English Fast (~39MB) for quick English-only transcripts, Multilingual (~73MB) as the default balance for anything non-English or accented, and High Accuracy (~237MB) for technical vocabulary, multiple speakers, or noisy audio where mistakes are costly.'
+				'Start with English Fast for English speech, use Multilingual for other supported languages, and try High Accuracy if smaller models make errors. Larger models need more resources; none guarantees an accurate transcript or identifies speakers.'
 		},
 		{
 			question: 'Do I need an internet connection?',
 			answer:
-				'Only the first time, to download the model. After that it\'s cached by the browser and transcription runs fully offline — though the page itself still needs to load, so you\'re not fully disconnected.'
+				'Plan to be online to load the page, runtime, and model assets. Processing is local once loaded, but cached files can be evicted and offline startup is not guaranteed. Test offline use in advance if you need it.'
 		},
 		{
 			question: 'What formats can I export?',
@@ -48,33 +48,34 @@
 		<h2 class="font-display text-2xl font-700 text-text">How it works</h2>
 		<p class="leading-relaxed text-text-muted">
 			nah.tools' <a href="/audio/transcribe" class="text-accent underline hover:text-accent-hover">transcription tool</a>
-			runs OpenAI's Whisper model converted to ONNX format, executed entirely in your browser via
-			WebAssembly. The first time you use it, the model downloads from Hugging Face's CDN — that's
-			the only network request involved. After that, the browser caches it, and every transcription
-			from then on runs locally with no network round-trip for the audio itself.
+			runs OpenAI's Whisper model converted to ONNX format, executed in your browser using WebGPU when available, with a WebAssembly fallback. Model assets download from Hugging Face, and the page and runtime need assets too. Browser
+			caching can reduce later downloads but does not guarantee offline access. Audio processing
+			runs locally; the recording is not sent to a transcription service.
 		</p>
 	</section>
 
 	<section class="space-y-4">
 		<h2 class="font-display text-2xl font-700 text-text">Which model to pick</h2>
+		<p class="leading-relaxed text-text-muted">Download size varies with the selected model and execution backend. Allow time and storage for model and runtime assets; the download indicator reports progress.</p>
 		<ul class="list-disc space-y-2 pl-6">
-			<li class="leading-relaxed text-text-muted"><strong class="text-text">English Fast (~39MB)</strong> — English-only, the smallest download, the quickest to process. Good default for a quick English voice memo.</li>
-			<li class="leading-relaxed text-text-muted"><strong class="text-text">Multilingual (~73MB)</strong> — handles non-English languages and accented speech noticeably better, at a moderate size increase.</li>
-			<li class="leading-relaxed text-text-muted"><strong class="text-text">High Accuracy (~237MB)</strong> — the largest download, best suited to technical vocabulary, multiple speakers, or audio with background noise, where getting it wrong costs more than the extra download and processing time.</li>
+			<li class="leading-relaxed text-text-muted"><strong class="text-text">English Fast</strong> — English-only, the smallest model and a fast starting point. Good default for a quick English voice memo.</li>
+			<li class="leading-relaxed text-text-muted"><strong class="text-text">Multilingual</strong> — supports non-English languages; accuracy still depends on language and recording quality.</li>
+			<li class="leading-relaxed text-text-muted"><strong class="text-text">High Accuracy</strong> — a larger model to try when the smaller models make errors. It does not identify speakers, and its output still needs review.</li>
 		</ul>
 	</section>
 
 	<section class="space-y-4">
 		<h2 class="font-display text-2xl font-700 text-text">Steps</h2>
 		<ul class="list-disc space-y-2 pl-6">
-			<li class="leading-relaxed text-text-muted">Open <a href="/audio/transcribe" class="text-accent underline hover:text-accent-hover">/audio/transcribe</a> and pick a model based on the table above.</li>
-			<li class="leading-relaxed text-text-muted">Drop in your audio or video file — the model downloads once, on first use.</li>
+			<li class="leading-relaxed text-text-muted">Open <a href="/audio/transcribe" class="text-accent underline hover:text-accent-hover">/audio/transcribe</a> and pick a model using the options above.</li>
+			<li class="leading-relaxed text-text-muted">Drop in your audio or video file — model and runtime assets download when needed.</li>
 			<li class="leading-relaxed text-text-muted">Wait for processing; larger models and longer recordings take more time, especially on lower-powered devices.</li>
 			<li class="leading-relaxed text-text-muted">Export as plain text, SRT/VTT subtitles, or a formatted PDF of notes.</li>
 		</ul>
 		<p class="leading-relaxed text-text-muted">
 			If the recording is noisy or has a wide dynamic range, running it through <a href="/audio/normalize" class="text-accent underline hover:text-accent-hover">audio normalization</a>
-			first can make speech more consistent for the model to pick up, before you transcribe.
+			first may help with uneven volume. Normalization does not remove background noise, and
+			it does not guarantee better recognition. Always review the transcript against the recording.
 		</p>
 	</section>
 </ArticleShell>

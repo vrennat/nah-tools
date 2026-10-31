@@ -1,0 +1,37 @@
+{
+  "checked": "2026-10-31",
+  "environment": "Local production preview in desktop in-app browser; synthetic nonpersonal fixtures only; no physical phone QA",
+  "ocr": {
+    "inputHadSelectableText": false,
+    "recognizedWords": 3,
+    "pages": 1,
+    "pageSizePoints": [
+      500,
+      150
+    ],
+    "extractedText": "SMOKE CHECK 123",
+    "renderSizePixels": [
+      1000,
+      300
+    ],
+    "beforePixelSHA256": "93e8da9830fde4b1e8dc0e64e96b35a2333bc9ced15a8fe9f7f2691ee413412b",
+    "afterPixelSHA256": "93e8da9830fde4b1e8dc0e64e96b35a2333bc9ced15a8fe9f7f2691ee413412b",
+    "visualPixelsIdentical": true
+  },
+  "otherExports": {
+    "pdf": "Two merged pages with alpha/beta text in order",
+    "pptx": "Notes parts/references absent; synthetic slide text retained; not opened in PowerPoint",
+    "image": "PNG to JPEG decodes at64x48; output637bytes exceeds input146bytes",
+    "media": "Real FFmpeg.wasm trim: source3.0s, selected1.0s, outputWAV1.024s",
+    "text": "Downloaded text exactly alpha gamma gamma"
+  },
+  "artifacts": {
+    "ocr-output.pdf": "98a988d065e20cf4f2b2fd68ae42142649991f93c4c3029e2902c65e103ad849",
+    "replaced-output.txt": "9e934c65241d1873496b7089169908427bc06938de967c5c6318f737b2702e2b",
+    "no-notes-output.pptx": "ce3836468bfda1019bf3ba0724d48022d010056c2bbf115927114f78129ec1a0",
+    "ocr-output.txt": "bd706fa4f45c46ab1f9d96a2a15ad6bb3f7cd9aeaae611cb63b99643bc3e4a1b",
+    "converted-output.jpg": "522c22d2d9f1e2cfc7c2fd92a61c4aa92e8f7a83531f2500017d84ae1c53ad5b",
+    "trimmed-output.wav": "d35ece68fc22dbc3dc7f148653c9b126f8d77b0954e1994b9f98f98503566af4",
+    "merged-output.pdf": "111d9edee89f49eb2c50a1fad6a8cbd13fca4357b3e039cb1ded85b1165c8c9e"
+  }
+}

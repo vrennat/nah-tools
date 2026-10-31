@@ -88,7 +88,7 @@
 
 <svelte:head>
 	<title>DMCA Notice Generator — nah</title>
-	<meta name="description" content="Generate a DMCA compliance statement for your website to handle copyright infringement claims." />
+	<meta name="description" content="Create a customizable copyright statement draft describing how your website handles infringement notices." />
 </svelte:head>
 
 <div class="min-h-screen bg-surface">
@@ -100,8 +100,9 @@
 					Back
 				</a>
 			</div>
-			<h1 class="text-3xl font-bold text-text font-display">DMCA Compliance Statement</h1>
-			<p class="text-text-muted mt-2">Establish your copyright notice and infringement procedures</p>
+			<h1 class="text-3xl font-bold text-text font-display">DMCA Statement Draft</h1>
+			<p class="text-text-muted mt-2">Draft your copyright notice and infringement procedures</p>
+			<p class="mt-2 text-sm text-text-muted">Review the draft against your actual practices. Generated text does not guarantee legal compliance.</p>
 		</div>
 	</div>
 

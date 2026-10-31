@@ -125,8 +125,8 @@
 				opens cleanly in any viewer.
 			</p>
 			<p class="text-sm leading-relaxed text-text-muted">
-				Your file is processed entirely in the browser — no uploads, no accounts, no file size
-				limits imposed by a server.
+				Your file is processed entirely in the browser, with no upload or account required.
+				The file picker accepts up to 100 MB per file; available browser memory can limit processing further.
 			</p>
 		</div>
 	</section>

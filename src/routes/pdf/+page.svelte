@@ -8,7 +8,7 @@
 	const faqs = [
 		{
 			question: 'Are these PDF tools really free?',
-			answer: 'Yes, completely free with no signup, no account, and no limits. All tools are open source and will stay free.'
+			answer: 'Yes. There are no usage charges, signup, or account requirements. File-size limits and available browser memory still apply. The tools are open source.'
 		},
 		{
 			question: 'Do my PDF files get uploaded to a server?',
@@ -16,7 +16,7 @@
 		},
 		{
 			question: 'Is there a file size limit?',
-			answer: 'There is no enforced limit — processing happens in your browser tab. Practical limits depend on your device memory; most documents up to a few hundred MB work fine.'
+			answer: 'The file picker accepts up to 100 MB per file. Processing also depends on available browser memory, so complex documents can fail even below that limit.'
 		},
 		{
 			question: 'Which browsers are supported?',
@@ -41,7 +41,7 @@
 	<title>Free PDF Tools — Merge, Split, Rotate, Compress | nah</title>
 	<meta
 		name="description"
-		content="Free online PDF tools. Merge, split, rotate, compress, convert, and more. 100% client-side — files never leave your device. No signup, no limits."
+		content="Free online PDF tools. Merge, split, rotate, compress, convert, and more. 100% client-side — files never leave your device. No signup or usage charges. 100 MB per file."
 	/>
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		'@context': 'https://schema.org',

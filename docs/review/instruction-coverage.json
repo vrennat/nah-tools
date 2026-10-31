@@ -1,0 +1,1443 @@
+{
+  "checked": "2026-10-31",
+  "registryEntries": 116,
+  "toolCount": 110,
+  "guideCount": 6,
+  "tools": [
+    {
+      "path": "/pdf/merge",
+      "family": "pdf",
+      "name": "Merge PDFs",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "built-in",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/split",
+      "family": "pdf",
+      "name": "Split PDF",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "built-in",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/rotate",
+      "family": "pdf",
+      "name": "Rotate Pages",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "built-in",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/remove-pages",
+      "family": "pdf",
+      "name": "Remove Pages",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "built-in",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/reorder",
+      "family": "pdf",
+      "name": "Reorder Pages",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "built-in",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/images-to-pdf",
+      "family": "pdf",
+      "name": "Images to PDF",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/pdf-to-images",
+      "family": "pdf",
+      "name": "PDF to Images",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/pdf-to-svg",
+      "family": "pdf",
+      "name": "PDF to SVG",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/compress",
+      "family": "pdf",
+      "name": "Compress PDF",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "built-in",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/flatten",
+      "family": "pdf",
+      "name": "Flatten PDF",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/page-numbers",
+      "family": "pdf",
+      "name": "Page Numbers",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/watermark",
+      "family": "pdf",
+      "name": "Watermark",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/edit",
+      "family": "pdf",
+      "name": "Edit PDF",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/fill-sign",
+      "family": "pdf",
+      "name": "Fill & Sign",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/word-to-pdf",
+      "family": "pdf",
+      "name": "Word to PDF",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/protect",
+      "family": "pdf",
+      "name": "Protect PDF",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "built-in",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/unlock",
+      "family": "pdf",
+      "name": "Unlock PDF",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/pdf-to-csv",
+      "family": "pdf",
+      "name": "PDF to CSV",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/ocr",
+      "family": "pdf",
+      "name": "OCR PDF",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "built-in",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/crop",
+      "family": "pdf",
+      "name": "Crop PDF",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "built-in",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/extract-images",
+      "family": "pdf",
+      "name": "Extract Images",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/pdfa",
+      "family": "pdf",
+      "name": "Prepare for PDF/A",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/compare",
+      "family": "pdf",
+      "name": "Compare PDFs",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pdf/redact",
+      "family": "pdf",
+      "name": "Redact PDF",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pptx/merge",
+      "family": "pptx",
+      "name": "Merge Presentations",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pptx/split",
+      "family": "pptx",
+      "name": "Split Presentation",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pptx/compress",
+      "family": "pptx",
+      "name": "Compress PPTX",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pptx/extract-images",
+      "family": "pptx",
+      "name": "Extract Images",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pptx/extract-text",
+      "family": "pptx",
+      "name": "Extract Text",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pptx/remove-notes",
+      "family": "pptx",
+      "name": "Remove Speaker Notes",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pptx/watermark",
+      "family": "pptx",
+      "name": "Add Watermark",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pptx/remove-animations",
+      "family": "pptx",
+      "name": "Remove Animations",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pptx/slide-numbers",
+      "family": "pptx",
+      "name": "Add Slide Numbers",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/pptx/metadata",
+      "family": "pptx",
+      "name": "Edit Metadata",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/photo/rm-bg",
+      "family": "photo",
+      "name": "Background Remover",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "built-in",
+        "ios": "built-in",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/photo/compress",
+      "family": "photo",
+      "name": "Image Compression",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "built-in",
+        "ios": "built-in",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/photo/filters",
+      "family": "photo",
+      "name": "Color Correction",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "built-in",
+        "ios": "built-in",
+        "android": "app"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/photo/exif",
+      "family": "photo",
+      "name": "EXIF Viewer & Remover",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/photo/crop",
+      "family": "photo",
+      "name": "Social Media Crop",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "built-in",
+        "ios": "built-in",
+        "android": "app"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/photo/favicon",
+      "family": "photo",
+      "name": "Favicon Generator",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/photo/svg-optimize",
+      "family": "photo",
+      "name": "SVG Optimizer",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/media/compress-video",
+      "family": "media",
+      "name": "Compress Video",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/media/trim-video",
+      "family": "media",
+      "name": "Trim Video",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "built-in",
+        "ios": "built-in",
+        "android": "app"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/media/trim-audio",
+      "family": "media",
+      "name": "Trim Audio",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": [
+        "ios"
+      ]
+    },
+    {
+      "path": "/media/compress-audio",
+      "family": "media",
+      "name": "Compress Audio",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/media/video-to-gif",
+      "family": "media",
+      "name": "Video to GIF",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/media/extract-audio",
+      "family": "media",
+      "name": "Extract Audio",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/audio/convert",
+      "family": "audio",
+      "name": "Convert Audio",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/audio/merge",
+      "family": "audio",
+      "name": "Merge Audio",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/audio/normalize",
+      "family": "audio",
+      "name": "Normalize Volume",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/audio/speed",
+      "family": "audio",
+      "name": "Change Speed",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/audio/pitch",
+      "family": "audio",
+      "name": "Shift Pitch",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/audio/volume",
+      "family": "audio",
+      "name": "Adjust Volume",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/audio/fade",
+      "family": "audio",
+      "name": "Fade In / Fade Out",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/audio/reverse",
+      "family": "audio",
+      "name": "Reverse Audio",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/audio/silence-remove",
+      "family": "audio",
+      "name": "Remove Silence",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/audio/record",
+      "family": "audio",
+      "name": "Voice Recorder",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "built-in",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/audio/transcribe",
+      "family": "audio",
+      "name": "Transcribe Audio",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": [
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "path": "/qr",
+      "family": "qr",
+      "name": "QR Code Generator",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/qr/wifi",
+      "family": "qr",
+      "name": "WiFi QR Code",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/qr/vcard",
+      "family": "qr",
+      "name": "vCard QR Code",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/qr/email",
+      "family": "qr",
+      "name": "Email QR Code",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/qr/phone",
+      "family": "qr",
+      "name": "Phone QR Code",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/qr/sms",
+      "family": "qr",
+      "name": "SMS QR Code",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/legal-gen/privacy-policy",
+      "family": "legal-gen",
+      "name": "Privacy Policy",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/legal-gen/terms-of-service",
+      "family": "legal-gen",
+      "name": "Terms of Service",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/legal-gen/cookie-policy",
+      "family": "legal-gen",
+      "name": "Cookie Policy",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/legal-gen/dmca-notice",
+      "family": "legal-gen",
+      "name": "DMCA Notice",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/resume",
+      "family": "standalone",
+      "name": "Resume Builder",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/invoice",
+      "family": "standalone",
+      "name": "Invoice Generator",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/signature",
+      "family": "standalone",
+      "name": "Email Signatures",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/links",
+      "family": "standalone",
+      "name": "Link Shortener",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/bio",
+      "family": "standalone",
+      "name": "Link in Bio",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/remove",
+      "family": "standalone",
+      "name": "Data Broker Opt-Out Requests",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/json",
+      "family": "dev",
+      "name": "JSON Formatter",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/base64",
+      "family": "dev",
+      "name": "Base64 Encode/Decode",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/jwt",
+      "family": "dev",
+      "name": "JWT Decoder",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/url",
+      "family": "dev",
+      "name": "URL Encoder",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/hash",
+      "family": "dev",
+      "name": "Hash Generator",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/uuid",
+      "family": "dev",
+      "name": "UUID Generator",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/regex",
+      "family": "dev",
+      "name": "Regex Tester",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/cron",
+      "family": "dev",
+      "name": "Cron Expression",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/timestamp",
+      "family": "dev",
+      "name": "Timestamp Converter",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/color",
+      "family": "dev",
+      "name": "Color Converter",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/qr-reader",
+      "family": "dev",
+      "name": "QR Code Reader",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/diff",
+      "family": "dev",
+      "name": "Text Diff Checker",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/password",
+      "family": "dev",
+      "name": "Password Generator",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/markdown",
+      "family": "dev",
+      "name": "Markdown Editor",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/lorem",
+      "family": "dev",
+      "name": "Lorem Ipsum",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/dev/case",
+      "family": "dev",
+      "name": "Case Converter",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/text/word-count",
+      "family": "text",
+      "name": "Word Counter",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/text/find-replace",
+      "family": "text",
+      "name": "Find & Replace",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/text/summarize",
+      "family": "text",
+      "name": "Text Summarizer",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/heic-to-jpg",
+      "family": "convert",
+      "name": "Convert HEIC to JPG",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/heic-to-png",
+      "family": "convert",
+      "name": "Convert HEIC to PNG",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/webp-to-png",
+      "family": "convert",
+      "name": "Convert WebP to PNG",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/webp-to-jpg",
+      "family": "convert",
+      "name": "Convert WebP to JPG",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/png-to-webp",
+      "family": "convert",
+      "name": "Convert PNG to WebP",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/jpg-to-webp",
+      "family": "convert",
+      "name": "Convert JPG to WebP",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/png-to-jpg",
+      "family": "convert",
+      "name": "Convert PNG to JPG",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "built-in",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/jpg-to-png",
+      "family": "convert",
+      "name": "Convert JPG to PNG",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "built-in",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/svg-to-png",
+      "family": "convert",
+      "name": "Convert SVG to PNG",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/avif-to-png",
+      "family": "convert",
+      "name": "Convert AVIF to PNG",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/avif-to-jpg",
+      "family": "convert",
+      "name": "Convert AVIF to JPG",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/png-to-avif",
+      "family": "convert",
+      "name": "Convert PNG to AVIF",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/jpg-to-avif",
+      "family": "convert",
+      "name": "Convert JPG to AVIF",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/jxl-to-png",
+      "family": "convert",
+      "name": "Convert JPEG XL to PNG",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/bmp-to-png",
+      "family": "convert",
+      "name": "Convert BMP to PNG",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "built-in",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/gif-to-png",
+      "family": "convert",
+      "name": "Convert GIF to PNG",
+      "browser": true,
+      "platforms": {
+        "mac": "browser",
+        "windows": "built-in",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    },
+    {
+      "path": "/convert/tiff-to-jpg",
+      "family": "convert",
+      "name": "Convert TIFF to JPG",
+      "browser": true,
+      "platforms": {
+        "mac": "built-in",
+        "windows": "browser",
+        "ios": "browser",
+        "android": "browser"
+      },
+      "optionalRecordingsOnly": []
+    }
+  ]
+}

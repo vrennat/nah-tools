@@ -106,13 +106,13 @@
 
 <svelte:head>
 	<title>Free QR Code Generator — nah</title>
-	<meta name="description" content="Free, open-source QR code generator. No signup, no expiration, no tracking." />
+	<meta name="description" content="Free, open-source QR code generator. Make static codes in your browser or create a hosted dynamic redirect. No subscription required." />
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		"@context": "https://schema.org",
 		"@type": "SoftwareApplication",
 		"name": "nah — Free QR Code Generator",
 		"url": "https://nah.tools/qr",
-		"description": "Free, open-source QR code generator. Create QR codes for URLs, WiFi, vCards, email, phone, and SMS. No signup, no expiration, no tracking.",
+		"description": "Free, open-source QR code generator for URLs, WiFi, vCards, email, phone, and SMS. Static generation is local; dynamic redirects use hosted storage and scan counts.",
 		"applicationCategory": "UtilityApplication",
 		"operatingSystem": "Any",
 		"offers": {

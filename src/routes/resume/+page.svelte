@@ -76,7 +76,7 @@
 	<title>Free Resume Builder — nah</title>
 	<meta
 		name="description"
-		content="Build a professional resume for free. ATS-optimized templates, job description matching, PDF and DOCX export. No signup, no watermarks, no catch."
+		content="Build a free resume with readable, parse-friendly formatting, job description keyword checks, and PDF or DOCX export. No signup or watermarks."
 	/>
 </svelte:head>
 
@@ -89,6 +89,7 @@
 		<p class="mx-auto mt-4 max-w-2xl text-lg text-text-muted">
 			Build, tailor, and export — everything stays in your browser.
 		</p>
+		<p class="mx-auto mt-2 max-w-2xl text-sm text-text-muted">Formatting and keyword checks are local guidance, not an employer ATS test, ranking prediction, or interview guarantee.</p>
 	</section>
 
 	<!-- Resume Manager + Import -->

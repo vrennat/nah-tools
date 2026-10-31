@@ -8,7 +8,7 @@
 	const faqs = [
 		{
 			question: 'Are these PowerPoint tools free?',
-			answer: 'Yes, completely free with no signup, no account, and no limits. All tools are open source and will stay free.'
+			answer: 'Yes. There are no usage charges, signup, or account requirements. File-size limits and available browser memory still apply. The tools are open source.'
 		},
 		{
 			question: 'Do my PPTX files get uploaded to a server?',
@@ -16,7 +16,7 @@
 		},
 		{
 			question: 'Is there a file size limit?',
-			answer: 'No enforced limit — processing is in-browser. Large presentations with many high-resolution images may be slow; for best performance keep files under 100 MB.'
+			answer: 'The file picker accepts up to 100 MB per file. Large presentations or high-resolution images can still exhaust browser memory below that limit.'
 		},
 		{
 			question: 'Does it work with .ppt (older format) files?',
@@ -41,7 +41,7 @@
 	<title>Free PowerPoint Tools — Merge, Split, Compress PPTX | nah</title>
 	<meta
 		name="description"
-		content="Free online PowerPoint tools. Merge, split, compress, extract images, add watermarks, and more. 100% client-side — files never leave your device. No signup, no limits."
+		content="Free online PowerPoint tools. Merge, split, compress, extract images, add watermarks, and more. 100% client-side — files never leave your device. No signup or usage charges. 100 MB per file."
 	/>
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		'@context': 'https://schema.org',

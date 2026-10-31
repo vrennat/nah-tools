@@ -90,7 +90,7 @@
 
 <svelte:head>
 	<title>Privacy Policy Generator — nah</title>
-	<meta name="description" content="Generate a professional privacy policy that complies with GDPR, CCPA, and other regulations." />
+	<meta name="description" content="Create a customizable privacy policy draft describing your data collection, use, and third-party services." />
 </svelte:head>
 
 <div class="min-h-screen bg-surface">
@@ -103,7 +103,8 @@
 				</a>
 			</div>
 			<h1 class="text-3xl font-bold text-text font-display">Privacy Policy Generator</h1>
-			<p class="text-text-muted mt-2">Customize your policy and download in multiple formats</p>
+			<p class="text-text-muted mt-2">Customize a policy draft describing your data practices and download in multiple formats</p>
+			<p class="mt-2 text-sm text-text-muted">Review the draft against your actual practices. Generated text does not guarantee legal compliance.</p>
 		</div>
 	</div>
 

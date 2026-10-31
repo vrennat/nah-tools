@@ -89,7 +89,7 @@
 
 <svelte:head>
 	<title>Cookie Policy Generator — nah</title>
-	<meta name="description" content="Generate a compliant cookie policy that discloses your tracking practices and third-party services." />
+	<meta name="description" content="Create a customizable cookie policy draft describing your tracking practices and third-party services." />
 </svelte:head>
 
 <div class="min-h-screen bg-surface">
@@ -102,7 +102,8 @@
 				</a>
 			</div>
 			<h1 class="text-3xl font-bold text-text font-display">Cookie Policy Generator</h1>
-			<p class="text-text-muted mt-2">Disclose your cookie and tracking practices</p>
+			<p class="text-text-muted mt-2">Draft a description of your cookie and tracking practices</p>
+			<p class="mt-2 text-sm text-text-muted">Review the draft against your actual practices. Generated text does not guarantee legal compliance.</p>
 		</div>
 	</div>
 

@@ -83,7 +83,7 @@
 		{
 			question: 'What Word formats are supported?',
 			answer:
-				'The tool accepts .docx and .doc files. DOCX (the modern Office Open XML format) is fully supported. Older .doc (binary Word 97-2003) files are accepted but may have limited formatting fidelity depending on the features used.'
+				'The tool accepts .docx files only. Legacy .doc (Word 97–2003) files are not supported. Open a legacy document in a compatible editor and save it as DOCX before using this converter.'
 		},
 		{
 			question: 'How faithfully does the conversion preserve formatting?',
@@ -110,18 +110,18 @@
 
 <ToolShell
 	path="/pdf/word-to-pdf"
-	tagline="Convert DOCX files to PDF with formatting preserved. Batch convert multiple files at once."
+	tagline="Convert DOCX files to PDF. Preview common formatting and batch convert multiple files."
 	seoTitle="Word to PDF Free — DOCX Converter | nah.tools"
-	description="Convert DOCX files to PDF for free. Supports headings, lists, tables, and images. 100% client-side — files never leave your device."
+	description="Convert DOCX files to PDF for free. DOCX only; save legacy DOC files as DOCX first. 100% client-side — files never leave your device."
 	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
 			<FileDropZone
-				accept=".docx,.doc"
+				accept=".docx"
 				multiple={true}
 				bind:files
-				label="Drop Word documents here or click to browse"
+				label="Drop DOCX documents here or click to browse"
 			/>
 
 			{#if files.length > 0}
@@ -196,7 +196,7 @@
 					{#if processing}
 						Converting...
 					{:else if files.length === 0}
-						Upload a Word document
+						Choose a DOCX document
 					{:else if files.length === 1}
 						Convert to PDF
 					{:else}

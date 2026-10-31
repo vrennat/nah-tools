@@ -60,12 +60,12 @@
 		{
 			question: 'Is there a file size limit?',
 			answer:
-				'There is no enforced file size limit. Very large PDFs (hundreds of megabytes combined) may slow down or run out of browser memory depending on your device, but the tool imposes no hard cap.'
+				'Each input PDF must be 100 MB or smaller. There is no fixed combined-size cap, but merging can slow down or fail if the files exceed available browser memory.'
 		},
 		{
 			question: 'How many PDFs can I merge at once?',
 			answer:
-				'You can add as many PDFs as your browser memory allows. The file list shows your current order; drag to reorder before merging.'
+				'There is no fixed file-count cap. Each PDF must be 100 MB or smaller, and the combined workload must fit in browser memory. The file list shows your current order; drag to reorder before merging.'
 		},
 		{
 			question: 'Can I reorder the files before merging?',

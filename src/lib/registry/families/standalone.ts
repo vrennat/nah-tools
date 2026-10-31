@@ -7,7 +7,7 @@ export const standaloneTools: ToolEntry[] = [
 		path: '/resume',
 		family: 'standalone',
 		name: 'Resume Builder',
-		description: 'ATS-optimized, PDF and DOCX export.',
+		description: 'Readable, parse-friendly formatting. PDF and DOCX export.',
 		keywords: ['resume', 'cv', 'ats', 'pdf', 'docx', 'job application', 'curriculum vitae'],
 		popular: true,
 		sitemap: { changefreq: 'weekly', priority: 1.0 }
@@ -48,8 +48,8 @@ export const standaloneTools: ToolEntry[] = [
 	{
 		path: '/remove',
 		family: 'standalone',
-		name: 'Data Removal',
-		description: 'Remove your info from 25+ data brokers.',
+		name: 'Data Broker Opt-Out Requests',
+		description: 'Prepare requests to review and submit to data brokers.',
 		keywords: ['data removal', 'privacy', 'data brokers', 'opt-out', 'personal information', 'people finder'],
 		sitemap: { changefreq: 'weekly', priority: 1.0 }
 	}

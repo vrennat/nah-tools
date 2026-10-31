@@ -116,7 +116,7 @@
 		{
 			question: 'Does trimming re-encode the audio?',
 			answer:
-				'No. The trimmer uses FFmpeg\'s stream-copy mode (-c copy), which cuts the file at the requested timestamps without decoding or re-encoding the audio data. This preserves the original quality and runs very quickly. Cut points snap to the nearest audio keyframe, so the actual boundaries may be off by a few milliseconds.'
+				'No. The trimmer uses FFmpeg\'s stream-copy mode (-c copy), which copies encoded audio packets without decoding or re-encoding them. This preserves the encoded quality, but cut points can extend beyond the selected times depending on the codec and packet boundaries. Check the exported duration and playback.'
 		},
 		{
 			question: 'What audio formats can I trim?',
@@ -131,7 +131,7 @@
 		{
 			question: 'How accurate are the trim points?',
 			answer:
-				'Stream-copy trimming snaps to keyframe boundaries in the encoded stream, so the actual cut may be within a fraction of a second of your requested time. For most audio formats (MP3, AAC, OGG) the difference is imperceptible. WAV and FLAC are sample-accurate since they are uncompressed.'
+				'Cut points depend on the format and packet boundaries. Stream-copy output is not guaranteed to be sample-accurate, including for WAV and lossless FLAC. A short selected range can produce a longer clip; reopen the result and check the boundaries before sharing.'
 		},
 		{
 			question: 'Can I use this to extract a clip from a long podcast or recording?',
@@ -143,7 +143,7 @@
 
 <ToolShell
 	path="/media/trim-audio"
-	tagline="Cut an audio file to exactly the clip you need — set start and end points with a live preview."
+	tagline="Keep a selected section of an audio file — set start and end points with a live preview."
 	seoTitle="Trim Audio Free Online — Cut Audio to Time Range"
 	description="Trim audio to a specific time range. Preview and adjust start/end times. Free, no upload — processed in your browser with FFmpeg.wasm."
 	{faqs}

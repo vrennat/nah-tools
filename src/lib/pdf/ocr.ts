@@ -58,7 +58,9 @@ export async function ocrPDF(
 	const Tesseract = await import('tesseract.js');
 
 	// Load PDF with both libraries
-	const pdfDoc = await pdfjs.getDocument({ data: source }).promise;
+	// PDF.js transfers this buffer to its worker. Keep the original available
+	// for pdf-lib, which also needs to load the same document below.
+	const pdfDoc = await pdfjs.getDocument({ data: source.slice(0) }).promise;
 	const numPages = pdfDoc.numPages;
 
 	// Load into pdf-lib for modification
@@ -131,7 +133,9 @@ export async function ocrPDF(
 				pageProgress: 0
 			});
 
-			const { data } = await worker.recognize(canvas);
+			// Tesseract v7 returns text only by default. Word bounds are needed
+			// below to place the invisible, searchable text on the original page.
+			const { data } = await worker.recognize(canvas, {}, { blocks: true });
 
 			// Extract words from nested structure: blocks -> paragraphs -> lines -> words
 			const words: { text: string; bbox: { x0: number; y0: number; x1: number; y1: number } }[] = [];

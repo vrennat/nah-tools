@@ -73,7 +73,7 @@
 		{
 			question: 'Is there a file size limit?',
 			answer:
-				'No hard limit is enforced. Very large PDFs (multi-hundred MB) may be slow on low-memory devices since the entire file is held in memory during processing.'
+				'The input PDF must be 100 MB or smaller. Processing holds the document in memory, so complex files can still slow down or fail on devices with limited memory.'
 		}
 	];
 </script>

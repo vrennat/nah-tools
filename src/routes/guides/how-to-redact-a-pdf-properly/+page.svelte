@@ -5,7 +5,7 @@
 		{
 			question: 'Is drawing a black rectangle over text in a PDF editor good enough?',
 			answer:
-				'No. Most PDF editors — including the annotation tools built into Preview, Acrobat, and browser PDF viewers — draw the rectangle as a separate layer on top of the page. The text underneath is untouched: select-all, copy-paste, or any text-extraction tool still recovers it.'
+				'No. An ordinary rectangle annotation can sit on top of the page without removing its contents. Dedicated redaction tools can remove content when their redactions are applied. With an annotation alone, copying or extracting text may still reveal the covered content.'
 		},
 		{
 			question: 'Does nah.tools redaction actually remove the text?',
@@ -15,7 +15,7 @@
 		{
 			question: 'Will my redacted PDF still be searchable?',
 			answer:
-				'Redacted pages lose selectable and searchable text, because they\'re now images rather than text layers — that\'s the price of genuine redaction. Untouched pages keep full text fidelity.'
+				'Redacted pages lose selectable and searchable text, because they\'re now images rather than text layers — that is a trade-off of this image-based method. Genuine redaction can also preserve searchable text outside removed regions. Untouched pages retain their original content.'
 		},
 		{
 			question: 'Is this actually free and private?',
@@ -36,10 +36,9 @@
 	<section class="space-y-4">
 		<h2 class="font-display text-2xl font-700 text-text">Why the black box trick fails</h2>
 		<p class="leading-relaxed text-text-muted">
-			A PDF is a text document with a visual layer drawn on top of it, not a picture. When you use
-			the annotation or "redact" tool built into a PDF viewer to draw a black rectangle over a Social
-			Security number or a name, most of the time you're adding a new shape to the page — the
-			original text stream underneath is completely untouched.
+			A PDF can contain text, images, and other objects. When you add an ordinary rectangle
+			annotation over a Social Security number or name, the original content can remain underneath.
+			Dedicated redaction tools are different: they remove marked content when you apply the redactions.
 		</p>
 		<p class="leading-relaxed text-text-muted">
 			That's a well-known failure mode. Anyone who selects all the text on the page and copies it,
@@ -75,16 +74,18 @@
 		</ul>
 		<p class="leading-relaxed text-text-muted">
 			Only the pages you mark get flattened. Any page without a redaction mark is copied through
-			as-is, keeping its original text, fonts, and file size untouched.
+			with their original page content. This is not a complete audit of metadata, attachments,
+			comments, or sensitive information elsewhere in the document. Review the downloaded copy.
 		</p>
 	</section>
 
 	<section class="space-y-4">
 		<h2 class="font-display text-2xl font-700 text-text">The trade-offs</h2>
 		<p class="leading-relaxed text-text-muted">
-			Redacted pages stop being searchable or selectable, and they get larger, since a rasterized
-			image takes more space than the vector text and graphics it replaced. Both are the cost of
-			doing this correctly — a redaction that's still searchable is a redaction that failed. If you
+			With this method, redacted pages lose selectable text and may grow in size or lose fine
+			detail when rasterized. Other genuine redaction methods can preserve searchable text outside
+			the removed regions. Check every marked area at high zoom and confirm sensitive content
+			is absent from search and text extraction before sharing. If you
 			also need to lock the file down further, <a href="/pdf/protect" class="text-accent underline hover:text-accent-hover">password-protecting</a> the redacted PDF or adding a <a href="/pdf/watermark" class="text-accent underline hover:text-accent-hover">watermark</a> before sharing it are natural next steps.
 		</p>
 	</section>

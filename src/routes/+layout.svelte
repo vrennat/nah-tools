@@ -3,6 +3,7 @@
 	import Header from '$components/Header.svelte';
 	import Footer from '$components/Footer.svelte';
 	import CommandPalette from '$components/CommandPalette.svelte';
+	import PlatformInstructions from '$components/PlatformInstructions.svelte';
 	import { page } from '$app/state';
 
 	let { children } = $props();
@@ -15,7 +16,7 @@
 		"@type": "WebSite",
 		"name": "nah",
 		"url": "https://nah.tools",
-		"description": "Free, open-source browser tools — QR codes, PDF tools, image editing, link shortening, and more. No signup, no tracking, no catch.",
+		"description": "Free, open-source tools for PDFs, images, QR codes, and everyday tasks. Most tools process files in your browser; hosted links and pages use our servers.",
 		"potentialAction": {
 			"@type": "SearchAction",
 			"target": "https://nah.tools/?q={search_term_string}",
@@ -32,6 +33,9 @@
 	<Header />
 	<main id="main-content" class="mx-auto w-full max-w-6xl flex-1 px-4 pb-8 sm:px-6 lg:px-8">
 		{@render children()}
+		{#key page.url.pathname}
+			<PlatformInstructions path={page.url.pathname} />
+		{/key}
 	</main>
 	<Footer />
 </div>

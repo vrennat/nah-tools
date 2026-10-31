@@ -2,27 +2,30 @@
 	import { allFamilies, getFamilyTools } from '$lib/registry/index';
 	import ToolSearch from '$components/ToolSearch.svelte';
 
-	// Pre-build sections at module scope — these are all plain data, no side effects.
-	// SvelteKit prerendering serialises this at build time, so every <a> is in the
-	// static HTML before any JS runs (SEO requirement).
-	// Section order is the registry's canonical family order.
-	const sections = allFamilies.map((family) => ({
-		family,
-		tools: getFamilyTools(family.id)
-	}));
-
-	const totalTools = sections.reduce((n, s) => n + s.tools.length, 0);
+	// Plain links remain in prerendered HTML, including the complete directory.
+	const sections = allFamilies.map((family) => ({ family, tools: getFamilyTools(family.id) }));
+	const totalTools = sections.filter((section) => section.family.id !== 'guides').reduce((n, section) => n + section.tools.length, 0);
+	const tasks = [
+		{ name: 'Merge PDFs', description: 'Combine documents into one PDF.', path: '/pdf/merge' },
+		{ name: 'Shrink a PDF', description: 'Make a PDF smaller for email or upload.', path: '/pdf/compress' },
+		{ name: 'Convert an image', description: 'Change HEIC, WebP, PNG, JPG, and more.', path: '/convert' },
+		{ name: 'Shrink a photo', description: 'Reduce image size with quality controls.', path: '/photo/compress' },
+		{ name: 'Make a QR code', description: 'Share a link, WiFi details, or a contact.', path: '/qr' },
+		{ name: 'Fill or sign a PDF', description: 'Add text and a signature to a document.', path: '/pdf/fill-sign' },
+		{ name: 'Remove a background', description: 'Turn a photo into a transparent image.', path: '/photo/rm-bg' },
+		{ name: 'Trim a video', description: 'Keep just the part you need.', path: '/media/trim-video' }
+	];
 </script>
 
 <svelte:head>
 	<title>nah — Free tools. No catch.</title>
-	<meta name="description" content="QR codes, PDFs, PowerPoint, links, resumes, invoices — all free, private, and open source. No signup, no tracking, most tools run in your browser." />
+	<meta name="description" content="Free browser tools to merge PDFs, shrink files, convert images, and make QR codes. Open source, with no subscription or account required." />
 
 	<!-- Open Graph -->
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://nah.tools" />
 	<meta property="og:title" content="nah — Free tools. No catch." />
-	<meta property="og:description" content="QR codes, PDFs, PowerPoint, links, resumes, invoices — all free, private, and open source. No signup, no tracking, most tools run in your browser." />
+	<meta property="og:description" content="Free browser tools to merge PDFs, shrink files, convert images, and make QR codes. Open source, with no subscription or account required." />
 	<meta property="og:image" content="https://nah.tools/og.png" />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
@@ -30,175 +33,67 @@
 	<!-- Twitter -->
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="nah — Free tools. No catch." />
-	<meta name="twitter:description" content="QR codes, PDFs, PowerPoint, links, resumes, invoices — all free, private, and open source. No signup, no tracking, most tools run in your browser." />
+	<meta name="twitter:description" content="Free browser tools to merge PDFs, shrink files, convert images, and make QR codes. Open source, with no subscription or account required." />
 	<meta name="twitter:image" content="https://nah.tools/og.png" />
 </svelte:head>
 
-<div class="relative">
-	<!-- Hero -->
-	<section class="relative overflow-hidden pt-4 pb-4 sm:pt-12 sm:pb-10">
-		<!-- Brand watermark -->
-		<svg
-			class="pointer-events-none absolute right-0 top-1/2 hidden h-[28vh] w-auto -translate-y-1/2 select-none opacity-[0.04] dark:opacity-[0.06] md:block lg:h-[32vh]"
-			viewBox="0 0 480 464"
-			fill="currentColor"
-			aria-hidden="true"
-		>
-			<path d="M197.475296,31.443810 C209.975235,31.512640 219.486847,37.336010 227.136002,45.789631 C248.929108,69.874725 270.284515,94.355675 291.833496,118.661942 C309.068390,138.102127 326.342590,157.507462 343.580566,176.944931 C347.401855,181.253799 351.144073,185.632767 355.409790,190.539764 C357.689392,182.113663 359.530304,174.408554 361.863953,166.855667 C368.331177,145.924194 378.022491,126.815338 396.468262,113.917831 C414.531067,101.288063 434.125305,99.899918 454.233459,109.047737 C462.592987,112.850761 469.960083,121.827995 465.638672,134.091476 C461.274078,146.477615 456.637604,158.781448 452.721283,171.309250 C444.622650,197.215729 438.500336,223.532928 436.110413,250.698792 C434.471497,269.328430 434.637878,287.954834 434.287567,306.599945 C433.242493,362.223145 410.017334,405.991547 362.435760,435.277863 C328.955566,455.884796 292.505829,460.541016 254.345673,449.966095 C230.564606,443.375916 210.932007,430.065948 193.873108,412.710846 C177.534439,396.088470 161.168442,379.470734 145.416000,362.299133 C115.798347,330.013184 85.320496,298.547852 55.209881,266.732727 C49.137321,260.316376 42.716915,254.280548 38.784767,246.137222 C27.834497,223.459610 38.295204,196.188950 61.658569,186.766739 C62.397888,186.468567 63.104988,186.090515 64.724373,185.326233 C52.469391,172.912476 45.179268,158.900909 47.634445,141.286789 C50.134953,123.347443 61.076626,112.167946 77.255379,104.660622 C66.697037,79.309357 71.605072,58.429039 95.799095,44.206871 C114.223984,33.376022 131.516434,36.980019 153.333405,55.217228 C163.381393,39.080154 177.400101,29.941523 197.475296,31.443810 M270.400909,187.117798 C273.081299,190.299774 276.093750,193.262711 278.369171,196.711838 C282.418396,202.849762 280.890045,211.069214 275.294952,215.653824 C270.188416,219.838104 263.372009,219.141266 257.729584,213.757538 C255.924500,212.035217 254.274368,210.145325 252.610184,208.281342 C233.080780,186.407730 213.547012,164.537964 194.046265,142.638824 C181.642975,128.710068 169.319717,114.710022 156.909973,100.787041 C148.153168,90.962433 139.366592,81.163109 130.489197,71.447617 C124.060654,64.412148 116.026833,63.098518 108.430710,67.593407 C97.399063,74.121201 96.108559,86.162682 105.634201,96.775124 C138.572113,133.470978 171.710922,169.986954 204.554138,206.767075 C213.079849,216.314789 222.684830,224.981125 229.533813,235.967651 C233.778778,242.777054 232.654556,250.303909 226.839325,254.641754 C221.136292,258.895905 213.795776,257.937714 208.467773,252.040604 C187.929550,229.308777 167.438950,206.533905 146.936249,183.769974 C133.222336,168.543549 119.559761,153.270554 105.780037,138.103958 C102.321457,134.297287 98.774162,130.320969 93.309441,129.425964 C83.749504,127.860260 75.087158,135.402283 74.234543,145.447159 C73.521904,153.842941 78.143211,159.697144 83.154045,165.321106 C92.239388,175.518158 101.673172,185.405121 110.742348,195.616165 C135.519073,223.512436 160.396866,251.314972 185.886337,278.565125 C188.273544,281.117218 190.752914,283.648956 192.724228,286.510651 C196.998108,292.714996 195.895599,300.674988 190.410416,305.521790 C185.652222,309.726227 178.279816,309.378235 172.643494,304.470978 C170.137894,302.289490 167.838593,299.846741 165.612152,297.372711 C141.537445,270.620850 117.493835,243.840958 93.446541,217.064407 C86.351067,209.163666 74.650009,207.879395 67.577682,214.093704 C61.743580,219.220016 59.481712,232.078751 67.709778,240.514282 C88.066078,261.383850 107.685371,282.969910 127.778275,304.099335 C158.430984,336.333252 188.158020,369.484100 220.227844,400.322601 C244.578232,423.738159 274.462219,432.702759 307.634644,427.267578 C350.809204,420.193542 380.687683,395.254639 397.810303,355.191925 C406.951813,333.803101 408.221924,310.941559 408.580841,288.088379 C409.035736,259.125641 410.395325,230.316986 416.429657,201.829971 C419.644775,186.651962 423.972412,171.855621 428.751404,157.152298 C431.561462,148.506790 434.586426,139.931122 437.708618,130.754150 C432.107422,130.156540 427.171875,129.693512 422.281891,130.917664 C411.349854,133.654358 404.044983,141.108948 398.673218,150.407974 C391.468964,162.879181 386.699371,176.341522 384.274567,190.586533 C381.368378,207.659729 375.071198,222.537659 362.171509,235.190598 C337.285309,259.600800 330.531708,289.326874 340.609039,322.804993 C341.699310,326.427032 343.010803,330.121155 341.883698,334.049408 C340.244446,339.762756 335.714478,343.352173 329.394318,343.906830 C324.005493,344.379761 318.476440,340.983917 316.126770,335.174896 C309.144745,317.913544 308.010040,299.703461 310.130951,281.633179 C312.914093,257.920563 322.535370,236.842453 339.477692,219.564194 C341.645264,217.353622 341.440094,215.802521 339.562744,213.687302 C331.050568,204.096603 322.633118,194.421982 314.158905,184.797485 C291.041412,158.541962 268.044067,132.178925 244.735764,106.093796 C231.972427,91.809898 219.840393,76.933777 206.144882,63.509403 C198.615234,56.128822 188.007050,56.137238 181.063797,62.964043 C174.968536,68.957069 175.544235,79.807945 182.289139,87.316689 C188.966507,94.750237 195.617004,102.208466 202.224854,109.703857 C224.807007,135.319122 247.365189,160.955505 270.400909,187.117798z"/>
-		</svg>
-
-		<p class="animate-fade-up font-mono text-[clamp(0.5rem,1.2vw,1rem)] tracking-widest text-text-muted uppercase">
-			Open source &middot; No accounts &middot; No tracking
-		</p>
-
-		<h1
-			class="animate-fade-up mt-5 font-display text-[clamp(1.75rem,8vw,8rem)] leading-[0.9] font-800 tracking-tight"
-			style="animation-delay: 80ms;"
-		>
-			Free tools.<br />
-			<span class="text-accent">No catch.</span>
-		</h1>
-
-		<p
-			class="animate-fade-up mt-6 max-w-2xl text-base leading-relaxed text-text-muted sm:mt-8 sm:text-xl"
-			style="animation-delay: 160ms;"
-		>
-			QR codes, PDFs, images and everyday utilities. Free, open source, and ready in your browser.
-			<a href="/trust" class="text-text underline decoration-border underline-offset-4 hover:decoration-accent">Here's&nbsp;how.</a>
-		</p>
+<div>
+	<section class="pt-6 pb-8 sm:pt-12 sm:pb-10" aria-labelledby="home-heading">
+		<p class="font-mono text-xs tracking-widest text-text-muted uppercase">Free &middot; Open source &middot; No account required</p>
+		<h1 id="home-heading" class="mt-5 max-w-3xl font-display text-4xl leading-tight font-800 tracking-tight sm:text-6xl">Everyday tasks.<br /><span class="text-accent">Without the subscription.</span></h1>
+		<p class="mt-5 max-w-2xl text-base leading-relaxed text-text-muted sm:text-lg">Merge PDFs, shrink a file, convert an image, or make a QR code. Genuinely free browser tools, with no trial or payment to download your result.</p>
+		<a href="#all-tools" class="mt-4 inline-block text-sm font-medium text-accent hover:underline">Browse all {totalTools} tools &darr;</a>
 	</section>
 
-	<!-- Search -->
-	<section class="animate-fade-up relative z-10 mt-2" style="animation-delay: 200ms;" aria-label="Tool search">
+	<section class="relative z-10" aria-label="Tool search">
 		<ToolSearch />
 	</section>
 
-	<!-- Featured tools — hardcoded because they have custom call-to-action copy -->
-	<section class="grid gap-5 sm:grid-cols-3 mt-8">
-		<a
-			href="/pdf"
-			class="animate-fade-up group rounded-2xl border border-border bg-surface-alt p-5 transition-all duration-200 hover:border-accent/50 hover:shadow-card-hover sm:p-7"
-			style="animation-delay: 240ms;"
-		>
-			<h2 class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">PDF Tools</h2>
-			<p class="mt-2 text-sm leading-relaxed text-text-muted">
-				Merge, split, rotate, compress, convert. Files never leave your device.
-			</p>
-			<span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-accent">
-				Get started
-				<svg class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-				</svg>
-			</span>
-		</a>
-
-		<a
-			href="/qr"
-			class="animate-fade-up group rounded-2xl border border-border bg-surface-alt p-5 transition-all duration-200 hover:border-accent/50 hover:shadow-card-hover sm:p-7"
-			style="animation-delay: 300ms;"
-		>
-			<h2 class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">QR Codes</h2>
-			<p class="mt-2 text-sm leading-relaxed text-text-muted">
-				URL, WiFi, vCard, batch export, dynamic codes. No expiration. No paywall.
-			</p>
-			<span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-accent">
-				Get started
-				<svg class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-				</svg>
-			</span>
-		</a>
-
-		<a
-			href="/photo"
-			class="animate-fade-up group rounded-2xl border border-border bg-surface-alt p-5 transition-all duration-200 hover:border-accent/50 hover:shadow-card-hover sm:p-7"
-			style="animation-delay: 360ms;"
-		>
-			<h2 class="font-display text-2xl font-700 tracking-tight text-text transition-colors duration-200 group-hover:text-accent">Photo & Image Tools</h2>
-			<p class="mt-2 text-sm leading-relaxed text-text-muted">
-				Convert, compress, remove backgrounds, adjust colors. All in your browser.
-			</p>
-			<span class="mt-4 inline-flex items-center gap-1 text-sm font-medium text-accent">
-				Get started
-				<svg class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-				</svg>
-			</span>
-		</a>
-	</section>
-
-	<!-- Tool directory: every registered tool, sectioned by family -->
-	<!-- In-page anchor nav for quick jumping — also helps crawlers understand structure -->
-	<nav class="animate-fade-up mt-12" style="animation-delay: 400ms;" aria-label="Tool categories">
-		<p class="mb-3 font-mono text-[clamp(0.5rem,1vw,0.75rem)] tracking-widest text-text-muted uppercase">
-			{totalTools} tools — jump to category
-		</p>
-		<div class="flex flex-wrap gap-2">
-			{#each sections as { family }}
-				<a
-					href="#{family.id}"
-					class="rounded-full border border-border px-3 py-1 text-xs font-medium text-text-muted transition-colors duration-150 hover:border-accent/50 hover:text-accent"
-				>
-					{family.name}
+	<section class="mt-9" aria-labelledby="tasks-heading">
+		<h2 id="tasks-heading" class="font-display text-xl font-700 tracking-tight">What do you need to do?</h2>
+		<div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+			{#each tasks as task}
+				<a href={task.path} class="group rounded-xl border border-border bg-surface-alt p-5 transition-colors duration-150 hover:border-accent/50">
+					<h3 class="font-medium text-text group-hover:text-accent">{task.name} <span aria-hidden="true">&rarr;</span></h3>
+					<p class="mt-2 text-sm leading-relaxed text-text-muted">{task.description}</p>
 				</a>
 			{/each}
 		</div>
-	</nav>
+		<p class="mt-4 text-sm text-text-muted">Need to shrink something else? <a href="/media/compress-video" class="text-accent hover:underline">Compress a video</a> or <a href="/media/compress-audio" class="text-accent hover:underline">compress audio</a>.</p>
+	</section>
 
-	<!-- Family sections -->
-	<div class="mt-8 space-y-12">
-		{#each sections as { family, tools }}
-			<section id={family.id} aria-labelledby="family-heading-{family.id}">
-				<!-- Section header with optional hub link -->
-				<div class="mb-4 flex items-baseline gap-3">
-					<h2
-						id="family-heading-{family.id}"
-						class="font-display text-lg font-700 tracking-tight text-text"
-					>
-						{family.name}
-					</h2>
-					{#if family.hub}
-						<a
-							href={family.hub}
-							class="text-xs font-medium text-accent hover:underline"
-							aria-label="Go to {family.name} hub"
-						>
-							All {family.name.split(' ')[0]} tools &rarr;
-						</a>
-					{/if}
-				</div>
+	<section class="mt-10 grid gap-6 rounded-xl border border-border p-5 sm:grid-cols-2 sm:p-6" aria-labelledby="browser-heading">
+		<div>
+			<h2 id="browser-heading" class="font-display text-lg font-700">Use the device you have</h2>
+			<p class="mt-2 text-sm leading-relaxed text-text-muted">On Mac or Windows, open a tool and choose your files. On iPhone or Android, choose files from your device, then save or share the result. No app installation needed.</p>
+			<p class="mt-2 text-sm leading-relaxed text-text-muted">Large files and video or AI tasks work best on a computer. Support depends on your browser and device.</p>
+		</div>
+		<div>
+			<h2 class="font-display text-lg font-700">Know where your data goes</h2>
+			<p class="mt-2 text-sm leading-relaxed text-text-muted">Most tools process files on your device. Short links, dynamic QR codes, and published bio pages use our servers so others can open them.</p>
+			<a href="/trust" class="mt-3 inline-block text-sm font-medium text-accent hover:underline">Read about privacy and how the tools work &rarr;</a>
+		</div>
+	</section>
 
-				<!-- Tool grid: compact link cards, all plain <a> for SSR/SEO -->
-				<div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-					{#each tools as tool}
-						<a
-							href={tool.path}
-							class="group flex items-start gap-3 rounded-xl border border-border p-3.5 transition-colors duration-150 hover:border-accent/50 hover:bg-surface-alt"
-						>
-							{#if tool.icon}
-								<svg
-									class="mt-0.5 h-4 w-4 shrink-0 text-text-muted transition-colors duration-150 group-hover:text-accent"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="1.5"
-									viewBox="0 0 24 24"
-									aria-hidden="true"
-								>
-									<path stroke-linecap="round" stroke-linejoin="round" d={tool.icon} />
-								</svg>
-							{/if}
-							<div class="min-w-0">
-								<div class="text-sm font-medium text-text transition-colors duration-150 group-hover:text-accent truncate">
-									{tool.name}
-								</div>
-								<div class="mt-0.5 text-xs leading-relaxed text-text-muted line-clamp-2">
-									{tool.description}
-								</div>
-							</div>
-						</a>
-					{/each}
-				</div>
-			</section>
-		{/each}
-	</div>
+	<section id="all-tools" class="mt-12 scroll-mt-6" aria-labelledby="directory-heading">
+		<h2 id="directory-heading" class="font-display text-2xl font-700 tracking-tight">All {totalTools} tools</h2>
+		<p class="mt-2 text-sm text-text-muted">Choose a category to see every tool, or open its overview.</p>
+		<div class="mt-5 divide-y divide-border border-y border-border">
+			{#each sections as { family, tools }}
+				<details id={family.id} class="scroll-mt-6 py-1">
+					<summary class="cursor-pointer rounded-lg px-2 py-4 font-medium text-text hover:text-accent">{family.name} <span class="ml-2 text-sm font-normal text-text-muted">{tools.length} {family.id === 'guides' ? 'guides' : 'tools'}</span></summary>
+					<div class="px-2 pb-5">
+						{#if family.hub}
+							<a href={family.hub} class="mb-4 inline-block text-sm font-medium text-accent hover:underline">{family.name} overview &rarr;</a>
+						{/if}
+						<ul class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+							{#each tools as tool}
+								<li><a href={tool.path} class="group block h-full rounded-lg border border-border p-3 hover:border-accent/50 hover:bg-surface-alt"><span class="text-sm font-medium text-text group-hover:text-accent">{tool.name}</span><span class="mt-1 block text-xs leading-relaxed text-text-muted">{tool.description}</span></a></li>
+							{/each}
+						</ul>
+					</div>
+				</details>
+			{/each}
+		</div>
+	</section>
 </div>

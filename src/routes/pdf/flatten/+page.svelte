@@ -49,17 +49,17 @@
 		{
 			question: 'Why would I want to flatten a PDF?',
 			answer:
-				'Flattened PDFs are more portable: some PDF viewers render form fields inconsistently, and some recipients may be able to edit or clear fields in a non-flattened form. Flattening locks in the current values and ensures the document looks the same everywhere.'
+				'Flattened PDFs are more portable: some PDF viewers render form fields inconsistently, and some recipients may be able to edit or clear fields in a non-flattened form. Flattening turns supported form-field appearances into page content. Review the downloaded PDF in your intended viewer; it can still be modified with a PDF editor.'
 		},
 		{
 			question: 'Does flattening remove annotations?',
 			answer:
-				'The tool uses pdf-lib, which flattens interactive form fields. Standard visual annotations (like comments or highlights) may or may not be affected depending on how the PDF was authored. The intent is to make the document non-interactive, not to remove visible content.'
+				'This tool flattens supported interactive form fields and their widgets. It does not flatten or remove arbitrary annotations such as comments, highlights, or drawn shapes. These may remain interactive in the output.'
 		},
 		{
 			question: 'What happens if the PDF has no form fields?',
 			answer:
-				'The PDF will be re-saved with an optimized structure. No visible content changes — it is effectively equivalent to running the compress tool.'
+				'The PDF is re-saved. There are no form fields to flatten, and file-size reduction is not guaranteed. This is not the same operation as the compress tool.'
 		},
 		{
 			question: 'Are my files uploaded?',
@@ -71,9 +71,9 @@
 
 <ToolShell
 	path="/pdf/flatten"
-	tagline="Lock form fields and annotations into static content so the PDF looks the same everywhere."
+	tagline="Convert supported interactive form fields into static page content."
 	seoTitle="Flatten PDF Free — Remove Form Fields | nah.tools"
-	description="Remove interactive form fields and annotations from PDFs, baking them into static content. Free, no upload — processed in your browser."
+	description="Flatten supported PDF form fields into static page content. Comments and other annotations are not flattened. Free, no upload — processed in your browser."
 	{faqs}
 >
 	<section class="mx-auto max-w-2xl space-y-6">
@@ -83,7 +83,7 @@
 			<div class="mt-4 rounded-lg border border-border bg-surface-alt px-4 py-3">
 				<p class="text-sm text-text-muted">
 					Flattens interactive form fields (text inputs, checkboxes, dropdowns) into static
-					content. If your PDF has no form fields, it will be re-saved with optimized structure.
+					content. Comments, highlights, and other annotations are not flattened. Keep the editable original.
 				</p>
 			</div>
 
@@ -121,23 +121,21 @@
 		<div class="space-y-4 rounded-xl border border-border bg-surface-alt p-6">
 			<h2 class="font-display text-lg font-700">Why flatten a PDF before sharing?</h2>
 			<p class="text-sm leading-relaxed text-text-muted">
-				Interactive PDF forms are convenient for filling out, but they carry risk once
-				distributed. Recipients can clear or change field values, different PDF viewers
-				render form fields inconsistently, and some email gateways strip interactive
-				elements entirely. Flattening resolves all of this by converting every field
-				into ordinary static content — the values you entered become part of the page
-				itself, as permanent as typed text.
+				Flattening converts supported form-field appearances into ordinary page content, so
+				recipients no longer fill or clear those values through form controls. This can help
+				when sharing a completed form, but does not make its contents impossible to edit.
+				Keep the editable original and review every field in the downloaded PDF.
 			</p>
 			<p class="text-sm leading-relaxed text-text-muted">
 				This tool uses <strong class="font-medium text-text">pdf-lib</strong> to read the
-				PDF's interactive layer and merge it into the page content stream. The process
+				PDF's supported form fields and merge their appearances into the page content stream. The process
 				runs in your browser — no upload required. After flattening, the resulting PDF
-				is a clean, static document that renders identically in every viewer and is
-				safe to share as a final record.
+				has static form values. Comments, highlights, links, and other interactive content
+				may remain; this is not a general annotation-flattening or sanitization tool.
 			</p>
 			<p class="text-sm leading-relaxed text-text-muted">
-				If you want to go further and prevent any modification, combine flattening with
-				the Protect PDF tool to add password protection.
+				The Protect PDF tool can add password protection and viewer-dependent permissions.
+				Neither flattening nor those permissions guarantees that a recipient cannot modify the file.
 			</p>
 		</div>
 	</section>

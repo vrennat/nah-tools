@@ -118,7 +118,7 @@
 		{
 			question: 'Is there a page count limit?',
 			answer:
-				'There is no enforced limit. The tool reads the full PDF in memory, so very large documents may be slow on low-memory devices, but no hard cap is imposed.'
+				'There is no fixed page-count cap, but the input PDF must be 100 MB or smaller. The tool reads the document in memory, so complex files or many output pages can slow down or fail depending on your device.'
 		},
 		{
 			question: 'Will my split PDFs have the same quality as the original?',
