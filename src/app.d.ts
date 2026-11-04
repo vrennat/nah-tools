@@ -5,7 +5,10 @@ declare global {
 			message: string;
 			code?: string;
 		}
-		// interface Locals {}
+		interface Locals {
+			/** Seconds until a 429 lockout ends; hooks.server.ts emits it as Retry-After */
+			retryAfter?: number;
+		}
 		// interface PageData {}
 		// interface PageState {}
 		interface Platform {

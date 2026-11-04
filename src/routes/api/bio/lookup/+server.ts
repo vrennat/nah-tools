@@ -1,19 +1,20 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB } from '$server/db';
 import { authenticateProfile, getAllBioLinks, getBioClickStats } from '$server/bio-db';
 
-export const POST: RequestHandler = async ({ request, platform }) => {
+export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { handle: string; passphrase: string };
+	const body = (await readJson(request)) as { handle: string; passphrase: string };
 	const { handle, passphrase } = body;
 
 	if (!handle || !passphrase) {
 		throw error(400, 'handle and passphrase are required');
 	}
 
-	const profile = await authenticateProfile(db, handle, passphrase);
+	const profile = await authenticateProfile(db, handle, passphrase, { platform, request, locals });
 	const links = await getAllBioLinks(db, handle);
 	const stats = await getBioClickStats(db, handle);
 

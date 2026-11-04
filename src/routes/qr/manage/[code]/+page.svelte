@@ -36,6 +36,12 @@
 				body: JSON.stringify({ short_code: data.code, passphrase })
 			});
 
+			if (res.status === 429) {
+				const body = (await res.json().catch(() => null)) as { message?: string } | null;
+				authError = body?.message ?? 'Too many failed attempts. Try again later.';
+				return;
+			}
+
 			if (res.status === 403) {
 				authError = 'Invalid passphrase';
 				return;

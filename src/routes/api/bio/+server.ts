@@ -1,5 +1,7 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
+import { requireTurnstile } from '$server/turnstile';
 import { getDB } from '$server/db';
 import { hashPassphrase } from '$server/auth';
 import {
@@ -10,7 +12,7 @@ import {
 	isHandleAvailable,
 	addBioLink
 } from '$server/bio-db';
-import { validateHandle, validateUrlSafety, verifyTurnstile, checkRateLimit } from '$server/safety';
+import { validateHandle, validateUrlSafety, checkRateLimit } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
 import { themes } from '$bio/themes';
 
@@ -20,7 +22,7 @@ const VALID_THEME_IDS = new Set(themes.map((t) => t.id));
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		handle: string;
 		display_name: string;
 		bio?: string;
@@ -54,20 +56,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, `Invalid theme. Valid themes: ${[...VALID_THEME_IDS].join(', ')}`);
 	}
 
-	// Verify Turnstile if configured
-	const turnstileSecret = platform?.env?.TURNSTILE_SECRET_KEY;
-	if (turnstileSecret) {
-		if (!turnstile_token) {
-			throw error(400, 'Turnstile verification is required');
-		}
-		const ip = request.headers.get('cf-connecting-ip') || undefined;
-		const valid = await verifyTurnstile(turnstile_token, turnstileSecret, ip);
-		if (!valid) {
-			throw error(403, 'Turnstile verification failed');
-		}
-	} else {
-		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
-	}
+	await requireTurnstile(platform, request, turnstile_token);
 
 	// Rate limit
 	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
@@ -94,9 +83,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'Passphrase must be at least 8 characters');
 	}
 
-	// Validate avatar URL if provided
-	if (avatar_url) {
-		const safety = await validateUrlSafety(normalizeUrl(avatar_url), db);
+	// Validate avatar URL if provided; store the same normalized value that was checked
+	const normalizedAvatar = avatar_url ? normalizeUrl(avatar_url) : null;
+	if (normalizedAvatar) {
+		const safety = await validateUrlSafety(normalizedAvatar, db);
 		if (!safety.safe) {
 			throw error(400, safety.reason || 'Avatar URL is not allowed');
 		}
@@ -109,7 +99,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		normalizedHandle,
 		display_name,
 		bio ?? null,
-		avatar_url ?? null,
+		normalizedAvatar,
 		theme ?? 'minimal',
 		passphraseHash
 	);
@@ -138,10 +128,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	);
 };
 
-export const PUT: RequestHandler = async ({ request, platform }) => {
+export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		handle: string;
 		passphrase: string;
 		display_name?: string;
@@ -156,7 +146,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'handle and passphrase are required');
 	}
 
-	await authenticateProfile(db, handle, passphrase);
+	await authenticateProfile(db, handle, passphrase, { platform, request, locals });
 
 	// Input length limits
 	if (fields.display_name && fields.display_name.length > 100) {
@@ -171,9 +161,10 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		throw error(400, `Invalid theme. Valid themes: ${[...VALID_THEME_IDS].join(', ')}`);
 	}
 
-	// Validate avatar URL if changing
+	// Validate avatar URL if changing; store the same normalized value that was checked
 	if (fields.avatar_url) {
-		const safety = await validateUrlSafety(normalizeUrl(fields.avatar_url), db);
+		fields.avatar_url = normalizeUrl(fields.avatar_url);
+		const safety = await validateUrlSafety(fields.avatar_url, db);
 		if (!safety.safe) {
 			throw error(400, safety.reason || 'Avatar URL is not allowed');
 		}
@@ -184,17 +175,17 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	return json({ success: true });
 };
 
-export const DELETE: RequestHandler = async ({ request, platform }) => {
+export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { handle: string; passphrase: string };
+	const body = (await readJson(request)) as { handle: string; passphrase: string };
 	const { handle, passphrase } = body;
 
 	if (!handle || !passphrase) {
 		throw error(400, 'handle and passphrase are required');
 	}
 
-	await authenticateProfile(db, handle, passphrase);
+	await authenticateProfile(db, handle, passphrase, { platform, request, locals });
 	await deactivateProfile(db, handle);
 
 	return json({ success: true });

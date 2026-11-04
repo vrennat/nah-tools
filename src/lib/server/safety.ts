@@ -1,26 +1,5 @@
 import { isValidURL } from '$server/db';
 
-/** Verify a Cloudflare Turnstile token */
-export async function verifyTurnstile(
-	token: string,
-	secretKey: string,
-	ip?: string
-): Promise<boolean> {
-	const body: Record<string, string> = {
-		secret: secretKey,
-		response: token
-	};
-	if (ip) body.remoteip = ip;
-
-	const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(body)
-	});
-	const data = (await res.json()) as { success: boolean };
-	return data.success;
-}
-
 // Known bad TLDs commonly used in phishing
 const BAD_TLDS = ['.tk', '.ml', '.ga', '.cf', '.gq'];
 

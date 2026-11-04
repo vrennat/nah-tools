@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB, isAliasAvailable } from '$server/db';
 import { validateAlias } from '$server/safety';
@@ -6,7 +7,7 @@ import { validateAlias } from '$server/safety';
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { alias: string };
+	const body = (await readJson(request)) as { alias: string };
 	const { alias } = body;
 
 	if (!alias || typeof alias !== 'string') {

@@ -1,13 +1,15 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
+import { requireTurnstile } from '$server/turnstile';
 import { getDB, getKV, authenticateRedirect, generateShortCode, createRedirect, updateRedirect, deactivateRedirect, invalidateRedirectCache } from '$server/db';
 import { hashPassphrase } from '$server/auth';
-import { validateUrlSafety, verifyTurnstile, checkRateLimit } from '$server/safety';
+import { validateUrlSafety, checkRateLimit } from '$server/safety';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { url: string; passphrase: string; label?: string; turnstile_token?: string };
+	const body = (await readJson(request)) as { url: string; passphrase: string; label?: string; turnstile_token?: string };
 	const { url, passphrase, label, turnstile_token } = body;
 
 	if (!url || typeof url !== 'string') {
@@ -24,20 +26,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'Passphrase must be at least 8 characters');
 	}
 
-	// Verify Turnstile if configured
-	const turnstileSecret = platform?.env?.TURNSTILE_SECRET_KEY;
-	if (turnstileSecret) {
-		if (!turnstile_token) {
-			throw error(400, 'Turnstile verification is required');
-		}
-		const ip = request.headers.get('cf-connecting-ip') || undefined;
-		const valid = await verifyTurnstile(turnstile_token, turnstileSecret, ip);
-		if (!valid) {
-			throw error(403, 'Turnstile verification failed');
-		}
-	} else {
-		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
-	}
+	await requireTurnstile(platform, request, turnstile_token);
 
 	// Rate limit
 	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
@@ -59,10 +48,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	);
 };
 
-export const PUT: RequestHandler = async ({ request, platform }) => {
+export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { short_code: string; passphrase: string; url: string };
+	const body = (await readJson(request)) as { short_code: string; passphrase: string; url: string };
 	const { short_code, passphrase, url } = body;
 
 	if (!short_code || !passphrase || !url) {
@@ -73,23 +62,23 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
 
-	await authenticateRedirect(db, short_code, passphrase);
+	await authenticateRedirect(db, short_code, passphrase, { platform, request, locals });
 	await updateRedirect(db, short_code, url);
 	await invalidateRedirectCache(getKV(platform), db, short_code);
 	return json({ success: true });
 };
 
-export const DELETE: RequestHandler = async ({ request, platform }) => {
+export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
 	const db = getDB(platform);
 
-	const body = (await request.json()) as { short_code: string; passphrase: string };
+	const body = (await readJson(request)) as { short_code: string; passphrase: string };
 	const { short_code, passphrase } = body;
 
 	if (!short_code || !passphrase) {
 		throw error(400, 'short_code and passphrase are required');
 	}
 
-	await authenticateRedirect(db, short_code, passphrase);
+	await authenticateRedirect(db, short_code, passphrase, { platform, request, locals });
 	await deactivateRedirect(db, short_code);
 	await invalidateRedirectCache(getKV(platform), db, short_code);
 	return json({ success: true });

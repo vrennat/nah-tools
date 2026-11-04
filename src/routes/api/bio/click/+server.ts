@@ -1,4 +1,5 @@
 import { json, error } from '@sveltejs/kit';
+import { readJson } from '$server/http';
 import type { RequestHandler } from './$types';
 import { getDB } from '$server/db';
 import { getProfile, logBioClick } from '$server/bio-db';
@@ -13,7 +14,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 	const db = getDB(platform);
 
-	const body = (await request.json()) as {
+	const body = (await readJson(request)) as {
 		handle: string;
 		link_id: number;
 	};
