@@ -20,6 +20,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		destination_url: redirect.destination_url,
 		label: redirect.label,
 		scan_count: stats.total,
+		analytics_available: stats.available,
 		is_active: redirect.is_active,
 		created_at: redirect.created_at,
 		updated_at: redirect.updated_at

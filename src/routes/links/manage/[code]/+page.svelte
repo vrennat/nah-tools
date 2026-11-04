@@ -34,6 +34,7 @@
 	let deactivateLoading = $state(false);
 	let showDeactivateConfirm = $state(false);
 
+	let analyticsAvailable = $state(true);
 	let copied = $state(false);
 	let qrInstance: any = $state(null);
 
@@ -89,6 +90,7 @@
 				label: string | null;
 				expires_at: string | null;
 				stats: {
+					available: boolean;
 					total: number;
 					byCountry: { country: string; count: number }[];
 					byDay: { date: string; count: number }[];
@@ -98,6 +100,7 @@
 			};
 			destinationUrl = info.destination_url;
 			newUrl = info.destination_url;
+			analyticsAvailable = info.stats?.available ?? true;
 			totalClicks = info.stats?.total ?? 0;
 			clicksByDay = info.stats?.byDay ?? [];
 			topCountries = info.stats?.byCountry ?? [];
@@ -251,7 +254,11 @@
 		<div class="rounded-xl border border-border bg-surface p-6 shadow-sm space-y-6">
 			<div class="text-center">
 				<p class="text-xs font-medium text-text-muted">Total Clicks</p>
-				<p class="mt-1 text-4xl font-bold text-text">{totalClicks.toLocaleString()}</p>
+				{#if analyticsAvailable}
+					<p class="mt-1 text-4xl font-bold text-text">{totalClicks.toLocaleString()}</p>
+				{:else}
+					<p class="mt-1 text-sm text-text-muted">Analytics unavailable right now.</p>
+				{/if}
 			</div>
 
 			{#if clicksByDay.length > 0}

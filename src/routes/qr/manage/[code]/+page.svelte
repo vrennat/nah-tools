@@ -12,6 +12,7 @@
 
 	let destinationUrl = $state('');
 	let scanCount = $state(0);
+	let analyticsAvailable = $state(true);
 	let createdAt = $state('');
 	let isActive = $state(true);
 	let labelText = $state('');
@@ -51,10 +52,11 @@
 				return;
 			}
 
-			const info = await res.json() as { destination_url: string; scan_count: number; created_at: string; is_active: number; label: string | null };
+			const info = await res.json() as { destination_url: string; scan_count: number; analytics_available?: boolean; created_at: string; is_active: number; label: string | null };
 			destinationUrl = info.destination_url;
 			newUrl = info.destination_url;
 			scanCount = info.scan_count;
+			analyticsAvailable = info.analytics_available ?? true;
 			createdAt = info.created_at;
 			isActive = info.is_active === 1;
 			labelText = info.label || '';
@@ -164,7 +166,11 @@
 			<div class="grid grid-cols-3 gap-4 text-center">
 				<div>
 					<p class="text-xs font-medium text-text-muted">Scans</p>
+					{#if analyticsAvailable}
 					<p class="mt-0.5 text-lg font-semibold text-text">{scanCount}</p>
+				{:else}
+					<p class="mt-0.5 text-sm text-text-muted">Analytics unavailable right now.</p>
+				{/if}
 				</div>
 				<div>
 					<p class="text-xs font-medium text-text-muted">Created</p>
