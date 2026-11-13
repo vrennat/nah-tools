@@ -133,21 +133,17 @@ export function visibleText(html: string): string {
 		.trim();
 }
 
-/** Refreshes slower than this are not treated as redirects: a visitor reads the page first. */
-export const MAX_REFRESH_DELAY_S = 5;
-
 /**
  * Target of a refresh instruction, from a `Refresh` header or a meta
  * refresh `content` value: "0; url=/x", "0;https://x", "0.5, URL='x'".
- * Returns null for a plain reload with no target, or a delay over
- * MAX_REFRESH_DELAY_S. Tabs and newlines are removed from the target, as the
+ * Returns null for a plain reload with no target. Any delay counts: a
+ * spam loader can wait, and pages are only followed when they are loaders
+ * (see isLoaderPage). Tabs and newlines are removed from the target, as the
  * URL parser does.
  */
 export function parseRefresh(value: string): string | null {
-	const m = /^\s*([\d.]*)\s*[;,]?\s*(?:url\s*=\s*)?([\s\S]*)$/i.exec(value);
+	const m = /^\s*[\d.]*\s*[;,]?\s*(?:url\s*=\s*)?([\s\S]*)$/i.exec(value);
 	if (!m) return null;
-	const delay = m[1] ? parseFloat(m[1]) : 0;
-	if (!(delay <= MAX_REFRESH_DELAY_S)) return null;
-	const target = m[2].replace(/[\t\n\r]/g, '').trim().replace(/^['"]|['"]$/g, '').trim();
+	const target = m[1].replace(/[\t\n\r]/g, '').trim().replace(/^['"]|['"]$/g, '').trim();
 	return target ? target : null;
 }

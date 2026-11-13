@@ -32,6 +32,9 @@ export interface Hop {
 	/** For a page that was read and then left by a client-side redirect: its title and opening text. */
 	title?: string;
 	text?: string;
+	/** That page's capped body, so the gate can judge it on its own. */
+	body?: string;
+	contentType?: string;
 }
 
 export type ChainOutcome =
@@ -84,12 +87,18 @@ export const LOADER_TEXT_MAX_CHARS = 400;
 export function isLoaderPage(html: string): boolean {
 	const live = stripElements(html, ['noscript']);
 	if (visibleText(live).length > LOADER_TEXT_MAX_CHARS) return false;
-	if (openingTags(live, 'select').length || openingTags(live, 'textarea').length) return false;
-	return !openingTags(live, 'input').some((t) => {
+	// Fields inside inert or raw-text elements are never shown.
+	const shown = stripElements(live, INERT_ELEMENTS);
+	if (openingTags(shown, 'select').length || openingTags(shown, 'textarea').length) return false;
+	return !openingTags(shown, 'input').some((t) => {
 		const type = (attr(t, 'type') ?? 'text').toLowerCase();
+		if (/(?:^|\s)hidden(?:[\s=/]|$)/i.test(t)) return false;
 		return type !== 'hidden' && type !== 'submit' && type !== 'button';
 	});
 }
+
+/** Elements whose contents a browser does not parse as live markup. */
+const INERT_ELEMENTS = ['script', 'template', 'textarea', 'title', 'style', 'noembed', 'noframes', 'xmp', 'iframe'];
 
 /**
  * Find a client-side redirect target in a loader page (see isLoaderPage).
@@ -101,7 +110,7 @@ export function findClientRedirect(html: string): { url: string; via: HopKind } 
 	// Comments and <noscript> fallbacks do not run in a browser with JavaScript.
 	const live = stripElements(html, ['noscript']);
 	// A <meta> inside these is text or inert markup, not a refresh.
-	const markup = stripElements(live, ['script', 'template', 'textarea', 'title', 'style']);
+	const markup = stripElements(live, INERT_ELEMENTS);
 	for (const tag of openingTags(markup, 'meta')) {
 		if (!/^refresh$/i.test((attr(tag, 'http-equiv') ?? '').trim())) continue;
 		const target = parseRefresh(attr(tag, 'content') ?? '');
@@ -264,6 +273,8 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 				const t = elementContents(body, 'title', 1)[0];
 				hop.title = t ? decodeEntities(t.inner).replace(/\s+/g, ' ').trim().slice(0, 200) : '';
 				hop.text = visibleText(body).slice(0, 300);
+				hop.body = body;
+				hop.contentType = contentType;
 			}
 
 			if (hops.length > maxHops) {

@@ -3,9 +3,10 @@
  *
  * Thresholds come from the 2026-11-13 evaluation (130 URLs from the OpenPhish
  * feed vs 108 public sites, see the pull request). End to end, no clean link
- * was blocked and 4 were held (2 fetch timeouts, 2 redirects to unreadable
- * pages); 113 of the 130 feed URLs were blocked or held. Change the
- * thresholds only with a new evaluation.
+ * was blocked and 5 were held (2 fetch timeouts, Microsoft sign-in, Google
+ * sign-in and Google Forms); 116 of the 130 feed URLs were blocked or held.
+ * The thresholds were tuned on that same data, so treat those numbers as
+ * optimistic, and change them only with a new evaluation.
  */
 import type { ChainResult } from './fetch-chain';
 import type { PageSummary } from './extract';
@@ -87,7 +88,36 @@ export function decideFromChain(chain: ChainResult, page: PageSummary | null): G
 	return unreadableHold(chain);
 }
 
-export function decideFromAnswers(answers: ClefAnswers, chain?: ChainResult): GateDecision {
+/** A blank page this short, with no form, that the model calls a redirect is held. */
+export const BLANK_PAGE_MAX_CHARS = 400;
+/**
+ * How sure the model must be that such a page redirects. JavaScript-rendered
+ * apps look the same to the checker: in the evaluation youtube.com/watch
+ * scored 0.53 and the Google sign-in and Forms pages 0.87 and 0.88, while
+ * phishing loaders scored 0.67 to 0.92. 0.8 keeps YouTube links working and
+ * still holds the two Google pages.
+ */
+export const UNFOLLOWED_REDIRECT_MIN = 0.8;
+
+/**
+ * @param page The page the answers are about.
+ * @param isFinal True for the page the chain ended on. Pages the chain left
+ *   by a client-side redirect are redirects by definition, so the
+ *   unfollowed-redirect rule applies only to the final page.
+ */
+const RANK = { allow: 0, hold: 1, block: 2 } as const;
+
+/** The more severe of two decisions; the first wins a tie. */
+export function worst(a: GateDecision, b: GateDecision): GateDecision {
+	return RANK[b.verdict] > RANK[a.verdict] ? b : a;
+}
+
+export function decideFromAnswers(
+	answers: ClefAnswers,
+	chain?: ChainResult,
+	page?: PageSummary | null,
+	isFinal = true
+): GateDecision {
 	const n = answers.nouls;
 	const signals = (['impersonation', 'urgency', 'payment', 'fake_captcha', 'crypto'] as const).filter(
 		(id) => n[id] >= BLOCK_SIGNAL_MIN
@@ -100,6 +130,18 @@ export function decideFromAnswers(answers: ClefAnswers, chain?: ChainResult): Ga
 	}
 	if (n.scam >= HOLD_SCAM_MIN && n.empty < UNREADABLE_MIN) {
 		return { verdict: 'hold', holdReason: 'suspicious', detail: `scam=${n.scam.toFixed(2)}` };
+	}
+	// A readable blank page the model calls a redirect, where the gate found
+	// none to follow: the redirect may be hidden from the scanner.
+	if (
+		isFinal &&
+		chain?.status === 200 &&
+		page &&
+		page.text.length <= BLANK_PAGE_MAX_CHARS &&
+		page.forms.length === 0 &&
+		n.redirector >= UNFOLLOWED_REDIRECT_MIN
+	) {
+		return { verdict: 'hold', holdReason: 'suspicious', detail: `unfollowed redirect=${n.redirector.toFixed(2)}` };
 	}
 	// A redirect to another host that lands on a page the model calls empty or blocked.
 	if (chain && n.empty >= UNREADABLE_MIN && crossesHosts(chain)) {

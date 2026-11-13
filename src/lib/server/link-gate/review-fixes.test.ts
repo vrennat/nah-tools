@@ -81,20 +81,83 @@ describe('decoy redirects (review pass 2)', () => {
 	it.each([
 		['meta refresh inside a script string', `${login}<script>var s='<meta http-equiv="refresh" content="0;url=https://b.example/">'</script>`],
 		['meta refresh inside <template>', `${login}<template><meta http-equiv="refresh" content="0;url=https://b.example/"></template>`],
-		['dead-branch script redirect', `${login}<script>if(false) location.href="https://b.example/"</script>`],
-		['slow meta refresh', `<p>hi</p><meta http-equiv="refresh" content="999999;url=https://b.example/">`]
+		['dead-branch script redirect', `${login}<script>if(false) location.href="https://b.example/"</script>`]
 	])('does not follow a %s', (_n, html) => {
 		expect(findClientRedirect(html)).toBeNull();
 	});
 
-	it('does not follow a slow Refresh header, or one on a content page', async () => {
+	it('follows a slow refresh on a loader page, but no Refresh header on a content page', async () => {
+		expect(findClientRedirect('<meta http-equiv="refresh" content="6;url=https://b.example/">')?.url).toBe(
+			'https://b.example/'
+		);
+		expect(findClientRedirect('<meta http-equiv="refresh" content=".;url=https://b.example/">')?.url).toBe(
+			'https://b.example/'
+		);
 		const { impl, calls } = fakeFetch({
-			'https://a.example/': { headers: { refresh: '999999; url=https://b.example/' }, body: 'hi' },
 			'https://c.example/': { headers: { refresh: '0; url=https://b.example/' }, body: content }
 		});
-		expect((await followChain('https://a.example/', { fetchImpl: impl })).finalUrl).toBe('https://a.example/');
 		expect((await followChain('https://c.example/', { fetchImpl: impl })).finalUrl).toBe('https://c.example/');
 		expect(calls).not.toContain('https://b.example/');
+	});
+
+	it.each([
+		['inside <template>', '<template><input name="x"></template>'],
+		['inside a script string', '<script>var s="<input>"</script>'],
+		['with the hidden attribute', '<input type=text hidden>']
+	])('treats a page whose only input is %s as a loader', (_n, extra) => {
+		expect(findClientRedirect(`${extra}<script>location.href="https://b.example/"</script>`)?.url).toBe(
+			'https://b.example/'
+		);
+	});
+
+	it('judges a decoy loader page on its own and keeps the worst verdict', async () => {
+		// The model flags only the casino page; the chain ends on a clean page.
+		const ai = {
+			run: vi.fn(async (_m: string, input: unknown) => {
+				const casino = /Finally: https:\/\/casino\.example/.test((input as { state: string }).state)
+					|| /Final URL: https:\/\/casino\.example/.test((input as { state: string }).state);
+				return clef(casino ? { scam: 0.95, gambling: 0.95, urgency: 0.9 } : {}).run();
+			})
+		};
+		const { impl } = fakeFetch({
+			'https://casino.example/': {
+				body: '<title>Bonus</title><img src="/banner.png" alt="Bonus"><script>if(0)location.href="https://en.wikipedia.org/"</script>'
+			},
+			'https://en.wikipedia.org/': { body: content }
+		});
+		const d = await judgeDestination('https://casino.example/', { ai, fetchImpl: impl });
+		expect(ai.run).toHaveBeenCalledTimes(2);
+		expect(d.verdict).toBe('block');
+	});
+
+	it('holds when any one of the page judgements fails', async () => {
+		let n = 0;
+		const ai = { run: vi.fn(async () => (n++ === 0 ? clef().run() : Promise.reject(new Error('down')))) };
+		const { impl } = fakeFetch({
+			'https://a.example/': { body: '<script>location.href="https://b.example/"</script>' },
+			'https://b.example/': { body: content }
+		});
+		const d = await judgeDestination('https://a.example/', { ai, fetchImpl: impl });
+		expect(d).toMatchObject({ verdict: 'hold', holdReason: 'unchecked' });
+	});
+
+	it('holds a blank page the model calls a redirect when none was found to follow', async () => {
+		const { impl } = fakeFetch({ 'https://a.example/': { body: '<title></title><div id=app></div>' } });
+		const d = await judgeDestination('https://a.example/', { ai: clef({ redirector: 0.8 }), fetchImpl: impl });
+		expect(d).toMatchObject({ verdict: 'hold', holdReason: 'suspicious' });
+	});
+
+	it('does not apply that rule to a content page or a non-200 page', async () => {
+		const { impl } = fakeFetch({
+			'https://a.example/': { body: content },
+			'https://b.example/': { status: 403, body: 'Just a moment...' }
+		});
+		expect(await judgeDestination('https://a.example/', { ai: clef({ redirector: 0.8 }), fetchImpl: impl })).toEqual({
+			verdict: 'allow'
+		});
+		expect(await judgeDestination('https://b.example/', { ai: clef({ redirector: 0.8 }), fetchImpl: impl })).toEqual({
+			verdict: 'allow'
+		});
 	});
 
 	it('shows the model the loader page it passed through', async () => {

@@ -18,7 +18,7 @@ import {
 	buildState,
 	parseClefResponse
 } from './questions';
-import { decideFromAnswers, decideFromChain, type GateDecision } from './decide';
+import { decideFromAnswers, decideFromChain, worst, type GateDecision } from './decide';
 
 export type { GateDecision, HoldReason } from './decide';
 
@@ -71,16 +71,43 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 	if (!deps.ai) {
 		return { verdict: 'hold', holdReason: 'unchecked', detail: 'AI binding missing' };
 	}
+	const ai = deps.ai;
+	const timeoutMs = deps.clefTimeoutMs ?? CLEF_TIMEOUT_MS;
+
+	// Judge the final page, and also every page the chain read and then left
+	// by a client-side redirect: a decoy redirect must not hide the page a
+	// visitor actually sees. The worst verdict wins.
+	const views: { chain: ChainResult; page: PageSummary | null; isFinal: boolean }[] = [
+		{ chain, page, isFinal: true }
+	];
+	chain.hops.forEach((hop, i) => {
+		if (hop.body === undefined) return;
+		const sub: ChainResult = {
+			outcome: 'page',
+			hops: chain.hops.slice(0, i + 1).map((h, j) => (j === i ? { url: h.url, status: h.status } : h)),
+			finalUrl: hop.url,
+			status: hop.status,
+			contentType: hop.contentType,
+			body: hop.body
+		};
+		views.push({ chain: sub, page: hop.body ? summarizePage(hop.body, hop.url) : null, isFinal: false });
+	});
+
 	try {
-		const raw = await withTimeout(
-			deps.ai.run(CLEF_MODEL_ID, {
-				model: CLEF_MODEL,
-				state: buildState(chain, page),
-				questions: buildQuestions()
-			}),
-			deps.clefTimeoutMs ?? CLEF_TIMEOUT_MS
+		const decisions = await Promise.all(
+			views.map(async (v) => {
+				const raw = await withTimeout(
+					ai.run(CLEF_MODEL_ID, {
+						model: CLEF_MODEL,
+						state: buildState(v.chain, v.page),
+						questions: buildQuestions()
+					}),
+					timeoutMs
+				);
+				return decideFromAnswers(parseClefResponse(raw), v.chain, v.page, v.isFinal);
+			})
 		);
-		return decideFromAnswers(parseClefResponse(raw), chain);
+		return decisions.reduce(worst);
 	} catch (e) {
 		console.error('link gate: Clef call failed', e);
 		return { verdict: 'hold', holdReason: 'unchecked', detail: 'model unavailable' };
