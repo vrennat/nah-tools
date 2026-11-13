@@ -36,7 +36,7 @@ function fakePlatform(opts: { limiterAllows: boolean }) {
 			},
 			first: async () => {
 				// The daily model-call counter: always room for one more call.
-				if (/link_gate_budget/.test(sql)) return /^\s*SELECT/i.test(sql) ? { calls: 0 } : { calls: 1 };
+				if (/link_gate_(network_)?budget/.test(sql)) return /^\s*SELECT/i.test(sql) ? { calls: 0 } : { calls: 1 };
 				if (/^\s*INSERT/i.test(sql)) {
 					inserts.push(params);
 					return { short_code: params[0], destination_url: params[1] };
@@ -45,7 +45,7 @@ function fakePlatform(opts: { limiterAllows: boolean }) {
 			},
 			all: async () => ({ results: [] }),
 			run: async () => {
-				if (/^\s*INSERT/i.test(sql) && !/link_gate_budget/.test(sql)) inserts.push(params);
+				if (/^\s*INSERT/i.test(sql) && !/link_gate_(network_)?budget/.test(sql)) inserts.push(params);
 				return { success: true, meta: { changes: 1 } };
 			}
 		};

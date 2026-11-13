@@ -64,7 +64,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
 
-	await assertModelBudget(platform, normalizedUrl);
+	const budget = await assertModelBudget(platform, request, normalizedUrl);
 	await enforceCreationLimits(platform, request, passphrase);
 
 	// Validate alias if provided
@@ -115,7 +115,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	// runs only for requests that passed every cheaper check. It judges the URL
 	// the redirect worker will serve, UTM parameters included.
 	const gateUrl = servedUrl(normalizedUrl, utm);
-	const decision = await gateDestinationOrThrow(platform, db, gateUrl);
+	const decision = await gateDestinationOrThrow(platform, db, gateUrl, { budget });
 
 	const shortCode = generateShortCode();
 	await createLink(db, shortCode, normalizedUrl, passphraseHash, {
@@ -124,7 +124,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		expiresAt: expires_at,
 		utm
 	});
-	scheduleRecheck(platform, db, decision, { shortCode, storedUrl: normalizedUrl, storedUtm: utm, gateUrl });
+	scheduleRecheck(platform, db, decision, { shortCode, storedUrl: normalizedUrl, storedUtm: utm, gateUrl, budget });
 
 	const displayCode = alias || shortCode;
 
@@ -167,14 +167,14 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 
 	// Destination changes share the creation budget, so one link cannot be
 	// re-pointed at a stream of fresh domains.
-	await assertModelBudget(platform, normalizedUrl);
+	const budget = await assertModelBudget(platform, request, normalizedUrl);
 	await enforceCreationLimits(platform, request, passphrase);
 
 	const existing = await authenticateRedirect(db, short_code, passphrase);
 	assertNotFlagged(existing);
 
 	const gateUrl = servedUrl(normalizedUrl, body.utm);
-	const decision = await gateDestinationOrThrow(platform, db, gateUrl);
+	const decision = await gateDestinationOrThrow(platform, db, gateUrl, { budget });
 
 	// Update destination URL
 	await db
@@ -199,7 +199,8 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		shortCode: existing.short_code,
 		storedUrl: normalizedUrl,
 		storedUtm: body.utm,
-		gateUrl
+		gateUrl,
+		budget
 	});
 	return json({ success: true });
 };

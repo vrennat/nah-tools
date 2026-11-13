@@ -42,9 +42,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 
 	// Each new link costs a destination check, so it shares the link-creation budget.
-	if (!isOwnSite(normalizedUrl)) await assertModelBudget(platform, normalizedUrl);
+	const budget = isOwnSite(normalizedUrl) ? {} : await assertModelBudget(platform, request, normalizedUrl);
 	await enforceCreationLimits(platform, request, passphrase);
-	await gateDestinationOrThrow(platform, db, normalizedUrl, { forRedirect: false });
+	await gateDestinationOrThrow(platform, db, normalizedUrl, { forRedirect: false, budget });
 
 	const link = await addBioLink(db, handle, normalizedUrl, title, icon ?? null, order_index ?? 0);
 
@@ -93,9 +93,9 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 			if (!safety.safe) {
 				throw error(400, safety.reason || 'URL is not allowed');
 			}
-			if (!isOwnSite(normalizedUrl)) await assertModelBudget(platform, normalizedUrl);
+			const budget = isOwnSite(normalizedUrl) ? {} : await assertModelBudget(platform, request, normalizedUrl);
 			await enforceCreationLimits(platform, request, passphrase);
-			await gateDestinationOrThrow(platform, db, normalizedUrl, { forRedirect: false });
+			await gateDestinationOrThrow(platform, db, normalizedUrl, { forRedirect: false, budget });
 		}
 		fields.url = normalizedUrl;
 	}

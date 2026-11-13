@@ -51,7 +51,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 
 	// Each link in the batch counts against the daily cap.
-	await assertModelBudget(platform, '');
+	const budget = await assertModelBudget(platform, request, '');
 	await enforceCreationLimits(platform, request, passphrase, links.length);
 
 	// Hash passphrase if provided, otherwise anonymous
@@ -106,7 +106,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			}
 
 			// Every bulk link goes through the spam gate, one at a time.
-			const decision = await judgeWithinBudget(platform, normalized, deps);
+			const decision = await judgeWithinBudget(platform, normalized, deps, budget);
 			logGateDecision(decision);
 			if (decision.verdict === 'block') {
 				results.push({ short_code: '', short_url: '', destination: link.url, error: decision.message });

@@ -130,9 +130,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	// against the shared per-network link-creation budget, like links added later.
 	// At the daily model-call limit, refuse before the allowance is charged
 	// (links to nah.tools itself are not checked, so they need no model).
-	if (initialLinks.some((link) => !isOwnSite(link.url))) {
-		await assertModelBudget(platform, '');
-	}
+	const budget = initialLinks.some((link) => !isOwnSite(link.url))
+		? await assertModelBudget(platform, request, '')
+		: {};
 	if (initialLinks.length > 0) {
 		await enforceCreationLimits(platform, request, passphrase, initialLinks.length);
 	}
@@ -143,7 +143,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		platform,
 		db,
 		initialLinks.map((link) => link.url),
-		{ forRedirect: false }
+		{ forRedirect: false, budget }
 	);
 
 	const passphraseHash = await hashPassphrase(passphrase);

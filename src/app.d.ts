@@ -20,6 +20,10 @@ declare global {
 				AI?: Ai;
 				/** Daily cap on spam-gate model calls; defaults to 5000 (src/lib/server/link-gate/budget.ts). */
 				LINK_GATE_DAILY_MODEL_CALLS?: string;
+				/** Per-network daily share of spam-gate model calls; defaults to 60 (src/lib/server/link-gate/budget.ts). */
+				LINK_GATE_NETWORK_DAILY_MODEL_CALLS?: string;
+				/** Daily share of spam-gate model calls for a whole IPv6 /48; defaults to 10 times the per-network share. */
+				LINK_GATE_BLOCK_DAILY_MODEL_CALLS?: string;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;

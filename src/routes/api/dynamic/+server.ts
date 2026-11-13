@@ -48,15 +48,15 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
 	}
 
-	await assertModelBudget(platform, url);
+	const budget = await assertModelBudget(platform, request, url);
 	await enforceCreationLimits(platform, request, passphrase);
 
-	const decision = await gateDestinationOrThrow(platform, db, url);
+	const decision = await gateDestinationOrThrow(platform, db, url, { budget });
 
 	const shortCode = generateShortCode();
 	const passphraseHash = await hashPassphrase(passphrase);
 	await createRedirect(db, shortCode, url, passphraseHash, label);
-	scheduleRecheck(platform, db, decision, { shortCode, storedUrl: url, gateUrl: url });
+	scheduleRecheck(platform, db, decision, { shortCode, storedUrl: url, gateUrl: url, budget });
 
 	return json(
 		{
@@ -85,7 +85,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	}
 
 	// Destination changes share the creation budget.
-	await assertModelBudget(platform, url);
+	const budget = await assertModelBudget(platform, request, url);
 	await enforceCreationLimits(platform, request, passphrase);
 
 	const existing = await authenticateRedirect(db, short_code, passphrase);
@@ -100,9 +100,9 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		content: existing.utm_content ?? undefined
 	};
 	const gateUrl = servedUrl(url, storedUtm);
-	const decision = await gateDestinationOrThrow(platform, db, gateUrl);
+	const decision = await gateDestinationOrThrow(platform, db, gateUrl, { budget });
 	await updateRedirect(db, short_code, url);
-	scheduleRecheck(platform, db, decision, { shortCode: existing.short_code, storedUrl: url, storedUtm, gateUrl });
+	scheduleRecheck(platform, db, decision, { shortCode: existing.short_code, storedUrl: url, storedUtm, gateUrl, budget });
 	await invalidateRedirectCache(getKV(platform), db, short_code);
 	return json({ success: true });
 };

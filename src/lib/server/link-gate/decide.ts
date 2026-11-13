@@ -23,7 +23,8 @@ export type GateEvent =
 	| 'link_gate_allow_unreadable'
 	| 'link_gate_allow_download'
 	| 'link_gate_allow_unchecked'
-	| 'link_gate_budget_exhausted';
+	| 'link_gate_budget_exhausted'
+	| 'link_gate_network_budget_exhausted';
 
 /** One structured log line. Host and status only: never a path, query or user data. */
 export interface GateLog {
