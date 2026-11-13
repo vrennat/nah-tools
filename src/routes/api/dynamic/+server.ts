@@ -41,10 +41,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
 	}
 
-	await assertModelBudget(platform, url);
+	const budget = await assertModelBudget(platform, request, url);
 	await enforceCreationLimits(platform, request, passphrase);
 
-	await gateDestinationOrThrow(platform, db, url);
+	await gateDestinationOrThrow(platform, db, url, budget);
 
 	const shortCode = generateShortCode();
 	const passphraseHash = await hashPassphrase(passphrase);
@@ -75,7 +75,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	}
 
 	// Destination changes share the creation budget.
-	await assertModelBudget(platform, url);
+	const budget = await assertModelBudget(platform, request, url);
 	await enforceCreationLimits(platform, request, passphrase);
 
 	const existing = await authenticateRedirect(db, short_code, passphrase);
@@ -90,7 +90,8 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 			campaign: existing.utm_campaign ?? undefined,
 			term: existing.utm_term ?? undefined,
 			content: existing.utm_content ?? undefined
-		})
+		}),
+		budget
 	);
 	await updateRedirect(db, short_code, url);
 	await invalidateRedirectCache(getKV(platform), db, short_code);

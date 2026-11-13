@@ -22,8 +22,9 @@ export const DEFAULT_DAILY_MODEL_CALLS = 5000;
 
 /** Thrown by a reserved model call when the day's budget is used up. */
 export class BudgetExhaustedError extends Error {
-	constructor() {
-		super('daily model-call budget exhausted');
+	/** 'global': the day's total is used up; 'network': this network's share is. */
+	constructor(readonly scope: 'global' | 'network' = 'global') {
+		super(`daily model-call budget exhausted (${scope})`);
 		this.name = 'BudgetExhaustedError';
 	}
 }
@@ -32,19 +33,32 @@ export function budgetDay(now = new Date()): string {
 	return now.toISOString().slice(0, 10);
 }
 
+/** Model calls one client network may use per UTC day (see reserveNetworkCall). */
+export const DEFAULT_NETWORK_DAILY_MODEL_CALLS = 60;
+
 /**
- * The cap from LINK_GATE_DAILY_MODEL_CALLS. Missing, blank, non-integer or
- * values below 1 fall back to the default: a cap of 0 would refuse every new
- * link, so it cannot be set by accident (an empty variable used to mean 0).
+ * A cap from an environment variable. Missing, blank, non-integer or values
+ * below 1 fall back to the default: a cap of 0 would refuse every new link,
+ * so it cannot be set by accident (an empty variable used to mean 0).
  */
-export function dailyCap(raw: string | undefined): number {
+function parseCap(raw: string | undefined, fallback: number): number {
 	const trimmed = raw?.trim() ?? '';
-	if (!/^\d+$/.test(trimmed)) return DEFAULT_DAILY_MODEL_CALLS;
+	if (!/^\d+$/.test(trimmed)) return fallback;
 	const n = Number(trimmed);
-	return n >= 1 ? n : DEFAULT_DAILY_MODEL_CALLS;
+	return n >= 1 ? n : fallback;
 }
 
-function logBudgetError(reason: string): void {
+/** The global cap from LINK_GATE_DAILY_MODEL_CALLS. */
+export function dailyCap(raw: string | undefined): number {
+	return parseCap(raw, DEFAULT_DAILY_MODEL_CALLS);
+}
+
+/** The per-network share from LINK_GATE_NETWORK_DAILY_MODEL_CALLS. */
+export function networkCap(raw: string | undefined): number {
+	return parseCap(raw, DEFAULT_NETWORK_DAILY_MODEL_CALLS);
+}
+
+export function logBudgetError(reason: string): void {
 	console.error(JSON.stringify({ event: 'link_gate_budget_error', reason }));
 }
 
@@ -86,3 +100,77 @@ export async function reserveCall(db: D1Database | undefined, cap: number, now =
 		return true;
 	}
 }
+
+/*
+ * Per-network share (issue #56 follow-up). The global cap alone lets about 9
+ * networks use up the day's calls and stop link creation for everyone until
+ * 00:00 UTC. Each network (a salted hash, see networkId in route.ts) also has
+ * its own daily share, counted in link_gate_network_budget (migration 0006).
+ * D1 failures are logged and allowed, as for the global counter.
+ */
+
+/** Calls this network used today, or null (logged) when the counter cannot be read. */
+export async function readNetworkUsage(
+	db: D1Database | undefined,
+	network: string,
+	now = new Date()
+): Promise<number | null> {
+	if (!db) return null;
+	try {
+		const row = await db
+			.prepare('SELECT calls FROM link_gate_network_budget WHERE day = ? AND network = ?')
+			.bind(budgetDay(now), network)
+			.first<{ calls: number }>();
+		return row?.calls ?? 0;
+	} catch {
+		logBudgetError('network_counter_read_failed');
+		return null;
+	}
+}
+
+/**
+ * Reserve one model call from this network's share: true if it fits, false
+ * if the share is used up, true (logged) if D1 fails. One atomic upsert, like
+ * reserveCall. A network's first call of the day also deletes earlier days'
+ * rows, so the table holds about one day of rows.
+ */
+export async function reserveNetworkCall(
+	db: D1Database | undefined,
+	network: string,
+	cap: number,
+	now = new Date()
+): Promise<boolean> {
+	if (!db) return true;
+	const day = budgetDay(now);
+	try {
+		const row = await db
+			.prepare(
+				`INSERT INTO link_gate_network_budget (day, network, calls) VALUES (?1, ?2, 1)
+				 ON CONFLICT(day, network) DO UPDATE SET calls = calls + 1 WHERE calls < ?3
+				 RETURNING calls`
+			)
+			.bind(day, network, cap)
+			.first<{ calls: number }>();
+		if (row?.calls === 1) {
+			await db.prepare('DELETE FROM link_gate_network_budget WHERE day < ?').bind(day).run();
+		}
+		return row !== null;
+	} catch {
+		logBudgetError('network_counter_write_failed');
+		return true;
+	}
+}
+
+/** Give back a network unit whose model call did not run (the global cap refused it). */
+export async function refundNetworkCall(db: D1Database | undefined, network: string, now = new Date()): Promise<void> {
+	if (!db) return;
+	try {
+		await db
+			.prepare('UPDATE link_gate_network_budget SET calls = calls - 1 WHERE day = ? AND network = ? AND calls > 0')
+			.bind(budgetDay(now), network)
+			.run();
+	} catch {
+		logBudgetError('network_counter_refund_failed');
+	}
+}
+

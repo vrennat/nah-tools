@@ -57,7 +57,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
 
-	await assertModelBudget(platform, normalizedUrl);
+	const budget = await assertModelBudget(platform, request, normalizedUrl);
 	await enforceCreationLimits(platform, request, passphrase);
 
 	// Validate alias if provided
@@ -107,7 +107,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	// Spam gate last: it fetches the destination and calls the model, so it
 	// runs only for requests that passed every cheaper check. It judges the URL
 	// the redirect worker will serve, UTM parameters included.
-	await gateDestinationOrThrow(platform, db, servedUrl(normalizedUrl, utm));
+	await gateDestinationOrThrow(platform, db, servedUrl(normalizedUrl, utm), budget);
 
 	const shortCode = generateShortCode();
 	await createLink(db, shortCode, normalizedUrl, passphraseHash, {
@@ -156,12 +156,12 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 
 	// Destination changes share the creation budget, so one link cannot be
 	// re-pointed at a stream of fresh domains.
-	await assertModelBudget(platform, normalizedUrl);
+	const budget = await assertModelBudget(platform, request, normalizedUrl);
 	await enforceCreationLimits(platform, request, passphrase);
 
 	await authenticateRedirect(db, short_code, passphrase);
 
-	await gateDestinationOrThrow(platform, db, servedUrl(normalizedUrl, body.utm));
+	await gateDestinationOrThrow(platform, db, servedUrl(normalizedUrl, body.utm), budget);
 
 	// Update destination URL
 	await db
