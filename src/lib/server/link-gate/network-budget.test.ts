@@ -146,12 +146,15 @@ describe('per-network share (judgeWithinBudget)', () => {
 	});
 
 	it('gives back on the day the unit was taken, not the current day', async () => {
-		sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES ('2026-11-13', 'net-a', 3)").run();
-		sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES ('2026-11-14', 'net-a', 1)").run();
-		await refundNetworkCall(db, 'net-a', { ok: true, day: '2026-11-13' });
+		// A unit taken on an earlier day (here a fixed past date), given back after midnight.
+		const taken = '2001-01-01';
+		const today = budgetDay();
+		sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES (?, 'net-a', 3)").run(taken);
+		sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES (?, 'net-a', 1)").run(today);
+		await refundNetworkCall(db, 'net-a', { ok: true, day: taken });
 		expect(sqlite.prepare('SELECT day, calls FROM link_gate_network_budget ORDER BY day').all()).toEqual([
-			{ day: '2026-11-13', calls: 2 },
-			{ day: '2026-11-14', calls: 1 }
+			{ day: taken, calls: 2 },
+			{ day: today, calls: 1 }
 		]);
 	});
 

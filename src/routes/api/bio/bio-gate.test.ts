@@ -3,7 +3,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { migratedDb } from '$server/sqlite-d1';
 import { NOUL_QUESTIONS, type NoulId } from '$server/link-gate/questions';
 
-vi.mock('$server/creation-limits', () => ({ enforceCreationLimits: vi.fn(async () => {}) }));
+vi.mock('$server/creation-limits', async (orig) => ({
+	...(await orig<typeof import('$server/creation-limits')>()),
+	enforceCreationLimits: vi.fn(async () => {})
+}));
 const { enforceCreationLimits } = await import('$server/creation-limits');
 const profiles = await import('./+server');
 const bioLinks = await import('./links/+server');
@@ -395,5 +398,67 @@ describe('bio links and the daily model-call limit', () => {
 			} as never)
 		).rejects.toMatchObject({ status: 503 });
 		expect(enforceCreationLimits).not.toHaveBeenCalled();
+	});
+});
+
+describe('bio links and the per-network share of model calls', () => {
+	const kvStore = new Map<string, string>();
+	const shareEnv = (env: Record<string, string>) => {
+		const p = platform();
+		return {
+			...p,
+			env: {
+				...p.env,
+				...env,
+				KV: {
+					...p.env.KV,
+					get: async (k: string) => kvStore.get(k) ?? null,
+					put: async (k: string, v: string) => void kvStore.set(k, v)
+				}
+			}
+		};
+	};
+	const from = (ip: string, method: string, body: unknown) =>
+		new Request('https://nah.tools/api/bio', { method, headers: { 'cf-connecting-ip': ip }, body: JSON.stringify(body) });
+	const profileCount = () => (sqlite.prepare('SELECT COUNT(*) AS n FROM bio_profiles').get() as { n: number }).n;
+	beforeEach(() => {
+		kvStore.clear();
+		vi.mocked(enforceCreationLimits).mockClear();
+	});
+
+	it("charges a new profile's link checks to its network and refuses the profile when the share runs out", async () => {
+		const links = Array.from({ length: 3 }, (_, i) => ({ url: `https://ok.example/${i}`, title: String(i) }));
+		await expect(
+			profiles.POST({
+				request: from('198.51.100.7', 'POST', { handle: 'sh1', display_name: 'S', passphrase: 'correct horse', links }),
+				platform: shareEnv({ LINK_GATE_NETWORK_DAILY_MODEL_CALLS: '2' })
+			} as never)
+		).rejects.toMatchObject({ status: 429 });
+		expect(ai.run).toHaveBeenCalledTimes(2);
+		expect(profileCount()).toBe(0);
+	});
+
+	it('refuses adding a bio link from a network over its share before charging the allowance', async () => {
+		const env = shareEnv({ LINK_GATE_NETWORK_DAILY_MODEL_CALLS: '1' });
+		const created = await profiles.POST({
+			request: from('2001:db8:5:1::1', 'POST', {
+				handle: 'sh2',
+				display_name: 'S',
+				passphrase: 'correct horse',
+				links: [{ url: 'https://ok.example/', title: 'Site' }]
+			}),
+			platform: env
+		} as never);
+		expect(created.status).toBe(201);
+		vi.mocked(enforceCreationLimits).mockClear();
+		const add = (ip: string) =>
+			bioLinks.POST({
+				request: from(ip, 'POST', { handle: 'sh2', passphrase: 'correct horse', url: 'https://ok.example/new', title: 'New' }),
+				platform: env
+			} as never);
+		await expect(add('2001:db8:5:1::2')).rejects.toMatchObject({ status: 429 });
+		expect(enforceCreationLimits).not.toHaveBeenCalled();
+		// Another network has its own share.
+		expect((await add('2001:db8:6:1::1')).status).toBe(201);
 	});
 });
