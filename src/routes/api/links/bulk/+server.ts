@@ -14,6 +14,9 @@ import { assertModelBudget, gateDeps, judgeWithinBudget, logGateDecision } from 
  */
 const MAX_BULK_LINKS = 20;
 
+const BULK_UNCHECKED_MESSAGE =
+	'This destination could not be checked right now. Create this link on its own instead, so it can be checked again.';
+
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
@@ -107,6 +110,13 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			logGateDecision(decision);
 			if (decision.verdict === 'block') {
 				results.push({ short_code: '', short_url: '', destination: link.url, error: decision.message });
+				continue;
+			}
+			// Bulk links are not rechecked in the background (twenty rechecks do not
+			// fit in one waitUntil), so a link whose check could not finish is not
+			// created here; created on its own, it gets the recheck.
+			if (decision.log?.event === 'link_gate_allow_unchecked') {
+				results.push({ short_code: '', short_url: '', destination: link.url, error: BULK_UNCHECKED_MESSAGE });
 				continue;
 			}
 

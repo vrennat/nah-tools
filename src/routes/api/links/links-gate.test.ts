@@ -109,7 +109,10 @@ describe('POST /api/links', () => {
 		const res = await links.POST({ request: req('POST', { url: 'https://down.example/' }), platform: platform() } as never);
 		expect(res.status).toBe(201);
 		expect(rows()).toEqual([{ destination_url: 'https://down.example/', is_active: 1 }]);
-		expect(logged()).toEqual([expect.objectContaining({ event: 'link_gate_allow_unchecked', reason: 'network_error' })]);
+		expect(logged()).toEqual([
+			expect.objectContaining({ event: 'link_gate_allow_unchecked', reason: 'network_error' }),
+			{ event: 'link_gate_recheck_started', host: 'down.example' }
+		]);
 	});
 });
 
