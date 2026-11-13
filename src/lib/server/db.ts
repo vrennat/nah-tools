@@ -348,15 +348,6 @@ async function getClickStatsFromD1(db: D1Database, shortCode: string): Promise<C
 	};
 }
 
-/** Check if a domain is blocked */
-export async function isDomainBlocked(db: D1Database, domain: string): Promise<boolean> {
-	const row = await db
-		.prepare('SELECT 1 FROM blocked_domains WHERE domain = ?')
-		.bind(domain)
-		.first();
-	return !!row;
-}
-
 /** Report a link as abusive. Auto-deactivates after 3 unique reports.
  *  One report per IP per short_code — duplicate reports are silently ignored
  *  to prevent a single IP from bombing a link into deactivation.

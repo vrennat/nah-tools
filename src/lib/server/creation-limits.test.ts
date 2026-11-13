@@ -1,16 +1,22 @@
 import { describe, it, expect } from 'vitest';
 import {
 	checkCreationLimits,
+	networkKey,
+	reporterKey,
 	DAILY_CREATE_CAP,
 	type CreationLimitEnv
 } from '$server/creation-limits';
 
-function fakeKV(opts: { failWrites?: boolean } = {}) {
+function fakeKV(opts: { failWrites?: boolean; failAll?: boolean; failCounterWrites?: boolean } = {}) {
 	const store = new Map<string, string>();
 	const kv = {
-		get: async (k: string) => store.get(k) ?? null,
+		get: async (k: string) => {
+			if (opts.failAll) throw new Error('KV unavailable');
+			return store.get(k) ?? null;
+		},
 		put: async (k: string, v: string) => {
-			if (opts.failWrites) throw new Error('KV put() limit exceeded for the day.');
+			if (opts.failWrites || opts.failAll) throw new Error('KV put() limit exceeded for the day.');
+			if (opts.failCounterWrites && k.startsWith('rl:')) throw new Error('KV put() limit exceeded for the day.');
 			store.set(k, v);
 		}
 	} as unknown as KVNamespace;
@@ -100,15 +106,64 @@ describe('checkCreationLimits', () => {
 		expect(hashes[0]).not.toEqual(hashes[1]);
 	});
 
-	it('allows the request when the counter store is failing', async () => {
-		const { kv } = fakeKV({ failWrites: true });
+	it('allows the request when only the daily counter cannot be written', async () => {
+		const { kv } = fakeKV({ failCounterWrites: true });
 		const r = await checkCreationLimits({ KV: kv }, { ip: '203.0.113.7', cost: 1, now: DAY1 });
 		expect(r.ok).toBe(true);
+	});
+
+	it('still applies the burst limit when KV is down entirely', async () => {
+		const { kv } = fakeKV({ failAll: true });
+		const env: CreationLimitEnv = { KV: kv, CREATE_LIMITER: fakeLimiter(5) };
+		for (let i = 0; i < 5; i++) {
+			expect((await checkCreationLimits(env, { ip: '203.0.113.7', cost: 1, now: DAY1 })).ok).toBe(true);
+		}
+		expect((await checkCreationLimits(env, { ip: '203.0.113.7', cost: 1, now: DAY1 })).ok).toBe(false);
+	});
+
+	it('treats every address in one IPv6 /64 as the same client', async () => {
+		const { kv } = fakeKV();
+		const env: CreationLimitEnv = { KV: kv, CREATE_LIMITER: fakeLimiter(5) };
+		for (let i = 1; i <= 5; i++) {
+			const r = await checkCreationLimits(env, { ip: `2001:db8:1:2::${i.toString(16)}`, cost: 1, now: DAY1 });
+			expect(r.ok).toBe(true);
+		}
+		const rotated = await checkCreationLimits(env, { ip: '2001:db8:1:2:aaaa:bbbb:cccc:dddd', cost: 1, now: DAY1 });
+		expect(rotated.ok).toBe(false);
+		expect((await checkCreationLimits(env, { ip: '2001:db8:1:3::1', cost: 1, now: DAY1 })).ok).toBe(true);
 	});
 
 	it('skips limits when there is no IP and no passphrase', async () => {
 		const { kv, store } = fakeKV();
 		expect((await checkCreationLimits({ KV: kv }, { ip: null, cost: 1, now: DAY1 })).ok).toBe(true);
 		expect(store.size).toBe(0);
+	});
+});
+
+describe('networkKey', () => {
+	it('keeps IPv4 addresses whole', () => {
+		expect(networkKey('203.0.113.7')).toBe('203.0.113.7');
+	});
+	it('reduces IPv6 to its /64 regardless of notation', () => {
+		expect(networkKey('2001:db8:0:1::5')).toBe(networkKey('2001:0DB8:0000:0001:ffff:0:0:9'));
+		expect(networkKey('2001:db8::1')).toBe('2001:0db8:0000:0000::/64');
+		expect(networkKey('::1')).toBe('0000:0000:0000:0000::/64');
+	});
+});
+
+describe('reporterKey', () => {
+	it('is stable across days for one network and never contains the IP', async () => {
+		const { kv, store } = fakeKV();
+		const a = await reporterKey(kv, '203.0.113.7');
+		const b = await reporterKey(kv, '203.0.113.7');
+		expect(a).toBeDefined();
+		expect(a).toBe(b);
+		expect(a).not.toContain('203.0.113');
+		expect([...store.values()].join()).not.toContain('203.0.113.7');
+		expect(await reporterKey(kv, '198.51.100.1')).not.toBe(a);
+	});
+	it('returns undefined instead of throwing when KV fails', async () => {
+		const { kv } = fakeKV({ failAll: true });
+		expect(await reporterKey(kv, '203.0.113.7')).toBeUndefined();
 	});
 });

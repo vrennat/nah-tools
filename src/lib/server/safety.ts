@@ -59,7 +59,8 @@ const RESERVED_ALIASES = [
 /**
  * Validate a destination URL: the static policy in destination-policy.ts, then
  * the D1 `blocked_domains` table, which blocks a listed domain and all of its
- * subdomains. Pass `forRedirect: false` for bio page links, which may point at
+ * subdomains. Store entries as bare ASCII hostnames (punycode for IDNs, e.g.
+ * xn--...); case and a trailing dot are ignored. Pass `forRedirect: false` for bio page links, which may point at
  * nah.tools.
  */
 export async function validateUrlSafety(
@@ -78,7 +79,7 @@ export async function validateUrlSafety(
 	const candidates = domainAndParents(hostname);
 	const blocked = await db
 		.prepare(
-			`SELECT 1 FROM blocked_domains WHERE domain IN (${candidates.map(() => '?').join(', ')}) LIMIT 1`
+			`SELECT 1 FROM blocked_domains WHERE lower(trim(domain, '.')) IN (${candidates.map(() => '?').join(', ')}) LIMIT 1`
 		)
 		.bind(...candidates)
 		.first();

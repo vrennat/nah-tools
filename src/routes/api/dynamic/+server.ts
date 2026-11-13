@@ -70,6 +70,9 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
 
+	// Destination changes share the creation budget.
+	await enforceCreationLimits(platform, request, passphrase);
+
 	await authenticateRedirect(db, short_code, passphrase);
 	await updateRedirect(db, short_code, url);
 	await invalidateRedirectCache(getKV(platform), db, short_code);

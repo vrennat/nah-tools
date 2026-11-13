@@ -45,9 +45,13 @@ describe('checkDestination', () => {
 		expect(r.ok).toBe(false);
 	});
 
+	it('accepts underscores in subdomain labels', () => {
+		expect(redirect('https://my_host.example.com/').ok).toBe(true);
+	});
+
 	it('rejects single-label and malformed hostnames', () => {
 		expect(redirect('https://example/').ok).toBe(false);
-		expect(redirect('https://exa_mple.com/').ok).toBe(false);
+		expect(redirect('https://example.c_m/').ok).toBe(false);
 		expect(redirect('https://-bad.example.com/').ok).toBe(false);
 	});
 
@@ -94,8 +98,10 @@ describe('checkDestination', () => {
 	it('blocks the campaign landing path on any domain', () => {
 		const r = redirect('https://brandnew.unseen-domain.com/wqamhcsom?r=y4V3sb&t=1');
 		expect(r.ok).toBe(false);
-		expect(redirect('https://brandnew.unseen-domain.com/WQAMHCSOM/?r=x').ok).toBe(false);
-		expect(redirect('https://example.com/wqamhcsomething').ok).toBe(true);
+		for (const path of ['/WQAMHCSOM/?r=x', '/%77qamhcsom?r=1', '//wqamhcsom?r=1', '/wqamhcsom.php?r=1', '/wqamhcsom;x']) {
+			expect(redirect(`https://brandnew.unseen-domain.com${path}`).ok).toBe(false);
+		}
+		expect(redirect('https://example.com/about/wqamhcsom').ok).toBe(true);
 	});
 
 	it('blocks free-registration TLDs', () => {

@@ -37,7 +37,10 @@ export const SHORTENER_DOMAINS = [
 	'qrco.de',
 	'shorturl.gg',
 	'urlz.fr',
-	'clck.ru'
+	'clck.ru',
+	'bit.do',
+	'x.gd',
+	'tiny.one'
 ];
 
 /**
@@ -86,15 +89,27 @@ export const SEED_BLOCKED_DOMAINS = [
 
 /**
  * Path prefixes used by that campaign. Its domains rotate faster than a
- * blocklist can follow, but every link used the same landing path.
+ * blocklist can follow, but every link used the same landing path. This is a
+ * speed bump, not a boundary: a campaign can change its path.
  */
 const BLOCKED_PATH_PREFIXES = ['/wqamhcsom'];
 
 /** Known bad TLDs commonly used in phishing (free-registration ccTLDs). */
 const BAD_TLDS = ['tk', 'ml', 'ga', 'cf', 'gq'];
 
-const LABEL_RE = /^(?!-)[a-z0-9-]{1,63}(?<!-)$/;
+const LABEL_RE = /^(?!-)[a-z0-9_-]{1,63}(?<!-)$/;
 const TLD_RE = /^([a-z]{2,63}|xn--[a-z0-9-]{1,59})$/;
+
+/** Lowercased path with percent-escapes decoded and repeated slashes collapsed, for prefix matching. */
+function normalizedPath(pathname: string): string {
+	let path = pathname;
+	try {
+		path = decodeURIComponent(pathname);
+	} catch {
+		// Malformed escapes: match on the raw path.
+	}
+	return path.toLowerCase().replace(/\/{2,}/g, '/');
+}
 
 export type PolicyResult = { ok: true } | { ok: false; reason: string };
 
@@ -170,8 +185,7 @@ export function checkDestination(url: string, opts: { forRedirect: boolean }): P
 	if (matchesDomainList(hostname, SEED_BLOCKED_DOMAINS)) {
 		return { ok: false, reason: 'This domain has been blocked.' };
 	}
-	const path = parsed.pathname.toLowerCase();
-	if (BLOCKED_PATH_PREFIXES.some((p) => path === p || path.startsWith(p + '/'))) {
+	if (BLOCKED_PATH_PREFIXES.some((p) => normalizedPath(parsed.pathname).startsWith(p))) {
 		return { ok: false, reason: 'This destination has been blocked.' };
 	}
 
