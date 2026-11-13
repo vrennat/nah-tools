@@ -58,6 +58,8 @@ export interface ChainResult {
 	body?: string;
 	/** Content-Disposition of the final response (it names a download). */
 	contentDisposition?: string;
+	/** First bytes of the final response body, read whatever the content type. */
+	prefix?: Uint8Array;
 	reason?: string;
 }
 
@@ -143,8 +145,11 @@ function resolveTarget(target: string | null, base: string): string | null {
 /** Only default web ports are fetched; other ports end the chain as unreadable. */
 const ALLOWED_PORTS = new Set(['', '80', '443']);
 
-async function readCapped(res: Response, maxBytes: number, signal: AbortSignal): Promise<string> {
-	if (!res.body) return '';
+/** Bytes kept from the start of a non-text response, to recognise executables by signature. */
+export const PREFIX_BYTES = 16;
+
+async function readCappedBytes(res: Response, maxBytes: number, signal: AbortSignal): Promise<Uint8Array> {
+	if (!res.body) return new Uint8Array(0);
 	const reader = res.body.getReader();
 	const chunks: Uint8Array[] = [];
 	let total = 0;
@@ -167,7 +172,7 @@ async function readCapped(res: Response, maxBytes: number, signal: AbortSignal):
 		off += take;
 		if (off >= buf.byteLength) break;
 	}
-	return new TextDecoder('utf-8', { fatal: false }).decode(buf);
+	return buf;
 }
 
 export interface FollowOptions {
@@ -240,19 +245,23 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 			} else {
 				const contentType = res.headers.get('content-type') ?? '';
 				let body = '';
-				if (isTextual(contentType)) {
-					try {
-						body = await readCapped(res, maxBytes, controller.signal);
-					} catch {
-						return {
-							outcome: 'fetch-failed',
-							hops,
-							finalUrl: url,
-							reason: controller.signal.aborted ? 'fetch_timeout' : 'body_read_error'
-						};
-					}
-				} else {
-					res.body?.cancel().catch(() => {});
+				let prefix: Uint8Array;
+				try {
+					// Text is read up to the cap; anything else only far enough to see its file signature.
+					const bytes = await readCappedBytes(
+						res,
+						isTextual(contentType) ? maxBytes : PREFIX_BYTES,
+						controller.signal
+					);
+					prefix = bytes.slice(0, PREFIX_BYTES);
+					if (isTextual(contentType)) body = new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+				} catch {
+					return {
+						outcome: 'fetch-failed',
+						hops,
+						finalUrl: url,
+						reason: controller.signal.aborted ? 'fetch_timeout' : 'body_read_error'
+					};
 				}
 				// A Refresh header counts like a meta refresh: only on a loader page.
 				const headerRefresh = parseRefresh(res.headers.get('refresh') ?? '');
@@ -273,6 +282,7 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 						status: res.status,
 						contentType,
 						contentDisposition: res.headers.get('content-disposition') ?? undefined,
+						prefix,
 						body
 					};
 				}

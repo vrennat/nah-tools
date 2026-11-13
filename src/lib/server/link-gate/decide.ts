@@ -61,6 +61,8 @@ export const MESSAGES = {
 		'This link redirects more than 5 times, so it could not be checked. Link to the final page instead.',
 	download:
 		'Short links to app installers and executable files are not allowed. Link to the page that offers the download instead.',
+	unreadableAfterRedirect:
+		'This link redirects to another site that could not be checked. Link to the final page directly instead.',
 	hopPolicy: (reason: string) =>
 		`This link redirects to a destination that is not allowed: ${reason} Link to the final page directly if it is allowed.`
 } as const;
@@ -71,9 +73,14 @@ export const MESSAGES = {
  */
 const CLOUDFLARE_WARNING_RE = /^Suspected (Phishing|Malware) \| Cloudflare$/;
 
-/** File types that install or run code. A short link to one is blocked. */
+/**
+ * File types that install or run code. A short link to one is blocked.
+ * (`.com` is left out: a URL path often ends in a domain name.)
+ */
 const EXECUTABLE_EXT_RE =
-	/\.(apk|xapk|aab|exe|msi|msix|msixbundle|appx|appxbundle|dmg|pkg|mpkg|scr|bat|cmd|com|ps1|vbs|vbe|jse|wsf|hta|jar|deb|rpm|run|command|ipa)$/i;
+	/\.(apk|xapk|aab|exe|msi|msix|msixbundle|appx|appxbundle|dmg|pkg|mpkg|scr|bat|cmd|ps1|vbs|vbe|jse|wsf|hta|jar|xpi|deb|rpm|run|command|ipa)$/i;
+/** ZIP-based app packages: a PK signature with one of these names is an installer. */
+const ZIP_PACKAGE_EXT_RE = /\.(apk|xapk|aab|jar|xpi|ipa|appx|appxbundle|msix|msixbundle)$/i;
 const EXECUTABLE_TYPE_RE =
 	/^application\/(vnd\.android\.package-archive|x-msdownload|x-ms-installer|x-msi|x-msdos-program|x-dosexec|x-apple-diskimage|x-newton-compatible-pkg|java-archive|x-java-archive|vnd\.microsoft\.portable-executable|x-sh|x-executable|x-debian-package|x-rpm|x-ms-application|vnd\.ms-appx)\b/i;
 
@@ -119,9 +126,60 @@ export function downloadName(chain: ChainResult): string {
 	return name.trim();
 }
 
-function isExecutableDownload(chain: ChainResult): boolean {
-	if (chain.outcome !== 'page' || isTextual(chain.contentType)) return false;
-	return EXECUTABLE_TYPE_RE.test(chain.contentType ?? '') || EXECUTABLE_EXT_RE.test(downloadName(chain));
+function startsWith(prefix: Uint8Array | undefined, sig: number[]): boolean {
+	return !!prefix && prefix.length >= sig.length && sig.every((b, i) => prefix[i] === b);
+}
+
+/**
+ * An installer or executable, by content type, by the file name in the URL
+ * path or Content-Disposition (whatever the content type, which may be
+ * missing or wrong), or by the first bytes: MZ (Windows), ELF, Mach-O, xar
+ * (macOS .pkg), or a ZIP named as an app package. DMG images carry their
+ * signature at the end of the file, so they are recognised by name and type only.
+ */
+export function isExecutableDownload(chain: ChainResult): boolean {
+	if (chain.outcome !== 'page') return false;
+	const name = downloadName(chain);
+	let pathName = '';
+	try {
+		pathName = decodeURIComponent(new URL(chain.finalUrl).pathname);
+	} catch {
+		// Keep empty.
+	}
+	if (EXECUTABLE_TYPE_RE.test(chain.contentType ?? '')) return true;
+	if (EXECUTABLE_EXT_RE.test(name) || EXECUTABLE_EXT_RE.test(pathName)) return true;
+	const p = chain.prefix;
+	if (
+		startsWith(p, [0x4d, 0x5a]) || // MZ
+		startsWith(p, [0x7f, 0x45, 0x4c, 0x46]) || // ELF
+		startsWith(p, [0xfe, 0xed, 0xfa, 0xce]) ||
+		startsWith(p, [0xfe, 0xed, 0xfa, 0xcf]) ||
+		startsWith(p, [0xce, 0xfa, 0xed, 0xfe]) ||
+		startsWith(p, [0xcf, 0xfa, 0xed, 0xfe]) || // Mach-O
+		startsWith(p, [0x78, 0x61, 0x72, 0x21]) // xar!
+	) {
+		return true;
+	}
+	return startsWith(p, [0x50, 0x4b, 0x03, 0x04]) && (ZIP_PACKAGE_EXT_RE.test(name) || ZIP_PACKAGE_EXT_RE.test(pathName));
+}
+
+/** The destination did not answer usefully: no page body, or an error status. Downloads are not refusals. */
+function refused(chain: ChainResult): boolean {
+	if (chain.outcome !== 'page') return false;
+	if ((chain.status ?? 0) >= 400) return true;
+	return isTextual(chain.contentType) && !chain.body;
+}
+
+/**
+ * A timeout, network error or refusal after a redirect to another host is
+ * blocked: that is how a throwaway redirector hides its final page (decision
+ * by the conductor session under Tanner's delegation, 2026-11-13). On the
+ * first URL, or after only same-host redirects (http to https, www, a
+ * trailing slash), it is allowed and logged instead, because large sites
+ * often refuse or stall automated fetches.
+ */
+function failedAfterCrossHostRedirect(chain: ChainResult): boolean {
+	return (chain.outcome === 'fetch-failed' || refused(chain)) && crossesHosts(chain);
 }
 
 /** Decisions that need no model call. Returns null when the model must judge. */
@@ -142,6 +200,13 @@ export function decideFromChain(chain: ChainResult, page: PageSummary | null): G
 	}
 	if (chain.outcome === 'too-many-hops') {
 		return { verdict: 'block', message: MESSAGES.redirectLimit, log: log('link_gate_block', 'redirect_limit', chain) };
+	}
+	if (failedAfterCrossHostRedirect(chain)) {
+		return {
+			verdict: 'block',
+			message: MESSAGES.unreadableAfterRedirect,
+			log: log('link_gate_block', chain.outcome === 'fetch-failed' ? `redirected_${chain.reason}` : 'redirected_refused', chain)
+		};
 	}
 	if (isExecutableDownload(chain)) {
 		return {
@@ -218,7 +283,9 @@ export function decideFromAnswers(answers: ClefAnswers, chain: ChainResult): Gat
 	// Known gap: a destination that refuses or blanks the checker is judged on the URL alone.
 	const readable = chain.outcome === 'page' && !!chain.body && (chain.status ?? 0) < 400;
 	if (!readable || excusedAsEmpty) {
-		const reason = crossesHosts(chain) ? 'redirected_unreadable' : 'unreadable_first_url';
+		// A refusal after a cross-host redirect was blocked earlier; what reaches
+		// here after one is a readable but blank page (a JavaScript app).
+		const reason = crossesHosts(chain) ? 'redirected_blank' : 'unreadable_first_url';
 		return { verdict: 'allow', log: log('link_gate_allow_unreadable', reason, chain) };
 	}
 	return { verdict: 'allow' };

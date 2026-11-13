@@ -37,6 +37,8 @@ export interface GateDeps {
 	/** D1 blocklist check for hops after the first; returns a reason or null. */
 	checkHop?: (url: string) => Promise<string | null>;
 	fetchImpl?: typeof fetch;
+	/** Total time budget for the redirect chain; defaults to TOTAL_TIMEOUT_MS. */
+	fetchTimeoutMs?: number;
 	clefTimeoutMs?: number;
 }
 
@@ -59,7 +61,11 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 export async function judgeDestination(url: string, deps: GateDeps): Promise<GateDecision> {
 	let chain: ChainResult;
 	try {
-		chain = await followChain(url, { fetchImpl: deps.fetchImpl, checkHop: deps.checkHop });
+		chain = await followChain(url, {
+			fetchImpl: deps.fetchImpl,
+			checkHop: deps.checkHop,
+			timeoutMs: deps.fetchTimeoutMs
+		});
 	} catch {
 		// followChain does not throw by design; a throw here is a bug or a failed blocklist lookup.
 		return uncheckedAllow({ outcome: 'fetch-failed', hops: [], finalUrl: url }, 'chain_check_error');

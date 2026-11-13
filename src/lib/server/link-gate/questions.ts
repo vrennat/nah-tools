@@ -71,49 +71,43 @@ function fence(lines: string[]): string[] {
 }
 
 /**
- * Plain-text state. Everything the destination controls (titles, page text,
- * form field names, download names, headers) is inside a fence labelled as
- * untrusted; only the URLs and statuses the gate observed are outside it.
+ * Plain-text state. Everything the destination controls, including the URLs
+ * of the chain (a redirector chooses them), its titles, page text, form field
+ * names and download headers, is inside one fence labelled as untrusted.
  */
 export function buildState(chain: ChainResult, page: PageSummary | null): string {
-	const lines: string[] = [];
-	lines.push('A user asked a link shortener to create a short link. The link was followed to its final page.');
-	lines.push(`Redirect chain (${chain.hops.length} request${chain.hops.length === 1 ? '' : 's'}):`);
+	const seen: string[] = [];
+	seen.push(`Redirect chain (${chain.hops.length} request${chain.hops.length === 1 ? '' : 's'}):`);
 	for (const h of chain.hops) {
-		lines.push(`- ${h.url} -> HTTP ${h.status}${h.via ? ` (then ${h.via} redirect)` : ''}`);
+		seen.push(`- ${h.url} -> HTTP ${h.status}${h.via ? ` (then ${h.via} redirect)` : ''}`);
 		if (h.text !== undefined) {
-			lines.push(`  This page was shown before redirecting ${UNTRUSTED}:`);
-			lines.push(...fence([`Title: ${h.title || '(none)'}`, `Text: ${h.text}`]).map((l) => `  ${l}`));
+			seen.push(`  Page shown before redirecting. Title: ${h.title || '(none)'}. Text: ${h.text}`);
 		}
 	}
-	lines.push(`Final URL: ${chain.finalUrl}`);
-	lines.push(`Final domain: ${hostOf(chain.finalUrl)}`);
+	seen.push(`Final URL: ${chain.finalUrl}`);
+	seen.push(`Final domain: ${hostOf(chain.finalUrl)}`);
+	if (chain.outcome === 'page') seen.push(`Content type: ${chain.contentType || 'unknown'}`);
+	const download = chain.outcome === 'page' && !page && !!chain.contentType && !isTextual(chain.contentType);
+	if (download) {
+		seen.push('This is a file download, not a web page.');
+		seen.push(`Content-Disposition: ${chain.contentDisposition ?? '(none)'}`);
+	}
+	if (page) {
+		seen.push(`Page title: ${page.title || '(none)'}`);
+		seen.push(`Forms: ${page.forms.length ? page.forms.join(' | ') : 'none'}`);
+		if (page.downloads.length) seen.push(`Download links: ${page.downloads.join(', ')}`);
+		seen.push('Visible text:');
+		seen.push(page.text || '(no visible text)');
+	}
+
+	const lines: string[] = [];
+	lines.push('A user asked a link shortener to create a short link. The link was followed to its final page.');
 	if (chain.outcome !== 'page') {
 		lines.push(`The final page could not be read: ${chain.outcome}${chain.reason ? ` (${chain.reason})` : ''}.`);
 	}
-	if (chain.outcome === 'page') lines.push(`Content type: ${chain.contentType || 'unknown'}`);
-	if (chain.outcome === 'page' && !page && chain.contentType && !isTextual(chain.contentType)) {
-		lines.push(`The destination is a file download, not a web page. Its headers ${UNTRUSTED}:`);
-		lines.push(
-			...fence([
-				`Content-Type: ${chain.contentType}`,
-				`Content-Disposition: ${chain.contentDisposition ?? '(none)'}`
-			])
-		);
-	}
-	if (page) {
-		lines.push(`Scripts: ${page.scripts.count}${page.scripts.obfuscated ? ', some obfuscated' : ''}`);
-		lines.push(`The final page ${UNTRUSTED}:`);
-		lines.push(
-			...fence([
-				`Title: ${page.title || '(none)'}`,
-				`Forms: ${page.forms.length ? page.forms.join(' | ') : 'none'}`,
-				...(page.downloads.length ? [`Download links: ${page.downloads.join(', ')}`] : []),
-				'Visible text:',
-				page.text || '(no visible text)'
-			])
-		);
-	}
+	if (page) lines.push(`Scripts on the final page: ${page.scripts.count}${page.scripts.obfuscated ? ', some obfuscated' : ''}`);
+	lines.push(`What the checker saw ${UNTRUSTED}:`);
+	lines.push(...fence(seen));
 	return lines.join('\n');
 }
 

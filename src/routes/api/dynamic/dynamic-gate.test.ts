@@ -1,7 +1,7 @@
 /** PUT /api/dynamic gates the URL the redirect worker will serve, stored UTM parameters included. */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { migratedDb } from '$server/sqlite-d1';
-import { createLink } from '$server/db';
+import { createLink, createRedirect } from '$server/db';
 import { hashPassphrase } from '$server/auth';
 import { NOUL_QUESTIONS } from '$server/link-gate/questions';
 
@@ -52,5 +52,32 @@ describe('PUT /api/dynamic', () => {
 			destination_url: string;
 		};
 		expect(row.destination_url).toBe('https://old.example/');
+	});
+
+	it('changes the destination of a dynamic QR code when the gate allows it', async () => {
+		const { db, sqlite } = migratedDb();
+		await createRedirect(db, 'qrcode01', 'https://old.example/', await hashPassphrase('correct horse'));
+		vi.stubGlobal(
+			'fetch',
+			vi.fn(async () => new Response(`<title>Menu</title><p>${'Soup of the day. '.repeat(40)}</p>`, {
+				headers: { 'content-type': 'text/html' }
+			}))
+		);
+		const ai = {
+			run: vi.fn(async () => ({
+				answers: Object.fromEntries(Object.keys(NOUL_QUESTIONS).map((id) => [id, { noul: 0.02 }]))
+			}))
+		};
+		const res = await PUT({
+			request: new Request('https://nah.tools/api/dynamic', {
+				method: 'PUT',
+				body: JSON.stringify({ short_code: 'qrcode01', passphrase: 'correct horse', url: 'https://cafe.example/menu' })
+			}),
+			platform: { env: { DB: db, KV: { delete: vi.fn(async () => {}) }, AI: ai }, context: { waitUntil: () => {} } }
+		} as never);
+		expect(res.status).toBe(200);
+		expect(ai.run).toHaveBeenCalledTimes(1);
+		const row = sqlite.prepare("SELECT destination_url, is_active FROM redirects WHERE short_code = 'qrcode01'").get();
+		expect(row).toEqual({ destination_url: 'https://cafe.example/menu', is_active: 1 });
 	});
 });
