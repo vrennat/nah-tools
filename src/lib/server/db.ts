@@ -349,8 +349,10 @@ async function getClickStatsFromD1(db: D1Database, shortCode: string): Promise<C
 }
 
 /** Report a link as abusive. Auto-deactivates after 3 unique reports.
- *  One report per IP per short_code — duplicate reports are silently ignored
- *  to prevent a single IP from bombing a link into deactivation.
+ *  `reporterKey` is a salted hash of the reporter's network (never the IP).
+ *  One open report per key per short_code; duplicates are silently ignored.
+ *  Reports without a key are recorded for review but do not count toward
+ *  auto-deactivation, so they cannot be used to bomb a link offline.
  */
 export async function reportLink(
 	db: D1Database,
@@ -358,8 +360,7 @@ export async function reportLink(
 	reason: string,
 	reporterIp?: string
 ): Promise<void> {
-	// Skip duplicate reports from the same IP to prevent report-bombing.
-	// An unknown IP (null) is always allowed through so anonymous reports still work.
+	// Skip duplicate reports from the same reporter key to prevent report-bombing.
 	if (reporterIp) {
 		const existing = await db
 			.prepare(
@@ -378,7 +379,7 @@ export async function reportLink(
 	// Check if threshold reached (3 unresolved reports)
 	const countRow = await db
 		.prepare(
-			'SELECT COUNT(*) as count FROM reported_links WHERE short_code = ? AND resolved = 0'
+			'SELECT COUNT(*) as count FROM reported_links WHERE short_code = ? AND resolved = 0 AND reporter_ip IS NOT NULL'
 		)
 		.bind(shortCode)
 		.first<{ count: number }>();

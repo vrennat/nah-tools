@@ -22,9 +22,6 @@ export const DAILY_CREATE_CAP = 100;
 
 const DAY_TTL_SECONDS = 2 * 24 * 60 * 60;
 
-/** Used only for the burst limiter when KV cannot supply the daily salt. Lives for one isolate. */
-const FALLBACK_SALT = crypto.randomUUID();
-
 export interface CreationLimitEnv {
 	KV: KVNamespace;
 	CREATE_LIMITER?: RateLimit;
@@ -58,6 +55,10 @@ function toHex(buf: ArrayBuffer): string {
  */
 export function networkKey(ip: string): string {
 	if (!ip.includes(':')) return ip;
+	// IPv4-mapped IPv6 (::ffff:203.0.113.7): key on the IPv4 address.
+	const mapped = ip.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/i);
+	if (mapped) return mapped[1];
+	ip = ip.split('%')[0];
 	const [head, tail = ''] = ip.toLowerCase().split('::');
 	const headGroups = head ? head.split(':') : [];
 	const tailGroups = tail ? tail.split(':') : [];
@@ -108,7 +109,9 @@ export async function checkCreationLimits(
 		salt = await dailySalt(env.KV, now);
 	} catch (e) {
 		console.error('creation limits: daily salt unavailable, applying burst limit only', e);
-		salt = FALLBACK_SALT;
+		// Deterministic so every isolate shares one burst bucket per network.
+		// These keys reach only the rate limiting binding, never storage.
+		salt = `fallback:${utcDay(now)}`;
 		kvAvailable = false;
 	}
 	const hashed = await Promise.all(
@@ -167,21 +170,16 @@ export async function enforceCreationLimits(
 }
 
 /**
- * A stable, non-reversible key for a link reporter, so one network can file
- * only one open report per link. The salt is random, kept only in KV, and never
- * rotates (rotating it would let one client re-report the same link every day).
- * Returns undefined when there is no IP or KV is unavailable; the report is
- * still recorded.
+ * A key for a link reporter: the reporter's network hashed with the daily
+ * salt, so it cannot be linked to an IP once that salt expires. It limits each
+ * network to one open report per link per day. Returns undefined when there is
+ * no IP or KV is unavailable; such reports are recorded but do not count
+ * toward auto-deactivation (see reportLink).
  */
 export async function reporterKey(kv: KVNamespace, ip: string | null): Promise<string | undefined> {
 	if (!ip) return undefined;
 	try {
-		let salt = await kv.get('salt:report');
-		if (!salt) {
-			salt = toHex(crypto.getRandomValues(new Uint8Array(32)).buffer as ArrayBuffer);
-			await kv.put('salt:report', salt);
-		}
-		return await hashIdentity(salt, 'report', networkKey(ip));
+		return await hashIdentity(await dailySalt(kv), 'report', networkKey(ip));
 	} catch (e) {
 		console.error('report: reporter key unavailable, recording report without it', e);
 		return undefined;

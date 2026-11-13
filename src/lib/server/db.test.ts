@@ -146,3 +146,52 @@ describe('reportLink - deduplication', () => {
 		expect((db as { _wasInsertCalled(): boolean })._wasInsertCalled()).toBe(true);
 	});
 });
+
+describe('reportLink - auto-deactivation', () => {
+	// In-memory reported_links + redirects, enough to exercise the threshold.
+	function makeDb() {
+		const reports: Array<{ code: string; key: string | null }> = [];
+		let deactivated = false;
+		const db = {
+			prepare(sql: string) {
+				let p: unknown[] = [];
+				const stmt = {
+					bind(...args: unknown[]) {
+						p = args;
+						return stmt;
+					},
+					async first() {
+						if (sql.includes('SELECT 1 FROM reported_links')) {
+							return reports.some((r) => r.code === p[0] && r.key === p[1]) ? {} : null;
+						}
+						if (sql.includes('COUNT(*)')) {
+							const keyed = sql.includes('reporter_ip IS NOT NULL');
+							return { count: reports.filter((r) => r.code === p[0] && (!keyed || r.key !== null)).length };
+						}
+						return null;
+					},
+					async run() {
+						if (sql.includes('INSERT INTO reported_links')) reports.push({ code: p[0] as string, key: (p[2] as string) ?? null });
+						if (/UPDATE redirects SET is_active = 0/.test(sql)) deactivated = true;
+						return { success: true, meta: { changes: 1 } };
+					}
+				};
+				return stmt;
+			}
+		} as unknown as D1Database;
+		return { db, reports, isDeactivated: () => deactivated };
+	}
+
+	it('deactivates after three reports from different reporters', async () => {
+		const { db, isDeactivated } = makeDb();
+		for (const k of ['k1', 'k2', 'k3']) await reportLink(db, 'abc123', 'spam', k);
+		expect(isDeactivated()).toBe(true);
+	});
+
+	it('does not deactivate on reports without a reporter key', async () => {
+		const { db, reports, isDeactivated } = makeDb();
+		for (let i = 0; i < 5; i++) await reportLink(db, 'abc123', 'spam', undefined);
+		expect(reports).toHaveLength(5);
+		expect(isDeactivated()).toBe(false);
+	});
+});

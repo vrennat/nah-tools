@@ -133,6 +133,12 @@ describe('redirect routes apply abuse controls', () => {
 		expect(inserts).toHaveLength(0);
 	});
 
+	it('PUT /api/dynamic refuses a blocked destination', async () => {
+		const { platform } = fakePlatform({ limiterAllows: true });
+		const r = req('PUT', { short_code: 'abc12345', passphrase: PASS, url: BLOCKED });
+		expect(await status(dynamic.PUT as Handler, r, platform)).toBe(400);
+	});
+
 	it('PUT /api/dynamic is rate limited', async () => {
 		const { platform } = fakePlatform({ limiterAllows: false });
 		const r = req('PUT', { short_code: 'abc12345', passphrase: PASS, url: GOOD });

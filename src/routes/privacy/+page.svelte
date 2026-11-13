@@ -50,8 +50,9 @@
 			API requests use IP addresses for rate limiting. Limits on creating and changing links and QR
 			codes count per network and per passphrase using hashes salted with a random value that
 			changes every day; the counters expire after two days and the IP address and passphrase
-			themselves are not stored. Link-abuse reports store the reason and a salted hash of the
-			reporter’s network address, which lets each network file one open report per link. When Turnstile is configured, creation APIs verify its token with
+			themselves are not stored. Link-abuse reports store the reason and a hash of the reporter’s
+			network address made with the same daily salt, which limits each network to one open report
+			per link per day. When Turnstile is configured, creation APIs verify its token with
 			Cloudflare and include the request IP when available. These records are more than anonymous
 			page counts and can contain information about a visit.
 		</p>

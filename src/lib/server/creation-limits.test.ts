@@ -148,11 +148,16 @@ describe('networkKey', () => {
 		expect(networkKey('2001:db8:0:1::5')).toBe(networkKey('2001:0DB8:0000:0001:ffff:0:0:9'));
 		expect(networkKey('2001:db8::1')).toBe('2001:0db8:0000:0000::/64');
 		expect(networkKey('::1')).toBe('0000:0000:0000:0000::/64');
+		expect(networkKey('fe80::1%eth0')).toBe('fe80:0000:0000:0000::/64');
+	});
+	it('keys IPv4-mapped IPv6 on the IPv4 address', () => {
+		expect(networkKey('::ffff:203.0.113.7')).toBe('203.0.113.7');
+		expect(networkKey('::ffff:203.0.113.7')).not.toBe(networkKey('::ffff:198.51.100.1'));
 	});
 });
 
 describe('reporterKey', () => {
-	it('is stable across days for one network and never contains the IP', async () => {
+	it('is stable within a day for one network and never contains the IP', async () => {
 		const { kv, store } = fakeKV();
 		const a = await reporterKey(kv, '203.0.113.7');
 		const b = await reporterKey(kv, '203.0.113.7');
