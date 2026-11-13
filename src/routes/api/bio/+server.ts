@@ -96,7 +96,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 	// Validate avatar URL if provided
 	if (avatar_url) {
-		const safety = await validateUrlSafety(normalizeUrl(avatar_url), db);
+		const safety = await validateUrlSafety(normalizeUrl(avatar_url), db, { forRedirect: false });
 		if (!safety.safe) {
 			throw error(400, safety.reason || 'Avatar URL is not allowed');
 		}
@@ -121,7 +121,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			if (!link.url || !link.title) continue;
 
 			const normalizedUrl = normalizeUrl(link.url);
-			const safety = await validateUrlSafety(normalizedUrl, db);
+			const safety = await validateUrlSafety(normalizedUrl, db, { forRedirect: false });
 			if (!safety.safe) continue;
 
 			await addBioLink(db, normalizedHandle, normalizedUrl, link.title, null, i);
@@ -173,7 +173,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 
 	// Validate avatar URL if changing
 	if (fields.avatar_url) {
-		const safety = await validateUrlSafety(normalizeUrl(fields.avatar_url), db);
+		const safety = await validateUrlSafety(normalizeUrl(fields.avatar_url), db, { forRedirect: false });
 		if (!safety.safe) {
 			throw error(400, safety.reason || 'Avatar URL is not allowed');
 		}

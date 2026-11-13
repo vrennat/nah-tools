@@ -1,4 +1,4 @@
-import { isValidURL } from '$server/db';
+import { checkDestination, domainAndParents } from '$server/destination-policy';
 
 /** Verify a Cloudflare Turnstile token */
 export async function verifyTurnstile(
@@ -20,24 +20,6 @@ export async function verifyTurnstile(
 	const data = (await res.json()) as { success: boolean };
 	return data.success;
 }
-
-// Known bad TLDs commonly used in phishing
-const BAD_TLDS = ['.tk', '.ml', '.ga', '.cf', '.gq'];
-
-// Known URL shorteners -- block redirect chains
-const SHORTENER_DOMAINS = [
-	'bit.ly',
-	'tinyurl.com',
-	't.co',
-	'goo.gl',
-	'ow.ly',
-	'is.gd',
-	'buff.ly',
-	'rebrand.ly',
-	'short.io',
-	'cutt.ly',
-	'rb.gy'
-];
 
 // Reserved aliases that cannot be custom-picked
 const RESERVED_ALIASES = [
@@ -74,59 +56,31 @@ const RESERVED_ALIASES = [
 	'remove'
 ];
 
-/** Validate URL safety beyond basic scheme checks */
+/**
+ * Validate a destination URL: the static policy in destination-policy.ts, then
+ * the D1 `blocked_domains` table, which blocks a listed domain and all of its
+ * subdomains. Pass `forRedirect: false` for bio page links, which may point at
+ * nah.tools.
+ */
 export async function validateUrlSafety(
 	url: string,
-	db: D1Database
+	db: D1Database,
+	opts: { forRedirect?: boolean } = {}
 ): Promise<{ safe: boolean; reason?: string }> {
-	// 1. Basic scheme check
-	if (!isValidURL(url)) {
-		return { safe: false, reason: 'Invalid URL. Must be a valid http or https URL.' };
+	const policy = checkDestination(url, { forRedirect: opts.forRedirect ?? true });
+	if (!policy.ok) {
+		return { safe: false, reason: policy.reason };
 	}
 
-	let parsed: URL;
-	try {
-		parsed = new URL(url);
-	} catch {
-		return { safe: false, reason: 'Invalid URL format.' };
-	}
-
-	const hostname = parsed.hostname.toLowerCase();
-
-	// 2. Block IP-only hostnames (dotted-decimal IPv4, bracketed IPv6, and localhost variants).
-	// These are SSRF vectors — they can reach internal services not exposed to the public internet.
-	if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(hostname)) {
-		return { safe: false, reason: 'IP addresses are not allowed as destinations.' };
-	}
-	if (hostname === 'localhost' || hostname.endsWith('.localhost')) {
-		return { safe: false, reason: 'localhost is not allowed as a destination.' };
-	}
-	// Bracketed IPv6 — e.g. [::1], [fe80::1]
-	if (hostname.startsWith('[')) {
-		return { safe: false, reason: 'IPv6 addresses are not allowed as destinations.' };
-	}
-
-	// 3. Block known bad TLDs
-	for (const tld of BAD_TLDS) {
-		if (hostname.endsWith(tld)) {
-			return { safe: false, reason: `URLs with ${tld} domains are not allowed.` };
-		}
-	}
-
-	// 4. Block shortener chains
-	for (const shortener of SHORTENER_DOMAINS) {
-		if (hostname === shortener || hostname.endsWith('.' + shortener)) {
-			return {
-				safe: false,
-				reason: 'Redirect chains through other URL shorteners are not allowed.'
-			};
-		}
-	}
-
-	// 5. Check blocked domains table
+	const hostname = new URL(url).hostname.replace(/\.$/, '');
+	// checkDestination caps hostnames at MAX_HOST_LABELS labels, which keeps this
+	// IN() list far below D1's bound-parameter limit.
+	const candidates = domainAndParents(hostname);
 	const blocked = await db
-		.prepare('SELECT 1 FROM blocked_domains WHERE domain = ?')
-		.bind(hostname)
+		.prepare(
+			`SELECT 1 FROM blocked_domains WHERE domain IN (${candidates.map(() => '?').join(', ')}) LIMIT 1`
+		)
+		.bind(...candidates)
 		.first();
 	if (blocked) {
 		return { safe: false, reason: 'This domain has been blocked.' };

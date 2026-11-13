@@ -11,7 +11,8 @@ import {
 	invalidateRedirectCache
 } from '$server/db';
 import { hashPassphrase } from '$server/auth';
-import { validateUrlSafety, validateAlias, verifyTurnstile, checkRateLimit } from '$server/safety';
+import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
+import { enforceCreationLimits } from '$server/creation-limits';
 import { normalizeUrl } from '$utils/url';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
@@ -49,11 +50,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
 	}
 
-	// Rate limit
-	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-	if (!checkRateLimit(ip)) {
-		throw error(429, 'Rate limit exceeded. Try again later.');
-	}
+	await enforceCreationLimits(platform, request, passphrase);
 
 	// Validate URL safety
 	const safety = await validateUrlSafety(normalizedUrl, db);

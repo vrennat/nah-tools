@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getDB, getKV, getRedirect, reportLink, invalidateRedirectCache } from '$server/db';
 import { checkRateLimit } from '$server/safety';
+import { dailySalt, hashIdentity } from '$server/creation-limits';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -27,11 +28,17 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(404, 'Link not found');
 	}
 
-	const reporterIp = request.headers.get('cf-connecting-ip') || undefined;
-	await reportLink(db, short_code, reason, reporterIp);
+	// Store a daily-salted hash, never the IP itself. It still stops one client
+	// from filing repeat reports against the same link on the same day.
+	const kv = getKV(platform);
+	const reporterIp = request.headers.get('cf-connecting-ip');
+	const reporterKey = reporterIp
+		? await hashIdentity(await dailySalt(kv), 'report', reporterIp)
+		: undefined;
+	await reportLink(db, short_code, reason, reporterKey);
 
 	// Invalidate KV in case the report triggered auto-deactivation
-	await invalidateRedirectCache(getKV(platform), db, short_code);
+	await invalidateRedirectCache(kv, db, short_code);
 
 	return json({ success: true });
 };

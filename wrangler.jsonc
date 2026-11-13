@@ -21,6 +21,15 @@
 			"id": "e61ce66823e24e5dba2c0a7a9e4556c0"
 		}
 	],
+	"ratelimits": [
+		{
+			// Burst limit on creating short links and dynamic QR codes, keyed by
+			// hashed IP and hashed passphrase (see src/lib/server/creation-limits.ts).
+			"name": "CREATE_LIMITER",
+			"namespace_id": "8714",
+			"simple": { "limit": 5, "period": 60 }
+		}
+	],
 	"vars": {
 		"CF_ACCOUNT_ID": "5a0a2ffa1e2f5b55c17406b48b489975"
 	},

@@ -15,6 +15,7 @@ declare global {
 				CF_ACCOUNT_ID?: string;
 				CF_ANALYTICS_TOKEN?: string;
 				TURNSTILE_SECRET_KEY?: string;
+				CREATE_LIMITER?: RateLimit;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;
