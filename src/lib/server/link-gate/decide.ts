@@ -7,9 +7,10 @@
  * session under Tanner's delegation, 2026-11-13).
  *
  * The block thresholds come from a 2026-11-13 evaluation against the
- * OpenPhish feed and a hand-picked set of public sites; the eval data is not
- * in this repository. They were tuned on that same data, so change them only
- * with a new evaluation.
+ * OpenPhish feed and a hand-picked set of public sites; see
+ * scripts/link-gate-eval/ (the clean list is committed with a tune/held-out
+ * split, phishing URLs are not). They were tuned on all of that data, so
+ * change them only with a new evaluation on the tune split.
  */
 import { isLoaderPage, isTextual, type ChainResult } from './fetch-chain';
 import type { PageSummary } from './extract';
