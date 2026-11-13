@@ -36,6 +36,8 @@ export interface GateDeps {
 	ai: AiRunner | undefined;
 	/** D1 blocklist check for hops after the first; returns a reason or null. */
 	checkHop?: (url: string) => Promise<string | null>;
+	/** Why ai is missing, when it was withheld on purpose (the daily budget). */
+	noAiReason?: string;
 	fetchImpl?: typeof fetch;
 	/** Total time budget for the redirect chain; defaults to TOTAL_TIMEOUT_MS. */
 	fetchTimeoutMs?: number;
@@ -76,7 +78,7 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 	const early = decideFromChain(chain, page);
 	if (early) return early;
 
-	if (!deps.ai) return uncheckedAllow(chain, 'ai_binding_missing');
+	if (!deps.ai) return uncheckedAllow(chain, deps.noAiReason ?? 'ai_binding_missing');
 	const ai = deps.ai;
 	const timeoutMs = deps.clefTimeoutMs ?? CLEF_TIMEOUT_MS;
 

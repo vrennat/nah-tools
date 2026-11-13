@@ -4,6 +4,7 @@
  */
 import { error } from '@sveltejs/kit';
 import { validateUrlSafety } from '$server/safety';
+import { addUsage, dailyCap, readUsage } from './budget';
 import type { UTMParams } from '$qr/types';
 import { judgeDestination, type GateDecision, type GateDeps } from './index';
 
@@ -44,13 +45,41 @@ export function logGateDecision(decision: GateDecision): void {
 	if (decision.log) console.info(JSON.stringify(decision.log));
 }
 
+/**
+ * Judge a destination within the global daily model-call budget (see
+ * budget.ts): withholds the model once the cap is reached, and counts the
+ * calls made.
+ */
+export async function judgeWithinBudget(
+	platform: App.Platform | undefined,
+	url: string,
+	deps: GateDeps
+): Promise<GateDecision> {
+	const kv = platform?.env?.KV;
+	const cap = dailyCap(platform?.env?.LINK_GATE_DAILY_MODEL_CALLS);
+	const used = await readUsage(kv);
+	if (used !== null && used >= cap) {
+		return judgeDestination(url, { ...deps, ai: undefined, noAiReason: 'daily_model_cap' });
+	}
+	let calls = 0;
+	const ai = deps.ai && {
+		run: (model: string, input: unknown) => {
+			calls++;
+			return deps.ai!.run(model, input);
+		}
+	};
+	const decision = await judgeDestination(url, { ...deps, ai });
+	if (used !== null) await addUsage(kv, used, calls);
+	return decision;
+}
+
 /** Run the gate and log its decision. Throws a 400 with a user-facing message when the destination is blocked. */
 export async function gateDestinationOrThrow(
 	platform: App.Platform | undefined,
 	db: D1Database,
 	url: string
 ): Promise<void> {
-	const decision = await judgeDestination(url, gateDeps(platform, db));
+	const decision = await judgeWithinBudget(platform, url, gateDeps(platform, db));
 	logGateDecision(decision);
 	if (decision.verdict === 'block') throw error(400, decision.message);
 }
