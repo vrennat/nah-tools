@@ -3,12 +3,13 @@
  *
  * Thresholds come from the 2026-11-13 evaluation (130 URLs from the OpenPhish
  * feed vs 108 public sites, see the pull request). End to end, no clean link
- * was blocked and 5 were held (2 fetch timeouts, Microsoft sign-in, Google
- * sign-in and Google Forms); 116 of the 130 feed URLs were blocked or held.
+ * was blocked and 6 were held (2 fetch timeouts, Microsoft sign-in, Google
+ * sign-in, Google Forms and booking.com's bot check); 118 of the 130 feed
+ * URLs were blocked or held.
  * The thresholds were tuned on that same data, so treat those numbers as
  * optimistic, and change them only with a new evaluation.
  */
-import type { ChainResult } from './fetch-chain';
+import { isLoaderPage, type ChainResult } from './fetch-chain';
 import type { PageSummary } from './extract';
 import type { ClefAnswers } from './questions';
 
@@ -88,36 +89,36 @@ export function decideFromChain(chain: ChainResult, page: PageSummary | null): G
 	return unreadableHold(chain);
 }
 
-/** A blank page this short, with no form, that the model calls a redirect is held. */
-export const BLANK_PAGE_MAX_CHARS = 400;
 /**
  * How sure the model must be that such a page redirects. JavaScript-rendered
  * apps look the same to the checker: in the evaluation youtube.com/watch
  * scored 0.53 and the Google sign-in and Forms pages 0.87 and 0.88, while
- * phishing loaders scored 0.67 to 0.92. 0.8 keeps YouTube links working and
- * still holds the two Google pages.
+ * phishing loaders scored 0.67 to 0.92. 0.8 keeps YouTube links working;
+ * the two Google pages are still held.
  */
 export const UNFOLLOWED_REDIRECT_MIN = 0.8;
 
 /**
- * @param page The page the answers are about.
- * @param isFinal True for the page the chain ended on. Pages the chain left
- *   by a client-side redirect are redirects by definition, so the
- *   unfollowed-redirect rule applies only to the final page.
+ * Severity: block, then holds a recheck cannot release, then holds it can.
+ * A recheckable reason must not mask a firmer one, or cloaking the recheck
+ * would release the link.
  */
-const RANK = { allow: 0, hold: 1, block: 2 } as const;
+function rank(d: GateDecision): number {
+	if (d.verdict === 'block') return 3;
+	if (d.verdict === 'hold') return RECHECKABLE_HOLDS.includes(d.holdReason) ? 1 : 2;
+	return 0;
+}
 
 /** The more severe of two decisions; the first wins a tie. */
 export function worst(a: GateDecision, b: GateDecision): GateDecision {
-	return RANK[b.verdict] > RANK[a.verdict] ? b : a;
+	return rank(b) > rank(a) ? b : a;
 }
 
-export function decideFromAnswers(
-	answers: ClefAnswers,
-	chain?: ChainResult,
-	page?: PageSummary | null,
-	isFinal = true
-): GateDecision {
+/**
+ * @param chain The chain up to and including the page the answers are about
+ *   (for a page the chain passed through, the chain is cut at that page).
+ */
+export function decideFromAnswers(answers: ClefAnswers, chain?: ChainResult): GateDecision {
 	const n = answers.nouls;
 	const signals = (['impersonation', 'urgency', 'payment', 'fake_captcha', 'crypto'] as const).filter(
 		(id) => n[id] >= BLOCK_SIGNAL_MIN
@@ -131,14 +132,17 @@ export function decideFromAnswers(
 	if (n.scam >= HOLD_SCAM_MIN && n.empty < UNREADABLE_MIN) {
 		return { verdict: 'hold', holdReason: 'suspicious', detail: `scam=${n.scam.toFixed(2)}` };
 	}
-	// A readable blank page the model calls a redirect, where the gate found
-	// none to follow: the redirect may be hidden from the scanner.
+	// A blank page (no visible fields, little text) served with a 2xx status
+	// that the model calls a redirect. Applies to every page read, including
+	// ones the gate followed a redirect from: the redirect the gate found may
+	// be a decoy, and the one the browser runs may be hidden from the scanner.
+	// 4xx/5xx pages are left out: bot walls on large sites look the same.
 	if (
-		isFinal &&
-		chain?.status === 200 &&
-		page &&
-		page.text.length <= BLANK_PAGE_MAX_CHARS &&
-		page.forms.length === 0 &&
+		chain?.status !== undefined &&
+		chain.status >= 200 &&
+		chain.status < 300 &&
+		chain.body !== undefined &&
+		isLoaderPage(chain.body) &&
 		n.redirector >= UNFOLLOWED_REDIRECT_MIN
 	) {
 		return { verdict: 'hold', holdReason: 'suspicious', detail: `unfollowed redirect=${n.redirector.toFixed(2)}` };

@@ -5,6 +5,7 @@ import { summarizePage } from './extract';
 import { judgeDestination } from './index';
 import { servedUrl } from './route';
 import { NOUL_QUESTIONS } from './questions';
+import { worst } from './decide';
 
 type Route = { status?: number; headers?: Record<string, string>; body?: string };
 function fakeFetch(routes: Record<string, Route>) {
@@ -145,6 +146,33 @@ describe('decoy redirects (review pass 2)', () => {
 		const { impl } = fakeFetch({ 'https://a.example/': { body: '<title></title><div id=app></div>' } });
 		const d = await judgeDestination('https://a.example/', { ai: clef({ redirector: 0.8 }), fetchImpl: impl });
 		expect(d).toMatchObject({ verdict: 'hold', holdReason: 'suspicious' });
+	});
+
+	it.each([
+		['behind a decoy redirect', '<script>if(0) location.href="https://en.wikipedia.org/"</script>', 200],
+		['served as 203', '', 203],
+		['with an empty form', '<form></form>', 200],
+		['with a form inside a template', '<template><form><input name=x></form></template>', 200]
+	])('holds a blank page the model calls a redirect %s', async (_n, extra, status) => {
+		const blank = `<title></title><div id=app></div>${extra}`;
+		const ai = {
+			run: vi.fn(async (_m: string, input: unknown) =>
+				clef(/Final URL: https:\/\/a\.example/.test((input as { state: string }).state) ? { redirector: 0.9 } : {}).run()
+			)
+		};
+		const { impl } = fakeFetch({
+			'https://a.example/': { status, body: blank },
+			'https://en.wikipedia.org/': { body: content }
+		});
+		const d = await judgeDestination('https://a.example/', { ai, fetchImpl: impl });
+		expect(d).toMatchObject({ verdict: 'hold', holdReason: 'suspicious' });
+	});
+
+	it('ranks a firm hold above a recheckable one', () => {
+		const firm = { verdict: 'hold', holdReason: 'suspicious', detail: '' } as const;
+		const soft = { verdict: 'hold', holdReason: 'unreadable', detail: '' } as const;
+		expect(worst(soft, firm)).toBe(firm);
+		expect(worst(firm, soft)).toBe(firm);
 	});
 
 	it('does not apply that rule to a content page or a non-200 page', async () => {

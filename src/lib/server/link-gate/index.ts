@@ -77,9 +77,7 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 	// Judge the final page, and also every page the chain read and then left
 	// by a client-side redirect: a decoy redirect must not hide the page a
 	// visitor actually sees. The worst verdict wins.
-	const views: { chain: ChainResult; page: PageSummary | null; isFinal: boolean }[] = [
-		{ chain, page, isFinal: true }
-	];
+	const views: { chain: ChainResult; page: PageSummary | null }[] = [{ chain, page }];
 	chain.hops.forEach((hop, i) => {
 		if (hop.body === undefined) return;
 		const sub: ChainResult = {
@@ -90,7 +88,7 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 			contentType: hop.contentType,
 			body: hop.body
 		};
-		views.push({ chain: sub, page: hop.body ? summarizePage(hop.body, hop.url) : null, isFinal: false });
+		views.push({ chain: sub, page: hop.body ? summarizePage(hop.body, hop.url) : null });
 	});
 
 	try {
@@ -104,7 +102,7 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 					}),
 					timeoutMs
 				);
-				return decideFromAnswers(parseClefResponse(raw), v.chain, v.page, v.isFinal);
+				return decideFromAnswers(parseClefResponse(raw), v.chain);
 			})
 		);
 		return decisions.reduce(worst);
