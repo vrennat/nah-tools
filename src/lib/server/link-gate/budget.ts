@@ -3,10 +3,10 @@
  *
  * Per-network creation limits bound what one attacker can spend, but not the
  * total. Model calls are counted per UTC day in D1 (table link_gate_budget,
- * migration 0005). Each call reserves one unit before it runs, with a
- * conditional UPDATE that only succeeds below the cap, so concurrent requests
+ * migration 0005). Each call reserves one unit just before it runs, with one
+ * conditional upsert that only adds below the cap, so concurrent requests
  * cannot overshoot it. When the cap is reached, the request is refused (see
- * judgeWithinBudget in route.ts): turning the model off instead would let
+ * assertModelBudget and judgeWithinBudget in route.ts): turning the model off instead would let
  * whoever exhausts the budget create unchecked links for the rest of the day.
  *
  * D1, not KV: KV allows one write per second to the same key, so a KV
@@ -65,17 +65,20 @@ export async function readUsage(db: D1Database | undefined, now = new Date()): P
 
 /**
  * Reserve one model call. Returns true if it fits under the cap, false if the
- * budget is used up, and true (logged) if D1 fails. Each statement is atomic,
- * so concurrent reservations never take the count past the cap.
+ * budget is used up, and true (logged) if D1 fails. One atomic statement:
+ * the first call of the day inserts the row, later ones add one only while
+ * the count is below the cap, so concurrent reservations never pass it.
  */
 export async function reserveCall(db: D1Database | undefined, cap: number, now = new Date()): Promise<boolean> {
 	if (!db) return true;
-	const day = budgetDay(now);
 	try {
-		await db.prepare('INSERT OR IGNORE INTO link_gate_budget (day, calls) VALUES (?, 0)').bind(day).run();
 		const row = await db
-			.prepare('UPDATE link_gate_budget SET calls = calls + 1 WHERE day = ?1 AND calls < ?2 RETURNING calls')
-			.bind(day, cap)
+			.prepare(
+				`INSERT INTO link_gate_budget (day, calls) VALUES (?1, 1)
+				 ON CONFLICT(day) DO UPDATE SET calls = calls + 1 WHERE calls < ?2
+				 RETURNING calls`
+			)
+			.bind(budgetDay(now), cap)
 			.first<{ calls: number }>();
 		return row !== null;
 	} catch {

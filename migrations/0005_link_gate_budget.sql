@@ -1,6 +1,6 @@
 -- Daily count of spam-gate model calls (src/lib/server/link-gate/budget.ts).
 -- One row per UTC day. Each model call reserves one unit with a conditional
--- UPDATE, so the count never passes the cap.
+-- upsert, so the count never passes the cap.
 -- Numbered after 0004 (pull request #63) but independent of it.
 --
 -- Apply this file alone; `bun run db:migrate:prod` re-runs every migration:

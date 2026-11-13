@@ -10,6 +10,7 @@ import { hashPassphrase } from '$server/auth';
 import { NOUL_QUESTIONS, type NoulId } from '$server/link-gate/questions';
 
 vi.mock('$server/creation-limits', () => ({ enforceCreationLimits: vi.fn(async () => {}) }));
+const { enforceCreationLimits } = await import('$server/creation-limits');
 const links = await import('./+server');
 const bulk = await import('./bulk/+server');
 
@@ -113,6 +114,7 @@ describe('POST /api/links', () => {
 });
 
 describe('daily model-call limit', () => {
+	beforeEach(() => vi.mocked(enforceCreationLimits).mockClear());
 	it('refuses a new link with 503 and a clear message once the day\'s limit is used up', async () => {
 		sqlite.prepare("INSERT INTO link_gate_budget (day, calls) VALUES (?, 5000)").run(new Date().toISOString().slice(0, 10));
 		await expect(
@@ -120,6 +122,36 @@ describe('daily model-call limit', () => {
 		).rejects.toMatchObject({ status: 503, body: { message: expect.stringMatching(/paused for today/) } });
 		expect(rows()).toEqual([]);
 		expect(logged()).toEqual([expect.objectContaining({ event: 'link_gate_budget_exhausted', reason: 'daily_model_cap' })]);
+		// Refused before the creator's own allowance is charged.
+		expect(enforceCreationLimits).not.toHaveBeenCalled();
+		expect(fetch).not.toHaveBeenCalled();
+	});
+
+	it('still answers a destination the static rules refuse with its own 400, not the 503', async () => {
+		sqlite.prepare("INSERT INTO link_gate_budget (day, calls) VALUES (?, 5000)").run(new Date().toISOString().slice(0, 10));
+		await expect(
+			links.POST({ request: req('POST', { url: 'http://127.0.0.1/' }), platform: platform() } as never)
+		).rejects.toMatchObject({ status: 400 });
+	});
+
+	it('refuses a destination change at the limit before charging the allowance', async () => {
+		await createLink(db, 'code0001', 'https://ok.example/', await hashPassphrase('correct horse'));
+		sqlite.prepare("INSERT INTO link_gate_budget (day, calls) VALUES (?, 5000)").run(new Date().toISOString().slice(0, 10));
+		await expect(
+			links.PUT({
+				request: req('PUT', { short_code: 'code0001', passphrase: 'correct horse', url: 'https://new.example/' }),
+				platform: platform()
+			} as never)
+		).rejects.toMatchObject({ status: 503 });
+		expect(enforceCreationLimits).not.toHaveBeenCalled();
+	});
+
+	it('does not refuse when there is no model binding, since no model call would be made', async () => {
+		sqlite.prepare("INSERT INTO link_gate_budget (day, calls) VALUES (?, 5000)").run(new Date().toISOString().slice(0, 10));
+		const p = platform() as { env: Record<string, unknown> };
+		delete p.env.AI;
+		const res = await links.POST({ request: req('POST', { url: 'https://ok.example/' }), platform: p } as never);
+		expect(res.status).toBe(201);
 	});
 });
 
