@@ -5,6 +5,15 @@ import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
 import { normalizeUrl } from '$utils/url';
+import { judgeDestination } from '$server/link-gate';
+import { gateDeps, logGateDecision } from '$server/link-gate/route';
+
+/**
+ * Each link runs the spam gate (up to 6 fetches, a blocklist lookup per hop
+ * and model calls), so a bulk request is capped well below what one Worker
+ * invocation can afford.
+ */
+const MAX_BULK_LINKS = 20;
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -20,8 +29,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'links array is required and must not be empty');
 	}
 
-	if (links.length > 100) {
-		throw error(400, 'Maximum 100 links per request');
+	if (links.length > MAX_BULK_LINKS) {
+		throw error(400, `Maximum ${MAX_BULK_LINKS} links per request`);
 	}
 
 	// Verify Turnstile if configured
@@ -52,6 +61,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 
 	const results: Array<{ short_code: string; short_url: string; destination: string; error?: string }> = [];
+	const deps = gateDeps(platform, db);
 
 	for (const link of links) {
 		try {
@@ -90,6 +100,14 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 					});
 					continue;
 				}
+			}
+
+			// Every bulk link goes through the spam gate, one at a time.
+			const decision = await judgeDestination(normalized, deps);
+			logGateDecision(decision);
+			if (decision.verdict === 'block') {
+				results.push({ short_code: '', short_url: '', destination: link.url, error: decision.message });
+				continue;
 			}
 
 			const shortCode = generateShortCode();

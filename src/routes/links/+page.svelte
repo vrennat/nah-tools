@@ -271,8 +271,8 @@
 				return;
 			}
 
-			if (parsed.length > 500) {
-				bulkError = `CSV contains ${parsed.length} entries. Maximum is 500.`;
+			if (parsed.length > 20) {
+				bulkError = `CSV contains ${parsed.length} entries. Maximum is 20.`;
 				bulkEntries = [];
 				return;
 			}

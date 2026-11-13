@@ -56,6 +56,22 @@
 			Cloudflare and include the request IP when available. These records are more than anonymous
 			page counts and can contain information about a visit.
 		</p>
+		<p class="text-text-muted">
+			When a short link or dynamic QR code is created or its destination changes, the server checks
+			the destination for phishing and scams. It requests the URL, with any UTM fields, and follows its
+			redirects, identifying itself as the nah.tools link check. The page title, form fields and up
+			to 6,000 characters of visible text are sent to Cloudflare Workers AI for a decision and are
+			not stored. That request can count as a visit to the destination, so links that work only once,
+			such as sign-in or confirmation links, may stop working. If the check finds phishing, a scam, an
+			app installer or too many redirects, the link is not created or changed; otherwise it is.
+		</p>
+		<p class="text-text-muted">
+			The service keeps its own log lines in Cloudflare Workers Logs for up to seven days. They are the
+			link check's decisions (event, destination host name, HTTP status and the model's scores, without
+			the rest of the URL) and error messages. Error messages from server-side tools, such as the PDF
+			and PowerPoint tools offered to AI agents, can include details from the file being processed.
+			Request URLs, request headers and IP addresses are not logged.
+		</p>
 	</section>
 	<section class="space-y-3">
 		<h2 class="text-xl font-bold">Network services and offline use</h2>
