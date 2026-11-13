@@ -4,6 +4,7 @@ import { migratedDb } from '$server/sqlite-d1';
 import { NOUL_QUESTIONS, type NoulId } from '$server/link-gate/questions';
 
 vi.mock('$server/creation-limits', () => ({ enforceCreationLimits: vi.fn(async () => {}) }));
+const { enforceCreationLimits } = await import('$server/creation-limits');
 const profiles = await import('./+server');
 const bioLinks = await import('./links/+server');
 
@@ -72,6 +73,23 @@ describe('POST /api/bio (create with initial links)', () => {
 		expect(fetched).toEqual(['https://ok.example/']);
 	});
 
+	it('charges the initial links against the shared link-creation budget, before any check', async () => {
+		vi.mocked(enforceCreationLimits).mockClear();
+		await create('erin', [
+			{ url: 'https://ok.example/a', title: 'A' },
+			{ url: 'https://ok.example/b', title: 'B' }
+		]);
+		expect(enforceCreationLimits).toHaveBeenCalledTimes(1);
+		expect(vi.mocked(enforceCreationLimits).mock.calls[0][3]).toBe(2);
+	});
+
+	it('creates nothing and checks nothing when the budget is spent', async () => {
+		vi.mocked(enforceCreationLimits).mockRejectedValueOnce(Object.assign(new Error('limit'), { status: 429 }));
+		await expect(create('fred', [{ url: 'https://ok.example/', title: 'Site' }])).rejects.toMatchObject({ status: 429 });
+		expect(fetched).toEqual([]);
+		expect(sqlite.prepare('SELECT COUNT(*) AS n FROM bio_profiles').get()).toEqual({ n: 0 });
+	});
+
 	it('rejects the whole request, storing nothing, when one link is blocked', async () => {
 		await expect(
 			create('bob', [
@@ -121,6 +139,19 @@ describe('POST and PUT /api/bio/links', () => {
 	it('refuses to change a link to a phishing destination, keeping the old one', async () => {
 		await expect(edit('https://phish.example/')).rejects.toMatchObject({ status: 400 });
 		expect(linkUrls()).toEqual(['https://ok.example/']);
+	});
+
+	it('does not re-check or charge a title-only edit that resends the same URL', async () => {
+		vi.mocked(enforceCreationLimits).mockClear();
+		const id = (sqlite.prepare('SELECT id FROM bio_links LIMIT 1').get() as { id: number }).id;
+		const res = await bioLinks.PUT({
+			request: req('PUT', { handle: 'dana', passphrase: 'correct horse', link_id: id, url: 'https://ok.example/', title: 'Renamed' }),
+			platform: platform()
+		} as never);
+		expect(res.status).toBe(200);
+		expect(fetched).toEqual([]);
+		expect(enforceCreationLimits).not.toHaveBeenCalled();
+		expect(sqlite.prepare('SELECT title FROM bio_links').get()).toEqual({ title: 'Renamed' });
 	});
 
 	it('changes a link to an allowed destination', async () => {

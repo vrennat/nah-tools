@@ -13,6 +13,7 @@ import {
 import { validateHandle, validateUrlSafety, verifyTurnstile, checkRateLimit } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
 import { gateDestinationOrThrow } from '$server/link-gate/route';
+import { enforceCreationLimits } from '$server/creation-limits';
 
 /** Each initial link runs the spam gate, so a new profile takes at most this many. */
 const MAX_INITIAL_LINKS = 20;
@@ -121,6 +122,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		const safety = await validateUrlSafety(normalizedUrl, db, { forRedirect: false });
 		if (!safety.safe) continue;
 		initialLinks.push({ url: normalizedUrl, title: link.title, index: i });
+	}
+	// Each initial link costs a destination check, so together they count
+	// against the shared per-network link-creation budget, like links added later.
+	if (initialLinks.length > 0) {
+		await enforceCreationLimits(platform, request, passphrase, initialLinks.length);
 	}
 	for (const link of initialLinks) {
 		await gateDestinationOrThrow(platform, db, link.url, { forRedirect: false });

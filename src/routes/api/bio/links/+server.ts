@@ -79,15 +79,22 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'icon must be 500 characters or fewer');
 	}
 
-	// Validate URL if changing
+	// Validate URL if changing. The management page sends the URL with every
+	// edit, so an unchanged URL (a title-only edit) is not checked or charged again.
 	if (fields.url) {
 		const normalizedUrl = normalizeUrl(fields.url);
-		const safety = await validateUrlSafety(normalizedUrl, db, { forRedirect: false });
-		if (!safety.safe) {
-			throw error(400, safety.reason || 'URL is not allowed');
+		const current = await db
+			.prepare('SELECT url FROM bio_links WHERE id = ? AND profile_handle = ?')
+			.bind(link_id, handle)
+			.first<{ url: string }>();
+		if (current?.url !== normalizedUrl) {
+			const safety = await validateUrlSafety(normalizedUrl, db, { forRedirect: false });
+			if (!safety.safe) {
+				throw error(400, safety.reason || 'URL is not allowed');
+			}
+			await enforceCreationLimits(platform, request, passphrase);
+			await gateDestinationOrThrow(platform, db, normalizedUrl, { forRedirect: false });
 		}
-		await enforceCreationLimits(platform, request, passphrase);
-		await gateDestinationOrThrow(platform, db, normalizedUrl, { forRedirect: false });
 		fields.url = normalizedUrl;
 	}
 
