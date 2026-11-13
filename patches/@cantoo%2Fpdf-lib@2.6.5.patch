@@ -1,0 +1,104 @@
+diff --git a/cjs/core/parser/BaseParser.js b/cjs/core/parser/BaseParser.js
+index 6077a0fad9925a258eb1301b0c67bb8791a70d16..47525a12f2f0afefd69e23ff0c36d5c39d23a3e5 100644
+--- a/cjs/core/parser/BaseParser.js
++++ b/cjs/core/parser/BaseParser.js
+@@ -54,12 +54,12 @@ class BaseParser {
+         if (numberValue > Number.MAX_SAFE_INTEGER) {
+             if (this.capNumbers) {
+                 const msg = `Parsed number that is too large for some PDF readers: ${value}, using Number.MAX_SAFE_INTEGER instead.`;
+-                console.warn(msg);
++        // nah.tools patch: no logging of values read from the file (issue #60).
+                 return Number.MAX_SAFE_INTEGER;
+             }
+             else {
+                 const msg = `Parsed number that is too large for some PDF readers: ${value}, not capping.`;
+-                console.warn(msg);
++        // nah.tools patch: no logging of values read from the file (issue #60).
+             }
+         }
+         return numberValue;
+diff --git a/cjs/core/parser/PDFParser.js b/cjs/core/parser/PDFParser.js
+index 5f88b2e09a5a3ec06e463a16e1f8dd540f9be053..26a88d3cc00e214459424f4e411685e6634dfdbd 100644
+--- a/cjs/core/parser/PDFParser.js
++++ b/cjs/core/parser/PDFParser.js
+@@ -142,11 +142,9 @@ class PDFParser extends PDFObjectParser_1.default {
+         const msg = `Trying to parse invalid object: ${JSON.stringify(startPos)})`;
+         if (this.throwOnInvalidObject)
+             throw new Error(msg);
+-        if (this.warnOnInvalidObjects)
+-            console.warn(msg);
++        // nah.tools patch: no logging of values read from the file (issue #60).
+         const ref = this.parseIndirectObjectHeader();
+-        if (this.warnOnInvalidObjects)
+-            console.warn(`Invalid object ref: ${ref}`);
++        // nah.tools patch: no logging of values read from the file (issue #60).
+         this.skipWhitespaceAndComments();
+         const start = this.bytes.offset();
+         let failed = true;
+diff --git a/cjs/core/streams/FlateStream.js b/cjs/core/streams/FlateStream.js
+index afbcd7b501370a2b5251ef024ba5b73263c40fb7..28addb1e926e9de3119609536ca8a9f5266f133c 100644
+--- a/cjs/core/streams/FlateStream.js
++++ b/cjs/core/streams/FlateStream.js
+@@ -319,9 +319,7 @@ class FlateStream extends DecodeStream_1.default {
+             codeSize += 8;
+         }
+         const code = codes[codeBuf & ((1 << maxLen) - 1)];
+-        if (typeof codes === 'number') {
+-            console.log('FLATE:', code);
+-        }
++        // nah.tools patch: no logging of values read from the file (issue #60).
+         const codeLen = code >> 16;
+         const codeVal = code & 0xffff;
+         if (codeLen < 1 || codeSize < codeLen) {
+diff --git a/es/core/parser/BaseParser.js b/es/core/parser/BaseParser.js
+index 7d50f338f8896b666a01863d79cf777a36d2bd57..69d02d1d60e84daad81cfe0419efb4c812fe931b 100644
+--- a/es/core/parser/BaseParser.js
++++ b/es/core/parser/BaseParser.js
+@@ -51,12 +51,12 @@ class BaseParser {
+         if (numberValue > Number.MAX_SAFE_INTEGER) {
+             if (this.capNumbers) {
+                 const msg = `Parsed number that is too large for some PDF readers: ${value}, using Number.MAX_SAFE_INTEGER instead.`;
+-                console.warn(msg);
++        // nah.tools patch: no logging of values read from the file (issue #60).
+                 return Number.MAX_SAFE_INTEGER;
+             }
+             else {
+                 const msg = `Parsed number that is too large for some PDF readers: ${value}, not capping.`;
+-                console.warn(msg);
++        // nah.tools patch: no logging of values read from the file (issue #60).
+             }
+         }
+         return numberValue;
+diff --git a/es/core/parser/PDFParser.js b/es/core/parser/PDFParser.js
+index ca9516bd89d60b2c3f81a14160f9115fc38d0b40..f23517f5fbd72c9b921751acc7c79499429a1fab 100644
+--- a/es/core/parser/PDFParser.js
++++ b/es/core/parser/PDFParser.js
+@@ -140,11 +140,9 @@ class PDFParser extends PDFObjectParser {
+         const msg = `Trying to parse invalid object: ${JSON.stringify(startPos)})`;
+         if (this.throwOnInvalidObject)
+             throw new Error(msg);
+-        if (this.warnOnInvalidObjects)
+-            console.warn(msg);
++        // nah.tools patch: no logging of values read from the file (issue #60).
+         const ref = this.parseIndirectObjectHeader();
+-        if (this.warnOnInvalidObjects)
+-            console.warn(`Invalid object ref: ${ref}`);
++        // nah.tools patch: no logging of values read from the file (issue #60).
+         this.skipWhitespaceAndComments();
+         const start = this.bytes.offset();
+         let failed = true;
+diff --git a/es/core/streams/FlateStream.js b/es/core/streams/FlateStream.js
+index a758bf78486eea170ad5f2b42c9fb8f36b4370ad..926a1ba96be0bc41f7621967813df214399cd5eb 100644
+--- a/es/core/streams/FlateStream.js
++++ b/es/core/streams/FlateStream.js
+@@ -316,9 +316,7 @@ class FlateStream extends DecodeStream {
+             codeSize += 8;
+         }
+         const code = codes[codeBuf & ((1 << maxLen) - 1)];
+-        if (typeof codes === 'number') {
+-            console.log('FLATE:', code);
+-        }
++        // nah.tools patch: no logging of values read from the file (issue #60).
+         const codeLen = code >> 16;
+         const codeVal = code & 0xffff;
+         if (codeLen < 1 || codeSize < codeLen) {
