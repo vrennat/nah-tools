@@ -35,3 +35,6 @@ vite.config.ts.timestamp-*
 
 # Bun cache symlink artifact
 .cache
+
+# Link gate eval: live phishing URLs and run output stay local
+/scripts/link-gate-eval/data/

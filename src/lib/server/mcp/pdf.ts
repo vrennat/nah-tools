@@ -8,6 +8,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { bufferToB64, MAX_BASE64_BYTES, MAX_MERGE_FILES } from './utils';
+import { logToolError } from './log';
 
 // Lazy-load pdf-lib to avoid top-level await
 let PDFLib: typeof import('@cantoo/pdf-lib');
@@ -80,7 +81,7 @@ export function registerPDFTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_get_info error:', e);
+			logToolError('pdf_get_info', e);
 			return error(`Failed to read PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -110,7 +111,7 @@ export function registerPDFTools(server: McpServer) {
 			const data = await merged.save();
 			return pdfResult(data, { files_merged: pdfs_base64.length, page_count: merged.getPageCount() });
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_merge error:', e);
+			logToolError('pdf_merge', e);
 			return error(`Failed to merge PDFs: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -162,7 +163,7 @@ export function registerPDFTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_split error:', e);
+			logToolError('pdf_split', e);
 			return error(`Failed to split PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -194,7 +195,7 @@ export function registerPDFTools(server: McpServer) {
 			}
 			return pdfResult(await doc.save(), { pages_rotated: rotations.length });
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_rotate error:', e);
+			logToolError('pdf_rotate', e);
 			return error(`Failed to rotate PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -222,7 +223,7 @@ export function registerPDFTools(server: McpServer) {
 				remaining_pages: newDoc.getPageCount()
 			});
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_remove_pages error:', e);
+			logToolError('pdf_remove_pages', e);
 			return error(`Failed to remove pages: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -258,7 +259,7 @@ export function registerPDFTools(server: McpServer) {
 			for (const page of copied) newDoc.addPage(page);
 			return pdfResult(await newDoc.save(), { page_count: newDoc.getPageCount() });
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_reorder error:', e);
+			logToolError('pdf_reorder', e);
 			return error(`Failed to reorder PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -308,7 +309,7 @@ export function registerPDFTools(server: McpServer) {
 			}
 			return pdfResult(await doc.save(), { pages_watermarked: doc.getPageCount() });
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_add_watermark error:', e);
+			logToolError('pdf_add_watermark', e);
 			return error(`Failed to add watermark: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -362,7 +363,7 @@ export function registerPDFTools(server: McpServer) {
 			}
 			return pdfResult(await doc.save(), { pages_numbered: total });
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_add_page_numbers error:', e);
+			logToolError('pdf_add_page_numbers', e);
 			return error(`Failed to add page numbers: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -398,7 +399,7 @@ export function registerPDFTools(server: McpServer) {
 			});
 			return pdfResult(await doc.save());
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_protect error:', e);
+			logToolError('pdf_protect', e);
 			return error(`Failed to protect PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -420,7 +421,7 @@ export function registerPDFTools(server: McpServer) {
 			for (const page of pages) newDoc.addPage(page);
 			return pdfResult(await newDoc.save(), { page_count: newDoc.getPageCount() });
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_unlock error:', e);
+			logToolError('pdf_unlock', e);
 			return error(`Failed to unlock PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -444,7 +445,7 @@ export function registerPDFTools(server: McpServer) {
 			}
 			return pdfResult(await doc.save());
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_flatten error:', e);
+			logToolError('pdf_flatten', e);
 			return error(`Failed to flatten PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -492,7 +493,7 @@ export function registerPDFTools(server: McpServer) {
 			}
 			return pdfResult(await doc.save(), { pages_cropped: indices.length });
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_crop error:', e);
+			logToolError('pdf_crop', e);
 			return error(`Failed to crop PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -522,7 +523,7 @@ export function registerPDFTools(server: McpServer) {
 				savings_percent: Math.round((1 - data.length / originalBuf.byteLength) * 100)
 			});
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_compress error:', e);
+			logToolError('pdf_compress', e);
 			return error(`Failed to compress PDF: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -550,7 +551,7 @@ export function registerPDFTools(server: McpServer) {
 			if (creator !== undefined) doc.setCreator(creator);
 			return pdfResult(await doc.save());
 		} catch (e) {
-			console.error('[mcp/pdf] pdf_set_metadata error:', e);
+			logToolError('pdf_set_metadata', e);
 			return error(`Failed to set metadata: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
