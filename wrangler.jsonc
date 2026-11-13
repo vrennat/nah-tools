@@ -43,10 +43,18 @@
 			"custom_domain": true
 		}
 	],
+	// Workers Logs keeps only this Worker's own console lines (link gate
+	// decisions such as link_gate_allow_unreadable, and errors), for 7 days on
+	// Workers Paid. Invocation logs stay off: they would store request URLs and
+	// headers, including client IPs, which the privacy page says are not kept.
+	// Volume is a few lines per link created, far below the free allowance, so
+	// every request is sampled.
 	"observability": {
+		"enabled": true,
 		"logs": {
-			"enabled": false,
-			"invocation_logs": true
+			"enabled": true,
+			"invocation_logs": false,
+			"head_sampling_rate": 1
 		}
 	}
 }

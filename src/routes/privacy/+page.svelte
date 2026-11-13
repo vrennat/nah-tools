@@ -63,7 +63,9 @@
 			to 6,000 characters of visible text are sent to Cloudflare Workers AI for a decision and are
 			not stored. That request can count as a visit to the destination, so links that work only once,
 			such as sign-in or confirmation links, may stop working. A link the check flags is not created
-			or is put on hold, and a held link does not redirect.
+			or is put on hold, and a held link does not redirect. The check's decision is logged with the
+			destination's host name and HTTP status, without the rest of the URL, and Cloudflare keeps
+			these logs for up to seven days. Request details such as IP addresses are not logged.
 		</p>
 	</section>
 	<section class="space-y-3">
