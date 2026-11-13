@@ -184,6 +184,12 @@ export async function createLink(
  * was judged (same destination and same UTM fields, which the redirect
  * worker appends), so a link changed or deactivated in the meantime is left
  * alone. Returns true if the row changed.
+ *
+ * Nothing in the app restores such a link. To restore one by hand after a
+ * report shows the flag was wrong (then clear its KV cache key
+ * redirect:<code>, or wait up to an hour):
+ *   UPDATE redirects SET is_active = 1, disabled_reason = NULL
+ *   WHERE short_code = '<code>' AND disabled_reason = 'destination_flagged';
  */
 export async function disableFlaggedRedirect(
 	db: D1Database,
@@ -208,6 +214,29 @@ export async function disableFlaggedRedirect(
 		)
 		.run();
 	return (res.meta?.changes ?? 0) > 0;
+}
+
+/** Same TTL as the redirect worker's KV cache (redirect-worker/src/index.ts). */
+const REDIRECT_CACHE_TTL_S = 3600;
+
+/**
+ * Write a redirect's current row into the redirect worker's KV cache, under
+ * its short code and alias. Used after disabling a link: writing the disabled
+ * row (instead of only deleting the key) narrows the window in which a
+ * concurrent cache fill by the redirect worker can put the old active row back.
+ */
+export async function cacheRedirectRow(kv: KVNamespace, db: D1Database, shortCode: string): Promise<void> {
+	const row = await db
+		.prepare('SELECT * FROM redirects WHERE short_code = ?')
+		.bind(shortCode)
+		.first<DynamicCode>();
+	if (!row) return;
+	const value = JSON.stringify(row);
+	const puts = [kv.put(`redirect:${row.short_code}`, value, { expirationTtl: REDIRECT_CACHE_TTL_S })];
+	if (row.custom_alias) {
+		puts.push(kv.put(`redirect:${row.custom_alias}`, value, { expirationTtl: REDIRECT_CACHE_TTL_S }));
+	}
+	await Promise.all(puts);
 }
 
 /** Check if a custom alias is available */

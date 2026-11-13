@@ -4,7 +4,7 @@
  */
 import { error } from '@sveltejs/kit';
 import { validateUrlSafety } from '$server/safety';
-import { disableFlaggedRedirect, invalidateRedirectCache } from '$server/db';
+import { cacheRedirectRow, disableFlaggedRedirect } from '$server/db';
 import type { UTMParams } from '$qr/types';
 import { judgeDestination, type GateDecision, type GateDeps } from './index';
 
@@ -65,14 +65,25 @@ export async function gateDestinationOrThrow(
 export const RECHECK_FETCH_TIMEOUT_MS = 10_000;
 export const RECHECK_MODEL_TIMEOUT_MS = 8_000;
 
+/** Dependencies for the background recheck: the normal gate, with longer budgets. */
+export function recheckDeps(platform: App.Platform | undefined, db: D1Database): GateDeps {
+	return { ...gateDeps(platform, db), fetchTimeoutMs: RECHECK_FETCH_TIMEOUT_MS, clefTimeoutMs: RECHECK_MODEL_TIMEOUT_MS };
+}
+
 /**
  * A link allowed because the check could not finish (a first-URL timeout or
  * network error, or a model failure) gets one more check after the response,
  * with longer budgets (issue #54). If that check blocks, the link is
  * disabled with disabled_reason 'destination_flagged', which the owner's
  * manage page and the redirect worker show. If it allows or cannot finish
- * either, the link stays active and the result is logged: there is no
- * waiting state. Returns the background promise, for tests.
+ * either, the link stays active: there is no waiting state.
+ *
+ * Every recheck that completes writes one line, link_gate_recheck_done, with
+ * its verdict and whether the link was disabled; a recheck that throws writes
+ * link_gate_recheck_error with a fixed code. A recheck the runtime cuts off
+ * after waitUntil's 30 s writes neither, so started rechecks (the
+ * link_gate_allow_unchecked lines) minus done and error lines counts those.
+ * Returns the background promise, for tests.
  */
 export function scheduleRecheck(
 	platform: App.Platform | undefined,
@@ -88,19 +99,31 @@ export function scheduleRecheck(
 ): Promise<void> | undefined {
 	if (decision.verdict !== 'allow' || decision.log?.event !== 'link_gate_allow_unchecked') return;
 	if (!platform?.context?.waitUntil) return;
+	let stage = 'judge';
 	const task = (async () => {
-		const result = await judgeDestination(link.gateUrl, {
-			...gateDeps(platform, db),
-			fetchTimeoutMs: RECHECK_FETCH_TIMEOUT_MS,
-			clefTimeoutMs: RECHECK_MODEL_TIMEOUT_MS
-		});
-		if (result.log) logGateDecision({ ...result, log: { ...result.log, recheck: true } } as GateDecision);
-		if (result.verdict !== 'block') return;
-		const changed = await disableFlaggedRedirect(db, link.shortCode, link.storedUrl, link.storedUtm);
-		const kv = platform.env?.KV;
-		if (changed && kv) await invalidateRedirectCache(kv, db, link.shortCode);
+		const result = await judgeDestination(link.gateUrl, recheckDeps(platform, db));
+		let disabled = false;
+		if (result.verdict === 'block') {
+			stage = 'disable';
+			disabled = await disableFlaggedRedirect(db, link.shortCode, link.storedUrl, link.storedUtm);
+			const kv = platform.env?.KV;
+			if (disabled && kv) {
+				stage = 'cache';
+				await cacheRedirectRow(kv, db, link.shortCode);
+			}
+		}
+		console.info(
+			JSON.stringify({
+				event: 'link_gate_recheck_done',
+				verdict: result.verdict,
+				result_event: result.log?.event ?? null,
+				reason: result.log?.reason ?? null,
+				host: result.log?.host ?? null,
+				disabled
+			})
+		);
 	})().catch(() => {
-		console.error(JSON.stringify({ event: 'link_gate_recheck_error', reason: 'recheck_failed' }));
+		console.error(JSON.stringify({ event: 'link_gate_recheck_error', reason: `${stage}_failed` }));
 	});
 	platform.context.waitUntil(task);
 	return task;

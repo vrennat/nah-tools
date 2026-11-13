@@ -378,6 +378,13 @@
 						<p class="mt-0.5 text-sm font-medium" class:text-success={isActive} class:text-error={!isActive}>
 							{isActive ? 'Active' : isFlagged ? 'Disabled: destination flagged as harmful' : 'Inactive'}
 						</p>
+						{#if isFlagged}
+							<p class="mt-1 text-xs text-text-muted">
+								A later check found this destination harmful, so the link no longer redirects. If you think
+								this is wrong, report it at
+								<a class="underline" href="https://github.com/vrennat/nah-tools/issues">github.com/vrennat/nah-tools/issues</a>.
+							</p>
+						{/if}
 					</div>
 					{#if expiresAt}
 						<div>

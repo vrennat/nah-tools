@@ -92,10 +92,10 @@ export default {
 		}
 
 		if (!row.is_active && row.disabled_reason) {
-			return new Response('This link was disabled because its destination was flagged as harmful.', {
-				status: 410,
-				headers: secureHeaders
-			});
+			return new Response(
+				'This link was disabled because its destination was flagged as harmful. If you think this is wrong, report it at https://github.com/vrennat/nah-tools/issues.',
+				{ status: 410, headers: secureHeaders }
+			);
 		}
 
 		if (!row.is_active) {
