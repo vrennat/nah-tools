@@ -99,6 +99,9 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'Passphrase must be at least 8 characters');
 	}
 
+	if (links !== undefined && links !== null && !Array.isArray(links)) {
+		throw error(400, 'links must be an array');
+	}
 	if (links && links.length > MAX_INITIAL_LINKS) {
 		throw error(400, `A new profile can have at most ${MAX_INITIAL_LINKS} links; add more after creating it.`);
 	}
@@ -117,7 +120,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	const initialLinks: { url: string; title: string; index: number }[] = [];
 	for (let i = 0; i < (links?.length ?? 0); i++) {
 		const link = links![i];
-		if (!link.url || !link.title) continue;
+		if (!link || typeof link.url !== 'string' || typeof link.title !== 'string' || !link.url || !link.title) continue;
 		const normalizedUrl = normalizeUrl(link.url);
 		const safety = await validateUrlSafety(normalizedUrl, db, { forRedirect: false });
 		if (!safety.safe) continue;
@@ -128,9 +131,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	if (initialLinks.length > 0) {
 		await enforceCreationLimits(platform, request, passphrase, initialLinks.length);
 	}
-	for (const link of initialLinks) {
-		await gateDestinationOrThrow(platform, db, link.url, { forRedirect: false });
-	}
+	// Checked together, not one by one (twenty slow destinations would take
+	// minutes); any block still rejects the request before anything is written.
+	await Promise.all(
+		initialLinks.map((link) => gateDestinationOrThrow(platform, db, link.url, { forRedirect: false }))
+	);
 
 	const passphraseHash = await hashPassphrase(passphrase);
 

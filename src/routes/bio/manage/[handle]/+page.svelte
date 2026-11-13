@@ -248,7 +248,9 @@
 				editingLinkId = null;
 				linkError = '';
 			} else {
-				linkError = 'Failed to save link. Please try again.';
+				// Show why (for example a blocked destination or the daily limit), as addLink does.
+				const body = (await res.json().catch(() => ({}))) as { message?: string };
+				linkError = body.message || 'Failed to save link. Please try again.';
 			}
 		} catch {
 			linkError = 'Network error saving link.';

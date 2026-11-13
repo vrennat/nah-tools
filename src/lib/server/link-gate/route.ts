@@ -46,11 +46,16 @@ export function gateDeps(
 	};
 }
 
-/** nah.tools and its subdomains: bio links may point here, and the site is not checked against itself. */
+/**
+ * nah.tools itself (and www): bio links may point here, and the site is not
+ * checked against itself. Other subdomains are judged like any destination:
+ * a go.nah.tools short link is followed to wherever it redirects, which may
+ * predate the gate.
+ */
 export function isOwnSite(url: string): boolean {
 	try {
 		const host = new URL(url).hostname.replace(/\.$/, '');
-		return host === 'nah.tools' || host.endsWith('.nah.tools');
+		return host === 'nah.tools' || host === 'www.nah.tools';
 	} catch {
 		return false;
 	}
