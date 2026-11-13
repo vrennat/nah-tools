@@ -8,7 +8,10 @@ import { migratedDb } from '$server/sqlite-d1';
 import { NOUL_QUESTIONS } from '$server/link-gate/questions';
 import { readUsage } from '$server/link-gate/budget';
 
-vi.mock('$server/creation-limits', () => ({ enforceCreationLimits: vi.fn(async () => {}) }));
+vi.mock('$server/creation-limits', async (orig) => ({
+	...(await orig<typeof import('$server/creation-limits')>()),
+	enforceCreationLimits: vi.fn(async () => {})
+}));
 const links = await import('./+server');
 
 const PHISH = '<title>Prize</title><p>Claim your prize now. ' + 'Enter your card. '.repeat(30) + '</p>';
@@ -86,3 +89,42 @@ describe('recheck within the daily model-call limit', () => {
 		});
 	});
 });
+
+describe('recheck within the network share', () => {
+	it("refuses a pending recheck once its network's share is used, leaving the link active and logged", async () => {
+		const kv = new Map<string, string>();
+		const p = {
+			env: {
+				DB: db,
+				AI: ai,
+				LINK_GATE_NETWORK_DAILY_MODEL_CALLS: '1',
+				KV: {
+					get: async (k: string) => kv.get(k) ?? null,
+					put: async (k: string, v: string) => void kv.set(k, v),
+					delete: async (k: string) => void kv.delete(k)
+				}
+			},
+			context: { waitUntil: (t: Promise<unknown>) => tasks.push(t) }
+		};
+		const req = new Request('https://nah.tools/api/links', {
+			method: 'POST',
+			headers: { 'cf-connecting-ip': '2001:db8:7:1::1' },
+			body: JSON.stringify({ url: 'https://slow.example/' })
+		});
+		// The first check (the page is down, so the URL alone) uses the network's one call;
+		// the recheck would see the phishing page but is refused by the share.
+		const res = await links.POST({ request: req, platform: p } as never);
+		expect(res.status).toBe(201);
+		await Promise.all(tasks);
+		expect(ai.run).toHaveBeenCalledTimes(1);
+		expect(sqlite.prepare('SELECT is_active, disabled_reason FROM redirects').get()).toEqual({ is_active: 1, disabled_reason: null });
+		expect(events(info).at(-1)).toMatchObject({
+			event: 'link_gate_recheck_done',
+			verdict: 'block',
+			result_event: 'link_gate_network_budget_exhausted',
+			reason: 'network_daily_model_cap',
+			disabled: false
+		});
+	});
+});
+
