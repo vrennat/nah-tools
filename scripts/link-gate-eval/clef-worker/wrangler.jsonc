@@ -1,11 +1,12 @@
 {
 	// Local-only helper: `bunx wrangler@latest dev` gives the eval a Workers AI
 	// binding over your wrangler login. AI calls are billed to the account.
-	// Not meant to be deployed: no workers.dev URL and no route, so a deploy by
-	// mistake is not reachable from the internet.
+	// Not meant to be deployed: no workers.dev URL, no preview URLs and no
+	// route, so a deploy by mistake is not reachable from the internet.
 	"name": "link-gate-eval-clef",
 	"main": "index.js",
 	"compatibility_date": "2026-11-01",
 	"workers_dev": false,
+	"preview_urls": false,
 	"ai": { "binding": "AI" }
 }
