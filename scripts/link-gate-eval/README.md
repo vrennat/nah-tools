@@ -71,3 +71,5 @@ On 2026-11-13, with the policy merged in #53 plus the cross-host rule:
 - Phishing: 96 of 130 blocked (47 on the Cloudflare warning, 49 by the model). 109 of 130 were blocked or logged as suspicious.
 
 These numbers come from the same data the thresholds were tuned on; see the caveat above.
+
+The phishing sample behind "96 of 130" cannot be rebuilt from these scripts: `pick-phishing.ts` now uses a seeded Fisher-Yates shuffle, which picks a different sample from the same feed than the shuffle used on 2026-11-13.
