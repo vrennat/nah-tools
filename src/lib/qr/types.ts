@@ -81,6 +81,8 @@ export interface DynamicCode {
 	utm_campaign: string | null;
 	utm_term: string | null;
 	utm_content: string | null;
+	/** Set when the service disabled the redirect (migration 0004); absent before it. */
+	disabled_reason?: string | null;
 }
 
 /** Click log record from D1 */
