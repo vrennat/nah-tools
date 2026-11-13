@@ -99,6 +99,7 @@ describe('recheck of a link the first check could not finish', () => {
 		expect(row()).toMatchObject({ is_active: 0, disabled_reason: 'destination_flagged' });
 		expect(events()).toEqual([
 			expect.objectContaining({ event: 'link_gate_allow_unchecked' }),
+			{ event: 'link_gate_recheck_started', host: 'slow.example' },
 			expect.objectContaining({ event: 'link_gate_recheck_done', verdict: 'block', result_event: 'link_gate_block', disabled: true })
 		]);
 		// The disabled row is written to the redirect worker's cache, not just deleted.
@@ -228,6 +229,8 @@ describe('recheck on the other routes', () => {
 		expect(results[1].error).toBeUndefined();
 		expect(sqlite.prepare('SELECT destination_url FROM redirects').all()).toEqual([{ destination_url: 'https://ok.example/' }]);
 		expect(tasks).toHaveLength(0);
+		// The refused link logged link_gate_allow_unchecked but no recheck started.
+		expect(events().filter((e) => e.event === 'link_gate_recheck_started')).toEqual([]);
 	});
 
 	it('logs a fixed error code when a recheck fails', async () => {
@@ -240,6 +243,35 @@ describe('recheck on the other routes', () => {
 			event: 'link_gate_recheck_error',
 			reason: 'disable_failed'
 		});
+	});
+});
+
+describe('destination changes on a link the recheck disabled', () => {
+	beforeEach(async () => {
+		await storeLink(db, 'code0001', 'https://ok.example/', await hashPassphrase('correct horse'));
+		sqlite.prepare("UPDATE redirects SET is_active = 0, disabled_reason = 'destination_flagged'").run();
+	});
+
+	it('refuses PUT /api/links with 409, without checking or storing the new destination', async () => {
+		behaviour = [];
+		await expect(
+			links.PUT({
+				request: req('PUT', { short_code: 'code0001', passphrase: 'correct horse', url: 'https://new.example/' }),
+				platform: platform()
+			} as never)
+		).rejects.toMatchObject({ status: 409, body: { message: expect.stringMatching(/flagged as harmful/) } });
+		expect(row()).toMatchObject({ destination_url: 'https://ok.example/', is_active: 0 });
+		expect(fetch).not.toHaveBeenCalled();
+	});
+
+	it('refuses PUT /api/dynamic with 409', async () => {
+		await expect(
+			dynamic.PUT({
+				request: req('PUT', { short_code: 'code0001', passphrase: 'correct horse', url: 'https://new.example/' }),
+				platform: platform()
+			} as never)
+		).rejects.toMatchObject({ status: 409 });
+		expect(row()).toMatchObject({ destination_url: 'https://ok.example/', is_active: 0 });
 	});
 });
 

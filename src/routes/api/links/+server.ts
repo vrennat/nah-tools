@@ -14,7 +14,7 @@ import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
 import { normalizeUrl } from '$utils/url';
-import { gateDestinationOrThrow, scheduleRecheck, servedUrl } from '$server/link-gate/route';
+import { assertNotFlagged, gateDestinationOrThrow, scheduleRecheck, servedUrl } from '$server/link-gate/route';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -160,6 +160,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	await enforceCreationLimits(platform, request, passphrase);
 
 	const existing = await authenticateRedirect(db, short_code, passphrase);
+	assertNotFlagged(existing);
 
 	const gateUrl = servedUrl(normalizedUrl, body.utm);
 	const decision = await gateDestinationOrThrow(platform, db, gateUrl);

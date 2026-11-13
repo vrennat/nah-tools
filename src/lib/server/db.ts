@@ -185,11 +185,18 @@ export async function createLink(
  * worker appends), so a link changed or deactivated in the meantime is left
  * alone. Returns true if the row changed.
  *
- * Nothing in the app restores such a link. To restore one by hand after a
- * report shows the flag was wrong (then clear its KV cache key
- * redirect:<code>, or wait up to an hour):
- *   UPDATE redirects SET is_active = 1, disabled_reason = NULL
- *   WHERE short_code = '<code>' AND disabled_reason = 'destination_flagged';
+ * Nothing in the app restores such a link, and its destination cannot be
+ * changed while it is disabled (assertNotFlagged in link-gate/route.ts). To
+ * restore one by hand after a report shows the flag was wrong:
+ *   1. Look at the row: SELECT short_code, custom_alias, destination_url,
+ *      utm_source, utm_medium, utm_campaign, utm_term, utm_content, updated_at
+ *      FROM redirects WHERE short_code = '<code>';
+ *   2. Check that destination (with its UTM fields) yourself, for example
+ *      by creating a test link to it, and restore only if it passes.
+ *   3. UPDATE redirects SET is_active = 1, disabled_reason = NULL
+ *      WHERE short_code = '<code>' AND disabled_reason = 'destination_flagged';
+ *   4. Delete the KV keys redirect:<code> and, if it has an alias,
+ *      redirect:<alias>, or wait up to an hour for them to expire.
  */
 export async function disableFlaggedRedirect(
 	db: D1Database,

@@ -4,7 +4,7 @@ import { getDB, getKV, authenticateRedirect, generateShortCode, createRedirect, 
 import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
-import { gateDestinationOrThrow, scheduleRecheck, servedUrl } from '$server/link-gate/route';
+import { assertNotFlagged, gateDestinationOrThrow, scheduleRecheck, servedUrl } from '$server/link-gate/route';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -78,6 +78,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	await enforceCreationLimits(platform, request, passphrase);
 
 	const existing = await authenticateRedirect(db, short_code, passphrase);
+	assertNotFlagged(existing);
 	// This endpoint also reaches short links, whose stored UTM parameters it
 	// keeps; the redirect worker appends them, so the gate must judge them too.
 	const storedUtm = {

@@ -61,6 +61,31 @@ export async function gateDestinationOrThrow(
 	return decision;
 }
 
+/**
+ * True when a decision blocks because of the destination itself (the model,
+ * Cloudflare's warning page, a redirect rule, an installer). Any other block,
+ * such as a refusal because the daily model-call limit is used up, means the
+ * check could not finish: a recheck must not disable a link for it.
+ */
+export function isSpamVerdict(decision: GateDecision): boolean {
+	return (
+		decision.verdict === 'block' &&
+		(decision.log.event === 'link_gate_block' || decision.log.event === 'link_gate_block_download')
+	);
+}
+
+export const FLAGGED_LINK_MESSAGE =
+	'This link was disabled because its destination was flagged as harmful, so its destination cannot be changed. If you think this is wrong, report it at https://github.com/vrennat/nah-tools/issues.';
+
+/**
+ * Refuse a destination change on a link a recheck disabled. Its recheck could
+ * not disable it again (the row is already inactive), so a later manual
+ * restore would switch on a destination nobody cleared.
+ */
+export function assertNotFlagged(row: { disabled_reason?: string | null }): void {
+	if (row.disabled_reason === 'destination_flagged') throw error(409, FLAGGED_LINK_MESSAGE);
+}
+
 /** Budgets for the background recheck, which runs after the response inside waitUntil's 30 s. */
 export const RECHECK_FETCH_TIMEOUT_MS = 10_000;
 export const RECHECK_MODEL_TIMEOUT_MS = 8_000;
@@ -78,11 +103,14 @@ export function recheckDeps(platform: App.Platform | undefined, db: D1Database):
  * manage page and the redirect worker show. If it allows or cannot finish
  * either, the link stays active: there is no waiting state.
  *
- * Every recheck that completes writes one line, link_gate_recheck_done, with
- * its verdict and whether the link was disabled; a recheck that throws writes
- * link_gate_recheck_error with a fixed code. A recheck the runtime cuts off
- * after waitUntil's 30 s writes neither, so started rechecks (the
- * link_gate_allow_unchecked lines) minus done and error lines counts those.
+ * Only a spam verdict (isSpamVerdict) disables the link; any other block
+ * leaves it active, logged in link_gate_recheck_done with its result event.
+ *
+ * Every scheduled recheck writes link_gate_recheck_started. One that
+ * completes writes link_gate_recheck_done, with its verdict and whether the
+ * link was disabled; one that throws writes link_gate_recheck_error with a
+ * fixed code. A recheck the runtime cuts off after waitUntil's 30 s writes
+ * neither, so started minus done and error lines counts those.
  * Returns the background promise, for tests.
  */
 export function scheduleRecheck(
@@ -99,11 +127,12 @@ export function scheduleRecheck(
 ): Promise<void> | undefined {
 	if (decision.verdict !== 'allow' || decision.log?.event !== 'link_gate_allow_unchecked') return;
 	if (!platform?.context?.waitUntil) return;
+	console.info(JSON.stringify({ event: 'link_gate_recheck_started', host: decision.log?.host ?? null }));
 	let stage = 'judge';
 	const task = (async () => {
 		const result = await judgeDestination(link.gateUrl, recheckDeps(platform, db));
 		let disabled = false;
-		if (result.verdict === 'block') {
+		if (isSpamVerdict(result)) {
 			stage = 'disable';
 			disabled = await disableFlaggedRedirect(db, link.shortCode, link.storedUrl, link.storedUtm);
 			const kv = platform.env?.KV;
