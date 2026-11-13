@@ -38,8 +38,6 @@
 		short_code: string;
 		redirect_url: string;
 		manage_url: string;
-		status?: 'active' | 'held';
-		notice?: string;
 	} | null>(null);
 
 	let passphraseValid = $derived(passphrase.length >= 8);
@@ -84,8 +82,6 @@
 				short_code: string;
 				redirect_url: string;
 				manage_url: string;
-				status?: 'active' | 'held';
-				notice?: string;
 				message?: string;
 			};
 			if (!res.ok) {
@@ -225,12 +221,7 @@
 									</button>
 								{:else}
 									<div class="space-y-2 rounded-lg bg-success/10 p-3">
-										{#if dynamicResult.status === 'held'}
-											<p class="text-sm font-medium text-text">Dynamic QR code created, on hold</p>
-											<p class="text-xs text-text-muted">{dynamicResult.notice} Do not print it until the manage page shows it as active.</p>
-										{:else}
-											<p class="text-sm font-medium text-success">Dynamic QR code created</p>
-										{/if}
+										<p class="text-sm font-medium text-success">Dynamic QR code created</p>
 										<p class="break-all font-mono text-xs text-text-muted">{dynamicResult.redirect_url}</p>
 									</div>
 									<div class="rounded-lg border border-border bg-surface-alt p-3">

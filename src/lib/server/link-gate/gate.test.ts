@@ -50,44 +50,52 @@ describe('judgeDestination', () => {
 		expect(d.verdict).toBe('block');
 	});
 
-	it('holds a page the model finds suspicious without a concrete trait', async () => {
+	it('allows and logs a page the model finds suspicious without a concrete trait', async () => {
 		const d = await judgeDestination('https://shop.example/', { ai: clef({ scam: 0.6 }), fetchImpl: siteFetch() });
-		expect(d).toMatchObject({ verdict: 'hold', holdReason: 'suspicious' });
+		expect(d).toMatchObject({
+			verdict: 'allow',
+			log: { event: 'link_gate_allow_suspicious', reason: 'model_suspicious', host: 'shop.example', scores: { scam: 0.6 } }
+		});
 	});
 
-	it('does not hold an unreadable page on the scam score alone', async () => {
+	it('does not excuse a page full of text as empty: it is still logged as suspicious', async () => {
 		const d = await judgeDestination('https://shop.example/', {
 			ai: clef({ scam: 0.7, empty: 0.9 }),
 			fetchImpl: siteFetch()
 		});
-		expect(d).toEqual({ verdict: 'allow' });
+		expect(d).toMatchObject({ verdict: 'allow', log: { event: 'link_gate_allow_suspicious' } });
 	});
 
-	describe('fails closed', () => {
-		it('holds when the AI binding is missing', async () => {
-			const d = await judgeDestination('https://shop.example/', { ai: undefined, fetchImpl: siteFetch() });
-			expect(d).toMatchObject({ verdict: 'hold', holdReason: 'unchecked' });
+	describe('allows and logs when the check cannot finish', () => {
+		const unchecked = (reason: string) => ({
+			verdict: 'allow',
+			log: { event: 'link_gate_allow_unchecked', reason }
 		});
 
-		it('holds when the model call throws', async () => {
+		it('when the AI binding is missing', async () => {
+			const d = await judgeDestination('https://shop.example/', { ai: undefined, fetchImpl: siteFetch() });
+			expect(d).toMatchObject(unchecked('ai_binding_missing'));
+		});
+
+		it('when the model call throws', async () => {
 			const ai = { run: vi.fn(async () => Promise.reject(new Error('Authentication error [code: 10000]'))) };
 			const d = await judgeDestination('https://shop.example/', { ai, fetchImpl: siteFetch() });
-			expect(d).toMatchObject({ verdict: 'hold', holdReason: 'unchecked' });
+			expect(d).toMatchObject(unchecked('model_error'));
 		});
 
-		it('holds when the model times out', async () => {
+		it('when the model times out', async () => {
 			const ai = { run: vi.fn(() => new Promise(() => {})) };
 			const d = await judgeDestination('https://shop.example/', { ai, fetchImpl: siteFetch(), clefTimeoutMs: 20 });
-			expect(d).toMatchObject({ verdict: 'hold', holdReason: 'unchecked' });
+			expect(d).toMatchObject(unchecked('model_timeout'));
 		});
 
-		it('holds when the model returns a malformed answer', async () => {
+		it('when the model returns a malformed answer', async () => {
 			const ai = { run: vi.fn(async () => ({ answers: { scam: { noul: 'yes' } } })) };
 			const d = await judgeDestination('https://shop.example/', { ai, fetchImpl: siteFetch() });
-			expect(d).toMatchObject({ verdict: 'hold', holdReason: 'unchecked' });
+			expect(d).toMatchObject(unchecked('model_malformed_answer'));
 		});
 
-		it('holds when the blocklist lookup for a hop throws', async () => {
+		it('when the blocklist lookup for a hop throws', async () => {
 			const fetchImpl = siteFetch(PAGE, {
 				'https://start.example/': new Response(null, { status: 302, headers: { location: 'https://next.example/' } })
 			});
@@ -98,7 +106,7 @@ describe('judgeDestination', () => {
 					throw new Error('D1 unavailable');
 				}
 			});
-			expect(d).toMatchObject({ verdict: 'hold', holdReason: 'unchecked' });
+			expect(d).toMatchObject(unchecked('chain_check_error'));
 		});
 	});
 
@@ -120,14 +128,15 @@ describe('judgeDestination', () => {
 		expect(ai.run).not.toHaveBeenCalled();
 	});
 
-	it('holds a chain with too many redirects without a model call', async () => {
+	it('blocks a chain with too many redirects without a model call, saying what to do', async () => {
 		const ai = clef();
 		const loop = (async (input: RequestInfo | URL) => {
 			const n = Number(new URL(String(input)).pathname.slice(1) || 0);
 			return new Response(null, { status: 302, headers: { location: `https://r.example/${n + 1}` } });
 		}) as typeof fetch;
 		const d = await judgeDestination('https://r.example/0', { ai, fetchImpl: loop });
-		expect(d).toMatchObject({ verdict: 'hold', holdReason: 'redirect-limit' });
+		expect(d).toMatchObject({ verdict: 'block', log: { event: 'link_gate_block', reason: 'redirect_limit' } });
+		expect(d.verdict === 'block' && d.message).toMatch(/Link to the final page instead/);
 		expect(ai.run).not.toHaveBeenCalled();
 	});
 });
@@ -139,15 +148,35 @@ describe('decideFromAnswers thresholds', () => {
 		siteTypeProbs: {},
 		inputTokens: 0
 	});
+	const readablePage = {
+		outcome: 'page' as const,
+		hops: [{ url: 'https://a.example/', status: 200 }],
+		finalUrl: 'https://a.example/',
+		status: 200,
+		body: `<p>${'Words on a page. '.repeat(40)}</p>`
+	};
+	const blankPage = { ...readablePage, body: '<div id=app></div>' };
 	it.each([
-		[{ scam: 0.79, impersonation: 0.99 }, 'hold'],
-		[{ scam: 0.8, impersonation: 0.5 }, 'block'],
-		[{ scam: 0.8, urgency: 0.6 }, 'block'],
-		[{ scam: 0.9 }, 'hold'],
-		[{ scam: 0.49, impersonation: 0.99 }, 'allow'],
-		[{ scam: 0.6, empty: 0.5 }, 'allow']
-	] as const)('%o -> %s', (n, verdict) => {
-		expect(decideFromAnswers(answers(n)).verdict).toBe(verdict);
+		[{ scam: 0.79, impersonation: 0.99 }, readablePage, 'allow', 'link_gate_allow_suspicious'],
+		[{ scam: 0.8, impersonation: 0.5 }, readablePage, 'block', 'link_gate_block'],
+		[{ scam: 0.8, urgency: 0.6 }, readablePage, 'block', 'link_gate_block'],
+		[{ scam: 0.9 }, readablePage, 'allow', 'link_gate_allow_suspicious'],
+		[{ scam: 0.49, impersonation: 0.99 }, readablePage, 'allow', undefined],
+		[{ scam: 0.6, empty: 0.5 }, blankPage, 'allow', 'link_gate_allow_unreadable'],
+		[{ scam: 0.6, empty: 0.5 }, readablePage, 'allow', 'link_gate_allow_suspicious']
+	] as const)('%o -> %s', (n, chain, verdict, event) => {
+		const d = decideFromAnswers(answers(n), chain);
+		expect(d.verdict).toBe(verdict);
+		expect(d.log?.event).toBe(event);
+	});
+
+	it('does not excuse a password form as empty, whatever the model says', () => {
+		const loginPage = {
+			...readablePage,
+			body: '<form><input type=email name=u><input type=password name=p></form>'
+		};
+		const d = decideFromAnswers(answers({ scam: 0.6, empty: 0.95 }), loginPage);
+		expect(d.log?.event).toBe('link_gate_allow_suspicious');
 	});
 });
 

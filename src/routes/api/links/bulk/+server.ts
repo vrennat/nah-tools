@@ -6,12 +6,12 @@ import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safet
 import { enforceCreationLimits } from '$server/creation-limits';
 import { normalizeUrl } from '$utils/url';
 import { judgeDestination } from '$server/link-gate';
-import { gateDeps, scheduleRecheck, HOLD_NOTICE } from '$server/link-gate/route';
+import { gateDeps, logGateDecision } from '$server/link-gate/route';
 
 /**
  * Each link runs the spam gate (up to 6 fetches, a blocklist lookup per hop
- * and one model call), so a bulk request is capped well below what one
- * Worker invocation can afford. Links the gate cannot finish are held.
+ * and model calls), so a bulk request is capped well below what one Worker
+ * invocation can afford.
  */
 const MAX_BULK_LINKS = 20;
 
@@ -60,14 +60,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		passphraseHash = await hashPassphrase(passphrase);
 	}
 
-	const results: Array<{
-		short_code: string;
-		short_url: string;
-		destination: string;
-		error?: string;
-		status?: 'active' | 'held';
-		notice?: string;
-	}> = [];
+	const results: Array<{ short_code: string; short_url: string; destination: string; error?: string }> = [];
 	const deps = gateDeps(platform, db);
 
 	for (const link of links) {
@@ -109,30 +102,25 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				}
 			}
 
-			// Every bulk link goes through the spam gate, one at a time. If the
-			// model fails or the page cannot be fetched, the link is held.
+			// Every bulk link goes through the spam gate, one at a time.
 			const decision = await judgeDestination(normalized, deps);
+			logGateDecision(decision);
 			if (decision.verdict === 'block') {
-				results.push({ short_code: '', short_url: '', destination: link.url, error: decision.reason });
+				results.push({ short_code: '', short_url: '', destination: link.url, error: decision.message });
 				continue;
 			}
-			const holdReason = decision.verdict === 'hold' ? decision.holdReason : null;
 
 			const shortCode = generateShortCode();
 			await createLink(db, shortCode, normalized, passphraseHash, {
 				label: link.label,
-				customAlias: link.alias,
-				holdReason
+				customAlias: link.alias
 			});
-			scheduleRecheck(platform, db, shortCode, normalized, holdReason);
 
 			const displayCode = link.alias || shortCode;
 			results.push({
 				short_code: displayCode,
 				short_url: `https://go.nah.tools/${displayCode}`,
-				destination: link.url,
-				status: holdReason ? 'held' : 'active',
-				...(holdReason ? { notice: HOLD_NOTICE } : {})
+				destination: link.url
 			});
 		} catch {
 			results.push({

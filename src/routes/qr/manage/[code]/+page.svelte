@@ -14,7 +14,6 @@
 	let scanCount = $state(0);
 	let createdAt = $state('');
 	let isActive = $state(true);
-	let isHeld = $state(false);
 	let labelText = $state('');
 
 	let newUrl = $state('');
@@ -52,13 +51,12 @@
 				return;
 			}
 
-			const info = await res.json() as { destination_url: string; scan_count: number; created_at: string; is_active: number; hold_reason?: string | null; label: string | null };
+			const info = await res.json() as { destination_url: string; scan_count: number; created_at: string; is_active: number; label: string | null };
 			destinationUrl = info.destination_url;
 			newUrl = info.destination_url;
 			scanCount = info.scan_count;
 			createdAt = info.created_at;
 			isActive = info.is_active === 1;
-			isHeld = !!info.hold_reason;
 			labelText = info.label || '';
 			authenticated = true;
 		} catch {
@@ -80,12 +78,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ short_code: data.code, passphrase, url: newUrl })
 			});
-			const body = await res.json() as {
-				success?: boolean;
-				message?: string;
-				status?: 'active' | 'held';
-				notice?: string;
-			};
+			const body = await res.json() as { success?: boolean; message?: string };
 
 			if (!res.ok) {
 				updateError = body.message || 'Failed to update';
@@ -93,15 +86,6 @@
 			}
 
 			destinationUrl = newUrl;
-			if (body.status === 'held') {
-				isHeld = true;
-				isActive = false;
-				updateSuccess = body.notice || 'URL updated; the link is on hold while it is checked.';
-				return;
-			}
-			// An allowed destination releases a hold; a deactivated link stays inactive.
-			if (isHeld) isActive = true;
-			isHeld = false;
 			updateSuccess = 'URL updated successfully';
 			setTimeout(() => { updateSuccess = ''; }, 3000);
 		} catch {
@@ -189,7 +173,7 @@
 				<div>
 					<p class="text-xs font-medium text-text-muted">Status</p>
 					<p class="mt-0.5 text-sm font-medium" class:text-success={isActive} class:text-error={!isActive}>
-						{isHeld ? 'On hold for review' : isActive ? 'Active' : 'Inactive'}
+						{isActive ? 'Active' : 'Inactive'}
 					</p>
 				</div>
 			</div>
@@ -201,7 +185,7 @@
 				</div>
 			{/if}
 
-			{#if isActive || isHeld}
+			{#if isActive}
 				<form onsubmit={handleUpdate} class="space-y-4 border-t border-border pt-4">
 					<div>
 						<label for="newUrl" class="block text-sm font-medium text-text mb-1">Destination URL</label>

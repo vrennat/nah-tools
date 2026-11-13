@@ -4,10 +4,8 @@
  */
 import { error } from '@sveltejs/kit';
 import { validateUrlSafety } from '$server/safety';
-import { invalidateRedirectCache, resolveUncheckedHold } from '$server/db';
-import { judgeDestination, type GateDeps, type HoldReason } from './index';
-import { RECHECKABLE_HOLDS } from './decide';
 import type { UTMParams } from '$qr/types';
+import { judgeDestination, type GateDecision, type GateDeps } from './index';
 
 /**
  * The URL the redirect worker will send visitors to: the stored destination
@@ -26,10 +24,6 @@ export function servedUrl(destination: string, utm?: UTMParams): string {
 	return parsed.toString();
 }
 
-/** Shown to the creator when a link is stored but held. */
-export const HOLD_NOTICE =
-	'This link was created but is on hold while its destination is checked. It will not redirect until the check passes.';
-
 export function gateDeps(platform: App.Platform | undefined, db: D1Database): GateDeps {
 	return {
 		ai: platform?.env?.AI,
@@ -42,48 +36,21 @@ export function gateDeps(platform: App.Platform | undefined, db: D1Database): Ga
 }
 
 /**
- * Run the gate. Throws a 400 when the destination is blocked; otherwise
- * returns the hold reason to store, or null when the link may go live.
+ * Write the decision's log line, if it has one: one JSON object with a fixed
+ * event name and reason code, the destination host and status, and model
+ * scores. Never the path, query or anything about the person creating the link.
  */
+export function logGateDecision(decision: GateDecision): void {
+	if (decision.log) console.info(JSON.stringify(decision.log));
+}
+
+/** Run the gate and log its decision. Throws a 400 with a user-facing message when the destination is blocked. */
 export async function gateDestinationOrThrow(
 	platform: App.Platform | undefined,
 	db: D1Database,
 	url: string
-): Promise<HoldReason | null> {
+): Promise<void> {
 	const decision = await judgeDestination(url, gateDeps(platform, db));
-	if (decision.verdict === 'block') throw error(400, decision.reason);
-	if (decision.verdict === 'hold') {
-		console.warn(`link gate: hold (${decision.holdReason}: ${decision.detail}) for ${new URL(url).hostname}`);
-		return decision.holdReason;
-	}
-	return null;
-}
-
-/**
- * For links held because the check itself failed (model unavailable, page
- * unreadable), try once more in the background and release or keep the hold.
- * Does nothing for other holds.
- */
-export function scheduleRecheck(
-	platform: App.Platform | undefined,
-	db: D1Database,
-	shortCode: string,
-	/** The destination as stored, used to match the row. */
-	url: string,
-	holdReason: HoldReason | null,
-	/** The stored UTM parameters; the recheck applies only if they are unchanged. */
-	utm?: UTMParams
-): void {
-	const gateUrl = servedUrl(url, utm);
-	if (!holdReason || !RECHECKABLE_HOLDS.includes(holdReason) || !platform?.context?.waitUntil) return;
-	const kv = platform.env?.KV;
-	platform.context.waitUntil(
-		(async () => {
-			const decision = await judgeDestination(gateUrl, gateDeps(platform, db));
-			const next =
-				decision.verdict === 'allow' ? null : decision.verdict === 'block' ? 'blocked' : decision.holdReason;
-			const changed = await resolveUncheckedHold(db, shortCode, url, utm, next);
-			if (changed && kv) await invalidateRedirectCache(kv, db, shortCode);
-		})().catch((e) => console.error('link gate: recheck failed', e))
-	);
+	logGateDecision(decision);
+	if (decision.verdict === 'block') throw error(400, decision.message);
 }

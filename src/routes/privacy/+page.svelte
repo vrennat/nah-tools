@@ -62,10 +62,15 @@
 			redirects, identifying itself as the nah.tools link check. The page title, form fields and up
 			to 6,000 characters of visible text are sent to Cloudflare Workers AI for a decision and are
 			not stored. That request can count as a visit to the destination, so links that work only once,
-			such as sign-in or confirmation links, may stop working. A link the check flags is not created
-			or is put on hold, and a held link does not redirect. The check's decision is logged with the
-			destination's host name and HTTP status, without the rest of the URL, and Cloudflare keeps
-			these logs for up to seven days. Request details such as IP addresses are not logged.
+			such as sign-in or confirmation links, may stop working. If the check finds phishing, a scam, an
+			app installer or too many redirects, the link is not created or changed; otherwise it is.
+		</p>
+		<p class="text-text-muted">
+			The service keeps its own log lines in Cloudflare Workers Logs for up to seven days. They are the
+			link check's decisions (event, destination host name, HTTP status and the model's scores, without
+			the rest of the URL) and error messages. Error messages from server-side tools, such as the PDF
+			and PowerPoint tools offered to AI agents, can include details from the file being processed.
+			Request URLs, request headers and IP addresses are not logged.
 		</p>
 	</section>
 	<section class="space-y-3">

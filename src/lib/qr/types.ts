@@ -81,8 +81,6 @@ export interface DynamicCode {
 	utm_campaign: string | null;
 	utm_term: string | null;
 	utm_content: string | null;
-	/** Why the spam gate holds this redirect; NULL when not held. */
-	hold_reason: string | null;
 }
 
 /** Click log record from D1 */

@@ -5,9 +5,12 @@
  * re-pointed. Follows the redirect chain, reads the final page and asks the
  * Clef decision model about it.
  *
- * Failure direction: if the model is missing, errors or times out, the link
- * is held (stored inactive with hold_reason 'unchecked') and rechecked in the
- * background. The gate never fails open.
+ * Only a block stops a link. If the check cannot finish (fetch failure or
+ * timeout, model missing, failing or timing out), the link is allowed and the
+ * decision is logged as link_gate_allow_unchecked so outages are countable
+ * (decision by the conductor session under Tanner's delegation, 2026-11-13:
+ * there is no way to review or release a held link, so holding would leave
+ * clean links dead).
  */
 import { followChain, type ChainResult } from './fetch-chain';
 import { summarizePage, type PageSummary } from './extract';
@@ -18,9 +21,9 @@ import {
 	buildState,
 	parseClefResponse
 } from './questions';
-import { decideFromAnswers, decideFromChain, worst, type GateDecision } from './decide';
+import { decideFromAnswers, decideFromChain, uncheckedAllow, worst, type GateDecision } from './decide';
 
-export type { GateDecision, HoldReason } from './decide';
+export type { GateDecision, GateLog } from './decide';
 
 export const CLEF_TIMEOUT_MS = 4000;
 
@@ -53,36 +56,13 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 	});
 }
 
-/**
- * Known gap, kept on purpose (decision by the conductor session under
- * Tanner's delegation, 2026-11-13): a destination that refuses the checker
- * on its own URL (a 4xx/5xx or empty body, no redirect) is judged on the URL
- * alone and usually allowed, because holding these held 12 of 108 clean
- * links in the evaluation and holds cannot be released. This line makes the
- * gap countable: one JSON line per such allow, with no user data.
- */
-function logUnreadableAllow(chain: ChainResult, decision: GateDecision): void {
-	if (decision.verdict !== 'allow' || chain.outcome !== 'page') return;
-	if ((chain.status ?? 0) < 400 && chain.body) return;
-	let host = '';
-	try {
-		host = new URL(chain.finalUrl).hostname;
-	} catch {
-		// finalUrl was validated before fetching; leave host empty if not.
-	}
-	console.info(
-		JSON.stringify({ event: 'link_gate_allow_unreadable', reason: 'unreadable_first_url', host, status: chain.status })
-	);
-}
-
 export async function judgeDestination(url: string, deps: GateDeps): Promise<GateDecision> {
 	let chain: ChainResult;
 	try {
 		chain = await followChain(url, { fetchImpl: deps.fetchImpl, checkHop: deps.checkHop });
-	} catch (e) {
+	} catch {
 		// followChain does not throw by design; a throw here is a bug or a failed blocklist lookup.
-		console.error('link gate: chain check failed', e);
-		return { verdict: 'hold', holdReason: 'unchecked', detail: 'chain check failed' };
+		return uncheckedAllow({ outcome: 'fetch-failed', hops: [], finalUrl: url }, 'chain_check_error');
 	}
 	const page: PageSummary | null =
 		chain.outcome === 'page' && chain.body ? summarizePage(chain.body, chain.finalUrl) : null;
@@ -90,9 +70,7 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 	const early = decideFromChain(chain, page);
 	if (early) return early;
 
-	if (!deps.ai) {
-		return { verdict: 'hold', holdReason: 'unchecked', detail: 'AI binding missing' };
-	}
+	if (!deps.ai) return uncheckedAllow(chain, 'ai_binding_missing');
 	const ai = deps.ai;
 	const timeoutMs = deps.clefTimeoutMs ?? CLEF_TIMEOUT_MS;
 
@@ -127,11 +105,14 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 				return decideFromAnswers(parseClefResponse(raw), v.chain);
 			})
 		);
-		const result = decisions.reduce(worst);
-		logUnreadableAllow(chain, result);
-		return result;
+		return decisions.reduce(worst);
 	} catch (e) {
-		console.error('link gate: Clef call failed', e);
-		return { verdict: 'hold', holdReason: 'unchecked', detail: 'model unavailable' };
+		const reason =
+			e instanceof Error && e.message.startsWith('timed out')
+				? 'model_timeout'
+				: e instanceof Error && e.message.startsWith('Clef ')
+					? 'model_malformed_answer'
+					: 'model_error';
+		return uncheckedAllow(chain, reason);
 	}
 }

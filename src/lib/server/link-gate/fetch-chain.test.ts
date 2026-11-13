@@ -160,7 +160,7 @@ describe('followChain', () => {
 			})) as typeof fetch;
 		const r = await followChain('https://slow.example/', { fetchImpl: slow, timeoutMs: 50 });
 		expect(r.outcome).toBe('fetch-failed');
-		expect(r.reason).toBe('timeout');
+		expect(r.reason).toBe('fetch_timeout');
 	});
 
 	it('reads at most maxBytes of the body', async () => {

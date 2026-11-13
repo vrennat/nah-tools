@@ -16,7 +16,7 @@ declare global {
 				CF_ANALYTICS_TOKEN?: string;
 				TURNSTILE_SECRET_KEY?: string;
 				CREATE_LIMITER?: RateLimit;
-				/** Workers AI, used by the link spam gate. Missing means every new link is held. */
+				/** Workers AI, used by the link spam gate. Missing means links are allowed unchecked and logged. */
 				AI?: Ai;
 			};
 			context: {

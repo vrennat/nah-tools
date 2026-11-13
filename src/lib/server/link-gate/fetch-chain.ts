@@ -56,6 +56,8 @@ export interface ChainResult {
 	contentType?: string;
 	/** Decoded body, cut at MAX_BODY_BYTES. Only text-like content types are read. */
 	body?: string;
+	/** Content-Disposition of the final response (it names a download). */
+	contentDisposition?: string;
 	reason?: string;
 }
 
@@ -123,11 +125,10 @@ export function findClientRedirect(html: string): { url: string; via: HopKind } 
 	return null;
 }
 
-/** Content types that are read: HTML and other text, XML, JSON, and SVG (which can carry scripts). */
-function isTextual(contentType: string): boolean {
-	return (
-		/^(text\/|application\/(xhtml\+xml|xml|json)|image\/svg\+xml)/i.test(contentType) || contentType === ''
-	);
+/** Text-like responses are read as pages; anything else is treated as a file download. */
+export function isTextual(contentType: string | undefined): boolean {
+	const ct = contentType ?? '';
+	return ct === '' || /^(text\/|application\/(xhtml\+xml|xml|json)|image\/svg\+xml)/i.test(ct);
 }
 
 function resolveTarget(target: string | null, base: string): string | null {
@@ -207,7 +208,7 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 				if (reason) return { outcome: 'policy-blocked', hops, finalUrl: url, reason };
 			}
 			if (!ALLOWED_PORTS.has(new URL(url).port)) {
-				return { outcome: 'fetch-failed', hops, finalUrl: url, reason: 'non-standard port' };
+				return { outcome: 'fetch-failed', hops, finalUrl: url, reason: 'non_standard_port' };
 			}
 
 			let res: Response;
@@ -218,12 +219,12 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 					headers: REQUEST_HEADERS,
 					signal: controller.signal
 				});
-			} catch (e) {
+			} catch {
 				return {
 					outcome: 'fetch-failed',
 					hops,
 					finalUrl: url,
-					reason: controller.signal.aborted ? 'timeout' : String(e)
+					reason: controller.signal.aborted ? 'fetch_timeout' : 'network_error'
 				};
 			}
 
@@ -242,12 +243,12 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 				if (isTextual(contentType)) {
 					try {
 						body = await readCapped(res, maxBytes, controller.signal);
-					} catch (e) {
+					} catch {
 						return {
 							outcome: 'fetch-failed',
 							hops,
 							finalUrl: url,
-							reason: controller.signal.aborted ? 'timeout' : String(e)
+							reason: controller.signal.aborted ? 'fetch_timeout' : 'body_read_error'
 						};
 					}
 				} else {
@@ -265,7 +266,15 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 				const clientTarget = resolveTarget(client?.url ?? null, url);
 				// A client redirect back to a page already seen is a loop; judge this page.
 				if (!clientTarget || hops.some((h) => h.url === clientTarget)) {
-					return { outcome: 'page', hops, finalUrl: url, status: res.status, contentType, body };
+					return {
+						outcome: 'page',
+						hops,
+						finalUrl: url,
+						status: res.status,
+						contentType,
+						contentDisposition: res.headers.get('content-disposition') ?? undefined,
+						body
+					};
 				}
 				next = clientTarget;
 				hop.via = client!.via;
@@ -283,7 +292,7 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 			try {
 				url = new URL(next, url).toString();
 			} catch {
-				return { outcome: 'fetch-failed', hops, finalUrl: url, reason: 'invalid redirect target' };
+				return { outcome: 'fetch-failed', hops, finalUrl: url, reason: 'invalid_redirect_target' };
 			}
 		}
 	} finally {

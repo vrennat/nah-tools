@@ -10,7 +10,7 @@ const config = {
 			// The Workers AI binding is remote-only. Without this, prerendering and
 			// `vite dev` open a remote wrangler session, which needs a Cloudflare
 			// login. Locally the AI binding is then absent and the link spam gate
-			// holds new links as 'unchecked'; the deployed Worker has the binding.
+			// allows new links unchecked (logged); the deployed Worker has the binding.
 			platformProxy: { remoteBindings: false },
 			routes: {
 				include: ['/*'],
