@@ -1,0 +1,8 @@
+{
+	// Local-only helper: `bunx wrangler@latest dev` gives the eval a Workers AI
+	// binding over your wrangler login. AI calls are billed to the account.
+	"name": "link-gate-eval-clef",
+	"main": "index.js",
+	"compatibility_date": "2026-11-01",
+	"ai": { "binding": "AI" }
+}
