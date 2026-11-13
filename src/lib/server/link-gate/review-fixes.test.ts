@@ -257,6 +257,22 @@ describe('unreadable destinations', () => {
 		expect(d).toEqual({ verdict: 'allow' });
 	});
 
+	it('logs one countable line when it allows an unreadable first URL, and none otherwise', async () => {
+		const info = vi.spyOn(console, 'info').mockImplementation(() => {});
+		const { impl } = fakeFetch({
+			'https://big.example/p?q=secret': { status: 403, body: 'Access Denied' },
+			'https://ok.example/': { body: content }
+		});
+		await judgeDestination('https://big.example/p?q=secret', { ai: clef({ empty: 0.9 }), fetchImpl: impl });
+		await judgeDestination('https://ok.example/', { ai: clef(), fetchImpl: impl });
+		expect(info).toHaveBeenCalledTimes(1);
+		const line = JSON.parse(info.mock.calls[0][0] as string);
+		expect(line).toEqual({ event: 'link_gate_allow_unreadable', reason: 'unreadable_first_url', host: 'big.example', status: 403 });
+		// Host and status only: no path, query or other user data.
+		expect(info.mock.calls[0][0]).not.toContain('secret');
+		info.mockRestore();
+	});
+
 	it('treats www and the bare domain as the same host', async () => {
 		const { impl } = fakeFetch({
 			'https://example.com/': { status: 301, headers: { location: 'https://www.example.com/' } },

@@ -53,6 +53,28 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
 	});
 }
 
+/**
+ * Known gap, kept on purpose (decision by the conductor session under
+ * Tanner's delegation, 2026-11-13): a destination that refuses the checker
+ * on its own URL (a 4xx/5xx or empty body, no redirect) is judged on the URL
+ * alone and usually allowed, because holding these held 12 of 108 clean
+ * links in the evaluation and holds cannot be released. This line makes the
+ * gap countable: one JSON line per such allow, with no user data.
+ */
+function logUnreadableAllow(chain: ChainResult, decision: GateDecision): void {
+	if (decision.verdict !== 'allow' || chain.outcome !== 'page') return;
+	if ((chain.status ?? 0) < 400 && chain.body) return;
+	let host = '';
+	try {
+		host = new URL(chain.finalUrl).hostname;
+	} catch {
+		// finalUrl was validated before fetching; leave host empty if not.
+	}
+	console.info(
+		JSON.stringify({ event: 'link_gate_allow_unreadable', reason: 'unreadable_first_url', host, status: chain.status })
+	);
+}
+
 export async function judgeDestination(url: string, deps: GateDeps): Promise<GateDecision> {
 	let chain: ChainResult;
 	try {
@@ -105,7 +127,9 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 				return decideFromAnswers(parseClefResponse(raw), v.chain);
 			})
 		);
-		return decisions.reduce(worst);
+		const result = decisions.reduce(worst);
+		logUnreadableAllow(chain, result);
+		return result;
 	} catch (e) {
 		console.error('link gate: Clef call failed', e);
 		return { verdict: 'hold', holdReason: 'unchecked', detail: 'model unavailable' };
