@@ -7,6 +7,7 @@ import { migratedDb } from '$server/sqlite-d1';
 import { NOUL_QUESTIONS, type NoulId } from '$server/link-gate/questions';
 
 vi.mock('$server/creation-limits', () => ({ enforceCreationLimits: vi.fn(async () => {}) }));
+const { enforceCreationLimits } = await import('$server/creation-limits');
 const links = await import('./+server');
 const lookup = await import('./lookup/+server');
 const dynamic = await import('../dynamic/+server');
@@ -250,6 +251,31 @@ describe('destination changes on a link the recheck disabled', () => {
 	beforeEach(async () => {
 		await storeLink(db, 'code0001', 'https://ok.example/', await hashPassphrase('correct horse'));
 		sqlite.prepare("UPDATE redirects SET is_active = 0, disabled_reason = 'destination_flagged'").run();
+	});
+
+	it('refuses the owner before charging the creation allowance', async () => {
+		vi.mocked(enforceCreationLimits).mockClear();
+		await expect(
+			links.PUT({
+				request: req('PUT', { short_code: 'code0001', passphrase: 'correct horse', url: 'https://new.example/' }),
+				platform: platform()
+			} as never)
+		).rejects.toMatchObject({ status: 409 });
+		expect(enforceCreationLimits).not.toHaveBeenCalled();
+	});
+
+	it('gives a wrong passphrase the usual 403, after the creation limits, without saying the link is flagged', async () => {
+		vi.mocked(enforceCreationLimits).mockClear();
+		for (const route of [links.PUT, dynamic.PUT]) {
+			const err = await Promise.resolve(
+				route({
+					request: req('PUT', { short_code: 'code0001', passphrase: 'wrong passphrase', url: 'https://new.example/' }),
+					platform: platform()
+				} as never)
+			).catch((e: unknown) => e);
+			expect(err).toMatchObject({ status: 403, body: { message: 'Invalid passphrase' } });
+		}
+		expect(enforceCreationLimits).toHaveBeenCalledTimes(2);
 	});
 
 	it('refuses PUT /api/links with 409, without checking or storing the new destination', async () => {

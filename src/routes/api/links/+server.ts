@@ -14,7 +14,7 @@ import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
 import { normalizeUrl } from '$utils/url';
-import { assertNotFlagged, gateDestinationOrThrow, scheduleRecheck, servedUrl } from '$server/link-gate/route';
+import { assertNotFlagged, gateDestinationOrThrow, refuseFlaggedChangeForOwner, scheduleRecheck, servedUrl } from '$server/link-gate/route';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -146,6 +146,8 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	if (!short_code || !passphrase || !url) {
 		throw error(400, 'short_code, passphrase, and url are required');
 	}
+	// The owner of a flagged link learns why before anything is charged.
+	await refuseFlaggedChangeForOwner(db, short_code, passphrase);
 
 	const normalizedUrl = normalizeUrl(url);
 

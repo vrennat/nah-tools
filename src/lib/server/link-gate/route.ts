@@ -4,7 +4,8 @@
  */
 import { error } from '@sveltejs/kit';
 import { validateUrlSafety } from '$server/safety';
-import { cacheRedirectRow, disableFlaggedRedirect } from '$server/db';
+import { cacheRedirectRow, disableFlaggedRedirect, getRedirect } from '$server/db';
+import { verifyPassphrase } from '$server/auth';
 import type { UTMParams } from '$qr/types';
 import { judgeDestination, type GateDecision, type GateDeps } from './index';
 
@@ -84,6 +85,20 @@ export const FLAGGED_LINK_MESSAGE =
  */
 export function assertNotFlagged(row: { disabled_reason?: string | null }): void {
 	if (row.disabled_reason === 'destination_flagged') throw error(409, FLAGGED_LINK_MESSAGE);
+}
+
+/**
+ * Refuse the owner's destination change on a flagged link with 409 before
+ * anything is charged: call it before the model budget and the creation
+ * limits. It reads the row, and only for a flagged link verifies the
+ * passphrase. Anyone else continues on the normal path, where the creation
+ * limits still throttle guessing and a wrong passphrase gets 403. Flagged
+ * status is no secret: the short link itself answers 410 saying so.
+ */
+export async function refuseFlaggedChangeForOwner(db: D1Database, shortCode: string, passphrase: string): Promise<void> {
+	const row = await getRedirect(db, shortCode);
+	if (row?.disabled_reason !== 'destination_flagged') return;
+	if (await verifyPassphrase(passphrase, row.passphrase_hash)) throw error(409, FLAGGED_LINK_MESSAGE);
 }
 
 /** Budgets for the background recheck, which runs after the response inside waitUntil's 30 s. */
