@@ -14,7 +14,7 @@ import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
 import { normalizeUrl } from '$utils/url';
-import { gateDestinationOrThrow, servedUrl } from '$server/link-gate/route';
+import { gateDestinationOrThrow, scheduleRecheck, servedUrl } from '$server/link-gate/route';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -106,7 +106,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	// Spam gate last: it fetches the destination and calls the model, so it
 	// runs only for requests that passed every cheaper check. It judges the URL
 	// the redirect worker will serve, UTM parameters included.
-	await gateDestinationOrThrow(platform, db, servedUrl(normalizedUrl, utm));
+	const gateUrl = servedUrl(normalizedUrl, utm);
+	const decision = await gateDestinationOrThrow(platform, db, gateUrl);
 
 	const shortCode = generateShortCode();
 	await createLink(db, shortCode, normalizedUrl, passphraseHash, {
@@ -115,6 +116,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		expiresAt: expires_at,
 		utm
 	});
+	scheduleRecheck(platform, db, decision, { shortCode, storedUrl: normalizedUrl, gateUrl });
 
 	const displayCode = alias || shortCode;
 
@@ -157,9 +159,10 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	// re-pointed at a stream of fresh domains.
 	await enforceCreationLimits(platform, request, passphrase);
 
-	await authenticateRedirect(db, short_code, passphrase);
+	const existing = await authenticateRedirect(db, short_code, passphrase);
 
-	await gateDestinationOrThrow(platform, db, servedUrl(normalizedUrl, body.utm));
+	const gateUrl = servedUrl(normalizedUrl, body.utm);
+	const decision = await gateDestinationOrThrow(platform, db, gateUrl);
 
 	// Update destination URL
 	await db
@@ -180,6 +183,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		.run();
 
 	await invalidateRedirectCache(getKV(platform), db, short_code);
+	scheduleRecheck(platform, db, decision, { shortCode: existing.short_code, storedUrl: normalizedUrl, gateUrl });
 	return json({ success: true });
 };
 

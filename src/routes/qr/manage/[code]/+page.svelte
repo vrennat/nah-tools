@@ -14,6 +14,7 @@
 	let scanCount = $state(0);
 	let createdAt = $state('');
 	let isActive = $state(true);
+	let isFlagged = $state(false);
 	let labelText = $state('');
 
 	let newUrl = $state('');
@@ -51,12 +52,13 @@
 				return;
 			}
 
-			const info = await res.json() as { destination_url: string; scan_count: number; created_at: string; is_active: number; label: string | null };
+			const info = await res.json() as { destination_url: string; scan_count: number; created_at: string; is_active: number; disabled_reason?: string | null; label: string | null };
 			destinationUrl = info.destination_url;
 			newUrl = info.destination_url;
 			scanCount = info.scan_count;
 			createdAt = info.created_at;
 			isActive = info.is_active === 1;
+			isFlagged = !isActive && !!info.disabled_reason;
 			labelText = info.label || '';
 			authenticated = true;
 		} catch {
@@ -173,7 +175,7 @@
 				<div>
 					<p class="text-xs font-medium text-text-muted">Status</p>
 					<p class="mt-0.5 text-sm font-medium" class:text-success={isActive} class:text-error={!isActive}>
-						{isActive ? 'Active' : 'Inactive'}
+						{isActive ? 'Active' : isFlagged ? 'Disabled: destination flagged as harmful' : 'Inactive'}
 					</p>
 				</div>
 			</div>

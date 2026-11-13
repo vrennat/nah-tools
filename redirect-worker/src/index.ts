@@ -16,6 +16,8 @@ interface Env {
 interface RedirectRow {
 	destination_url: string;
 	is_active: number;
+	/** Set when the service disabled the link (migration 0004); absent before it. */
+	disabled_reason?: string | null;
 	short_code: string;
 	expires_at: string | null;
 	passphrase_hash: string;
@@ -63,7 +65,8 @@ export default {
 			row = cached;
 		} else {
 			row = await env.DB.prepare(
-				'SELECT short_code, destination_url, is_active, expires_at, passphrase_hash, utm_source, utm_medium, utm_campaign, utm_term, utm_content FROM redirects WHERE short_code = ? OR custom_alias = ?'
+				// SELECT * so this worker keeps working before migration 0004 adds disabled_reason.
+				'SELECT * FROM redirects WHERE short_code = ? OR custom_alias = ?'
 			)
 				.bind(code, code)
 				.first<RedirectRow>();
@@ -84,6 +87,13 @@ export default {
 		if (!row) {
 			return new Response('QR code not found.', {
 				status: 404,
+				headers: secureHeaders
+			});
+		}
+
+		if (!row.is_active && row.disabled_reason) {
+			return new Response('This link was disabled because its destination was flagged as harmful.', {
+				status: 410,
 				headers: secureHeaders
 			});
 		}

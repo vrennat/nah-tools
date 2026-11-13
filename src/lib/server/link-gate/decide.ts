@@ -31,6 +31,8 @@ export interface GateLog {
 	host: string;
 	status?: number;
 	scores?: Partial<Record<NoulId, number>>;
+	/** Set on the result of a background recheck. */
+	recheck?: true;
 }
 
 export type GateDecision =

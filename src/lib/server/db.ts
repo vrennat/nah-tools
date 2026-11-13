@@ -178,6 +178,27 @@ export async function createLink(
 	}
 }
 
+/**
+ * Disable a redirect because a background recheck blocked its destination.
+ * Only touches the row if it is still active and still points at the URL
+ * that was judged, so a destination changed or a link deactivated in the
+ * meantime is left alone. Returns true if the row changed.
+ */
+export async function disableFlaggedRedirect(
+	db: D1Database,
+	shortCode: string,
+	destinationUrl: string
+): Promise<boolean> {
+	const res = await db
+		.prepare(
+			`UPDATE redirects SET is_active = 0, disabled_reason = 'destination_flagged', updated_at = datetime('now')
+			 WHERE short_code = ? AND destination_url = ? AND is_active = 1`
+		)
+		.bind(shortCode, destinationUrl)
+		.run();
+	return (res.meta?.changes ?? 0) > 0;
+}
+
 /** Check if a custom alias is available */
 export async function isAliasAvailable(db: D1Database, alias: string): Promise<boolean> {
 	// Check both short_code and custom_alias columns
