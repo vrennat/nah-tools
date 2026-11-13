@@ -7,7 +7,7 @@ Measures the link spam gate (`src/lib/server/link-gate/`) end to end: the real r
 | File | Purpose |
 |---|---|
 | `clean-tune.txt`, `clean-holdout.txt` | 108 public sites (docs, shops, news, social, government, banks, sign-in and download pages), split 54/54 by a seeded shuffle |
-| `pick-phishing.ts` | Builds the phishing sample from a locally downloaded OpenPhish feed |
+| `pick-phishing.ts` | Builds the phishing sample from a locally downloaded OpenPhish feed and splits it into tune and held-out halves |
 | `run.ts` | Runs the gate over a URL list and writes one JSON line per URL |
 | `score.ts` | Counts verdicts and log events, with 95% Wilson intervals and latency |
 | `clef-worker/` | A local Worker that gives the eval a Workers AI binding over your wrangler login |
@@ -16,7 +16,7 @@ Measures the link spam gate (`src/lib/server/link-gate/`) end to end: the real r
 
 ## Held-out split
 
-Change thresholds in `decide.ts` only while looking at `clean-tune.txt` and the tune half of the phishing sample. Report results on `clean-holdout.txt` and the other half.
+Change thresholds in `decide.ts` only while looking at `clean-tune.txt` and `data/phishing-tune.txt`. Report results only on `clean-holdout.txt` and `data/phishing-holdout.txt`. `pick-phishing.ts` writes both phishing halves from one seeded shuffle, so the same feed always gives the same split.
 
 **Caveat:** the thresholds now in `decide.ts` were set on 2026-11-13 using all 108 clean sites and a 130-URL phishing sample, before this split existed. Hold-out results on that same data are therefore not independent. A fresh phishing sample is independent; a fresh clean list would be too.
 
@@ -33,15 +33,15 @@ Change thresholds in `decide.ts` only while looking at `clean-tune.txt` and the 
    ```bash
    mkdir -p scripts/link-gate-eval/data
    curl -sSL -o scripts/link-gate-eval/data/openphish.txt https://openphish.com/feed.txt
-   bun scripts/link-gate-eval/pick-phishing.ts scripts/link-gate-eval/data/openphish.txt > scripts/link-gate-eval/data/phishing.txt
+   bun scripts/link-gate-eval/pick-phishing.ts scripts/link-gate-eval/data/openphish.txt scripts/link-gate-eval/data/
    ```
 
-3. Run the gate and score it:
+3. Report on the held-out halves only (when tuning, run the same commands on the `-tune` files instead):
 
    ```bash
    bun scripts/link-gate-eval/run.ts clean scripts/link-gate-eval/clean-holdout.txt scripts/link-gate-eval/data/clean-holdout.jsonl
-   bun scripts/link-gate-eval/run.ts spam scripts/link-gate-eval/data/phishing.txt scripts/link-gate-eval/data/phishing.jsonl
-   bun scripts/link-gate-eval/score.ts scripts/link-gate-eval/data/clean-holdout.jsonl scripts/link-gate-eval/data/phishing.jsonl
+   bun scripts/link-gate-eval/run.ts spam scripts/link-gate-eval/data/phishing-holdout.txt scripts/link-gate-eval/data/phishing-holdout.jsonl
+   bun scripts/link-gate-eval/score.ts scripts/link-gate-eval/data/clean-holdout.jsonl scripts/link-gate-eval/data/phishing-holdout.jsonl
    ```
 
 ## Cost and limits
