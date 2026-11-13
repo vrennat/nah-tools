@@ -13,6 +13,10 @@ vi.mock('$server/creation-limits', async (orig) => ({
 	enforceCreationLimits: vi.fn(async () => {})
 }));
 const links = await import('./+server');
+const dynamic = await import('../dynamic/+server');
+const { enforceCreationLimits } = await import('$server/creation-limits');
+const { hashPassphrase } = await import('$server/auth');
+const { createLink, createRedirect } = await import('$server/db');
 
 const PHISH = '<title>Prize</title><p>Claim your prize now. ' + 'Enter your card. '.repeat(30) + '</p>';
 let db: D1Database;
@@ -125,6 +129,87 @@ describe('recheck within the network share', () => {
 			reason: 'network_daily_model_cap',
 			disabled: false
 		});
+	});
+});
+
+/** A platform with a working KV (for the daily salt) and the given network share. */
+function sharePlatform(share: string) {
+	const kv = new Map<string, string>();
+	return {
+		env: {
+			DB: db,
+			AI: ai,
+			LINK_GATE_NETWORK_DAILY_MODEL_CALLS: share,
+			KV: {
+				get: async (k: string) => kv.get(k) ?? null,
+				put: async (k: string, v: string) => void kv.set(k, v),
+				delete: async (k: string) => void kv.delete(k)
+			}
+		},
+		context: { waitUntil: (t: Promise<unknown>) => tasks.push(t) }
+	};
+}
+const call = (method: string, body: Record<string, unknown>, ip = '2001:db8:7:1::1') =>
+	new Request('https://nah.tools/api/links', { method, headers: { 'cf-connecting-ip': ip }, body: JSON.stringify(body) });
+
+describe('every recheck call site charges the network share', () => {
+	const routes: Array<[string, (p: ReturnType<typeof sharePlatform>) => Promise<Response>]> = [
+		[
+			'PUT /api/links',
+			async (p) => {
+				await createLink(db, 'code0001', 'https://ok.example/', await hashPassphrase('correct horse'));
+				return links.PUT({ request: call('PUT', { short_code: 'code0001', passphrase: 'correct horse', url: 'https://slow.example/' }), platform: p } as never);
+			}
+		],
+		[
+			'POST /api/dynamic',
+			async (p) => dynamic.POST({ request: call('POST', { url: 'https://slow.example/', passphrase: 'correct horse' }), platform: p } as never)
+		],
+		[
+			'PUT /api/dynamic',
+			async (p) => {
+				await createRedirect(db, 'qrcode01', 'https://ok.example/', await hashPassphrase('correct horse'));
+				return dynamic.PUT({ request: call('PUT', { short_code: 'qrcode01', passphrase: 'correct horse', url: 'https://slow.example/' }), platform: p } as never);
+			}
+		]
+	];
+
+	it.each(routes)('%s: a recheck refused by the share leaves the link active and logged', async (_name, run) => {
+		const res = await run(sharePlatform('1'));
+		expect([200, 201]).toContain(res.status);
+		await Promise.all(tasks);
+		// The first check (page down, URL alone) used the network's one call; the recheck is refused.
+		expect(ai.run).toHaveBeenCalledTimes(1);
+		expect(sqlite.prepare('SELECT is_active, disabled_reason FROM redirects').get()).toEqual({ is_active: 1, disabled_reason: null });
+		expect(events(info).at(-1)).toMatchObject({
+			event: 'link_gate_recheck_done',
+			result_event: 'link_gate_network_budget_exhausted',
+			disabled: false
+		});
+	});
+});
+
+describe("a flagged link's owner at an exhausted share", () => {
+	it.each([
+		['PUT /api/links', (p: ReturnType<typeof sharePlatform>, body: Record<string, unknown>) => links.PUT({ request: call('PUT', body), platform: p } as never)],
+		['PUT /api/dynamic', (p: ReturnType<typeof sharePlatform>, body: Record<string, unknown>) => dynamic.PUT({ request: call('PUT', body), platform: p } as never)]
+	])('%s: gets the 409 that explains the flag, not 429, and is not charged', async (_name, put) => {
+		vi.stubGlobal('fetch', vi.fn(async () => new Response('<p>ok</p>', { headers: { 'content-type': 'text/html' } })));
+		const p = sharePlatform('1');
+		// This network uses its one call on a link of its own.
+		const first = await links.POST({ request: call('POST', { url: 'https://first.example/' }), platform: p } as never);
+		expect(first.status).toBe(201);
+		await createLink(db, 'flag0001', 'https://bad.example/', await hashPassphrase('correct horse'));
+		sqlite.prepare("UPDATE redirects SET is_active = 0, disabled_reason = 'destination_flagged' WHERE short_code = 'flag0001'").run();
+		vi.mocked(enforceCreationLimits).mockClear();
+		await expect(
+			Promise.resolve(put(p, { short_code: 'flag0001', passphrase: 'correct horse', url: 'https://new.example/' }))
+		).rejects.toMatchObject({ status: 409, body: { message: expect.stringMatching(/flagged as harmful/) } });
+		expect(enforceCreationLimits).not.toHaveBeenCalled();
+		// A wrong passphrase stays on the normal path: the share's 429, before the passphrase is checked.
+		await expect(
+			Promise.resolve(put(p, { short_code: 'flag0001', passphrase: 'wrong passphrase', url: 'https://new.example/' }))
+		).rejects.toMatchObject({ status: 429 });
 	});
 });
 
