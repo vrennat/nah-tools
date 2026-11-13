@@ -18,6 +18,8 @@ declare global {
 				CREATE_LIMITER?: RateLimit;
 				/** Workers AI, used by the link spam gate. Missing means links are allowed unchecked and logged. */
 				AI?: Ai;
+				/** Daily cap on spam-gate model calls; defaults to 5000 (src/lib/server/link-gate/budget.ts). */
+				LINK_GATE_DAILY_MODEL_CALLS?: string;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;

@@ -5,7 +5,7 @@ import { authenticateProfile, addBioLink, updateBioLink, deleteBioLink } from '$
 import { validateUrlSafety } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
 import { enforceCreationLimits } from '$server/creation-limits';
-import { gateDestinationOrThrow } from '$server/link-gate/route';
+import { assertModelBudget, gateDestinationOrThrow, isOwnSite } from '$server/link-gate/route';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -42,6 +42,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 
 	// Each new link costs a destination check, so it shares the link-creation budget.
+	if (!isOwnSite(normalizedUrl)) await assertModelBudget(platform, normalizedUrl);
 	await enforceCreationLimits(platform, request, passphrase);
 	await gateDestinationOrThrow(platform, db, normalizedUrl, { forRedirect: false });
 
@@ -92,6 +93,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 			if (!safety.safe) {
 				throw error(400, safety.reason || 'URL is not allowed');
 			}
+			if (!isOwnSite(normalizedUrl)) await assertModelBudget(platform, normalizedUrl);
 			await enforceCreationLimits(platform, request, passphrase);
 			await gateDestinationOrThrow(platform, db, normalizedUrl, { forRedirect: false });
 		}

@@ -340,3 +340,60 @@ describe('POST and PUT /api/bio/links', () => {
 		expect(linkUrls()).toEqual(['https://ok.example/new']);
 	});
 });
+
+describe('bio links and the daily model-call limit', () => {
+	const today = () => new Date().toISOString().slice(0, 10);
+	const atLimit = (calls = 5000) =>
+		sqlite.prepare('INSERT INTO link_gate_budget (day, calls) VALUES (?, ?)').run(today(), calls);
+	const used = () =>
+		(sqlite.prepare('SELECT calls FROM link_gate_budget WHERE day = ?').get(today()) as { calls: number } | undefined)?.calls ?? 0;
+	const createWith = (handle: string, links: { url: string; title: string }[], env: Record<string, unknown> = {}) => {
+		const p = platform();
+		return profiles.POST({
+			request: req('POST', { handle, display_name: 'Test', passphrase: 'correct horse', links }),
+			platform: { ...p, env: { ...p.env, ...env } }
+		} as never);
+	};
+	const profileCount = () => (sqlite.prepare('SELECT COUNT(*) AS n FROM bio_profiles').get() as { n: number }).n;
+	beforeEach(() => vi.mocked(enforceCreationLimits).mockClear());
+
+	it('refuses a new profile with links with 503 at the limit, before charging the allowance or fetching', async () => {
+		atLimit();
+		await expect(createWith('lim1', [{ url: 'https://ok.example/', title: 'Site' }])).rejects.toMatchObject({
+			status: 503,
+			body: { message: expect.stringMatching(/paused for today/) }
+		});
+		expect(enforceCreationLimits).not.toHaveBeenCalled();
+		expect(fetched).toEqual([]);
+		expect(profileCount()).toBe(0);
+	});
+
+	it('counts each initial link check and refuses the whole profile when the limit is reached partway', async () => {
+		// Limit 2, four links checked up to five at a time: two model calls get a unit, the
+		// others are refused, the request fails with 503 and nothing is written.
+		const links = Array.from({ length: 4 }, (_, i) => ({ url: `https://ok.example/${i}`, title: String(i) }));
+		await expect(createWith('lim2', links, { LINK_GATE_DAILY_MODEL_CALLS: '2' })).rejects.toMatchObject({ status: 503 });
+		expect(ai.run).toHaveBeenCalledTimes(2);
+		expect(used()).toBe(2);
+		expect(profileCount()).toBe(0);
+		expect(linkUrls()).toEqual([]);
+	});
+
+	it('creates a profile whose links all point at nah.tools at the limit, since no model call is needed', async () => {
+		atLimit();
+		const res = await createWith('lim3', [{ url: 'https://nah.tools/qr', title: 'QR' }]);
+		expect(res.status).toBe(201);
+	});
+
+	it('refuses adding a link at the limit with 503 before charging the allowance', async () => {
+		await create('lim4', []);
+		atLimit();
+		await expect(
+			bioLinks.POST({
+				request: req('POST', { handle: 'lim4', passphrase: 'correct horse', url: 'https://ok.example/new', title: 'New' }),
+				platform: platform()
+			} as never)
+		).rejects.toMatchObject({ status: 503 });
+		expect(enforceCreationLimits).not.toHaveBeenCalled();
+	});
+});

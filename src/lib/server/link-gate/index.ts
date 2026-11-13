@@ -21,6 +21,7 @@ import {
 	buildState,
 	parseClefResponse
 } from './questions';
+import { BudgetExhaustedError } from './budget';
 import { decideFromAnswers, decideFromChain, uncheckedAllow, worst, type GateDecision } from './decide';
 
 export type { GateDecision, GateLog } from './decide';
@@ -116,6 +117,8 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 		);
 		return decisions.reduce(worst);
 	} catch (e) {
+		// The daily budget ran out mid-check: the caller refuses the request.
+		if (e instanceof BudgetExhaustedError) throw e;
 		const reason =
 			e instanceof Error && e.message.startsWith('timed out')
 				? 'model_timeout'
