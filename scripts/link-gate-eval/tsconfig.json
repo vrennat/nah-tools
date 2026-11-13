@@ -1,0 +1,21 @@
+{
+	// Typechecks the eval scripts: bunx tsc -p scripts/link-gate-eval
+	// (also part of `bun run check`). The scripts use Node APIs, which Bun
+	// runs, so @types/node is enough and no Bun types package is needed.
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"lib": ["ES2022", "DOM"],
+		"types": ["node"],
+		"strict": true,
+		"noEmit": true,
+		"skipLibCheck": true,
+		"paths": {
+			"$server/*": ["../../src/lib/server/*"],
+			"$qr/*": ["../../src/lib/qr/*"],
+			"$utils/*": ["../../src/lib/utils/*"]
+		}
+	},
+	"include": ["*.ts"]
+}

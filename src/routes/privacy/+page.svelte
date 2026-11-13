@@ -68,9 +68,10 @@
 		<p class="text-text-muted">
 			The service keeps its own log lines in Cloudflare Workers Logs for up to seven days. They are the
 			link check's decisions (event, destination host name, HTTP status and the model's scores, without
-			the rest of the URL) and error messages. Error messages from server-side tools, such as the PDF
-			and PowerPoint tools offered to AI agents, can include details from the file being processed.
-			Request URLs, request headers and IP addresses are not logged.
+			the rest of the URL) and errors. When a server-side tool fails, such as the PDF and PowerPoint
+			tools offered to AI agents, the log records only the tool's name and the type of error, not the
+			error message or anything from the file. Request URLs, request headers and IP addresses are not
+			logged.
 		</p>
 	</section>
 	<section class="space-y-3">

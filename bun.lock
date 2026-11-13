@@ -52,6 +52,9 @@
       },
     },
   },
+  "patchedDependencies": {
+    "@cantoo/pdf-lib@2.6.5": "patches/@cantoo%2Fpdf-lib@2.6.5.patch",
+  },
   "packages": {
     "@babel/runtime": ["@babel/runtime@7.29.2", "", {}, "sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g=="],
 
