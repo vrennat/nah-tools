@@ -107,7 +107,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	// Spam gate last: it fetches the destination and calls the model, so it
 	// runs only for requests that passed every cheaper check. It judges the URL
 	// the redirect worker will serve, UTM parameters included.
-	await gateDestinationOrThrow(platform, db, servedUrl(normalizedUrl, utm), budget);
+	await gateDestinationOrThrow(platform, db, servedUrl(normalizedUrl, utm), { budget });
 
 	const shortCode = generateShortCode();
 	await createLink(db, shortCode, normalizedUrl, passphraseHash, {
@@ -161,7 +161,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 
 	await authenticateRedirect(db, short_code, passphrase);
 
-	await gateDestinationOrThrow(platform, db, servedUrl(normalizedUrl, body.utm), budget);
+	await gateDestinationOrThrow(platform, db, servedUrl(normalizedUrl, body.utm), { budget });
 
 	// Update destination URL
 	await db

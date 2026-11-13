@@ -44,7 +44,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	const budget = await assertModelBudget(platform, request, url);
 	await enforceCreationLimits(platform, request, passphrase);
 
-	await gateDestinationOrThrow(platform, db, url, budget);
+	await gateDestinationOrThrow(platform, db, url, { budget });
 
 	const shortCode = generateShortCode();
 	const passphraseHash = await hashPassphrase(passphrase);
@@ -91,7 +91,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 			term: existing.utm_term ?? undefined,
 			content: existing.utm_content ?? undefined
 		}),
-		budget
+		{ budget }
 	);
 	await updateRedirect(db, short_code, url);
 	await invalidateRedirectCache(getKV(platform), db, short_code);

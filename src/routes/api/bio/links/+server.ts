@@ -4,6 +4,8 @@ import { getDB } from '$server/db';
 import { authenticateProfile, addBioLink, updateBioLink, deleteBioLink } from '$server/bio-db';
 import { validateUrlSafety } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
+import { enforceCreationLimits } from '$server/creation-limits';
+import { assertModelBudget, gateDestinationOrThrow, isOwnSite } from '$server/link-gate/route';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -39,6 +41,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
 
+	// Each new link costs a destination check, so it shares the link-creation budget.
+	const budget = isOwnSite(normalizedUrl) ? {} : await assertModelBudget(platform, request, normalizedUrl);
+	await enforceCreationLimits(platform, request, passphrase);
+	await gateDestinationOrThrow(platform, db, normalizedUrl, { forRedirect: false, budget });
+
 	const link = await addBioLink(db, handle, normalizedUrl, title, icon ?? null, order_index ?? 0);
 
 	return json({ link }, { status: 201 });
@@ -73,12 +80,22 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'icon must be 500 characters or fewer');
 	}
 
-	// Validate URL if changing
+	// Validate URL if changing. The management page sends the URL with every
+	// edit, so an unchanged URL (a title-only edit) is not checked or charged again.
 	if (fields.url) {
 		const normalizedUrl = normalizeUrl(fields.url);
-		const safety = await validateUrlSafety(normalizedUrl, db, { forRedirect: false });
-		if (!safety.safe) {
-			throw error(400, safety.reason || 'URL is not allowed');
+		const current = await db
+			.prepare('SELECT url FROM bio_links WHERE id = ? AND profile_handle = ?')
+			.bind(link_id, handle)
+			.first<{ url: string }>();
+		if (current?.url !== normalizedUrl) {
+			const safety = await validateUrlSafety(normalizedUrl, db, { forRedirect: false });
+			if (!safety.safe) {
+				throw error(400, safety.reason || 'URL is not allowed');
+			}
+			const budget = isOwnSite(normalizedUrl) ? {} : await assertModelBudget(platform, request, normalizedUrl);
+			await enforceCreationLimits(platform, request, passphrase);
+			await gateDestinationOrThrow(platform, db, normalizedUrl, { forRedirect: false, budget });
 		}
 		fields.url = normalizedUrl;
 	}
