@@ -47,7 +47,7 @@ export function logGateDecision(decision: GateDecision): void {
 
 /**
  * Judge a destination within the global daily model-call budget (see
- * budget.ts): withholds the model once the cap is reached, and counts the
+ * budget.ts, counted in D1): withholds the model once the cap is reached, and counts the
  * calls made.
  */
 export async function judgeWithinBudget(
@@ -55,9 +55,9 @@ export async function judgeWithinBudget(
 	url: string,
 	deps: GateDeps
 ): Promise<GateDecision> {
-	const kv = platform?.env?.KV;
+	const db = platform?.env?.DB;
 	const cap = dailyCap(platform?.env?.LINK_GATE_DAILY_MODEL_CALLS);
-	const used = await readUsage(kv);
+	const used = await readUsage(db);
 	if (used !== null && used >= cap) {
 		return judgeDestination(url, { ...deps, ai: undefined, noAiReason: 'daily_model_cap' });
 	}
@@ -69,7 +69,7 @@ export async function judgeWithinBudget(
 		}
 	};
 	const decision = await judgeDestination(url, { ...deps, ai });
-	if (used !== null) await addUsage(kv, used, calls);
+	await addUsage(db, calls);
 	return decision;
 }
 
