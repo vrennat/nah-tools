@@ -4,7 +4,15 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { migratedDb } from '$server/sqlite-d1';
-import { budgetDay, networkCap, DEFAULT_NETWORK_DAILY_MODEL_CALLS, readNetworkUsage, readUsage, reserveNetworkCall } from './budget';
+import {
+	budgetDay,
+	networkCap,
+	DEFAULT_NETWORK_DAILY_MODEL_CALLS,
+	readNetworkUsage,
+	readUsage,
+	refundNetworkCall,
+	reserveNetworkCall
+} from './budget';
 import { judgeWithinBudget, NETWORK_BUDGET_EXHAUSTED_MESSAGE } from './route';
 import { NOUL_QUESTIONS } from './questions';
 
@@ -74,6 +82,8 @@ describe('per-network share (judgeWithinBudget)', () => {
 		expect(model.run).toHaveBeenCalledTimes(3);
 		expect(results.filter((r) => r.verdict === 'block' && r.httpStatus === 429)).toHaveLength(27);
 		expect(await readNetworkUsage(db, 'net-a')).toBe(3);
+		// The network unit is taken first, so refused calls take nothing from the global count.
+		expect(await readUsage(db)).toBe(3);
 	});
 
 	it('gives the network unit back when the global count runs out between the early check and the call', async () => {
@@ -91,9 +101,72 @@ describe('per-network share (judgeWithinBudget)', () => {
 		expect(await readNetworkUsage(db, 'net-a')).toBe(0);
 	});
 
+	it('takes nothing from the global count when the network share runs out between the early check and the call', async () => {
+		const model = ai();
+		onFetch = () =>
+			sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES (?, 'net-a', 1)").run(budgetDay());
+		const d = await judgeWithinBudget(
+			platform({ LINK_GATE_NETWORK_DAILY_MODEL_CALLS: '1' }),
+			'https://a.example/',
+			{ ai: model, fetchImpl },
+			{ network: 'net-a' }
+		);
+		expect(d).toMatchObject({ verdict: 'block', httpStatus: 429 });
+		expect(model.run).not.toHaveBeenCalled();
+		expect(await readUsage(db)).toBe(0);
+	});
+
+	it('never gives back below zero', async () => {
+		sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES (?, 'net-a', 0)").run(budgetDay());
+		await refundNetworkCall(db, 'net-a', { ok: true, day: budgetDay() });
+		expect(await readNetworkUsage(db, 'net-a')).toBe(0);
+	});
+
+	it('gives nothing back when the network reservation failed in D1 and took no unit', async () => {
+		const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+		sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES (?, 'net-a', 2)").run(budgetDay());
+		// D1 fails the network reservation; the global count is already at its cap of 1 when the call comes.
+		const failing = {
+			prepare: (sql: string) =>
+				/INSERT INTO link_gate_network_budget/.test(sql)
+					? { bind: () => ({ first: async () => Promise.reject(new Error('D1 down')) }) }
+					: db.prepare(sql)
+		} as unknown as D1Database;
+		onFetch = () => sqlite.prepare('INSERT INTO link_gate_budget (day, calls) VALUES (?, 1)').run(budgetDay());
+		const d = await judgeWithinBudget(
+			{ env: { DB: failing, LINK_GATE_DAILY_MODEL_CALLS: '1' } } as never,
+			'https://a.example/',
+			{ ai: ai(), fetchImpl },
+			{ network: 'net-a' }
+		);
+		expect(d).toMatchObject({ verdict: 'block', httpStatus: 503 });
+		expect(await readNetworkUsage(db, 'net-a')).toBe(2);
+		expect(err.mock.calls.map((c: unknown[]) => JSON.parse(c[0] as string).reason)).toEqual(['network_counter_write_failed']);
+	});
+
+	it('gives back on the day the unit was taken, not the current day', async () => {
+		sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES ('2026-11-13', 'net-a', 3)").run();
+		sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES ('2026-11-14', 'net-a', 1)").run();
+		await refundNetworkCall(db, 'net-a', { ok: true, day: '2026-11-13' });
+		expect(sqlite.prepare('SELECT day, calls FROM link_gate_network_budget ORDER BY day').all()).toEqual([
+			{ day: '2026-11-13', calls: 2 },
+			{ day: '2026-11-14', calls: 1 }
+		]);
+	});
+
+	it('logs a failed delete of old rows on its own and keeps the reservation', async () => {
+		const err = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const failing = {
+			prepare: (sql: string) =>
+				/^DELETE/.test(sql) ? { bind: () => ({ run: async () => Promise.reject(new Error('D1 down')) }) } : db.prepare(sql)
+		} as unknown as D1Database;
+		expect(await reserveNetworkCall(failing, 'net-a', 60)).toEqual({ ok: true, day: budgetDay() });
+		expect(err.mock.calls.map((c: unknown[]) => JSON.parse(c[0] as string).reason)).toEqual(['network_counter_cleanup_failed']);
+	});
+
 	it("deletes earlier days' rows on a network's first call of the day", async () => {
 		sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES ('2026-11-01', 'old', 5)").run();
-		expect(await reserveNetworkCall(db, 'net-a', 60)).toBe(true);
+		expect(await reserveNetworkCall(db, 'net-a', 60)).toEqual({ ok: true, day: budgetDay() });
 		expect(sqlite.prepare('SELECT day, network, calls FROM link_gate_network_budget').all()).toEqual([
 			{ day: budgetDay(), network: 'net-a', calls: 1 }
 		]);

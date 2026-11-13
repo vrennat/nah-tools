@@ -173,9 +173,10 @@ export async function judgeWithinBudget(
 	}
 	const ai = deps.ai && {
 		run: async (model: string, input: unknown) => {
-			if (network && !(await reserveNetworkCall(db, network, share))) throw new BudgetExhaustedError('network');
+			const mine = network ? await reserveNetworkCall(db, network, share) : undefined;
+			if (mine && !mine.ok) throw new BudgetExhaustedError('network');
 			if (!(await reserveCall(db, cap))) {
-				if (network) await refundNetworkCall(db, network);
+				if (network && mine) await refundNetworkCall(db, network, mine);
 				throw new BudgetExhaustedError('global');
 			}
 			return deps.ai!.run(model, input);

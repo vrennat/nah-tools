@@ -128,22 +128,31 @@ export async function readNetworkUsage(
 	}
 }
 
+/** The outcome of a network reservation. `day` is set only when a unit was actually taken. */
+export interface NetworkReservation {
+	/** False only when the share is used up. True when a unit was taken, and when D1 failed (logged). */
+	ok: boolean;
+	/** The UTC day the unit was taken from, for giving it back. */
+	day?: string;
+}
+
 /**
- * Reserve one model call from this network's share: true if it fits, false
- * if the share is used up, true (logged) if D1 fails. One atomic upsert, like
+ * Reserve one model call from this network's share. One atomic upsert, like
  * reserveCall. A network's first call of the day also deletes earlier days'
- * rows, so the table holds about one day of rows.
+ * rows (all networks), so the table holds about one day of rows; a failed
+ * delete is logged on its own and does not affect the reservation.
  */
 export async function reserveNetworkCall(
 	db: D1Database | undefined,
 	network: string,
 	cap: number,
 	now = new Date()
-): Promise<boolean> {
-	if (!db) return true;
+): Promise<NetworkReservation> {
+	if (!db) return { ok: true };
 	const day = budgetDay(now);
+	let row: { calls: number } | null;
 	try {
-		const row = await db
+		row = await db
 			.prepare(
 				`INSERT INTO link_gate_network_budget (day, network, calls) VALUES (?1, ?2, 1)
 				 ON CONFLICT(day, network) DO UPDATE SET calls = calls + 1 WHERE calls < ?3
@@ -151,26 +160,38 @@ export async function reserveNetworkCall(
 			)
 			.bind(day, network, cap)
 			.first<{ calls: number }>();
-		if (row?.calls === 1) {
-			await db.prepare('DELETE FROM link_gate_network_budget WHERE day < ?').bind(day).run();
-		}
-		return row !== null;
 	} catch {
 		logBudgetError('network_counter_write_failed');
-		return true;
+		return { ok: true };
 	}
+	if (row === null) return { ok: false };
+	if (row.calls === 1) {
+		try {
+			await db.prepare('DELETE FROM link_gate_network_budget WHERE day < ?').bind(day).run();
+		} catch {
+			logBudgetError('network_counter_cleanup_failed');
+		}
+	}
+	return { ok: true, day };
 }
 
-/** Give back a network unit whose model call did not run (the global cap refused it). */
-export async function refundNetworkCall(db: D1Database | undefined, network: string, now = new Date()): Promise<void> {
-	if (!db) return;
+/**
+ * Give back a network unit whose model call did not run (the global cap
+ * refused it). Only for a reservation that took a unit, and on the day it
+ * was taken, so a unit is never returned that was not taken.
+ */
+export async function refundNetworkCall(
+	db: D1Database | undefined,
+	network: string,
+	reservation: NetworkReservation
+): Promise<void> {
+	if (!db || !reservation.day) return;
 	try {
 		await db
 			.prepare('UPDATE link_gate_network_budget SET calls = calls - 1 WHERE day = ? AND network = ? AND calls > 0')
-			.bind(budgetDay(now), network)
+			.bind(reservation.day, network)
 			.run();
 	} catch {
 		logBudgetError('network_counter_refund_failed');
 	}
 }
-
