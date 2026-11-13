@@ -1,10 +1,10 @@
 /**
  * The PDF tools must not log values read from the user's file (issue #60).
- * @cantoo/pdf-lib 2.6.5 console.warns parsed numbers and object refs; those
- * calls are removed by patches/@cantoo%2Fpdf-lib@2.6.5.patch.
+ * @cantoo/pdf-lib 2.6.5 console.warns parsed numbers and object refs, and
+ * PDFForm.flatten console.errors errors that name object refs; those calls are removed by patches/@cantoo%2Fpdf-lib@2.6.5.patch.
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { PDFDocument } from '@cantoo/pdf-lib';
+import { PDFDocument, PDFName } from '@cantoo/pdf-lib';
 import { registerPDFTools } from './pdf';
 
 const MARKER = '98765432109876543210';
@@ -39,5 +39,24 @@ describe('PDF tool logging', () => {
 		expect(res.isError, res.content[0]?.text).toBeFalsy();
 		const logged = spies.flatMap((s) => s.mock.calls.map((c) => c.map(String).join(' ')));
 		expect(logged.filter((l) => l.includes(MARKER) || l.includes('Parsed number'))).toEqual([]);
+	});
+
+	it('logs nothing from the file when flattening a form whose widget is on no page', async () => {
+		const doc = await PDFDocument.create();
+		const page = doc.addPage([200, 200]);
+		const field = doc.getForm().createTextField('orphan');
+		field.addToPage(page, { x: 10, y: 10, width: 100, height: 20 });
+		// Detach the widget from every page: flatten then hits "Could not find page for PDFRef <n> 0 R".
+		page.node.delete(PDFName.of('Annots'));
+		for (const w of field.acroField.getWidgets()) w.dict.delete(PDFName.of('P'));
+		const pdf = Buffer.from(await doc.save()).toString('base64');
+
+		const spies = (['log', 'info', 'warn', 'error', 'debug'] as const).map((m) =>
+			vi.spyOn(console, m).mockImplementation(() => {})
+		);
+		const res = await captureTools().get('pdf_flatten')!({ pdf_base64: pdf });
+		expect(res.isError, res.content[0]?.text).toBeFalsy();
+		const logged = spies.flatMap((s) => s.mock.calls.map((c) => c.map(String).join(' ')));
+		expect(logged).toEqual([]);
 	});
 });
