@@ -247,4 +247,59 @@ describe('recheck budgets', () => {
 	it('gives the recheck 10 s for the fetch and 8 s for the model', async () => {
 		expect(recheckDeps(undefined, db)).toMatchObject({ fetchTimeoutMs: 10_000, clefTimeoutMs: 8_000 });
 	});
+
+	/** POST a link with fake timers, advancing time until the response and then the recheck settle. */
+	async function createWithFakeTime(p: ReturnType<typeof platform>) {
+		const res = links.POST({ request: req('POST', { url: 'https://slow.example/' }), platform: p } as never);
+		await vi.advanceTimersByTimeAsync(5_000);
+		expect((await res).status).toBe(201);
+		expect(tasks).toHaveLength(1);
+		await vi.advanceTimersByTimeAsync(11_000);
+		await Promise.all(tasks);
+	}
+
+	it('a model answer that takes 6 s times out on the first check but counts in the recheck', async () => {
+		vi.useFakeTimers();
+		try {
+			behaviour = ['phish', 'phish'];
+			const p = platform();
+			const inner = p.env.AI.run.getMockImplementation()!;
+			p.env.AI.run.mockImplementation(async (m: string, input: unknown) => {
+				await new Promise((r) => setTimeout(r, 6_000));
+				return inner(m, input);
+			});
+			await createWithFakeTime(p);
+			expect(events()[0]).toMatchObject({ event: 'link_gate_allow_unchecked', reason: 'model_timeout' });
+			expect(row()).toMatchObject({ is_active: 0, disabled_reason: 'destination_flagged' });
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it('a page that takes 5 s times out on the first check but is read in the recheck', async () => {
+		vi.useFakeTimers();
+		try {
+			vi.stubGlobal(
+				'fetch',
+				vi.fn(
+					(_u: string, init?: RequestInit) =>
+						new Promise<Response>((resolve, reject) => {
+							const t = setTimeout(() => {
+								const body = '<title>Prize</title><p>Claim your prize now. ' + 'Enter your card. '.repeat(30) + '</p>';
+								resolve(new Response(body, { headers: { 'content-type': 'text/html' } }));
+							}, 5_000);
+							init?.signal?.addEventListener('abort', () => {
+								clearTimeout(t);
+								reject(new DOMException('aborted', 'AbortError'));
+							});
+						})
+				)
+			);
+			await createWithFakeTime(platform());
+			expect(events()[0]).toMatchObject({ event: 'link_gate_allow_unchecked' });
+			expect(row()).toMatchObject({ is_active: 0, disabled_reason: 'destination_flagged' });
+		} finally {
+			vi.useRealTimers();
+		}
+	});
 });

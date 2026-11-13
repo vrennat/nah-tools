@@ -42,6 +42,31 @@ describe('redirect worker', () => {
 		expect(await res.text()).toMatch(/deactivated by its owner/);
 	});
 
+	it('answers 410 from the disabled row the recheck cached in KV, without reading D1', async () => {
+		const { migratedDb } = await import('$server/sqlite-d1');
+		const { createLink, disableFlaggedRedirect, cacheRedirectRow } = await import('$server/db');
+		const { db } = migratedDb();
+		await createLink(db, 'code0001', 'https://ok.example/', '');
+		await disableFlaggedRedirect(db, 'code0001', 'https://ok.example/', undefined);
+		const store = new Map<string, string>();
+		const kv = {
+			get: async (k: string, type?: string) => {
+				const v = store.get(k) ?? null;
+				return v && type === 'json' ? JSON.parse(v) : v;
+			},
+			put: async (k: string, v: string) => void store.set(k, v)
+		};
+		await cacheRedirectRow(kv as never, db, 'code0001');
+		const staleD1 = { prepare: () => ({ bind: () => ({ first: async () => ({ ...base, is_active: 1 }) }) }) };
+		const res = await worker.fetch(
+			new Request('https://go.nah.tools/code0001'),
+			{ KV: kv, DB: staleD1, CLICKS: { writeDataPoint: () => {} } } as never,
+			ctx as never
+		);
+		expect(res.status).toBe(410);
+		expect(await res.text()).toMatch(/destination was flagged as harmful/);
+	});
+
 	it('redirects an active link', async () => {
 		const res = await worker.fetch(new Request('https://go.nah.tools/code0001'), env({ ...base, is_active: 1 }) as never, ctx as never);
 		expect(res.status).toBe(302);
