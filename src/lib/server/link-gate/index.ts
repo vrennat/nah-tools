@@ -21,6 +21,7 @@ import {
 	buildState,
 	parseClefResponse
 } from './questions';
+import { BudgetExhaustedError } from './budget';
 import { decideFromAnswers, decideFromChain, uncheckedAllow, worst, type GateDecision } from './decide';
 
 export type { GateDecision, GateLog } from './decide';
@@ -36,8 +37,6 @@ export interface GateDeps {
 	ai: AiRunner | undefined;
 	/** D1 blocklist check for hops after the first; returns a reason or null. */
 	checkHop?: (url: string) => Promise<string | null>;
-	/** Why ai is missing, when it was withheld on purpose (the daily budget). */
-	noAiReason?: string;
 	fetchImpl?: typeof fetch;
 	/** Total time budget for the redirect chain; defaults to TOTAL_TIMEOUT_MS. */
 	fetchTimeoutMs?: number;
@@ -78,7 +77,7 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 	const early = decideFromChain(chain, page);
 	if (early) return early;
 
-	if (!deps.ai) return uncheckedAllow(chain, deps.noAiReason ?? 'ai_binding_missing');
+	if (!deps.ai) return uncheckedAllow(chain, 'ai_binding_missing');
 	const ai = deps.ai;
 	const timeoutMs = deps.clefTimeoutMs ?? CLEF_TIMEOUT_MS;
 
@@ -115,6 +114,8 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 		);
 		return decisions.reduce(worst);
 	} catch (e) {
+		// The daily budget ran out mid-check: the caller refuses the request.
+		if (e instanceof BudgetExhaustedError) throw e;
 		const reason =
 			e instanceof Error && e.message.startsWith('timed out')
 				? 'model_timeout'

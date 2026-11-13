@@ -4,7 +4,7 @@
  */
 import { error } from '@sveltejs/kit';
 import { validateUrlSafety } from '$server/safety';
-import { addUsage, dailyCap, readUsage } from './budget';
+import { BudgetExhaustedError, dailyCap, readUsage, reserveCall } from './budget';
 import type { UTMParams } from '$qr/types';
 import { judgeDestination, type GateDecision, type GateDeps } from './index';
 
@@ -45,10 +45,30 @@ export function logGateDecision(decision: GateDecision): void {
 	if (decision.log) console.info(JSON.stringify(decision.log));
 }
 
+export const BUDGET_EXHAUSTED_MESSAGE =
+	'New short links are paused for today because the link safety check has reached its daily limit. Please try again after 00:00 UTC.';
+
+function budgetExhausted(url: string): GateDecision {
+	let host = '';
+	try {
+		host = new URL(url).hostname;
+	} catch {
+		// Leave host empty.
+	}
+	return {
+		verdict: 'block',
+		message: BUDGET_EXHAUSTED_MESSAGE,
+		httpStatus: 503,
+		log: { event: 'link_gate_budget_exhausted', reason: 'daily_model_cap', host }
+	};
+}
+
 /**
- * Judge a destination within the global daily model-call budget (see
- * budget.ts, counted in D1): withholds the model once the cap is reached, and counts the
- * calls made.
+ * Judge a destination within the global daily model-call budget (budget.ts,
+ * counted in D1). Every model call reserves one unit first. When the budget
+ * is used up, the request is refused with a 503 and logged as
+ * link_gate_budget_exhausted, for every creator: a passphrase costs nothing
+ * to set, so exempting passphrase users would leave the same bypass.
  */
 export async function judgeWithinBudget(
 	platform: App.Platform | undefined,
@@ -57,20 +77,21 @@ export async function judgeWithinBudget(
 ): Promise<GateDecision> {
 	const db = platform?.env?.DB;
 	const cap = dailyCap(platform?.env?.LINK_GATE_DAILY_MODEL_CALLS);
+	// Cheap early refusal, before fetching anything.
 	const used = await readUsage(db);
-	if (used !== null && used >= cap) {
-		return judgeDestination(url, { ...deps, ai: undefined, noAiReason: 'daily_model_cap' });
-	}
-	let calls = 0;
+	if (used !== null && used >= cap) return budgetExhausted(url);
 	const ai = deps.ai && {
-		run: (model: string, input: unknown) => {
-			calls++;
+		run: async (model: string, input: unknown) => {
+			if (!(await reserveCall(db, cap))) throw new BudgetExhaustedError();
 			return deps.ai!.run(model, input);
 		}
 	};
-	const decision = await judgeDestination(url, { ...deps, ai });
-	await addUsage(db, calls);
-	return decision;
+	try {
+		return await judgeDestination(url, { ...deps, ai });
+	} catch (e) {
+		if (e instanceof BudgetExhaustedError) return budgetExhausted(url);
+		throw e;
+	}
 }
 
 /** Run the gate and log its decision. Throws a 400 with a user-facing message when the destination is blocked. */
@@ -81,5 +102,5 @@ export async function gateDestinationOrThrow(
 ): Promise<void> {
 	const decision = await judgeWithinBudget(platform, url, gateDeps(platform, db));
 	logGateDecision(decision);
-	if (decision.verdict === 'block') throw error(400, decision.message);
+	if (decision.verdict === 'block') throw error(decision.httpStatus ?? 400, decision.message);
 }

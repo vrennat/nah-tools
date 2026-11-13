@@ -112,6 +112,17 @@ describe('POST /api/links', () => {
 	});
 });
 
+describe('daily model-call limit', () => {
+	it('refuses a new link with 503 and a clear message once the day\'s limit is used up', async () => {
+		sqlite.prepare("INSERT INTO link_gate_budget (day, calls) VALUES (?, 5000)").run(new Date().toISOString().slice(0, 10));
+		await expect(
+			links.POST({ request: req('POST', { url: 'https://ok.example/' }), platform: platform() } as never)
+		).rejects.toMatchObject({ status: 503, body: { message: expect.stringMatching(/paused for today/) } });
+		expect(rows()).toEqual([]);
+		expect(logged()).toEqual([expect.objectContaining({ event: 'link_gate_budget_exhausted', reason: 'daily_model_cap' })]);
+	});
+});
+
 describe('PUT /api/links', () => {
 	beforeEach(async () => {
 		await createLink(db, 'code0001', 'https://ok.example/', await hashPassphrase('correct horse'));
