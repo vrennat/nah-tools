@@ -4,6 +4,8 @@
  *
  *   bun scripts/link-gate-eval/score.ts <run.jsonl>...
  */
+import { readFile } from 'node:fs/promises';
+
 type Row = {
 	label: string;
 	url: string;
@@ -23,13 +25,14 @@ function wilson(k: number, n: number): string {
 }
 
 for (const file of process.argv.slice(2)) {
-	const rows: Row[] = (await Bun.file(file).text())
+	const rows: Row[] = (await readFile(file, 'utf8'))
 		.split('\n')
 		.filter(Boolean)
 		.map((l) => JSON.parse(l));
 	const n = rows.length;
 	const blocked = rows.filter((r) => r.verdict === 'block').length;
 	const suspicious = rows.filter((r) => r.log?.event === 'link_gate_allow_suspicious').length;
+	const timeouts = rows.filter((r) => r.log?.reason === 'model_timeout').length;
 	const byKey: Record<string, number> = {};
 	for (const r of rows) {
 		const k = r.verdict + (r.log ? ` ${r.log.event}/${r.log.reason}` : '');
@@ -41,6 +44,7 @@ for (const file of process.argv.slice(2)) {
 	console.log(
 		`  blocked or suspicious: ${blocked + suspicious}/${n}  95% CI ${wilson(blocked + suspicious, n)}`
 	);
+	console.log(`  model timeouts:        ${timeouts}/${n}`);
 	console.log(`  latency: median ${ms[Math.floor(n / 2)]} ms, p95 ${ms[Math.floor(n * 0.95)]} ms`);
 	for (const [k, v] of Object.entries(byKey).sort((a, b) => b[1] - a[1])) {
 		console.log(`  ${String(v).padStart(4)}  ${k}`);
