@@ -5,8 +5,7 @@ import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
 import { normalizeUrl } from '$utils/url';
-import { judgeDestination } from '$server/link-gate';
-import { gateDeps, logGateDecision } from '$server/link-gate/route';
+import { assertModelBudget, gateDeps, judgeWithinBudget, logGateDecision } from '$server/link-gate/route';
 
 /**
  * Each link runs the spam gate (up to 6 fetches, a blocklist lookup per hop
@@ -52,6 +51,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 
 	// Each link in the batch counts against the daily cap.
+	await assertModelBudget(platform, '');
 	await enforceCreationLimits(platform, request, passphrase, links.length);
 
 	// Hash passphrase if provided, otherwise anonymous
@@ -106,7 +106,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			}
 
 			// Every bulk link goes through the spam gate, one at a time.
-			const decision = await judgeDestination(normalized, deps);
+			const decision = await judgeWithinBudget(platform, normalized, deps);
 			logGateDecision(decision);
 			if (decision.verdict === 'block') {
 				results.push({ short_code: '', short_url: '', destination: link.url, error: decision.message });

@@ -185,6 +185,11 @@ export interface FollowOptions {
 	 * Return a reason to stop the chain as policy-blocked, or null to continue.
 	 */
 	checkHop?: (url: string) => Promise<string | null>;
+	/**
+	 * True (default) for go.nah.tools redirects. False for bio page links,
+	 * which may point at nah.tools; see checkDestination.
+	 */
+	forRedirect?: boolean;
 }
 
 /**
@@ -204,7 +209,7 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 	let url = startUrl;
 	try {
 		for (;;) {
-			const policy = checkDestination(url, { forRedirect: true });
+			const policy = checkDestination(url, { forRedirect: opts.forRedirect ?? true });
 			if (!policy.ok) {
 				return { outcome: 'policy-blocked', hops, finalUrl: url, reason: policy.reason };
 			}

@@ -4,7 +4,14 @@ import { getDB, getKV, authenticateRedirect, generateShortCode, createRedirect, 
 import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
-import { assertNotFlagged, gateDestinationOrThrow, refuseFlaggedChangeForOwner, scheduleRecheck, servedUrl } from '$server/link-gate/route';
+import {
+	assertModelBudget,
+	assertNotFlagged,
+	gateDestinationOrThrow,
+	refuseFlaggedChangeForOwner,
+	scheduleRecheck,
+	servedUrl
+} from '$server/link-gate/route';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -41,6 +48,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
 	}
 
+	await assertModelBudget(platform, url);
 	await enforceCreationLimits(platform, request, passphrase);
 
 	const decision = await gateDestinationOrThrow(platform, db, url);
@@ -77,6 +85,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	}
 
 	// Destination changes share the creation budget.
+	await assertModelBudget(platform, url);
 	await enforceCreationLimits(platform, request, passphrase);
 
 	const existing = await authenticateRedirect(db, short_code, passphrase);

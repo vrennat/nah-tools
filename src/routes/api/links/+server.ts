@@ -14,7 +14,14 @@ import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
 import { normalizeUrl } from '$utils/url';
-import { assertNotFlagged, gateDestinationOrThrow, refuseFlaggedChangeForOwner, scheduleRecheck, servedUrl } from '$server/link-gate/route';
+import {
+	assertModelBudget,
+	assertNotFlagged,
+	gateDestinationOrThrow,
+	refuseFlaggedChangeForOwner,
+	scheduleRecheck,
+	servedUrl
+} from '$server/link-gate/route';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -57,6 +64,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
 
+	await assertModelBudget(platform, normalizedUrl);
 	await enforceCreationLimits(platform, request, passphrase);
 
 	// Validate alias if provided
@@ -159,6 +167,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 
 	// Destination changes share the creation budget, so one link cannot be
 	// re-pointed at a stream of fresh domains.
+	await assertModelBudget(platform, normalizedUrl);
 	await enforceCreationLimits(platform, request, passphrase);
 
 	const existing = await authenticateRedirect(db, short_code, passphrase);

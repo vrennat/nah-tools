@@ -2,12 +2,14 @@
 	// Typechecks the eval scripts: bunx tsc -p scripts/link-gate-eval
 	// (also part of `bun run check`). The scripts use Node APIs, which Bun
 	// runs, so @types/node is enough and no Bun types package is needed.
+	// The Workers types cover the gate code they import (D1Database and the
+	// like); it runs in Bun here without those bindings.
 	"compilerOptions": {
 		"target": "ES2022",
 		"module": "ESNext",
 		"moduleResolution": "bundler",
 		"lib": ["ES2022", "DOM"],
-		"types": ["node"],
+		"types": ["node", "@cloudflare/workers-types"],
 		"strict": true,
 		"noEmit": true,
 		"skipLibCheck": true,
