@@ -12,7 +12,7 @@ import {
 } from '$server/bio-db';
 import { validateHandle, validateUrlSafety, verifyTurnstile, checkRateLimit } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
-import { gateDestinationOrThrow } from '$server/link-gate/route';
+import { gateAllOrThrow } from '$server/link-gate/route';
 import { enforceCreationLimits } from '$server/creation-limits';
 
 /** Each initial link runs the spam gate, so a new profile takes at most this many. */
@@ -131,10 +131,14 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	if (initialLinks.length > 0) {
 		await enforceCreationLimits(platform, request, passphrase, initialLinks.length);
 	}
-	// Checked together, not one by one (twenty slow destinations would take
-	// minutes); any block still rejects the request before anything is written.
-	await Promise.all(
-		initialLinks.map((link) => gateDestinationOrThrow(platform, db, link.url, { forRedirect: false }))
+	// Checked a few at a time, not one by one (twenty slow destinations would
+	// take minutes) and not all at once (queued fetches would time out and be
+	// allowed unchecked). Any block rejects the request before anything is written.
+	await gateAllOrThrow(
+		platform,
+		db,
+		initialLinks.map((link) => link.url),
+		{ forRedirect: false }
 	);
 
 	const passphraseHash = await hashPassphrase(passphrase);

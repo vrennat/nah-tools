@@ -82,3 +82,39 @@ export async function gateDestinationOrThrow(
 	logGateDecision(decision);
 	if (decision.verdict === 'block') throw error(400, decision.message);
 }
+
+/**
+ * At most this many gate checks run at once. A Worker invocation can have six
+ * connections waiting for response headers; a seventh fetch is queued
+ * (https://developers.cloudflare.com/workers/platform/limits/#simultaneous-open-connections),
+ * and its 3-second fetch budget keeps running while it waits, so a queued
+ * destination would time out and be allowed unchecked. Five leaves a slot
+ * for D1 and KV. It also bounds model calls in flight.
+ */
+export const GATE_CONCURRENCY = 5;
+
+/**
+ * gateDestinationOrThrow for several URLs, at most GATE_CONCURRENCY at a
+ * time. The first block rejects; no further checks are started after it.
+ */
+export async function gateAllOrThrow(
+	platform: App.Platform | undefined,
+	db: D1Database,
+	urls: readonly string[],
+	opts: GateOptions = {}
+): Promise<void> {
+	let next = 0;
+	let failed = false;
+	const worker = async () => {
+		while (!failed && next < urls.length) {
+			const url = urls[next++];
+			try {
+				await gateDestinationOrThrow(platform, db, url, opts);
+			} catch (e) {
+				failed = true;
+				throw e;
+			}
+		}
+	};
+	await Promise.all(Array.from({ length: Math.min(GATE_CONCURRENCY, urls.length) }, worker));
+}

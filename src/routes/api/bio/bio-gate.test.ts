@@ -173,6 +173,87 @@ describe('POST /api/bio (create with initial links)', () => {
 		expect(maxInFlight).toBe(3);
 	});
 
+	it('checks at most 5 initial links at a time', async () => {
+		const res = await create(
+			'iris',
+			Array.from({ length: 8 }, (_, i) => ({ url: `https://ok.example/${i}`, title: String(i) }))
+		);
+		expect(res.status).toBe(201);
+		expect(linkUrls()).toHaveLength(8);
+		expect(maxInFlight).toBe(5);
+	});
+
+	it('still rejects a phishing link listed after six slow ones, under a six-connection limit', async () => {
+		// Models a Worker invocation: six fetches may wait for headers at once,
+		// a seventh is queued, and each check's 3 s fetch budget runs meanwhile.
+		// Checking all seven at once let the phishing link time out in the
+		// queue and be stored unchecked (review of #62).
+		vi.useFakeTimers();
+		try {
+			let slots = 6;
+			const queue: (() => void)[] = [];
+			const acquire = (signal: AbortSignal) =>
+				new Promise<void>((resolve, reject) => {
+					if (slots > 0) return (slots--, resolve());
+					const go = () => (slots--, resolve());
+					queue.push(go);
+					signal.addEventListener('abort', () => {
+						const i = queue.indexOf(go);
+						if (i >= 0) queue.splice(i, 1);
+						reject(new Error('aborted'));
+					});
+				});
+			const release = () => {
+				slots++;
+				queue.shift()?.();
+			};
+			const wait = (ms: number, signal: AbortSignal) =>
+				new Promise<void>((resolve, reject) => {
+					const t = setTimeout(resolve, ms);
+					signal.addEventListener('abort', () => (clearTimeout(t), reject(new Error('aborted'))));
+				});
+			vi.stubGlobal(
+				'fetch',
+				vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+					const url = new URL(String(input));
+					const signal = init!.signal!;
+					await acquire(signal);
+					try {
+						if (signal.aborted) throw new Error('aborted');
+						await wait(url.hostname === 'slow.example' ? 3_500 : 50, signal);
+						const body =
+							url.hostname === 'phish.example' ? '<title>Prize</title><p>' + 'Claim your prize now. '.repeat(30) + '</p>' : PAGE;
+						return new Response(body, { headers: { 'content-type': 'text/html' } });
+					} finally {
+						release();
+					}
+				})
+			);
+			// Score the page, not the host: a check that never read the page must not block it.
+			ai.run.mockImplementation(async (_m: string, input: unknown) => {
+				const phish = (input as { state: string }).state.includes('Claim your prize');
+				return {
+					answers: Object.fromEntries(
+						Object.keys(NOUL_QUESTIONS).map((id) => [id, { noul: phish ? (PHISH[id as keyof typeof PHISH] ?? 0.02) : 0.02 }])
+					)
+				};
+			});
+			const links = [
+				...Array.from({ length: 6 }, (_, i) => ({ url: `https://slow.example/${i}`, title: 'S' })),
+				{ url: 'https://phish.example/', title: 'P' }
+			];
+			const res = Promise.resolve(create('zed', links)).then(
+				() => 'stored',
+				(e: { status?: number }) => e.status
+			);
+			await vi.advanceTimersByTimeAsync(20_000);
+			expect(await res).toBe(400);
+			expect(linkUrls()).toEqual([]);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
 	it.each([
 		['a string', 'https://ok.example/'],
 		['an object', { url: 'https://ok.example/', title: 'X' }],
