@@ -340,7 +340,7 @@
 </script>
 
 <svelte:head>
-	<title>nah — Free Link Shortener</title>
+	<title>Free Link Shortener | nah.tools</title>
 	<meta name="description" content="Free, open-source link shortener with custom aliases, click analytics, UTM builder, and QR codes. No signup required." />
 	{@html `<script type="application/ld+json">${JSON.stringify({
 		"@context": "https://schema.org",

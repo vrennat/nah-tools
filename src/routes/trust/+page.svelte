@@ -1,7 +1,7 @@
 <svelte:head>
-	<title>How it works — nah</title>
+	<title>How it works | nah.tools</title>
 	<meta name="description" content="How nah.tools works: local browser processing, hosted links and bio pages, model downloads and practical limits." />
-	<meta property="og:title" content="How it works — nah" />
+	<meta property="og:title" content="How it works | nah.tools" />
 	<meta property="og:description" content="Local browser tools, hosted redirects and public bio pages. What runs where and what to expect." />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://nah.tools/trust" />

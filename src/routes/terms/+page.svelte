@@ -1,5 +1,5 @@
 <svelte:head>
-	<title>Terms of Service — nah</title>
+	<title>Terms of Service | nah.tools</title>
 	<meta name="description" content="nah terms of service. Free, open-source, provided as-is." />
 </svelte:head>
 

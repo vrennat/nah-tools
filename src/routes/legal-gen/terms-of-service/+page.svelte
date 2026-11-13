@@ -87,7 +87,7 @@
 </script>
 
 <svelte:head>
-	<title>Terms of Service Generator — nah</title>
+	<title>Terms of Service Generator | nah.tools</title>
 	<meta name="description" content="Create a customizable terms of service draft describing service rules and user obligations." />
 </svelte:head>
 

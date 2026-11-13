@@ -12,7 +12,7 @@
 />
 
 <svelte:head>
-	<title>The Video Compressor Shakedown — nah</title>
+	<title>The Video Compressor Shakedown | nah.tools</title>
 	<meta
 		name="description"
 		content="Your browser has a video encoder. These companies charge you not to use it."

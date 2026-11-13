@@ -23,7 +23,7 @@
 <FAQSchema {faqs} />
 
 <svelte:head>
-	<title>Free Phone Number QR Code Generator — nah</title>
+	<title>Free Phone Number QR Code Generator | nah.tools</title>
 	<meta name="description" content="Create a free QR code for a phone number. Scan to call instantly. No signup, no expiration. Works with any phone number worldwide." />
 </svelte:head>
 
