@@ -132,7 +132,12 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ short_code: data.code, passphrase, url: newUrl })
 			});
-			const body = await res.json() as { success?: boolean; message?: string };
+			const body = await res.json() as {
+				success?: boolean;
+				message?: string;
+				status?: 'active' | 'held';
+				notice?: string;
+			};
 
 			if (!res.ok) {
 				updateError = body.message || 'Failed to update';
@@ -140,6 +145,15 @@
 			}
 
 			destinationUrl = newUrl;
+			if (body.status === 'held') {
+				isHeld = true;
+				isActive = false;
+				updateSuccess = body.notice || 'URL updated; the link is on hold while it is checked.';
+				return;
+			}
+			// An allowed destination releases a hold; a deactivated link stays inactive.
+			if (isHeld) isActive = true;
+			isHeld = false;
 			updateSuccess = 'URL updated successfully';
 			setTimeout(() => { updateSuccess = ''; }, 3000);
 		} catch {
@@ -388,7 +402,7 @@
 				</div>
 			</div>
 
-			{#if isActive}
+			{#if isActive || isHeld}
 				<form onsubmit={handleUpdate} class="space-y-4 border-t border-border pt-4">
 					<div>
 						<label for="newUrl" class="block text-sm font-medium text-text mb-1">Update destination URL</label>

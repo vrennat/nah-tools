@@ -3,9 +3,8 @@
  * repository's migrations, so the CASE logic is tested as SQL, not as a mock.
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { DatabaseSync } from 'node:sqlite';
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import type { DatabaseSync } from 'node:sqlite';
+import { migratedDb } from './sqlite-d1';
 import {
 	createLink,
 	createRedirect,
@@ -14,27 +13,6 @@ import {
 	resolveUncheckedHold,
 	deactivateRedirect
 } from '$server/db';
-
-/** Minimal D1 shim over node:sqlite: prepare().bind().first()/run(). */
-function d1(sqlite: DatabaseSync): D1Database {
-	const prepare = (sql: string) => {
-		let params: unknown[] = [];
-		const stmt = {
-			bind: (...p: unknown[]) => {
-				params = p;
-				return stmt;
-			},
-			first: async () => (sqlite.prepare(sql).get(...(params as never[])) as unknown) ?? null,
-			run: async () => {
-				const r = sqlite.prepare(sql).run(...(params as never[]));
-				return { success: true, meta: { changes: Number(r.changes) } };
-			},
-			all: async () => ({ results: sqlite.prepare(sql).all(...(params as never[])) })
-		};
-		return stmt;
-	};
-	return { prepare } as unknown as D1Database;
-}
 
 let sqlite: DatabaseSync;
 let db: D1Database;
@@ -46,12 +24,7 @@ const row = (code: string) =>
 	};
 
 beforeEach(() => {
-	sqlite = new DatabaseSync(':memory:');
-	const dir = join(process.cwd(), 'migrations');
-	for (const f of readdirSync(dir).filter((f) => f.endsWith('.sql')).sort()) {
-		sqlite.exec(readFileSync(join(dir, f), 'utf8'));
-	}
-	db = d1(sqlite);
+	({ sqlite, db } = migratedDb());
 });
 
 describe('creating links', () => {

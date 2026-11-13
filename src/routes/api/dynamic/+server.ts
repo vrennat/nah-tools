@@ -4,7 +4,7 @@ import { getDB, getKV, authenticateRedirect, generateShortCode, createRedirect, 
 import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
-import { gateDestinationOrThrow, scheduleRecheck, HOLD_NOTICE } from '$server/link-gate/route';
+import { gateDestinationOrThrow, scheduleRecheck, servedUrl, HOLD_NOTICE } from '$server/link-gate/route';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -80,9 +80,18 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	await enforceCreationLimits(platform, request, passphrase);
 
 	const existing = await authenticateRedirect(db, short_code, passphrase);
-	const holdReason = await gateDestinationOrThrow(platform, db, url);
+	// This endpoint also reaches short links, whose stored UTM parameters it
+	// keeps; the redirect worker appends them, so the gate must judge them too.
+	const utm = {
+		source: existing.utm_source ?? undefined,
+		medium: existing.utm_medium ?? undefined,
+		campaign: existing.utm_campaign ?? undefined,
+		term: existing.utm_term ?? undefined,
+		content: existing.utm_content ?? undefined
+	};
+	const holdReason = await gateDestinationOrThrow(platform, db, servedUrl(url, utm));
 	await updateRedirect(db, short_code, url, holdReason);
-	scheduleRecheck(platform, db, existing.short_code, url, holdReason);
+	scheduleRecheck(platform, db, existing.short_code, url, holdReason, utm);
 	await invalidateRedirectCache(getKV(platform), db, short_code);
 	return json(
 		holdReason ? { success: true, status: 'held', notice: HOLD_NOTICE } : { success: true, status: 'active' }
