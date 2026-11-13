@@ -8,6 +8,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { bufferToB64, MAX_BASE64_BYTES, MAX_MERGE_FILES } from './utils';
+import { logToolError } from './log';
 
 // Zip-bomb backstop: reject archives with unreasonably many entries.
 const MAX_ZIP_ENTRIES = 10_000;
@@ -130,7 +131,7 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			console.error('[mcp/pptx] pptx_get_info error:', e);
+			logToolError('pptx_get_info', e);
 			return error(`Failed to read PPTX: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -172,7 +173,7 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			console.error('[mcp/pptx] pptx_extract_text error:', e);
+			logToolError('pptx_extract_text', e);
 			return error(`Failed to extract text: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -227,7 +228,7 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			console.error('[mcp/pptx] pptx_remove_notes error:', e);
+			logToolError('pptx_remove_notes', e);
 			return error(`Failed to remove notes: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -280,7 +281,7 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			console.error('[mcp/pptx] pptx_remove_animations error:', e);
+			logToolError('pptx_remove_animations', e);
 			return error(`Failed to remove animations: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -377,7 +378,7 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			console.error('[mcp/pptx] pptx_add_watermark error:', e);
+			logToolError('pptx_add_watermark', e);
 			return error(`Failed to add watermark: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -412,7 +413,7 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			console.error('[mcp/pptx] pptx_merge error:', e);
+			logToolError('pptx_merge', e);
 			return error(`Failed to merge PPTX files: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -447,7 +448,7 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			console.error('[mcp/pptx] pptx_split error:', e);
+			logToolError('pptx_split', e);
 			return error(`Failed to split PPTX: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -488,7 +489,7 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			console.error('[mcp/pptx] pptx_compress error:', e);
+			logToolError('pptx_compress', e);
 			return error(`Failed to compress PPTX: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
@@ -547,7 +548,7 @@ export function registerPPTXTools(server: McpServer) {
 				}]
 			};
 		} catch (e) {
-			console.error('[mcp/pptx] pptx_set_metadata error:', e);
+			logToolError('pptx_set_metadata', e);
 			return error(`Failed to set metadata: ${e instanceof Error ? e.message : String(e)}`);
 		}
 	});
