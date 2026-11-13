@@ -5,6 +5,8 @@ import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
 import { normalizeUrl } from '$utils/url';
+import { judgeDestination } from '$server/link-gate';
+import { gateDeps, scheduleRecheck, HOLD_NOTICE } from '$server/link-gate/route';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -51,7 +53,15 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		passphraseHash = await hashPassphrase(passphrase);
 	}
 
-	const results: Array<{ short_code: string; short_url: string; destination: string; error?: string }> = [];
+	const results: Array<{
+		short_code: string;
+		short_url: string;
+		destination: string;
+		error?: string;
+		status?: 'active' | 'held';
+		notice?: string;
+	}> = [];
+	const deps = gateDeps(platform, db);
 
 	for (const link of links) {
 		try {
@@ -92,17 +102,30 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 				}
 			}
 
+			// Every bulk link goes through the spam gate, one at a time. If the
+			// gate cannot finish (model down, subrequest limit), the link is held.
+			const decision = await judgeDestination(normalized, deps);
+			if (decision.verdict === 'block') {
+				results.push({ short_code: '', short_url: '', destination: link.url, error: decision.reason });
+				continue;
+			}
+			const holdReason = decision.verdict === 'hold' ? decision.holdReason : null;
+
 			const shortCode = generateShortCode();
 			await createLink(db, shortCode, normalized, passphraseHash, {
 				label: link.label,
-				customAlias: link.alias
+				customAlias: link.alias,
+				holdReason
 			});
+			scheduleRecheck(platform, db, shortCode, normalized, holdReason);
 
 			const displayCode = link.alias || shortCode;
 			results.push({
 				short_code: displayCode,
 				short_url: `https://go.nah.tools/${displayCode}`,
-				destination: link.url
+				destination: link.url,
+				status: holdReason ? 'held' : 'active',
+				...(holdReason ? { notice: HOLD_NOTICE } : {})
 			});
 		} catch {
 			results.push({

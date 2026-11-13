@@ -21,6 +21,10 @@
 			"id": "e61ce66823e24e5dba2c0a7a9e4556c0"
 		}
 	],
+	// Workers AI for the link spam gate (src/lib/server/link-gate/).
+	"ai": {
+		"binding": "AI"
+	},
 	"ratelimits": [
 		{
 			// Burst limit on creating short links and dynamic QR codes, keyed by

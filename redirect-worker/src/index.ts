@@ -16,6 +16,8 @@ interface Env {
 interface RedirectRow {
 	destination_url: string;
 	is_active: number;
+	/** Set while the spam gate holds this link (migration 0004). Held links are also inactive. */
+	hold_reason?: string | null;
 	short_code: string;
 	expires_at: string | null;
 	passphrase_hash: string;
@@ -63,7 +65,7 @@ export default {
 			row = cached;
 		} else {
 			row = await env.DB.prepare(
-				'SELECT short_code, destination_url, is_active, expires_at, passphrase_hash, utm_source, utm_medium, utm_campaign, utm_term, utm_content FROM redirects WHERE short_code = ? OR custom_alias = ?'
+				'SELECT short_code, destination_url, is_active, hold_reason, expires_at, passphrase_hash, utm_source, utm_medium, utm_campaign, utm_term, utm_content FROM redirects WHERE short_code = ? OR custom_alias = ?'
 			)
 				.bind(code, code)
 				.first<RedirectRow>();
@@ -85,6 +87,13 @@ export default {
 			return new Response('QR code not found.', {
 				status: 404,
 				headers: secureHeaders
+			});
+		}
+
+		if (row.hold_reason) {
+			return new Response('This link is under review and is not available right now.', {
+				status: 403,
+				headers: { ...secureHeaders, 'Cache-Control': 'no-store' }
 			});
 		}
 

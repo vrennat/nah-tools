@@ -24,6 +24,8 @@
 		short_code: string;
 		short_url: string;
 		manage_url: string | null;
+		status?: 'active' | 'held';
+		notice?: string;
 	} | null>(null);
 
 	let loading = $state(false);
@@ -47,7 +49,7 @@
 	let bulkLoading = $state(false);
 	let bulkProgress = $state({ current: 0, total: 0 });
 	let bulkError = $state('');
-	let bulkResults = $state<{ short_url: string; destination: string; error?: string }[]>([]);
+	let bulkResults = $state<{ short_url: string; destination: string; error?: string; status?: 'active' | 'held' }[]>([]);
 	let bulkFileInput = $state<HTMLInputElement>(null!);
 
 	let passphraseValid = $derived(!passphrase || passphrase.length >= 8);
@@ -142,6 +144,8 @@
 				short_code: string;
 				short_url: string;
 				manage_url: string | null;
+				status?: 'active' | 'held';
+				notice?: string;
 				message?: string;
 			};
 			if (!res.ok) {
@@ -307,7 +311,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ links: bulkEntries })
 			});
-			const json = await res.json() as { results: { short_url: string; destination: string; error?: string }[] };
+			const json = await res.json() as { results: { short_url: string; destination: string; error?: string; status?: 'active' | 'held' }[] };
 			if (!res.ok) {
 				bulkError = 'Bulk creation failed. Please try again.';
 				return;
@@ -559,7 +563,12 @@
 					<!-- Result card -->
 					<div class="space-y-4">
 						<div class="space-y-2 rounded-lg bg-success/10 p-4">
-							<p class="text-sm font-medium text-success">Link created</p>
+							{#if result.status === 'held'}
+								<p class="text-sm font-medium text-text">Link created, on hold</p>
+								<p class="text-sm text-text-muted">{result.notice}</p>
+							{:else}
+								<p class="text-sm font-medium text-success">Link created</p>
+							{/if}
 							<div class="flex items-center gap-2">
 								<p class="break-all font-mono text-sm text-text">{result.short_url}</p>
 								<button
@@ -689,6 +698,8 @@
 											<td class="px-4 py-2">
 												{#if row.error}
 													<span class="text-xs text-error">{row.error}</span>
+												{:else if row.status === 'held'}
+													<span class="text-xs text-text-muted">On hold for review</span>
 												{:else}
 													<span class="text-xs text-success">Created</span>
 												{/if}

@@ -8,8 +8,10 @@ import {
 	createLink,
 	isAliasAvailable,
 	deactivateRedirect,
-	invalidateRedirectCache
+	invalidateRedirectCache,
+	updateLinkDestination
 } from '$server/db';
+import { gateDestinationOrThrow, scheduleRecheck, HOLD_NOTICE } from '$server/link-gate/route';
 import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
@@ -102,20 +104,34 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		passphraseHash = await hashPassphrase(passphrase);
 	}
 
+	// Spam gate last: it fetches the destination and calls the model, so it
+	// runs only for requests that passed every cheaper check.
+	const holdReason = await gateDestinationOrThrow(platform, db, normalizedUrl);
+
 	const shortCode = generateShortCode();
 	await createLink(db, shortCode, normalizedUrl, passphraseHash, {
 		label,
 		customAlias: alias,
 		expiresAt: expires_at,
-		utm
+		utm,
+		holdReason
 	});
+	scheduleRecheck(platform, db, shortCode, normalizedUrl, holdReason);
 
 	const displayCode = alias || shortCode;
 
-	const response: { short_code: string; short_url: string; manage_url?: string } = {
+	const response: {
+		short_code: string;
+		short_url: string;
+		manage_url?: string;
+		status: 'active' | 'held';
+		notice?: string;
+	} = {
 		short_code: displayCode,
-		short_url: `https://go.nah.tools/${displayCode}`
+		short_url: `https://go.nah.tools/${displayCode}`,
+		status: holdReason ? 'held' : 'active'
 	};
+	if (holdReason) response.notice = HOLD_NOTICE;
 
 	if (passphraseHash) {
 		response.manage_url = `/links/manage/${displayCode}`;
@@ -151,28 +167,16 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	// re-pointed at a stream of fresh domains.
 	await enforceCreationLimits(platform, request, passphrase);
 
-	await authenticateRedirect(db, short_code, passphrase);
+	const existing = await authenticateRedirect(db, short_code, passphrase);
 
-	// Update destination URL
-	await db
-		.prepare(
-			`UPDATE redirects SET destination_url = ?, utm_source = ?, utm_medium = ?, utm_campaign = ?, utm_term = ?, utm_content = ?, updated_at = datetime('now')
-			 WHERE short_code = ? OR custom_alias = ?`
-		)
-		.bind(
-			normalizedUrl,
-			body.utm?.source ?? null,
-			body.utm?.medium ?? null,
-			body.utm?.campaign ?? null,
-			body.utm?.term ?? null,
-			body.utm?.content ?? null,
-			short_code,
-			short_code
-		)
-		.run();
+	const holdReason = await gateDestinationOrThrow(platform, db, normalizedUrl);
+	await updateLinkDestination(db, short_code, normalizedUrl, holdReason, body.utm);
+	scheduleRecheck(platform, db, existing.short_code, normalizedUrl, holdReason);
 
 	await invalidateRedirectCache(getKV(platform), db, short_code);
-	return json({ success: true });
+	return json(
+		holdReason ? { success: true, status: 'held', notice: HOLD_NOTICE } : { success: true, status: 'active' }
+	);
 };
 
 export const DELETE: RequestHandler = async ({ request, platform }) => {

@@ -6,6 +6,7 @@
 import { error } from '@sveltejs/kit';
 import type { DynamicCode, ClickLog, ClickStats, UTMParams } from '$qr/types';
 import { verifyPassphrase } from '$server/auth';
+import type { HoldReason } from '$server/link-gate/decide';
 
 /** Extract and validate the D1 database binding */
 export function getDB(platform: App.Platform | undefined): D1Database {
@@ -82,15 +83,16 @@ export async function createRedirect(
 	shortCode: string,
 	destinationUrl: string,
 	passphraseHash: string,
-	label?: string
+	label?: string,
+	holdReason: HoldReason | null = null
 ): Promise<DynamicCode> {
 	const result = await db
 		.prepare(
-			`INSERT INTO redirects (short_code, destination_url, passphrase_hash, label)
-			 VALUES (?, ?, ?, ?)
+			`INSERT INTO redirects (short_code, destination_url, passphrase_hash, label, is_active, hold_reason)
+			 VALUES (?, ?, ?, ?, ?, ?)
 			 RETURNING *`
 		)
-		.bind(shortCode, destinationUrl, passphraseHash, label ?? null)
+		.bind(shortCode, destinationUrl, passphraseHash, label ?? null, holdReason ? 0 : 1, holdReason)
 		.first<DynamicCode>();
 
 	if (!result) throw new Error('Failed to create redirect');
@@ -105,26 +107,100 @@ export async function getRedirect(db: D1Database, shortCode: string): Promise<Dy
 		.first<DynamicCode>();
 }
 
+/**
+ * SQL fragment that applies a spam-gate result to a destination change.
+ * Binds one parameter (the hold reason, or NULL for allow).
+ *
+ * - Allow: a link that was held becomes active again. A link the owner
+ *   deactivated, or that reports deactivated, stays inactive (its
+ *   hold_reason is NULL, see deactivateRedirect).
+ * - Hold: an active or already-held link becomes inactive and held. An
+ *   inactive, unheld link is left inactive and unheld, so a later recheck
+ *   cannot revive a link that was deactivated.
+ *
+ * SQLite evaluates every right-hand side against the row before the update.
+ */
+const APPLY_GATE_SQL = `
+	is_active = CASE
+		WHEN ?1 IS NULL THEN CASE WHEN hold_reason IS NOT NULL THEN 1 ELSE is_active END
+		WHEN is_active = 1 OR hold_reason IS NOT NULL THEN 0
+		ELSE is_active END,
+	hold_reason = CASE
+		WHEN ?1 IS NULL THEN NULL
+		WHEN is_active = 1 OR hold_reason IS NOT NULL THEN ?1
+		ELSE NULL END`;
+
 /** Update the destination URL — matches short_code OR custom_alias */
 export async function updateRedirect(
 	db: D1Database,
 	shortCode: string,
-	destinationUrl: string
+	destinationUrl: string,
+	holdReason: HoldReason | null
 ): Promise<void> {
 	await db
 		.prepare(
-			`UPDATE redirects SET destination_url = ?, updated_at = datetime('now')
-			 WHERE short_code = ? OR custom_alias = ?`
+			`UPDATE redirects SET ${APPLY_GATE_SQL}, destination_url = ?2, updated_at = datetime('now')
+			 WHERE short_code = ?3 OR custom_alias = ?3`
 		)
-		.bind(destinationUrl, shortCode, shortCode)
+		.bind(holdReason, destinationUrl, shortCode)
 		.run();
+}
+
+/** Update a short link's destination and UTM parameters, applying the spam-gate result. */
+export async function updateLinkDestination(
+	db: D1Database,
+	shortCode: string,
+	destinationUrl: string,
+	holdReason: HoldReason | null,
+	utm: UTMParams | undefined
+): Promise<void> {
+	await db
+		.prepare(
+			`UPDATE redirects SET ${APPLY_GATE_SQL}, destination_url = ?2, utm_source = ?3, utm_medium = ?4,
+			 utm_campaign = ?5, utm_term = ?6, utm_content = ?7, updated_at = datetime('now')
+			 WHERE short_code = ?8 OR custom_alias = ?8`
+		)
+		.bind(
+			holdReason,
+			destinationUrl,
+			utm?.source ?? null,
+			utm?.medium ?? null,
+			utm?.campaign ?? null,
+			utm?.term ?? null,
+			utm?.content ?? null,
+			shortCode
+		)
+		.run();
+}
+
+/**
+ * Record the result of a background recheck of a link held as 'unchecked'.
+ * Only touches the row if it is still held as 'unchecked' for the same
+ * destination, so it cannot revive a link that was edited, deactivated or
+ * reported in the meantime. Returns true if the row changed.
+ */
+export async function resolveUncheckedHold(
+	db: D1Database,
+	shortCode: string,
+	destinationUrl: string,
+	holdReason: HoldReason | 'blocked' | null
+): Promise<boolean> {
+	if (holdReason === 'unchecked') return false;
+	const res = await db
+		.prepare(
+			`UPDATE redirects SET is_active = CASE WHEN ?1 IS NULL THEN 1 ELSE 0 END, hold_reason = ?1, updated_at = datetime('now')
+			 WHERE short_code = ?2 AND destination_url = ?3 AND hold_reason = 'unchecked'`
+		)
+		.bind(holdReason, shortCode, destinationUrl)
+		.run();
+	return (res.meta?.changes ?? 0) > 0;
 }
 
 /** Deactivate (soft delete) a dynamic code — matches short_code OR custom_alias */
 export async function deactivateRedirect(db: D1Database, shortCode: string): Promise<void> {
 	await db
 		.prepare(
-			`UPDATE redirects SET is_active = 0, updated_at = datetime('now')
+			`UPDATE redirects SET is_active = 0, hold_reason = NULL, updated_at = datetime('now')
 			 WHERE short_code = ? OR custom_alias = ?`
 		)
 		.bind(shortCode, shortCode)
@@ -142,13 +218,16 @@ export async function createLink(
 		customAlias?: string;
 		expiresAt?: string;
 		utm?: UTMParams;
+		/** Set when the spam gate held the destination; the link is stored inactive. */
+		holdReason?: HoldReason | null;
 	}
 ): Promise<DynamicCode> {
+	const holdReason = options?.holdReason ?? null;
 	try {
 		const result = await db
 			.prepare(
-				`INSERT INTO redirects (short_code, destination_url, passphrase_hash, label, source, custom_alias, expires_at, utm_source, utm_medium, utm_campaign, utm_term, utm_content)
-			 VALUES (?, ?, ?, ?, 'link', ?, ?, ?, ?, ?, ?, ?)
+				`INSERT INTO redirects (short_code, destination_url, passphrase_hash, label, source, custom_alias, expires_at, utm_source, utm_medium, utm_campaign, utm_term, utm_content, is_active, hold_reason)
+			 VALUES (?, ?, ?, ?, 'link', ?, ?, ?, ?, ?, ?, ?, ?, ?)
 			 RETURNING *`
 			)
 			.bind(
@@ -162,7 +241,9 @@ export async function createLink(
 				options?.utm?.medium ?? null,
 				options?.utm?.campaign ?? null,
 				options?.utm?.term ?? null,
-				options?.utm?.content ?? null
+				options?.utm?.content ?? null,
+				holdReason ? 0 : 1,
+				holdReason
 			)
 			.first<DynamicCode>();
 

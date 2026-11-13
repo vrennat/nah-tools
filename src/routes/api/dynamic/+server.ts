@@ -4,6 +4,7 @@ import { getDB, getKV, authenticateRedirect, generateShortCode, createRedirect, 
 import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
+import { gateDestinationOrThrow, scheduleRecheck, HOLD_NOTICE } from '$server/link-gate/route';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -42,15 +43,20 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 	await enforceCreationLimits(platform, request, passphrase);
 
+	const holdReason = await gateDestinationOrThrow(platform, db, url);
+
 	const shortCode = generateShortCode();
 	const passphraseHash = await hashPassphrase(passphrase);
-	await createRedirect(db, shortCode, url, passphraseHash, label);
+	await createRedirect(db, shortCode, url, passphraseHash, label, holdReason);
+	scheduleRecheck(platform, db, shortCode, url, holdReason);
 
 	return json(
 		{
 			short_code: shortCode,
 			redirect_url: `https://go.nah.tools/${shortCode}`,
-			manage_url: `/qr/manage/${shortCode}`
+			manage_url: `/qr/manage/${shortCode}`,
+			status: holdReason ? 'held' : 'active',
+			...(holdReason ? { notice: HOLD_NOTICE } : {})
 		},
 		{ status: 201 }
 	);
@@ -73,10 +79,14 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	// Destination changes share the creation budget.
 	await enforceCreationLimits(platform, request, passphrase);
 
-	await authenticateRedirect(db, short_code, passphrase);
-	await updateRedirect(db, short_code, url);
+	const existing = await authenticateRedirect(db, short_code, passphrase);
+	const holdReason = await gateDestinationOrThrow(platform, db, url);
+	await updateRedirect(db, short_code, url, holdReason);
+	scheduleRecheck(platform, db, existing.short_code, url, holdReason);
 	await invalidateRedirectCache(getKV(platform), db, short_code);
-	return json({ success: true });
+	return json(
+		holdReason ? { success: true, status: 'held', notice: HOLD_NOTICE } : { success: true, status: 'active' }
+	);
 };
 
 export const DELETE: RequestHandler = async ({ request, platform }) => {
