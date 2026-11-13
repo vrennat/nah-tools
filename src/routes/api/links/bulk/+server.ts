@@ -5,8 +5,7 @@ import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
 import { normalizeUrl } from '$utils/url';
-import { judgeDestination } from '$server/link-gate';
-import { gateDeps, logGateDecision } from '$server/link-gate/route';
+import { assertModelBudget, gateDeps, judgeWithinBudget, logGateDecision } from '$server/link-gate/route';
 
 /**
  * Each link runs the spam gate (up to 6 fetches, a blocklist lookup per hop
@@ -14,6 +13,9 @@ import { gateDeps, logGateDecision } from '$server/link-gate/route';
  * invocation can afford.
  */
 const MAX_BULK_LINKS = 20;
+
+const BULK_UNCHECKED_MESSAGE =
+	'This destination could not be checked right now. Create this link on its own instead, so it can be checked again.';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -49,6 +51,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 
 	// Each link in the batch counts against the daily cap.
+	const budget = await assertModelBudget(platform, request, '');
 	await enforceCreationLimits(platform, request, passphrase, links.length);
 
 	// Hash passphrase if provided, otherwise anonymous
@@ -103,10 +106,17 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			}
 
 			// Every bulk link goes through the spam gate, one at a time.
-			const decision = await judgeDestination(normalized, deps);
+			const decision = await judgeWithinBudget(platform, normalized, deps, budget);
 			logGateDecision(decision);
 			if (decision.verdict === 'block') {
 				results.push({ short_code: '', short_url: '', destination: link.url, error: decision.message });
+				continue;
+			}
+			// Bulk links are not rechecked in the background (twenty rechecks do not
+			// fit in one waitUntil), so a link whose check could not finish is not
+			// created here; created on its own, it gets the recheck.
+			if (decision.log?.event === 'link_gate_allow_unchecked') {
+				results.push({ short_code: '', short_url: '', destination: link.url, error: BULK_UNCHECKED_MESSAGE });
 				continue;
 			}
 

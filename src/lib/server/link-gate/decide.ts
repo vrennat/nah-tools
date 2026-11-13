@@ -22,7 +22,9 @@ export type GateEvent =
 	| 'link_gate_allow_suspicious'
 	| 'link_gate_allow_unreadable'
 	| 'link_gate_allow_download'
-	| 'link_gate_allow_unchecked';
+	| 'link_gate_allow_unchecked'
+	| 'link_gate_budget_exhausted'
+	| 'link_gate_network_budget_exhausted';
 
 /** One structured log line. Host and status only: never a path, query or user data. */
 export interface GateLog {
@@ -32,11 +34,19 @@ export interface GateLog {
 	host: string;
 	status?: number;
 	scores?: Partial<Record<NoulId, number>>;
+	/** Set on the result of a background recheck. */
+	recheck?: true;
 }
 
 export type GateDecision =
 	| { verdict: 'allow'; log?: GateLog }
-	| { verdict: 'block'; message: string; log: GateLog };
+	| {
+			verdict: 'block';
+			message: string;
+			log: GateLog;
+			/** HTTP status for the refusal; 400 when absent. 503 when the daily budget is used up. */
+			httpStatus?: number;
+	  };
 
 /** Block when the model is this sure the page is a scam... */
 export const BLOCK_SCAM_MIN = 0.8;

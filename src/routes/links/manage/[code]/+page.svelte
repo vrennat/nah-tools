@@ -22,6 +22,7 @@
 	let topReferers = $state<{ referer: string; count: number }[]>([]);
 	let createdAt = $state('');
 	let isActive = $state(true);
+	let isFlagged = $state(false);
 	let labelText = $state('');
 	let expiresAt = $state('');
 	let shortUrl = $state('');
@@ -86,6 +87,7 @@
 				destination_url: string;
 				created_at: string;
 				is_active: number;
+				disabled_reason?: string | null;
 				label: string | null;
 				expires_at: string | null;
 				stats: {
@@ -105,6 +107,7 @@
 			topReferers = info.stats?.byReferer ?? [];
 			createdAt = info.created_at;
 			isActive = info.is_active === 1;
+			isFlagged = !isActive && !!info.disabled_reason;
 			labelText = info.label || '';
 			expiresAt = info.expires_at || '';
 			// Derive the short URL from the code; the API doesn't return it directly.
@@ -373,8 +376,15 @@
 					<div>
 						<p class="text-xs font-medium text-text-muted">Status</p>
 						<p class="mt-0.5 text-sm font-medium" class:text-success={isActive} class:text-error={!isActive}>
-							{isActive ? 'Active' : 'Inactive'}
+							{isActive ? 'Active' : isFlagged ? 'Disabled: destination flagged as harmful' : 'Inactive'}
 						</p>
+						{#if isFlagged}
+							<p class="mt-1 text-xs text-text-muted">
+								A later check found this destination harmful, so the link no longer redirects. If you think
+								this is wrong, report it at
+								<a class="underline" href="https://github.com/vrennat/nah-tools/issues">github.com/vrennat/nah-tools/issues</a>.
+							</p>
+						{/if}
 					</div>
 					{#if expiresAt}
 						<div>

@@ -12,7 +12,7 @@ import {
 } from '$server/bio-db';
 import { validateHandle, validateUrlSafety, verifyTurnstile, checkRateLimit } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
-import { gateAllOrThrow } from '$server/link-gate/route';
+import { assertModelBudget, gateAllOrThrow, isOwnSite } from '$server/link-gate/route';
 import { enforceCreationLimits } from '$server/creation-limits';
 
 /** Each initial link runs the spam gate, so a new profile takes at most this many. */
@@ -128,6 +128,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 	// Each initial link costs a destination check, so together they count
 	// against the shared per-network link-creation budget, like links added later.
+	// At the daily model-call limit, refuse before the allowance is charged
+	// (links to nah.tools itself are not checked, so they need no model).
+	const budget = initialLinks.some((link) => !isOwnSite(link.url))
+		? await assertModelBudget(platform, request, '')
+		: {};
 	if (initialLinks.length > 0) {
 		await enforceCreationLimits(platform, request, passphrase, initialLinks.length);
 	}
@@ -138,7 +143,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		platform,
 		db,
 		initialLinks.map((link) => link.url),
-		{ forRedirect: false }
+		{ forRedirect: false, budget }
 	);
 
 	const passphraseHash = await hashPassphrase(passphrase);

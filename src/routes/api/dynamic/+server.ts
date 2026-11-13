@@ -4,7 +4,14 @@ import { getDB, getKV, authenticateRedirect, generateShortCode, createRedirect, 
 import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
-import { gateDestinationOrThrow, servedUrl } from '$server/link-gate/route';
+import {
+	assertModelBudget,
+	assertNotFlagged,
+	gateDestinationOrThrow,
+	refuseFlaggedChangeForOwner,
+	scheduleRecheck,
+	servedUrl
+} from '$server/link-gate/route';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -41,13 +48,15 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
 	}
 
+	const budget = await assertModelBudget(platform, request, url);
 	await enforceCreationLimits(platform, request, passphrase);
 
-	await gateDestinationOrThrow(platform, db, url);
+	const decision = await gateDestinationOrThrow(platform, db, url, { budget });
 
 	const shortCode = generateShortCode();
 	const passphraseHash = await hashPassphrase(passphrase);
 	await createRedirect(db, shortCode, url, passphraseHash, label);
+	scheduleRecheck(platform, db, decision, { shortCode, storedUrl: url, gateUrl: url, budget });
 
 	return json(
 		{
@@ -68,29 +77,32 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	if (!short_code || !passphrase || !url) {
 		throw error(400, 'short_code, passphrase, and url are required');
 	}
+	// The owner of a flagged link learns why before anything is charged.
+	await refuseFlaggedChangeForOwner(db, short_code, passphrase);
 	const safety = await validateUrlSafety(url, db);
 	if (!safety.safe) {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
 
 	// Destination changes share the creation budget.
+	const budget = await assertModelBudget(platform, request, url);
 	await enforceCreationLimits(platform, request, passphrase);
 
 	const existing = await authenticateRedirect(db, short_code, passphrase);
+	assertNotFlagged(existing);
 	// This endpoint also reaches short links, whose stored UTM parameters it
 	// keeps; the redirect worker appends them, so the gate must judge them too.
-	await gateDestinationOrThrow(
-		platform,
-		db,
-		servedUrl(url, {
-			source: existing.utm_source ?? undefined,
-			medium: existing.utm_medium ?? undefined,
-			campaign: existing.utm_campaign ?? undefined,
-			term: existing.utm_term ?? undefined,
-			content: existing.utm_content ?? undefined
-		})
-	);
+	const storedUtm = {
+		source: existing.utm_source ?? undefined,
+		medium: existing.utm_medium ?? undefined,
+		campaign: existing.utm_campaign ?? undefined,
+		term: existing.utm_term ?? undefined,
+		content: existing.utm_content ?? undefined
+	};
+	const gateUrl = servedUrl(url, storedUtm);
+	const decision = await gateDestinationOrThrow(platform, db, gateUrl, { budget });
 	await updateRedirect(db, short_code, url);
+	scheduleRecheck(platform, db, decision, { shortCode: existing.short_code, storedUrl: url, storedUtm, gateUrl, budget });
 	await invalidateRedirectCache(getKV(platform), db, short_code);
 	return json({ success: true });
 };

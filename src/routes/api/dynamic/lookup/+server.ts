@@ -21,6 +21,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		label: redirect.label,
 		scan_count: stats.total,
 		is_active: redirect.is_active,
+		disabled_reason: redirect.disabled_reason ?? null,
 		created_at: redirect.created_at,
 		updated_at: redirect.updated_at
 	});

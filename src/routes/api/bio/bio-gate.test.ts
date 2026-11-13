@@ -3,7 +3,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { migratedDb } from '$server/sqlite-d1';
 import { NOUL_QUESTIONS, type NoulId } from '$server/link-gate/questions';
 
-vi.mock('$server/creation-limits', () => ({ enforceCreationLimits: vi.fn(async () => {}) }));
+vi.mock('$server/creation-limits', async (orig) => ({
+	...(await orig<typeof import('$server/creation-limits')>()),
+	enforceCreationLimits: vi.fn(async () => {})
+}));
 const { enforceCreationLimits } = await import('$server/creation-limits');
 const profiles = await import('./+server');
 const bioLinks = await import('./links/+server');
@@ -338,5 +341,170 @@ describe('POST and PUT /api/bio/links', () => {
 	it('changes a link to an allowed destination', async () => {
 		expect((await edit('https://ok.example/new')).status).toBe(200);
 		expect(linkUrls()).toEqual(['https://ok.example/new']);
+	});
+});
+
+describe('bio links and the daily model-call limit', () => {
+	const today = () => new Date().toISOString().slice(0, 10);
+	const atLimit = (calls = 5000) =>
+		sqlite.prepare('INSERT INTO link_gate_budget (day, calls) VALUES (?, ?)').run(today(), calls);
+	const used = () =>
+		(sqlite.prepare('SELECT calls FROM link_gate_budget WHERE day = ?').get(today()) as { calls: number } | undefined)?.calls ?? 0;
+	const createWith = (handle: string, links: { url: string; title: string }[], env: Record<string, unknown> = {}) => {
+		const p = platform();
+		return profiles.POST({
+			request: req('POST', { handle, display_name: 'Test', passphrase: 'correct horse', links }),
+			platform: { ...p, env: { ...p.env, ...env } }
+		} as never);
+	};
+	const profileCount = () => (sqlite.prepare('SELECT COUNT(*) AS n FROM bio_profiles').get() as { n: number }).n;
+	beforeEach(() => vi.mocked(enforceCreationLimits).mockClear());
+
+	it('refuses a new profile with links with 503 at the limit, before charging the allowance or fetching', async () => {
+		atLimit();
+		await expect(createWith('lim1', [{ url: 'https://ok.example/', title: 'Site' }])).rejects.toMatchObject({
+			status: 503,
+			body: { message: expect.stringMatching(/paused for today/) }
+		});
+		expect(enforceCreationLimits).not.toHaveBeenCalled();
+		expect(fetched).toEqual([]);
+		expect(profileCount()).toBe(0);
+	});
+
+	it('counts each initial link check and refuses the whole profile when the limit is reached partway', async () => {
+		// Limit 2, four links checked up to five at a time: two model calls get a unit, the
+		// others are refused, the request fails with 503 and nothing is written.
+		const links = Array.from({ length: 4 }, (_, i) => ({ url: `https://ok.example/${i}`, title: String(i) }));
+		await expect(createWith('lim2', links, { LINK_GATE_DAILY_MODEL_CALLS: '2' })).rejects.toMatchObject({ status: 503 });
+		expect(ai.run).toHaveBeenCalledTimes(2);
+		expect(used()).toBe(2);
+		expect(profileCount()).toBe(0);
+		expect(linkUrls()).toEqual([]);
+	});
+
+	it('creates a profile whose links all point at nah.tools at the limit, since no model call is needed', async () => {
+		atLimit();
+		const res = await createWith('lim3', [{ url: 'https://nah.tools/qr', title: 'QR' }]);
+		expect(res.status).toBe(201);
+	});
+
+	it('refuses adding a link at the limit with 503 before charging the allowance', async () => {
+		await create('lim4', []);
+		atLimit();
+		await expect(
+			bioLinks.POST({
+				request: req('POST', { handle: 'lim4', passphrase: 'correct horse', url: 'https://ok.example/new', title: 'New' }),
+				platform: platform()
+			} as never)
+		).rejects.toMatchObject({ status: 503 });
+		expect(enforceCreationLimits).not.toHaveBeenCalled();
+	});
+});
+
+describe('bio links and the per-network share of model calls', () => {
+	const kvStore = new Map<string, string>();
+	const shareEnv = (env: Record<string, string>) => {
+		const p = platform();
+		return {
+			...p,
+			env: {
+				...p.env,
+				...env,
+				KV: {
+					...p.env.KV,
+					get: async (k: string) => kvStore.get(k) ?? null,
+					put: async (k: string, v: string) => void kvStore.set(k, v)
+				}
+			}
+		};
+	};
+	const from = (ip: string, method: string, body: unknown) =>
+		new Request('https://nah.tools/api/bio', { method, headers: { 'cf-connecting-ip': ip }, body: JSON.stringify(body) });
+	const profileCount = () => (sqlite.prepare('SELECT COUNT(*) AS n FROM bio_profiles').get() as { n: number }).n;
+	beforeEach(() => {
+		kvStore.clear();
+		vi.mocked(enforceCreationLimits).mockClear();
+	});
+
+	it("charges a new profile's link checks to its network and refuses the profile when the share runs out", async () => {
+		const links = Array.from({ length: 3 }, (_, i) => ({ url: `https://ok.example/${i}`, title: String(i) }));
+		await expect(
+			profiles.POST({
+				request: from('198.51.100.7', 'POST', { handle: 'sh1', display_name: 'S', passphrase: 'correct horse', links }),
+				platform: shareEnv({ LINK_GATE_NETWORK_DAILY_MODEL_CALLS: '2' })
+			} as never)
+		).rejects.toMatchObject({ status: 429 });
+		expect(ai.run).toHaveBeenCalledTimes(2);
+		expect(profileCount()).toBe(0);
+	});
+
+	it('refuses adding a bio link from a network over its share before charging the allowance', async () => {
+		const env = shareEnv({ LINK_GATE_NETWORK_DAILY_MODEL_CALLS: '1' });
+		const created = await profiles.POST({
+			request: from('2001:db8:5:1::1', 'POST', {
+				handle: 'sh2',
+				display_name: 'S',
+				passphrase: 'correct horse',
+				links: [{ url: 'https://ok.example/', title: 'Site' }]
+			}),
+			platform: env
+		} as never);
+		expect(created.status).toBe(201);
+		vi.mocked(enforceCreationLimits).mockClear();
+		const add = (ip: string) =>
+			bioLinks.POST({
+				request: from(ip, 'POST', { handle: 'sh2', passphrase: 'correct horse', url: 'https://ok.example/new', title: 'New' }),
+				platform: env
+			} as never);
+		await expect(add('2001:db8:5:1::2')).rejects.toMatchObject({ status: 429 });
+		expect(enforceCreationLimits).not.toHaveBeenCalled();
+		// Another network has its own share.
+		expect((await add('2001:db8:6:1::1')).status).toBe(201);
+	});
+
+	it('charges bio link adds and edits in the gate itself: two at once from one network with a share of 1', async () => {
+		const env = shareEnv({ LINK_GATE_NETWORK_DAILY_MODEL_CALLS: '1' });
+		const created = await profiles.POST({
+			request: from('192.0.2.1', 'POST', {
+				handle: 'sh3',
+				display_name: 'S',
+				passphrase: 'correct horse',
+				links: [
+					{ url: 'https://nah.tools/a', title: 'A' },
+					{ url: 'https://nah.tools/b', title: 'B' }
+				]
+			}),
+			platform: env
+		} as never);
+		expect(created.status).toBe(201);
+		const status = (p: Promise<Response> | Response) =>
+			Promise.resolve(p).then(
+				(r) => r.status,
+				(e: { status?: number }) => e.status
+			);
+		// Both pass the early check (0 of 1 used); only one can reserve the call.
+		const added = await Promise.all(
+			[1, 2].map((i) =>
+				status(
+					bioLinks.POST({
+						request: from('198.51.100.20', 'POST', { handle: 'sh3', passphrase: 'correct horse', url: `https://ok.example/add${i}`, title: 'N' }),
+						platform: env
+					} as never)
+				)
+			)
+		);
+		expect(added.sort()).toEqual([201, 429]);
+		const ids = (sqlite.prepare("SELECT id FROM bio_links WHERE profile_handle = 'sh3' AND url LIKE 'https://nah.tools/%' ORDER BY id").all() as { id: number }[]).map((r) => r.id);
+		const edited = await Promise.all(
+			ids.map((id, i) =>
+				status(
+					bioLinks.PUT({
+						request: from('198.51.100.30', 'PUT', { handle: 'sh3', passphrase: 'correct horse', link_id: id, url: `https://ok.example/edit${i}` }),
+						platform: env
+					} as never)
+				)
+			)
+		);
+		expect(edited.sort()).toEqual([200, 429]);
 	});
 });
