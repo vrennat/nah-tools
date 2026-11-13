@@ -81,5 +81,8 @@
 		"pica": "^9.0.1",
 		"qr-code-styling": "^1.8.4",
 		"tesseract.js": "^7.0.0"
+	},
+	"patchedDependencies": {
+		"@cantoo/pdf-lib@2.6.5": "patches/@cantoo%2Fpdf-lib@2.6.5.patch"
 	}
 }
