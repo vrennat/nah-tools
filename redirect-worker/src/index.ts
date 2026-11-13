@@ -26,6 +26,13 @@ interface RedirectRow {
 	utm_content: string | null;
 }
 
+/**
+ * The link spam gate's own requests (User-Agent set in
+ * src/lib/server/link-gate/fetch-chain.ts). A bio link to a short link is
+ * checked by fetching it; that fetch is not a visitor's click.
+ */
+export const LINK_CHECK_UA_MARKER = 'nah.tools link check';
+
 function getDeviceType(ua: string): string {
 	if (!ua) return 'unknown';
 	if (/bot|crawler|spider|crawling/i.test(ua)) return 'bot';
@@ -118,8 +125,8 @@ export default {
 
 		// Log click via Analytics Engine (free, fire-and-forget)
 		// Only for passphrase-protected links (someone will view stats)
-		if (row.passphrase_hash !== '') {
-			const userAgent = request.headers.get('user-agent') || '';
+		const userAgent = request.headers.get('user-agent') || '';
+		if (row.passphrase_hash !== '' && !userAgent.includes(LINK_CHECK_UA_MARKER)) {
 			const referer = request.headers.get('referer') || null;
 			const cf = (request as any).cf;
 
