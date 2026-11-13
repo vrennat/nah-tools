@@ -22,8 +22,8 @@ export const DEFAULT_DAILY_MODEL_CALLS = 5000;
 
 /** Thrown by a reserved model call when the day's budget is used up. */
 export class BudgetExhaustedError extends Error {
-	/** 'global': the day's total is used up; 'network': this network's share is. */
-	constructor(readonly scope: 'global' | 'network' = 'global') {
+	/** 'global': the day's total is used up; 'network': this network's share is; 'block': its IPv6 /48's share is. */
+	constructor(readonly scope: 'global' | 'network' | 'block' = 'global') {
 		super(`daily model-call budget exhausted (${scope})`);
 		this.name = 'BudgetExhaustedError';
 	}
@@ -56,6 +56,18 @@ export function dailyCap(raw: string | undefined): number {
 /** The per-network share from LINK_GATE_NETWORK_DAILY_MODEL_CALLS. */
 export function networkCap(raw: string | undefined): number {
 	return parseCap(raw, DEFAULT_NETWORK_DAILY_MODEL_CALLS);
+}
+
+/** A whole IPv6 /48's share, by default this many times the per-network share. */
+export const BLOCK_SHARE_MULTIPLIER = 10;
+
+/**
+ * The share of one IPv6 /48 (all its /64 networks together) from
+ * LINK_GATE_BLOCK_DAILY_MODEL_CALLS; by default 10 times the per-network
+ * share (600 with the default of 60).
+ */
+export function blockCap(raw: string | undefined, networkShare: number): number {
+	return parseCap(raw, networkShare * BLOCK_SHARE_MULTIPLIER);
 }
 
 export function logBudgetError(reason: string): void {

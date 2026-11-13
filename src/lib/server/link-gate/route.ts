@@ -8,12 +8,14 @@ import {
 	BudgetExhaustedError,
 	dailyCap,
 	logBudgetError,
+	blockCap,
 	networkCap,
 	readNetworkUsage,
 	readUsage,
 	refundNetworkCall,
 	reserveCall,
-	reserveNetworkCall
+	reserveNetworkCall,
+	type NetworkReservation
 } from './budget';
 import { dailySalt, hashIdentity, networkKey } from '$server/creation-limits';
 import type { UTMParams } from '$qr/types';
@@ -70,13 +72,18 @@ function hostOf(url: string): string {
 	}
 }
 
-function budgetExhausted(url: string, scope: 'global' | 'network' = 'global'): GateDecision {
-	if (scope === 'network') {
+function budgetExhausted(url: string, scope: 'global' | 'network' | 'block' = 'global'): GateDecision {
+	if (scope !== 'global') {
+		// A network over its share and an IPv6 /48 over its share get the same answer.
 		return {
 			verdict: 'block',
 			message: NETWORK_BUDGET_EXHAUSTED_MESSAGE,
 			httpStatus: 429,
-			log: { event: 'link_gate_network_budget_exhausted', reason: 'network_daily_model_cap', host: hostOf(url) }
+			log: {
+				event: 'link_gate_network_budget_exhausted',
+				reason: scope === 'block' ? 'block_daily_model_cap' : 'network_daily_model_cap',
+				host: hostOf(url)
+			}
 		};
 	}
 	return {
@@ -89,33 +96,75 @@ function budgetExhausted(url: string, scope: 'global' | 'network' = 'global'): G
 
 /** Who a request's model calls are charged to, besides the global count. */
 export interface ModelBudget {
-	/** Salted hash of the client network; absent without an IP (local dev) or when KV fails. */
+	/** Salted hash of the client network (IPv4 address or IPv6 /64); absent without an IP (local dev) or when KV fails. */
 	network?: string;
+	/** Salted hash of the client's IPv6 /48; absent for IPv4 and when network is absent. */
+	block?: string;
+}
+
+/** The IPv6 /48 containing a /64 network key ('2001:0db8:0001:0002::/64'), or undefined for IPv4. */
+export function ipv6BlockKey(networkKeyValue: string): string | undefined {
+	if (!networkKeyValue.endsWith('::/64')) return undefined;
+	return networkKeyValue.split(':').slice(0, 3).join(':') + '::/48';
 }
 
 /**
- * The client network as a salted hash (the creation limits' daily salt, kind
- * 'gate'), or undefined without an IP or when KV fails (logged).
+ * The client network and, for IPv6, its /48 block, as salted hashes (the
+ * creation limits' daily salt, kinds 'gate' and 'gate48'); empty without an
+ * IP or when KV fails (logged).
  */
-async function networkId(platform: App.Platform | undefined, request: Request): Promise<string | undefined> {
+async function budgetIds(platform: App.Platform | undefined, request: Request): Promise<ModelBudget> {
 	const ip = request.headers.get('cf-connecting-ip');
 	const kv = platform?.env?.KV;
-	if (!ip || !kv) return undefined;
+	if (!ip || !kv) return {};
 	try {
-		return await hashIdentity(await dailySalt(kv), 'gate', networkKey(ip));
+		const salt = await dailySalt(kv);
+		const key = networkKey(ip);
+		const blockKey = ipv6BlockKey(key);
+		return {
+			network: await hashIdentity(salt, 'gate', key),
+			block: blockKey ? await hashIdentity(salt, 'gate48', blockKey) : undefined
+		};
 	} catch {
 		logBudgetError('network_key_failed');
-		return undefined;
+		return {};
 	}
+}
+
+/** One share a model call is charged to before the global count, in reservation order. */
+interface Share {
+	id: string;
+	cap: number;
+	scope: 'network' | 'block';
+}
+
+/** The shares to charge, in order: the network (IPv4 address or IPv6 /64), then its IPv6 /48. */
+function sharesFor(platform: App.Platform | undefined, budget: ModelBudget): Share[] {
+	const network = networkCap(platform?.env?.LINK_GATE_NETWORK_DAILY_MODEL_CALLS);
+	const shares: Share[] = [];
+	if (budget.network) shares.push({ id: budget.network, cap: network, scope: 'network' });
+	if (budget.network && budget.block) {
+		shares.push({ id: budget.block, cap: blockCap(platform?.env?.LINK_GATE_BLOCK_DAILY_MODEL_CALLS, network), scope: 'block' });
+	}
+	return shares;
+}
+
+/** The first share already used up, read without reserving; failed reads are logged and pass. */
+async function exhaustedShare(db: D1Database | undefined, shares: Share[]): Promise<Share | undefined> {
+	for (const share of shares) {
+		const used = await readNetworkUsage(db, share.id);
+		if (used !== null && used >= share.cap) return share;
+	}
+	return undefined;
 }
 
 /**
  * Refuse a request that would need the model once the day's model calls, or
- * this network's share of them, are used up, before the caller charges the
- * creator's own allowance (enforceCreationLimits) or fetches anything. Call
- * it after the static URL checks, which decide without the model. Without an
- * AI binding no model call is made, so nothing is refused. Failed reads are
- * logged and allowed. Returns the budget to pass to the gate.
+ * this network's or IPv6 /48's share of them, are used up, before the caller
+ * charges the creator's own allowance (enforceCreationLimits) or fetches
+ * anything. Call it after the static URL checks, which decide without the
+ * model. Without an AI binding no model call is made, so nothing is refused.
+ * Failed reads are logged and allowed. Returns the budget to pass to the gate.
  */
 export async function assertModelBudget(
 	platform: App.Platform | undefined,
@@ -129,27 +178,27 @@ export async function assertModelBudget(
 		logGateDecision(budgetExhausted(url));
 		throw error(503, BUDGET_EXHAUSTED_MESSAGE);
 	}
-	const network = await networkId(platform, request);
-	if (network) {
-		const mine = await readNetworkUsage(db, network);
-		if (mine !== null && mine >= networkCap(platform.env.LINK_GATE_NETWORK_DAILY_MODEL_CALLS)) {
-			logGateDecision(budgetExhausted(url, 'network'));
-			throw error(429, NETWORK_BUDGET_EXHAUSTED_MESSAGE);
-		}
+	const budget = await budgetIds(platform, request);
+	const full = await exhaustedShare(db, sharesFor(platform, budget));
+	if (full) {
+		logGateDecision(budgetExhausted(url, full.scope));
+		throw error(429, NETWORK_BUDGET_EXHAUSTED_MESSAGE);
 	}
-	return { network };
+	return budget;
 }
 
 /**
  * Judge a destination within the daily model-call budget (budget.ts, counted
- * in D1). Every model call first reserves one unit of the network's share
- * (when the network is known), then one unit of the global count; if the
- * global count is used up, the network unit is given back. Nothing else is
- * refunded: a unit is taken only for a call that is about to run.
+ * in D1). Every model call reserves, in order, one unit of the network's
+ * share, one unit of its IPv6 /48's share (IPv6 only), then one unit of the
+ * global count. When a later step refuses, every unit taken by an earlier
+ * step is given back, on the day it was taken. Nothing else is refunded: a
+ * unit is taken only for a call that is about to run.
  *
  * Global limit reached: refused with 503, logged as link_gate_budget_exhausted,
- * for every creator (Tanner's decision, 2026-11-13). Network share used up:
- * refused with 429, logged as link_gate_network_budget_exhausted.
+ * for every creator (Tanner's decision, 2026-11-13). A network's or /48's
+ * share used up: refused with 429, logged as link_gate_network_budget_exhausted
+ * (reason network_daily_model_cap or block_daily_model_cap).
  */
 export async function judgeWithinBudget(
 	platform: App.Platform | undefined,
@@ -159,24 +208,31 @@ export async function judgeWithinBudget(
 ): Promise<GateDecision> {
 	const db = platform?.env?.DB;
 	const cap = dailyCap(platform?.env?.LINK_GATE_DAILY_MODEL_CALLS);
-	const share = networkCap(platform?.env?.LINK_GATE_NETWORK_DAILY_MODEL_CALLS);
-	const { network } = budget;
+	const shares = sharesFor(platform, budget);
 	// Cheap early refusal, before fetching anything. Without a model there is
 	// nothing to count: the gate allows unchecked and logs it.
 	if (deps.ai) {
 		const used = await readUsage(db);
 		if (used !== null && used >= cap) return budgetExhausted(url);
-		if (network) {
-			const mine = await readNetworkUsage(db, network);
-			if (mine !== null && mine >= share) return budgetExhausted(url, 'network');
-		}
+		const full = await exhaustedShare(db, shares);
+		if (full) return budgetExhausted(url, full.scope);
 	}
 	const ai = deps.ai && {
 		run: async (model: string, input: unknown) => {
-			const mine = network ? await reserveNetworkCall(db, network, share) : undefined;
-			if (mine && !mine.ok) throw new BudgetExhaustedError('network');
+			const taken: Array<[Share, NetworkReservation]> = [];
+			const giveBack = async () => {
+				for (const [share, reservation] of taken) await refundNetworkCall(db, share.id, reservation);
+			};
+			for (const share of shares) {
+				const reservation = await reserveNetworkCall(db, share.id, share.cap);
+				if (!reservation.ok) {
+					await giveBack();
+					throw new BudgetExhaustedError(share.scope);
+				}
+				taken.push([share, reservation]);
+			}
 			if (!(await reserveCall(db, cap))) {
-				if (network && mine) await refundNetworkCall(db, network, mine);
+				await giveBack();
 				throw new BudgetExhaustedError('global');
 			}
 			return deps.ai!.run(model, input);

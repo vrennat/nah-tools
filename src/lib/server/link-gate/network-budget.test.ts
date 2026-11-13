@@ -11,9 +11,10 @@ import {
 	readNetworkUsage,
 	readUsage,
 	refundNetworkCall,
-	reserveNetworkCall
+	reserveNetworkCall,
+	blockCap
 } from './budget';
-import { judgeWithinBudget, NETWORK_BUDGET_EXHAUSTED_MESSAGE } from './route';
+import { ipv6BlockKey, judgeWithinBudget, NETWORK_BUDGET_EXHAUSTED_MESSAGE } from './route';
 import { NOUL_QUESTIONS } from './questions';
 
 vi.mock('$server/creation-limits', async (orig) => ({
@@ -230,7 +231,125 @@ describe('per-network share (POST /api/links)', () => {
 		expect(lines.filter((l: string) => /203\.0\.113|2001:db8|198\.51/.test(l))).toEqual([]);
 		// Only hashes are stored.
 		const stored = sqlite.prepare('SELECT network FROM link_gate_network_budget').all() as { network: string }[];
-		expect(stored).toHaveLength(3);
+		// Two IPv4 networks, one IPv6 /64 and its /48 block.
+		expect(stored).toHaveLength(4);
 		for (const { network } of stored) expect(network).toMatch(/^[0-9a-f]{32}$/);
 	});
 });
+
+describe('IPv6 /48 block share', () => {
+	const usage = (id: string) => readNetworkUsage(db, id);
+	const env = (network: string, block: string, extra: Record<string, string> = {}) =>
+		platform({ LINK_GATE_NETWORK_DAILY_MODEL_CALLS: network, LINK_GATE_BLOCK_DAILY_MODEL_CALLS: block, ...extra });
+
+	it('keys a /64 network to its /48 and leaves IPv4 without a block', () => {
+		expect(ipv6BlockKey('2001:0db8:0001:0002::/64')).toBe('2001:0db8:0001::/48');
+		expect(ipv6BlockKey('203.0.113.7')).toBeUndefined();
+	});
+
+	it('defaults the block share to 10 times the network share', () => {
+		expect(blockCap(undefined, 60)).toBe(600);
+		expect(blockCap('', 7)).toBe(70);
+		expect(blockCap('250', 60)).toBe(250);
+	});
+
+	it('limits many /64 networks inside one /48 together: block share 5, 40 networks in parallel', async () => {
+		const model = ai();
+		const p = env('3', '5');
+		const results = await Promise.all(
+			Array.from({ length: 40 }, (_, i) =>
+				judgeWithinBudget(p, `https://p${i}.example/`, { ai: model, fetchImpl }, { network: `net-${i}`, block: 'blk-a' })
+			)
+		);
+		expect(model.run).toHaveBeenCalledTimes(5);
+		expect(results.filter((r) => r.verdict === 'block' && r.httpStatus === 429)).toHaveLength(35);
+		expect(results.find((r) => r.verdict === 'block')).toMatchObject({
+			log: { event: 'link_gate_network_budget_exhausted', reason: 'block_daily_model_cap' }
+		});
+		expect(await usage('blk-a')).toBe(5);
+		expect(await readUsage(db)).toBe(5);
+		// Refused calls gave back their network units: the 40 networks hold exactly the 5 calls that ran.
+		let networks = 0;
+		for (let i = 0; i < 40; i++) networks += (await usage(`net-${i}`)) ?? 0;
+		expect(networks).toBe(5);
+		// Another /48 is unaffected.
+		expect(
+			await judgeWithinBudget(p, 'https://other.example/', { ai: model, fetchImpl }, { network: 'net-x', block: 'blk-b' })
+		).toEqual({ verdict: 'allow' });
+	});
+
+	it('gives back the network unit when the block share refuses', async () => {
+		// The early check sees room; the block fills up before the model call.
+		onFetch = () =>
+			sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES (?, 'blk-a', 5)").run(budgetDay());
+		const d = await judgeWithinBudget(env('3', '5'), 'https://a.example/', { ai: ai(), fetchImpl }, { network: 'net-a', block: 'blk-a' });
+		expect(d).toMatchObject({ httpStatus: 429, log: { reason: 'block_daily_model_cap' } });
+		expect(await usage('net-a')).toBe(0);
+		expect(await usage('blk-a')).toBe(5);
+		expect(await readUsage(db)).toBe(0);
+	});
+
+	it('gives back both the network and the block unit when the global count refuses', async () => {
+		onFetch = () => sqlite.prepare('INSERT INTO link_gate_budget (day, calls) VALUES (?, 1)').run(budgetDay());
+		const d = await judgeWithinBudget(
+			env('3', '5', { LINK_GATE_DAILY_MODEL_CALLS: '1' }),
+			'https://a.example/',
+			{ ai: ai(), fetchImpl },
+			{ network: 'net-a', block: 'blk-a' }
+		);
+		expect(d).toMatchObject({ httpStatus: 503 });
+		expect(await usage('net-a')).toBe(0);
+		expect(await usage('blk-a')).toBe(0);
+	});
+
+	it('takes nothing from the block or the global count when the network share refuses', async () => {
+		onFetch = () =>
+			sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES (?, 'net-a', 3)").run(budgetDay());
+		const d = await judgeWithinBudget(env('3', '5'), 'https://a.example/', { ai: ai(), fetchImpl }, { network: 'net-a', block: 'blk-a' });
+		expect(d).toMatchObject({ httpStatus: 429, log: { reason: 'network_daily_model_cap' } });
+		expect(await usage('blk-a')).toBe(0);
+		expect(await readUsage(db)).toBe(0);
+	});
+
+	it('reserves the network before the block: with both full mid-check, the network share is reported', async () => {
+		onFetch = () => {
+			sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES (?, 'net-a', 3)").run(budgetDay());
+			sqlite.prepare("INSERT INTO link_gate_network_budget (day, network, calls) VALUES (?, 'blk-a', 5)").run(budgetDay());
+		};
+		const d = await judgeWithinBudget(env('3', '5'), 'https://a.example/', { ai: ai(), fetchImpl }, { network: 'net-a', block: 'blk-a' });
+		expect(d).toMatchObject({ log: { reason: 'network_daily_model_cap' } });
+	});
+
+	it('refuses a /48 over its share with 429 before charging the allowance (POST /api/links)', async () => {
+		const kv = new Map<string, string>();
+		const p = {
+			env: {
+				DB: db,
+				AI: ai(),
+				LINK_GATE_NETWORK_DAILY_MODEL_CALLS: '5',
+				LINK_GATE_BLOCK_DAILY_MODEL_CALLS: '2',
+				KV: { get: async (k: string) => kv.get(k) ?? null, put: async (k: string, v: string) => void kv.set(k, v) }
+			},
+			context: { waitUntil: () => {} }
+		};
+		vi.stubGlobal('fetch', vi.fn(fetchImpl));
+		const post = (ip: string, url: string) =>
+			links.POST({
+				request: new Request('https://nah.tools/api/links', { method: 'POST', headers: { 'cf-connecting-ip': ip }, body: JSON.stringify({ url }) }),
+				platform: p
+			} as never);
+		// Two different /64s in 2001:db8:1::/48 use the block's two calls.
+		expect((await post('2001:db8:1:1::1', 'https://one.example/')).status).toBe(201);
+		expect((await post('2001:db8:1:2::1', 'https://two.example/')).status).toBe(201);
+		vi.mocked(enforceCreationLimits).mockClear();
+		await expect(post('2001:db8:1:3::1', 'https://three.example/')).rejects.toMatchObject({
+			status: 429,
+			body: { message: NETWORK_BUDGET_EXHAUSTED_MESSAGE }
+		});
+		expect(enforceCreationLimits).not.toHaveBeenCalled();
+		// Another /48 and IPv4 are unaffected.
+		expect((await post('2001:db8:2:1::1', 'https://four.example/')).status).toBe(201);
+		expect((await post('203.0.113.7', 'https://five.example/')).status).toBe(201);
+	});
+});
+

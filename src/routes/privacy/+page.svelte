@@ -51,7 +51,8 @@
 			codes count per network and per passphrase using hashes salted with a random value that
 			changes every day; these counters expire after two days and the IP address and passphrase
 			themselves are not stored. The link safety check described below also counts its checks per
-			network for the current day, in our database, under a hash made with the same daily salt; those
+			network, and for IPv6 also per /48 address block, for the current day, in our database, under
+			hashes made with the same daily salt; those
 			counts are deleted by the first check on a later day, and the salt itself expires after two days,
 			after which a stored hash can no longer be linked to an address. Link-abuse reports store the reason and a hash of the reporter’s
 			network address made with the same daily salt, which limits each network to one open report
