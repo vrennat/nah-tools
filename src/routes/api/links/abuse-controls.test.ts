@@ -2,12 +2,27 @@
  * Route-level checks that every redirect create/update path applies the
  * destination policy and the creation limits.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { NOUL_QUESTIONS } from '$server/link-gate/questions';
 import * as links from './+server';
 import * as bulk from './bulk/+server';
 import * as dynamic from '../dynamic/+server';
 
 type Handler = (event: unknown) => Promise<Response>;
+
+// No real network: every destination the gate fetches is a plain page.
+beforeEach(() => {
+	vi.stubGlobal(
+		'fetch',
+		vi.fn(async () => new Response(`<title>Page</title><p>${'Text. '.repeat(80)}</p>`, { headers: { 'content-type': 'text/html' } }))
+	);
+	vi.spyOn(console, 'info').mockImplementation(() => {});
+	vi.spyOn(console, 'warn').mockImplementation(() => {});
+});
+afterEach(() => {
+	vi.unstubAllGlobals();
+	vi.restoreAllMocks();
+});
 
 function fakePlatform(opts: { limiterAllows: boolean }) {
 	const inserts: unknown[][] = [];
@@ -42,7 +57,13 @@ function fakePlatform(opts: { limiterAllows: boolean }) {
 				put: async (k: string, v: string) => void store.set(k, v),
 				delete: async (k: string) => void store.delete(k)
 			},
-			CREATE_LIMITER: { limit: async () => ({ success: opts.limiterAllows }) }
+			CREATE_LIMITER: { limit: async () => ({ success: opts.limiterAllows }) },
+			// The spam gate is not under test here: a model that allows everything.
+			AI: {
+				run: async () => ({
+					answers: Object.fromEntries(Object.keys(NOUL_QUESTIONS).map((id) => [id, { noul: 0.02 }]))
+				})
+			}
 		},
 		context: { waitUntil: () => {} }
 	};
