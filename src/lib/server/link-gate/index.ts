@@ -37,6 +37,8 @@ export interface GateDeps {
 	/** D1 blocklist check for hops after the first; returns a reason or null. */
 	checkHop?: (url: string) => Promise<string | null>;
 	fetchImpl?: typeof fetch;
+	/** False for bio page links, which may point at nah.tools. Defaults to true. */
+	forRedirect?: boolean;
 	/** Total time budget for the redirect chain; defaults to TOTAL_TIMEOUT_MS. */
 	fetchTimeoutMs?: number;
 	clefTimeoutMs?: number;
@@ -64,7 +66,8 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 		chain = await followChain(url, {
 			fetchImpl: deps.fetchImpl,
 			checkHop: deps.checkHop,
-			timeoutMs: deps.fetchTimeoutMs
+			timeoutMs: deps.fetchTimeoutMs,
+			forRedirect: deps.forRedirect
 		});
 	} catch {
 		// followChain does not throw by design; a throw here is a bug or a failed blocklist lookup.

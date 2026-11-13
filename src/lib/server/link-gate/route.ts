@@ -24,15 +24,36 @@ export function servedUrl(destination: string, utm?: UTMParams): string {
 	return parsed.toString();
 }
 
-export function gateDeps(platform: App.Platform | undefined, db: D1Database): GateDeps {
+export interface GateOptions {
+	/** False for bio page links, which may point at nah.tools. Defaults to true. */
+	forRedirect?: boolean;
+}
+
+export function gateDeps(
+	platform: App.Platform | undefined,
+	db: D1Database,
+	opts: GateOptions = {}
+): GateDeps {
+	const forRedirect = opts.forRedirect ?? true;
 	return {
 		ai: platform?.env?.AI,
+		forRedirect,
 		// Later hops also go through the D1 blocklist, not only the static policy.
 		checkHop: async (url) => {
-			const r = await validateUrlSafety(url, db);
+			const r = await validateUrlSafety(url, db, { forRedirect });
 			return r.safe ? null : (r.reason ?? 'blocked');
 		}
 	};
+}
+
+/** nah.tools and its subdomains: bio links may point here, and the site is not checked against itself. */
+export function isOwnSite(url: string): boolean {
+	try {
+		const host = new URL(url).hostname.replace(/\.$/, '');
+		return host === 'nah.tools' || host.endsWith('.nah.tools');
+	} catch {
+		return false;
+	}
 }
 
 /**
@@ -48,9 +69,11 @@ export function logGateDecision(decision: GateDecision): void {
 export async function gateDestinationOrThrow(
 	platform: App.Platform | undefined,
 	db: D1Database,
-	url: string
+	url: string,
+	opts: GateOptions = {}
 ): Promise<void> {
-	const decision = await judgeDestination(url, gateDeps(platform, db));
+	if (opts.forRedirect === false && isOwnSite(url)) return;
+	const decision = await judgeDestination(url, gateDeps(platform, db, opts));
 	logGateDecision(decision);
 	if (decision.verdict === 'block') throw error(400, decision.message);
 }

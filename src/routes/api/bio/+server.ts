@@ -12,6 +12,10 @@ import {
 } from '$server/bio-db';
 import { validateHandle, validateUrlSafety, verifyTurnstile, checkRateLimit } from '$server/safety';
 import { normalizeUrl } from '$utils/url';
+import { gateDestinationOrThrow } from '$server/link-gate/route';
+
+/** Each initial link runs the spam gate, so a new profile takes at most this many. */
+const MAX_INITIAL_LINKS = 20;
 import { themes } from '$bio/themes';
 
 // Derive the allowlist from the canonical theme definitions so this stays in sync automatically
@@ -94,12 +98,32 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'Passphrase must be at least 8 characters');
 	}
 
+	if (links && links.length > MAX_INITIAL_LINKS) {
+		throw error(400, `A new profile can have at most ${MAX_INITIAL_LINKS} links; add more after creating it.`);
+	}
+
 	// Validate avatar URL if provided
 	if (avatar_url) {
 		const safety = await validateUrlSafety(normalizeUrl(avatar_url), db, { forRedirect: false });
 		if (!safety.safe) {
 			throw error(400, safety.reason || 'Avatar URL is not allowed');
 		}
+	}
+
+	// Initial links: unsafe ones are skipped as before; then every kept link
+	// goes through the spam gate before anything is stored, so a blocked link
+	// rejects the request instead of leaving a half-created profile.
+	const initialLinks: { url: string; title: string; index: number }[] = [];
+	for (let i = 0; i < (links?.length ?? 0); i++) {
+		const link = links![i];
+		if (!link.url || !link.title) continue;
+		const normalizedUrl = normalizeUrl(link.url);
+		const safety = await validateUrlSafety(normalizedUrl, db, { forRedirect: false });
+		if (!safety.safe) continue;
+		initialLinks.push({ url: normalizedUrl, title: link.title, index: i });
+	}
+	for (const link of initialLinks) {
+		await gateDestinationOrThrow(platform, db, link.url, { forRedirect: false });
 	}
 
 	const passphraseHash = await hashPassphrase(passphrase);
@@ -114,18 +138,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		passphraseHash
 	);
 
-	// Add initial links if provided
-	if (links && links.length > 0) {
-		for (let i = 0; i < links.length; i++) {
-			const link = links[i];
-			if (!link.url || !link.title) continue;
-
-			const normalizedUrl = normalizeUrl(link.url);
-			const safety = await validateUrlSafety(normalizedUrl, db, { forRedirect: false });
-			if (!safety.safe) continue;
-
-			await addBioLink(db, normalizedHandle, normalizedUrl, link.title, null, i);
-		}
+	for (const link of initialLinks) {
+		await addBioLink(db, normalizedHandle, link.url, link.title, null, link.index);
 	}
 
 	return json(
