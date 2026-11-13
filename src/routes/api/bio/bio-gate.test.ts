@@ -461,4 +461,50 @@ describe('bio links and the per-network share of model calls', () => {
 		// Another network has its own share.
 		expect((await add('2001:db8:6:1::1')).status).toBe(201);
 	});
+
+	it('charges bio link adds and edits in the gate itself: two at once from one network with a share of 1', async () => {
+		const env = shareEnv({ LINK_GATE_NETWORK_DAILY_MODEL_CALLS: '1' });
+		const created = await profiles.POST({
+			request: from('192.0.2.1', 'POST', {
+				handle: 'sh3',
+				display_name: 'S',
+				passphrase: 'correct horse',
+				links: [
+					{ url: 'https://nah.tools/a', title: 'A' },
+					{ url: 'https://nah.tools/b', title: 'B' }
+				]
+			}),
+			platform: env
+		} as never);
+		expect(created.status).toBe(201);
+		const status = (p: Promise<Response> | Response) =>
+			Promise.resolve(p).then(
+				(r) => r.status,
+				(e: { status?: number }) => e.status
+			);
+		// Both pass the early check (0 of 1 used); only one can reserve the call.
+		const added = await Promise.all(
+			[1, 2].map((i) =>
+				status(
+					bioLinks.POST({
+						request: from('198.51.100.20', 'POST', { handle: 'sh3', passphrase: 'correct horse', url: `https://ok.example/add${i}`, title: 'N' }),
+						platform: env
+					} as never)
+				)
+			)
+		);
+		expect(added.sort()).toEqual([201, 429]);
+		const ids = (sqlite.prepare("SELECT id FROM bio_links WHERE profile_handle = 'sh3' AND url LIKE 'https://nah.tools/%' ORDER BY id").all() as { id: number }[]).map((r) => r.id);
+		const edited = await Promise.all(
+			ids.map((id, i) =>
+				status(
+					bioLinks.PUT({
+						request: from('198.51.100.30', 'PUT', { handle: 'sh3', passphrase: 'correct horse', link_id: id, url: `https://ok.example/edit${i}` }),
+						platform: env
+					} as never)
+				)
+			)
+		);
+		expect(edited.sort()).toEqual([200, 429]);
+	});
 });
