@@ -18,10 +18,14 @@ let tasks: Promise<unknown>[];
 /** What the destination does on each successive fetch: 'down', 'ok' or 'phish'. */
 let behaviour: ('down' | 'ok' | 'phish')[];
 let info: { mock: { calls: unknown[][] } };
+/** When set, the recheck's model call (the second one) waits for this, so a test can change the row mid-recheck. */
+let modelGate: Promise<void> | null;
+let modelCalls: number;
 
 function platform() {
 	const ai = {
 		run: vi.fn(async (_m: string, input: unknown) => {
+			if (++modelCalls > 1 && modelGate) await modelGate;
 			const phish = (input as { state: string }).state.includes('Claim your prize');
 			const p: Partial<Record<NoulId, number>> = phish ? { scam: 0.95, impersonation: 0.9 } : {};
 			return { answers: Object.fromEntries(Object.keys(NOUL_QUESTIONS).map((id) => [id, { noul: p[id as NoulId] ?? 0.02 }])) };
@@ -45,6 +49,8 @@ const events = () => info.mock.calls.map((c) => JSON.parse(c[0] as string) as { 
 beforeEach(() => {
 	({ db, sqlite } = migratedDb());
 	tasks = [];
+	modelGate = null;
+	modelCalls = 0;
 	vi.stubGlobal(
 		'fetch',
 		vi.fn(async () => {
@@ -104,16 +110,45 @@ describe('recheck of a link the first check could not finish', () => {
 	});
 
 	it('does not disable a link whose destination changed before the recheck finished', async () => {
-		behaviour = ['down'];
+		behaviour = ['down', 'phish'];
+		let release!: () => void;
+		modelGate = new Promise((r) => (release = r));
 		const res = await links.POST({
 			request: req('POST', { url: 'https://slow.example/', passphrase: 'correct horse' }),
 			platform: platform()
 		} as never);
 		expect(res.status).toBe(201);
-		// The owner re-points the link before the recheck lands.
+		// The recheck's model call is waiting; the owner re-points the link meanwhile.
 		sqlite.prepare("UPDATE redirects SET destination_url = 'https://new.example/'").run();
-		behaviour = ['phish'];
+		release();
 		await Promise.all(tasks);
 		expect(row()).toMatchObject({ destination_url: 'https://new.example/', is_active: 1, disabled_reason: null });
+	});
+
+	it('does not disable a link whose UTM fields changed before the recheck finished', async () => {
+		behaviour = ['down', 'phish'];
+		let release!: () => void;
+		modelGate = new Promise((r) => (release = r));
+		const res = await links.POST({
+			request: req('POST', { url: 'https://slow.example/', passphrase: 'correct horse', utm: { content: 'a' } }),
+			platform: platform()
+		} as never);
+		expect(res.status).toBe(201);
+		// Same destination, new UTM: the served URL the recheck judged is no longer what is stored.
+		sqlite.prepare("UPDATE redirects SET utm_content = 'b'").run();
+		release();
+		await Promise.all(tasks);
+		expect(row()).toMatchObject({ is_active: 1, disabled_reason: null });
+	});
+
+	it('still disables when the UTM fields are unchanged', async () => {
+		behaviour = ['down', 'phish'];
+		const res = await links.POST({
+			request: req('POST', { url: 'https://slow.example/', utm: { content: 'a' } }),
+			platform: platform()
+		} as never);
+		expect(res.status).toBe(201);
+		await Promise.all(tasks);
+		expect(row()).toMatchObject({ is_active: 0, disabled_reason: 'destination_flagged' });
 	});
 });

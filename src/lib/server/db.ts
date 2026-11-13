@@ -180,21 +180,32 @@ export async function createLink(
 
 /**
  * Disable a redirect because a background recheck blocked its destination.
- * Only touches the row if it is still active and still points at the URL
- * that was judged, so a destination changed or a link deactivated in the
- * meantime is left alone. Returns true if the row changed.
+ * Only touches the row if it is still active and still serves the URL that
+ * was judged (same destination and same UTM fields, which the redirect
+ * worker appends), so a link changed or deactivated in the meantime is left
+ * alone. Returns true if the row changed.
  */
 export async function disableFlaggedRedirect(
 	db: D1Database,
 	shortCode: string,
-	destinationUrl: string
+	destinationUrl: string,
+	utm: UTMParams | undefined
 ): Promise<boolean> {
 	const res = await db
 		.prepare(
 			`UPDATE redirects SET is_active = 0, disabled_reason = 'destination_flagged', updated_at = datetime('now')
-			 WHERE short_code = ? AND destination_url = ? AND is_active = 1`
+			 WHERE short_code = ? AND destination_url = ? AND is_active = 1
+			   AND utm_source IS ? AND utm_medium IS ? AND utm_campaign IS ? AND utm_term IS ? AND utm_content IS ?`
 		)
-		.bind(shortCode, destinationUrl)
+		.bind(
+			shortCode,
+			destinationUrl,
+			utm?.source ?? null,
+			utm?.medium ?? null,
+			utm?.campaign ?? null,
+			utm?.term ?? null,
+			utm?.content ?? null
+		)
 		.run();
 	return (res.meta?.changes ?? 0) > 0;
 }

@@ -116,7 +116,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		expiresAt: expires_at,
 		utm
 	});
-	scheduleRecheck(platform, db, decision, { shortCode, storedUrl: normalizedUrl, gateUrl });
+	scheduleRecheck(platform, db, decision, { shortCode, storedUrl: normalizedUrl, storedUtm: utm, gateUrl });
 
 	const displayCode = alias || shortCode;
 
@@ -183,7 +183,12 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 		.run();
 
 	await invalidateRedirectCache(getKV(platform), db, short_code);
-	scheduleRecheck(platform, db, decision, { shortCode: existing.short_code, storedUrl: normalizedUrl, gateUrl });
+	scheduleRecheck(platform, db, decision, {
+		shortCode: existing.short_code,
+		storedUrl: normalizedUrl,
+		storedUtm: body.utm,
+		gateUrl
+	});
 	return json({ success: true });
 };
 

@@ -78,7 +78,13 @@ export function scheduleRecheck(
 	platform: App.Platform | undefined,
 	db: D1Database,
 	decision: GateDecision,
-	link: { shortCode: string; storedUrl: string; gateUrl: string }
+	link: {
+		shortCode: string;
+		storedUrl: string;
+		/** The UTM fields stored with the link: the recheck only disables the row if they are unchanged. */
+		storedUtm?: UTMParams;
+		gateUrl: string;
+	}
 ): Promise<void> | undefined {
 	if (decision.verdict !== 'allow' || decision.log?.event !== 'link_gate_allow_unchecked') return;
 	if (!platform?.context?.waitUntil) return;
@@ -90,7 +96,7 @@ export function scheduleRecheck(
 		});
 		if (result.log) logGateDecision({ ...result, log: { ...result.log, recheck: true } } as GateDecision);
 		if (result.verdict !== 'block') return;
-		const changed = await disableFlaggedRedirect(db, link.shortCode, link.storedUrl);
+		const changed = await disableFlaggedRedirect(db, link.shortCode, link.storedUrl, link.storedUtm);
 		const kv = platform.env?.KV;
 		if (changed && kv) await invalidateRedirectCache(kv, db, link.shortCode);
 	})().catch(() => {

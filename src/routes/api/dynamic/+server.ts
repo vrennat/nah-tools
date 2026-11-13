@@ -80,16 +80,17 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	const existing = await authenticateRedirect(db, short_code, passphrase);
 	// This endpoint also reaches short links, whose stored UTM parameters it
 	// keeps; the redirect worker appends them, so the gate must judge them too.
-	const gateUrl = servedUrl(url, {
+	const storedUtm = {
 		source: existing.utm_source ?? undefined,
 		medium: existing.utm_medium ?? undefined,
 		campaign: existing.utm_campaign ?? undefined,
 		term: existing.utm_term ?? undefined,
 		content: existing.utm_content ?? undefined
-	});
+	};
+	const gateUrl = servedUrl(url, storedUtm);
 	const decision = await gateDestinationOrThrow(platform, db, gateUrl);
 	await updateRedirect(db, short_code, url);
-	scheduleRecheck(platform, db, decision, { shortCode: existing.short_code, storedUrl: url, gateUrl });
+	scheduleRecheck(platform, db, decision, { shortCode: existing.short_code, storedUrl: url, storedUtm, gateUrl });
 	await invalidateRedirectCache(getKV(platform), db, short_code);
 	return json({ success: true });
 };
