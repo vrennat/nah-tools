@@ -2,7 +2,8 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getDB, generateShortCode, createLink, isAliasAvailable } from '$server/db';
 import { hashPassphrase } from '$server/auth';
-import { validateUrlSafety, validateAlias, verifyTurnstile, checkRateLimit } from '$server/safety';
+import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
+import { enforceCreationLimits } from '$server/creation-limits';
 import { normalizeUrl } from '$utils/url';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
@@ -38,12 +39,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
 	}
 
-	// Rate limit — count each link in the batch as one token so a 100-link request
-	// consumes the same quota as 100 individual requests.
-	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-	if (!checkRateLimit(ip, links.length)) {
-		throw error(429, 'Rate limit exceeded. Try again later.');
-	}
+	// Each link in the batch counts against the daily cap.
+	await enforceCreationLimits(platform, request, passphrase, links.length);
 
 	// Hash passphrase if provided, otherwise anonymous
 	let passphraseHash = '';

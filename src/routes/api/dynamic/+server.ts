@@ -2,7 +2,8 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getDB, getKV, authenticateRedirect, generateShortCode, createRedirect, updateRedirect, deactivateRedirect, invalidateRedirectCache } from '$server/db';
 import { hashPassphrase } from '$server/auth';
-import { validateUrlSafety, verifyTurnstile, checkRateLimit } from '$server/safety';
+import { validateUrlSafety, verifyTurnstile } from '$server/safety';
+import { enforceCreationLimits } from '$server/creation-limits';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -39,11 +40,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
 	}
 
-	// Rate limit
-	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-	if (!checkRateLimit(ip)) {
-		throw error(429, 'Rate limit exceeded. Try again later.');
-	}
+	await enforceCreationLimits(platform, request, passphrase);
 
 	const shortCode = generateShortCode();
 	const passphraseHash = await hashPassphrase(passphrase);
@@ -72,6 +69,9 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	if (!safety.safe) {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
+
+	// Destination changes share the creation budget.
+	await enforceCreationLimits(platform, request, passphrase);
 
 	await authenticateRedirect(db, short_code, passphrase);
 	await updateRedirect(db, short_code, url);

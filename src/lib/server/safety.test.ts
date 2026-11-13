@@ -180,3 +180,57 @@ describe('validateUrlSafety - SSRF gaps', () => {
 		expect(result.safe).toBe(false);
 	});
 });
+
+// D1 stub holding a blocked_domains table; records the bound parameters it saw.
+function makeBlocklistDb(blocked: string[]) {
+	const seen: unknown[][] = [];
+	const db = {
+		prepare: (sql: string) => {
+			let params: unknown[] = [];
+			const stmt = {
+				bind: (...p: unknown[]) => {
+					params = p;
+					seen.push(p);
+					return stmt;
+				},
+				first: async () =>
+					/blocked_domains/.test(sql) && params.some((p) => blocked.includes(String(p)))
+						? { 1: 1 }
+						: null
+			};
+			return stmt;
+		}
+	} as unknown as D1Database;
+	return { db, seen };
+}
+
+describe('validateUrlSafety - blocklist table', () => {
+	it('blocks a listed domain', async () => {
+		const { db } = makeBlocklistDb(['evil.example']);
+		const r = await validateUrlSafety('https://evil.example/x', db);
+		expect(r.safe).toBe(false);
+		expect(r.reason).toMatch(/blocked/);
+	});
+
+	it('blocks subdomains of a listed domain', async () => {
+		const { db } = makeBlocklistDb(['evil.example']);
+		expect((await validateUrlSafety('https://a.b.evil.example/x', db)).safe).toBe(false);
+	});
+
+	it('does not block unrelated domains', async () => {
+		const { db } = makeBlocklistDb(['evil.example']);
+		expect((await validateUrlSafety('https://notevil.example/', db)).safe).toBe(true);
+	});
+
+	it('keeps the lookup under the D1 bound-parameter limit', async () => {
+		const { db, seen } = makeBlocklistDb([]);
+		await validateUrlSafety(`https://${'a.'.repeat(18)}example.com/`, db);
+		expect(Math.max(...seen.map((p) => p.length))).toBeLessThan(100);
+	});
+
+	it('lets bio links point at nah.tools but not redirects', async () => {
+		const { db } = makeBlocklistDb([]);
+		expect((await validateUrlSafety('https://nah.tools/qr', db)).safe).toBe(false);
+		expect((await validateUrlSafety('https://nah.tools/qr', db, { forRedirect: false })).safe).toBe(true);
+	});
+});

@@ -131,6 +131,8 @@ All routes prerender by default via `export const prerender = true` in `src/rout
 
 - `src/lib/server/db.ts` — D1 query helpers for dynamic redirect CRUD
 - `src/lib/server/auth.ts` — bcryptjs passphrase hashing/verification
+- `src/lib/server/destination-policy.ts` — static rules for redirect destinations (http/https only, no IP or local hosts, no nah.tools or other shorteners, length caps, seed blocklist of abuse domains and paths); `safety.ts` adds the D1 `blocked_domains` lookup, which blocks a listed domain and its subdomains
+- `src/lib/server/creation-limits.ts` — limits on creating links and dynamic QR codes and on changing their destinations: `CREATE_LIMITER` rate limiting binding (5 requests/min) plus a KV daily cap (100 links/day), each per network (IPv4 address or IPv6 /64) and per passphrase, keyed by hashes with a daily-rotating random salt. Also the salted reporter key for abuse reports
 
 ### API routes
 

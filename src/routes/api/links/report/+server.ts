@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getDB, getKV, getRedirect, reportLink, invalidateRedirectCache } from '$server/db';
 import { checkRateLimit } from '$server/safety';
+import { reporterKey } from '$server/creation-limits';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
@@ -27,11 +28,13 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(404, 'Link not found');
 	}
 
-	const reporterIp = request.headers.get('cf-connecting-ip') || undefined;
-	await reportLink(db, short_code, reason, reporterIp);
+	// Store a salted hash of the reporter's network, never the IP itself. It
+	// still limits each network to one open report per link.
+	const kv = getKV(platform);
+	await reportLink(db, short_code, reason, await reporterKey(kv, request.headers.get('cf-connecting-ip')));
 
 	// Invalidate KV in case the report triggered auto-deactivation
-	await invalidateRedirectCache(getKV(platform), db, short_code);
+	await invalidateRedirectCache(kv, db, short_code);
 
 	return json({ success: true });
 };

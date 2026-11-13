@@ -11,7 +11,8 @@ import {
 	invalidateRedirectCache
 } from '$server/db';
 import { hashPassphrase } from '$server/auth';
-import { validateUrlSafety, validateAlias, verifyTurnstile, checkRateLimit } from '$server/safety';
+import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
+import { enforceCreationLimits } from '$server/creation-limits';
 import { normalizeUrl } from '$utils/url';
 
 export const POST: RequestHandler = async ({ request, platform }) => {
@@ -49,17 +50,13 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		console.warn('TURNSTILE_SECRET_KEY not configured - bot protection disabled');
 	}
 
-	// Rate limit
-	const ip = request.headers.get('cf-connecting-ip') || 'unknown';
-	if (!checkRateLimit(ip)) {
-		throw error(429, 'Rate limit exceeded. Try again later.');
-	}
-
 	// Validate URL safety
 	const safety = await validateUrlSafety(normalizedUrl, db);
 	if (!safety.safe) {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
+
+	await enforceCreationLimits(platform, request, passphrase);
 
 	// Validate alias if provided
 	if (alias) {
@@ -149,6 +146,10 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	if (!safety.safe) {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
+
+	// Destination changes share the creation budget, so one link cannot be
+	// re-pointed at a stream of fresh domains.
+	await enforceCreationLimits(platform, request, passphrase);
 
 	await authenticateRedirect(db, short_code, passphrase);
 

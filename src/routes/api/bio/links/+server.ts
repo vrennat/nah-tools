@@ -34,7 +34,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	await authenticateProfile(db, handle, passphrase);
 
 	const normalizedUrl = normalizeUrl(url);
-	const safety = await validateUrlSafety(normalizedUrl, db);
+	const safety = await validateUrlSafety(normalizedUrl, db, { forRedirect: false });
 	if (!safety.safe) {
 		throw error(400, safety.reason || 'URL is not allowed');
 	}
@@ -76,7 +76,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	// Validate URL if changing
 	if (fields.url) {
 		const normalizedUrl = normalizeUrl(fields.url);
-		const safety = await validateUrlSafety(normalizedUrl, db);
+		const safety = await validateUrlSafety(normalizedUrl, db, { forRedirect: false });
 		if (!safety.safe) {
 			throw error(400, safety.reason || 'URL is not allowed');
 		}
