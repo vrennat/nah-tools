@@ -176,13 +176,15 @@ export async function updateLinkDestination(
 /**
  * Record the result of a background recheck of a link held as 'unchecked'
  * or 'unreadable'. Only touches the row if it is still held that way for the same
- * destination, so it cannot revive a link that was edited, deactivated or
+ * destination and UTM parameters (the URL that was judged), so it cannot
+ * release a different URL or revive a link that was edited, deactivated or
  * reported in the meantime. Returns true if the row changed.
  */
 export async function resolveUncheckedHold(
 	db: D1Database,
 	shortCode: string,
 	destinationUrl: string,
+	utm: UTMParams | undefined,
 	holdReason: HoldReason | 'blocked' | null
 ): Promise<boolean> {
 	// Another failed check changes nothing; the link stays held.
@@ -190,9 +192,19 @@ export async function resolveUncheckedHold(
 	const res = await db
 		.prepare(
 			`UPDATE redirects SET is_active = CASE WHEN ?1 IS NULL THEN 1 ELSE 0 END, hold_reason = ?1, updated_at = datetime('now')
-			 WHERE short_code = ?2 AND destination_url = ?3 AND hold_reason IN ('unchecked', 'unreadable')`
+			 WHERE short_code = ?2 AND destination_url = ?3 AND hold_reason IN ('unchecked', 'unreadable')
+			   AND utm_source IS ?4 AND utm_medium IS ?5 AND utm_campaign IS ?6 AND utm_term IS ?7 AND utm_content IS ?8`
 		)
-		.bind(holdReason, shortCode, destinationUrl)
+		.bind(
+			holdReason,
+			shortCode,
+			destinationUrl,
+			utm?.source ?? null,
+			utm?.medium ?? null,
+			utm?.campaign ?? null,
+			utm?.term ?? null,
+			utm?.content ?? null
+		)
 		.run();
 	return (res.meta?.changes ?? 0) > 0;
 }

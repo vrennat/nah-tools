@@ -76,6 +76,64 @@ describe('redirect forms browsers follow', () => {
 	});
 });
 
+describe('decoy redirects (review pass 2)', () => {
+	const login = `<title>Sign in</title><form action="/p"><input type="email" name="u"><input type="password" name="p"></form>`;
+	it.each([
+		['meta refresh inside a script string', `${login}<script>var s='<meta http-equiv="refresh" content="0;url=https://b.example/">'</script>`],
+		['meta refresh inside <template>', `${login}<template><meta http-equiv="refresh" content="0;url=https://b.example/"></template>`],
+		['dead-branch script redirect', `${login}<script>if(false) location.href="https://b.example/"</script>`],
+		['slow meta refresh', `<p>hi</p><meta http-equiv="refresh" content="999999;url=https://b.example/">`]
+	])('does not follow a %s', (_n, html) => {
+		expect(findClientRedirect(html)).toBeNull();
+	});
+
+	it('does not follow a slow Refresh header, or one on a content page', async () => {
+		const { impl, calls } = fakeFetch({
+			'https://a.example/': { headers: { refresh: '999999; url=https://b.example/' }, body: 'hi' },
+			'https://c.example/': { headers: { refresh: '0; url=https://b.example/' }, body: content }
+		});
+		expect((await followChain('https://a.example/', { fetchImpl: impl })).finalUrl).toBe('https://a.example/');
+		expect((await followChain('https://c.example/', { fetchImpl: impl })).finalUrl).toBe('https://c.example/');
+		expect(calls).not.toContain('https://b.example/');
+	});
+
+	it('shows the model the loader page it passed through', async () => {
+		const ai = clef();
+		const { impl } = fakeFetch({
+			'https://a.example/': { body: '<title>Please wait</title><p>Verifying your account</p><script>location.href="https://b.example/"</script>' },
+			'https://b.example/': { body: content }
+		});
+		await judgeDestination('https://a.example/', { ai, fetchImpl: impl });
+		const state = (ai.run.mock.calls[0] as unknown as [string, { state: string }])[1].state;
+		expect(state).toContain('Title: Please wait');
+		expect(state).toContain('Verifying your account');
+	});
+});
+
+describe('parser evasions (review pass 2)', () => {
+	const refresh = '<meta http-equiv="refresh" content="0;url=https://b.example/">';
+	it.each([
+		['after an abruptly closed comment <!-->', `<!-->${refresh}`],
+		['after an abruptly closed comment <!--->', `<!--->${refresh}`],
+		['after a comment closed with --!>', `<!-- x --!>${refresh}`],
+		['after 201 other meta tags', `${'<meta name="x" content="y">'.repeat(201)}${refresh}`],
+		['with http-equiv after 3 KB of attributes', `<meta data-x="${'a'.repeat(3000)}" http-equiv="refresh" content="0;url=https://b.example/">`],
+		['with a newline inside the URL', '<meta http-equiv="refresh" content="0;url=https://b.exa\nmple/">']
+	])('finds a refresh %s', (_n, html) => {
+		expect(findClientRedirect(html)?.url).toBe('https://b.example/');
+	});
+
+	it('finds a script redirect after 51 other scripts', () => {
+		const html = `${'<script>var a=1</script>'.repeat(51)}<script>location.href="https://b.example/"</script>`;
+		expect(findClientRedirect(html)?.url).toBe('https://b.example/');
+	});
+
+	it('passes SVG text to the model', () => {
+		const s = summarizePage('<svg><text>Your account is suspended</text></svg>', 'https://a.example/x.svg');
+		expect(s.text).toContain('Your account is suspended');
+	});
+});
+
 describe('unreadable destinations', () => {
 	it('holds when the page cannot be fetched, even if the model would allow it', async () => {
 		const ai = clef({ scam: 0.1, empty: 0.9 });
@@ -120,8 +178,12 @@ describe('unreadable destinations', () => {
 
 describe('servedUrl', () => {
 	it('matches what the redirect worker sends visitors to', () => {
-		expect(servedUrl('https://a.example/p?x=1', { source: 'nl', content: 'v2' })).toBe(
+		expect(servedUrl('https://a.example/p?x=1', { content: 'v2', source: 'nl' })).toBe(
 			'https://a.example/p?x=1&utm_source=nl&utm_content=v2'
+		);
+		// Keys the worker never stores are not part of the judged URL.
+		expect(servedUrl('https://a.example/', { content: 'a', evil: 'x' } as never)).toBe(
+			'https://a.example/?utm_content=a'
 		);
 		expect(servedUrl('https://a.example/', undefined)).toBe('https://a.example/');
 	});

@@ -7,6 +7,7 @@ import { validateUrlSafety } from '$server/safety';
 import { invalidateRedirectCache, resolveUncheckedHold } from '$server/db';
 import { judgeDestination, type GateDeps, type HoldReason } from './index';
 import { RECHECKABLE_HOLDS } from './decide';
+import type { UTMParams } from '$qr/types';
 
 /**
  * The URL the redirect worker will send visitors to: the stored destination
@@ -14,14 +15,13 @@ import { RECHECKABLE_HOLDS } from './decide';
  * redirect-worker/src/index.ts, so the gate judges exactly what is served
  * (a redirector can branch on a query parameter).
  */
-export function servedUrl(
-	destination: string,
-	utm?: { source?: string; medium?: string; campaign?: string; term?: string; content?: string }
-): string {
+export function servedUrl(destination: string, utm?: UTMParams): string {
 	if (!utm) return destination;
 	const parsed = new URL(destination);
-	for (const [key, value] of Object.entries(utm)) {
-		if (value) parsed.searchParams.set(`utm_${key}`, value);
+	// Only the five stored fields, in the worker's order; other request keys are never stored.
+	for (const key of ['source', 'medium', 'campaign', 'term', 'content'] as const) {
+		const value = utm[key];
+		if (value) parsed.searchParams.set(`utm_${key}`, String(value));
 	}
 	return parsed.toString();
 }
@@ -71,9 +71,10 @@ export function scheduleRecheck(
 	/** The destination as stored, used to match the row. */
 	url: string,
 	holdReason: HoldReason | null,
-	/** The URL to judge, when it differs from the stored one (UTM parameters). */
-	gateUrl: string = url
+	/** The stored UTM parameters; the recheck applies only if they are unchanged. */
+	utm?: UTMParams
 ): void {
+	const gateUrl = servedUrl(url, utm);
 	if (!holdReason || !RECHECKABLE_HOLDS.includes(holdReason) || !platform?.context?.waitUntil) return;
 	const kv = platform.env?.KV;
 	platform.context.waitUntil(
@@ -81,7 +82,7 @@ export function scheduleRecheck(
 			const decision = await judgeDestination(gateUrl, gateDeps(platform, db));
 			const next =
 				decision.verdict === 'allow' ? null : decision.verdict === 'block' ? 'blocked' : decision.holdReason;
-			const changed = await resolveUncheckedHold(db, shortCode, url, next);
+			const changed = await resolveUncheckedHold(db, shortCode, url, utm, next);
 			if (changed && kv) await invalidateRedirectCache(kv, db, shortCode);
 		})().catch((e) => console.error('link gate: recheck failed', e))
 	);

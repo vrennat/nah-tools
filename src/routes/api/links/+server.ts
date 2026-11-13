@@ -117,7 +117,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		utm,
 		holdReason
 	});
-	scheduleRecheck(platform, db, shortCode, normalizedUrl, holdReason, gateUrl);
+	scheduleRecheck(platform, db, shortCode, normalizedUrl, holdReason, utm);
 
 	const displayCode = alias || shortCode;
 
@@ -173,7 +173,7 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 	const gateUrl = servedUrl(normalizedUrl, body.utm);
 	const holdReason = await gateDestinationOrThrow(platform, db, gateUrl);
 	await updateLinkDestination(db, short_code, normalizedUrl, holdReason, body.utm);
-	scheduleRecheck(platform, db, existing.short_code, normalizedUrl, holdReason, gateUrl);
+	scheduleRecheck(platform, db, existing.short_code, normalizedUrl, holdReason, body.utm);
 
 	await invalidateRedirectCache(getKV(platform), db, short_code);
 	return json(

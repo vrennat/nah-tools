@@ -93,7 +93,7 @@ describe('changing a destination', () => {
 		await deactivateRedirect(db, 'code0004');
 		await updateRedirect(db, 'code0004', 'https://b.example/', 'unchecked');
 		expect(row('code0004')).toMatchObject({ is_active: 0, hold_reason: null });
-		expect(await resolveUncheckedHold(db, 'code0004', 'https://b.example/', null)).toBe(false);
+		expect(await resolveUncheckedHold(db, 'code0004', 'https://b.example/', undefined, null)).toBe(false);
 		expect(row('code0004').is_active).toBe(0);
 	});
 
@@ -101,45 +101,54 @@ describe('changing a destination', () => {
 		await createLink(db, 'code0005', 'https://a.example/', 'h', { holdReason: 'unchecked' });
 		await deactivateRedirect(db, 'code0005');
 		expect(row('code0005')).toMatchObject({ is_active: 0, hold_reason: null });
-		expect(await resolveUncheckedHold(db, 'code0005', 'https://a.example/', null)).toBe(false);
+		expect(await resolveUncheckedHold(db, 'code0005', 'https://a.example/', undefined, null)).toBe(false);
 	});
 });
 
 describe('background recheck', () => {
 	it('activates an unchecked link when the recheck allows it', async () => {
 		await createLink(db, 'code0006', 'https://a.example/', '', { holdReason: 'unchecked' });
-		expect(await resolveUncheckedHold(db, 'code0006', 'https://a.example/', null)).toBe(true);
+		expect(await resolveUncheckedHold(db, 'code0006', 'https://a.example/', undefined, null)).toBe(true);
 		expect(row('code0006')).toMatchObject({ is_active: 1, hold_reason: null });
 	});
 
 	it('keeps it held as blocked when the recheck blocks it', async () => {
 		await createLink(db, 'code0007', 'https://a.example/', '', { holdReason: 'unchecked' });
-		await resolveUncheckedHold(db, 'code0007', 'https://a.example/', 'blocked');
+		await resolveUncheckedHold(db, 'code0007', 'https://a.example/', undefined, 'blocked');
 		expect(row('code0007')).toMatchObject({ is_active: 0, hold_reason: 'blocked' });
 	});
 
 	it('does nothing if the destination changed since the hold', async () => {
 		await createLink(db, 'code0008', 'https://a.example/', 'h', { holdReason: 'unchecked' });
 		await updateLinkDestination(db, 'code0008', 'https://b.example/', 'unchecked', undefined);
-		expect(await resolveUncheckedHold(db, 'code0008', 'https://a.example/', null)).toBe(false);
+		expect(await resolveUncheckedHold(db, 'code0008', 'https://a.example/', undefined, null)).toBe(false);
 		expect(row('code0008').is_active).toBe(0);
 	});
 
 	it('releases a link held as unreadable when the recheck can read and allow it', async () => {
 		await createLink(db, 'code0011', 'https://a.example/', '', { holdReason: 'unreadable' });
-		expect(await resolveUncheckedHold(db, 'code0011', 'https://a.example/', null)).toBe(true);
+		expect(await resolveUncheckedHold(db, 'code0011', 'https://a.example/', undefined, null)).toBe(true);
 		expect(row('code0011')).toMatchObject({ is_active: 1, hold_reason: null });
+	});
+
+	it('does not release the row when its UTM parameters changed since the judged URL', async () => {
+		await createLink(db, 'code0012', 'https://a.example/', 'h', { holdReason: 'unreadable', utm: { content: 'u1' } });
+		await updateLinkDestination(db, 'code0012', 'https://a.example/', 'unreadable', { content: 'u2' });
+		// The recheck scheduled for u1 finds a clean page; it must not put u2 live.
+		expect(await resolveUncheckedHold(db, 'code0012', 'https://a.example/', { content: 'u1' }, null)).toBe(false);
+		expect(row('code0012').is_active).toBe(0);
+		expect(await resolveUncheckedHold(db, 'code0012', 'https://a.example/', { content: 'u2' }, null)).toBe(true);
 	});
 
 	it('does not release a link held for another reason', async () => {
 		await createLink(db, 'code0009', 'https://a.example/', '', { holdReason: 'suspicious' });
-		expect(await resolveUncheckedHold(db, 'code0009', 'https://a.example/', null)).toBe(false);
+		expect(await resolveUncheckedHold(db, 'code0009', 'https://a.example/', undefined, null)).toBe(false);
 		expect(row('code0009')).toMatchObject({ is_active: 0, hold_reason: 'suspicious' });
 	});
 
 	it('leaves the row alone when the recheck is still unchecked', async () => {
 		await createLink(db, 'code0010', 'https://a.example/', '', { holdReason: 'unchecked' });
-		expect(await resolveUncheckedHold(db, 'code0010', 'https://a.example/', 'unchecked')).toBe(false);
+		expect(await resolveUncheckedHold(db, 'code0010', 'https://a.example/', undefined, 'unchecked')).toBe(false);
 		expect(row('code0010')).toMatchObject({ is_active: 0, hold_reason: 'unchecked' });
 	});
 });

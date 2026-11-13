@@ -29,6 +29,9 @@ export interface Hop {
 	status: number;
 	/** How the next hop was reached from this one; absent on the last hop. */
 	via?: HopKind;
+	/** For a page that was read and then left by a client-side redirect: its title and opening text. */
+	title?: string;
+	text?: string;
 }
 
 export type ChainOutcome =
@@ -56,7 +59,7 @@ export interface ChainResult {
 /** Browser-like headers: many sites answer bare clients with a 403 or a stub. */
 const REQUEST_HEADERS = {
 	'User-Agent':
-		'Mozilla/5.0 (compatible; nah.tools link check; +https://nah.tools/trust)',
+		'Mozilla/5.0 (compatible; nah.tools link check; +https://nah.tools/privacy)',
 	Accept: 'text/html,application/xhtml+xml;q=0.9,*/*;q=0.5',
 	'Accept-Language': 'en-US,en;q=0.8'
 };
@@ -74,21 +77,38 @@ const SCRIPT_REDIRECT_RE =
 export const LOADER_TEXT_MAX_CHARS = 400;
 
 /**
- * Find a client-side redirect target in a loader page (little visible text).
+ * A loader page has little visible text and nothing to fill in. A page with
+ * form fields is judged as the destination even if it also carries a
+ * redirect, so a decoy redirect cannot hide a login form.
+ */
+export function isLoaderPage(html: string): boolean {
+	const live = stripElements(html, ['noscript']);
+	if (visibleText(live).length > LOADER_TEXT_MAX_CHARS) return false;
+	if (openingTags(live, 'select').length || openingTags(live, 'textarea').length) return false;
+	return !openingTags(live, 'input').some((t) => {
+		const type = (attr(t, 'type') ?? 'text').toLowerCase();
+		return type !== 'hidden' && type !== 'submit' && type !== 'button';
+	});
+}
+
+/**
+ * Find a client-side redirect target in a loader page (see isLoaderPage).
  * Returns the raw (possibly relative) URL, or null for a content page.
  * Scans the whole (already size-capped) body in linear time.
  */
 export function findClientRedirect(html: string): { url: string; via: HopKind } | null {
+	if (!isLoaderPage(html)) return null;
 	// Comments and <noscript> fallbacks do not run in a browser with JavaScript.
 	const live = stripElements(html, ['noscript']);
-	if (visibleText(live).length > LOADER_TEXT_MAX_CHARS) return null;
-	for (const tag of openingTags(live, 'meta')) {
+	// A <meta> inside these is text or inert markup, not a refresh.
+	const markup = stripElements(live, ['script', 'template', 'textarea', 'title', 'style']);
+	for (const tag of openingTags(markup, 'meta')) {
 		if (!/^refresh$/i.test((attr(tag, 'http-equiv') ?? '').trim())) continue;
 		const target = parseRefresh(attr(tag, 'content') ?? '');
 		if (target) return { url: target, via: 'meta-refresh' };
 	}
 	for (const script of elementContents(live, 'script')) {
-		const m = SCRIPT_REDIRECT_RE.exec(script.inner.slice(0, 64 * 1024));
+		const m = SCRIPT_REDIRECT_RE.exec(script.inner);
 		if (m) return { url: decodeEntities(m[1]), via: 'script' };
 	}
 	return null;
@@ -203,15 +223,9 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 
 			let next: string | null = null;
 			const location = res.headers.get('location');
-			const refresh = resolveTarget(parseRefresh(res.headers.get('refresh') ?? ''), url);
 			if (res.status >= 300 && res.status < 400 && location) {
 				res.body?.cancel().catch(() => {});
 				next = location;
-				hop.via = 'http';
-			} else if (refresh && !hops.some((h) => h.url === refresh)) {
-				// A Refresh header that reloads a page already seen is not a hop; read the page.
-				res.body?.cancel().catch(() => {});
-				next = refresh;
 				hop.via = 'http';
 			} else {
 				const contentType = res.headers.get('content-type') ?? '';
@@ -230,7 +244,14 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 				} else {
 					res.body?.cancel().catch(() => {});
 				}
-				const client = body ? findClientRedirect(body) : null;
+				// A Refresh header counts like a meta refresh: only on a loader page.
+				const headerRefresh = parseRefresh(res.headers.get('refresh') ?? '');
+				const client =
+					headerRefresh && isLoaderPage(body)
+						? { url: headerRefresh, via: 'http' as HopKind }
+						: body
+							? findClientRedirect(body)
+							: null;
 				// An unparseable target leaves clientTarget null: judge this page as it is.
 				const clientTarget = resolveTarget(client?.url ?? null, url);
 				// A client redirect back to a page already seen is a loop; judge this page.
@@ -239,6 +260,10 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 				}
 				next = clientTarget;
 				hop.via = client!.via;
+				// Keep what the visitor would glimpse on the way, for the model.
+				const t = elementContents(body, 'title', 1)[0];
+				hop.title = t ? decodeEntities(t.inner).replace(/\s+/g, ' ').trim().slice(0, 200) : '';
+				hop.text = visibleText(body).slice(0, 300);
 			}
 
 			if (hops.length > maxHops) {

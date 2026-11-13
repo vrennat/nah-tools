@@ -70,6 +70,9 @@ export function buildState(chain: ChainResult, page: PageSummary | null): string
 	lines.push(`Redirect chain (${chain.hops.length} request${chain.hops.length === 1 ? '' : 's'}):`);
 	for (const h of chain.hops) {
 		lines.push(`- ${h.url} -> HTTP ${h.status}${h.via ? ` (then ${h.via} redirect)` : ''}`);
+		if (h.text !== undefined) {
+			lines.push(`  This page was shown before redirecting. Title: ${h.title || '(none)'}. Text: "${h.text}"`);
+		}
 	}
 	lines.push(`Final URL: ${chain.finalUrl}`);
 	lines.push(`Final domain: ${hostOf(chain.finalUrl)}`);
