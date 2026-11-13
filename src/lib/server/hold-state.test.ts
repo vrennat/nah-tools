@@ -125,6 +125,12 @@ describe('background recheck', () => {
 		expect(row('code0008').is_active).toBe(0);
 	});
 
+	it('releases a link held as unreadable when the recheck can read and allow it', async () => {
+		await createLink(db, 'code0011', 'https://a.example/', '', { holdReason: 'unreadable' });
+		expect(await resolveUncheckedHold(db, 'code0011', 'https://a.example/', null)).toBe(true);
+		expect(row('code0011')).toMatchObject({ is_active: 1, hold_reason: null });
+	});
+
 	it('does not release a link held for another reason', async () => {
 		await createLink(db, 'code0009', 'https://a.example/', '', { holdReason: 'suspicious' });
 		expect(await resolveUncheckedHold(db, 'code0009', 'https://a.example/', null)).toBe(false);

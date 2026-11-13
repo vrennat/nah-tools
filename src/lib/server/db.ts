@@ -174,8 +174,8 @@ export async function updateLinkDestination(
 }
 
 /**
- * Record the result of a background recheck of a link held as 'unchecked'.
- * Only touches the row if it is still held as 'unchecked' for the same
+ * Record the result of a background recheck of a link held as 'unchecked'
+ * or 'unreadable'. Only touches the row if it is still held that way for the same
  * destination, so it cannot revive a link that was edited, deactivated or
  * reported in the meantime. Returns true if the row changed.
  */
@@ -185,11 +185,12 @@ export async function resolveUncheckedHold(
 	destinationUrl: string,
 	holdReason: HoldReason | 'blocked' | null
 ): Promise<boolean> {
-	if (holdReason === 'unchecked') return false;
+	// Another failed check changes nothing; the link stays held.
+	if (holdReason === 'unchecked' || holdReason === 'unreadable') return false;
 	const res = await db
 		.prepare(
 			`UPDATE redirects SET is_active = CASE WHEN ?1 IS NULL THEN 1 ELSE 0 END, hold_reason = ?1, updated_at = datetime('now')
-			 WHERE short_code = ?2 AND destination_url = ?3 AND hold_reason = 'unchecked'`
+			 WHERE short_code = ?2 AND destination_url = ?3 AND hold_reason IN ('unchecked', 'unreadable')`
 		)
 		.bind(holdReason, shortCode, destinationUrl)
 		.run();

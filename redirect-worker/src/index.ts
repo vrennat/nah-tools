@@ -65,7 +65,8 @@ export default {
 			row = cached;
 		} else {
 			row = await env.DB.prepare(
-				'SELECT short_code, destination_url, is_active, hold_reason, expires_at, passphrase_hash, utm_source, utm_medium, utm_campaign, utm_term, utm_content FROM redirects WHERE short_code = ? OR custom_alias = ?'
+				// SELECT * so this worker keeps working before migration 0004 adds hold_reason.
+				'SELECT * FROM redirects WHERE short_code = ? OR custom_alias = ?'
 			)
 				.bind(code, code)
 				.first<RedirectRow>();

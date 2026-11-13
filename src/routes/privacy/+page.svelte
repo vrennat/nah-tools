@@ -56,6 +56,15 @@
 			Cloudflare and include the request IP when available. These records are more than anonymous
 			page counts and can contain information about a visit.
 		</p>
+		<p class="text-text-muted">
+			When a short link or dynamic QR code is created or its destination changes, the server checks
+			the destination for phishing and scams. It requests the URL, with any UTM fields, and follows its
+			redirects, identifying itself as the nah.tools link check. The page title, form fields and up
+			to 6,000 characters of visible text are sent to Cloudflare Workers AI for a decision and are
+			not stored. That request can count as a visit to the destination, so links that work only once,
+			such as sign-in or confirmation links, may stop working. A link the check flags is not created
+			or is put on hold, and a held link does not redirect.
+		</p>
 	</section>
 	<section class="space-y-3">
 		<h2 class="text-xl font-bold">Network services and offline use</h2>

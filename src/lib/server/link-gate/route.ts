@@ -6,6 +6,25 @@ import { error } from '@sveltejs/kit';
 import { validateUrlSafety } from '$server/safety';
 import { invalidateRedirectCache, resolveUncheckedHold } from '$server/db';
 import { judgeDestination, type GateDeps, type HoldReason } from './index';
+import { RECHECKABLE_HOLDS } from './decide';
+
+/**
+ * The URL the redirect worker will send visitors to: the stored destination
+ * with its UTM parameters set. Must match appendUTM in
+ * redirect-worker/src/index.ts, so the gate judges exactly what is served
+ * (a redirector can branch on a query parameter).
+ */
+export function servedUrl(
+	destination: string,
+	utm?: { source?: string; medium?: string; campaign?: string; term?: string; content?: string }
+): string {
+	if (!utm) return destination;
+	const parsed = new URL(destination);
+	for (const [key, value] of Object.entries(utm)) {
+		if (value) parsed.searchParams.set(`utm_${key}`, value);
+	}
+	return parsed.toString();
+}
 
 /** Shown to the creator when a link is stored but held. */
 export const HOLD_NOTICE =
@@ -41,21 +60,25 @@ export async function gateDestinationOrThrow(
 }
 
 /**
- * For links held because the model was unavailable, try once more in the
- * background and release or keep the hold. Does nothing for other holds.
+ * For links held because the check itself failed (model unavailable, page
+ * unreadable), try once more in the background and release or keep the hold.
+ * Does nothing for other holds.
  */
 export function scheduleRecheck(
 	platform: App.Platform | undefined,
 	db: D1Database,
 	shortCode: string,
+	/** The destination as stored, used to match the row. */
 	url: string,
-	holdReason: HoldReason | null
+	holdReason: HoldReason | null,
+	/** The URL to judge, when it differs from the stored one (UTM parameters). */
+	gateUrl: string = url
 ): void {
-	if (holdReason !== 'unchecked' || !platform?.context?.waitUntil) return;
+	if (!holdReason || !RECHECKABLE_HOLDS.includes(holdReason) || !platform?.context?.waitUntil) return;
 	const kv = platform.env?.KV;
 	platform.context.waitUntil(
 		(async () => {
-			const decision = await judgeDestination(url, gateDeps(platform, db));
+			const decision = await judgeDestination(gateUrl, gateDeps(platform, db));
 			const next =
 				decision.verdict === 'allow' ? null : decision.verdict === 'block' ? 'blocked' : decision.holdReason;
 			const changed = await resolveUncheckedHold(db, shortCode, url, next);

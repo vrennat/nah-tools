@@ -11,7 +11,7 @@ import {
 	invalidateRedirectCache,
 	updateLinkDestination
 } from '$server/db';
-import { gateDestinationOrThrow, scheduleRecheck, HOLD_NOTICE } from '$server/link-gate/route';
+import { gateDestinationOrThrow, scheduleRecheck, servedUrl, HOLD_NOTICE } from '$server/link-gate/route';
 import { hashPassphrase } from '$server/auth';
 import { validateUrlSafety, validateAlias, verifyTurnstile } from '$server/safety';
 import { enforceCreationLimits } from '$server/creation-limits';
@@ -106,7 +106,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 
 	// Spam gate last: it fetches the destination and calls the model, so it
 	// runs only for requests that passed every cheaper check.
-	const holdReason = await gateDestinationOrThrow(platform, db, normalizedUrl);
+	const gateUrl = servedUrl(normalizedUrl, utm);
+	const holdReason = await gateDestinationOrThrow(platform, db, gateUrl);
 
 	const shortCode = generateShortCode();
 	await createLink(db, shortCode, normalizedUrl, passphraseHash, {
@@ -116,7 +117,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		utm,
 		holdReason
 	});
-	scheduleRecheck(platform, db, shortCode, normalizedUrl, holdReason);
+	scheduleRecheck(platform, db, shortCode, normalizedUrl, holdReason, gateUrl);
 
 	const displayCode = alias || shortCode;
 
@@ -169,9 +170,10 @@ export const PUT: RequestHandler = async ({ request, platform }) => {
 
 	const existing = await authenticateRedirect(db, short_code, passphrase);
 
-	const holdReason = await gateDestinationOrThrow(platform, db, normalizedUrl);
+	const gateUrl = servedUrl(normalizedUrl, body.utm);
+	const holdReason = await gateDestinationOrThrow(platform, db, gateUrl);
 	await updateLinkDestination(db, short_code, normalizedUrl, holdReason, body.utm);
-	scheduleRecheck(platform, db, existing.short_code, normalizedUrl, holdReason);
+	scheduleRecheck(platform, db, existing.short_code, normalizedUrl, holdReason, gateUrl);
 
 	await invalidateRedirectCache(getKV(platform), db, short_code);
 	return json(

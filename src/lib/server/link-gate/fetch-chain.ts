@@ -8,6 +8,15 @@
  * another shortener partway through.
  */
 import { checkDestination } from '$server/destination-policy';
+import {
+	attr,
+	decodeEntities,
+	elementContents,
+	openingTags,
+	parseRefresh,
+	stripElements,
+	visibleText
+} from './html-scan';
 
 export const MAX_HOPS = 5;
 export const TOTAL_TIMEOUT_MS = 3000;
@@ -52,13 +61,9 @@ const REQUEST_HEADERS = {
 	'Accept-Language': 'en-US,en;q=0.8'
 };
 
-const META_REFRESH_RE =
-	/<meta[^>]+http-equiv\s*=\s*["']?refresh["']?[^>]*content\s*=\s*["']?\s*\d*\s*;?\s*url\s*=\s*['"]?([^"'>\s]+)/i;
-const META_REFRESH_RE_REV =
-	/<meta[^>]+content\s*=\s*["']?\s*\d*\s*;?\s*url\s*=\s*['"]?([^"'>\s]+)[^>]*http-equiv\s*=\s*["']?refresh/i;
 /** `location = "..."`, `location.href = '...'`, `location.replace("...")`, `location.assign(...)`, optionally on window/document/top. */
 const SCRIPT_REDIRECT_RE =
-	/(?:window\.|document\.|top\.|self\.)?location(?:\.href)?\s*(?:=\s*|\.(?:replace|assign)\s*\(\s*)["'`]([^"'`]+)["'`]/i;
+	/(?:window\.|document\.|top\.|self\.)?location(?:\.href)?\s*(?:=\s*|\.(?:replace|assign)\s*\(\s*)["'`]([^"'`]{1,2048})["'`]/i;
 
 /**
  * A page with less visible text than this that sets a client-side redirect is
@@ -68,37 +73,45 @@ const SCRIPT_REDIRECT_RE =
  */
 export const LOADER_TEXT_MAX_CHARS = 400;
 
-function visibleTextLength(html: string): number {
-	return html
-		.replace(/<(script|style|noscript|template|svg)\b[\s\S]*?<\/\1>/gi, ' ')
-		.replace(/<[^>]+>/g, ' ')
-		.replace(/\s+/g, ' ')
-		.trim().length;
-}
-
 /**
  * Find a client-side redirect target in a loader page (little visible text).
  * Returns the raw (possibly relative) URL, or null for a content page.
+ * Scans the whole (already size-capped) body in linear time.
  */
 export function findClientRedirect(html: string): { url: string; via: HopKind } | null {
-	const head = html.slice(0, 64 * 1024).replace(/<noscript\b[\s\S]*?<\/noscript>/gi, ' ');
-	if (visibleTextLength(head) > LOADER_TEXT_MAX_CHARS) return null;
-	const meta = META_REFRESH_RE.exec(head) ?? META_REFRESH_RE_REV.exec(head);
-	if (meta) return { url: decodeEntities(meta[1]), via: 'meta-refresh' };
-	for (const script of head.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)) {
-		const m = SCRIPT_REDIRECT_RE.exec(script[1]);
+	// Comments and <noscript> fallbacks do not run in a browser with JavaScript.
+	const live = stripElements(html, ['noscript']);
+	if (visibleText(live).length > LOADER_TEXT_MAX_CHARS) return null;
+	for (const tag of openingTags(live, 'meta')) {
+		if (!/^refresh$/i.test((attr(tag, 'http-equiv') ?? '').trim())) continue;
+		const target = parseRefresh(attr(tag, 'content') ?? '');
+		if (target) return { url: target, via: 'meta-refresh' };
+	}
+	for (const script of elementContents(live, 'script')) {
+		const m = SCRIPT_REDIRECT_RE.exec(script.inner.slice(0, 64 * 1024));
 		if (m) return { url: decodeEntities(m[1]), via: 'script' };
 	}
 	return null;
 }
 
-function decodeEntities(s: string): string {
-	return s.replace(/&amp;/g, '&').replace(/&#x2f;/gi, '/').replace(/&#47;/g, '/');
+/** Content types that are read: HTML and other text, XML, JSON, and SVG (which can carry scripts). */
+function isTextual(contentType: string): boolean {
+	return (
+		/^(text\/|application\/(xhtml\+xml|xml|json)|image\/svg\+xml)/i.test(contentType) || contentType === ''
+	);
 }
 
-function isTextual(contentType: string): boolean {
-	return /^(text\/|application\/(xhtml\+xml|xml|json))/i.test(contentType) || contentType === '';
+function resolveTarget(target: string | null, base: string): string | null {
+	if (!target) return null;
+	try {
+		return new URL(target, base).toString();
+	} catch {
+		return null;
+	}
 }
+
+/** Only default web ports are fetched; other ports end the chain as unreadable. */
+const ALLOWED_PORTS = new Set(['', '80', '443']);
 
 async function readCapped(res: Response, maxBytes: number, signal: AbortSignal): Promise<string> {
 	if (!res.body) return '';
@@ -140,9 +153,10 @@ export interface FollowOptions {
 }
 
 /**
- * Follow `startUrl` through HTTP redirects, meta refreshes and simple script
- * redirects. Never throws. The start URL is assumed to have passed the policy
- * already; every later hop is checked here before it is fetched.
+ * Follow `startUrl` through HTTP redirects, `Refresh` headers, meta refreshes
+ * and simple script redirects. Every hop, including the first, is checked
+ * against the static policy before it is fetched. Does not throw, except that
+ * an error thrown by `checkHop` propagates to the caller.
  */
 export async function followChain(startUrl: string, opts: FollowOptions = {}): Promise<ChainResult> {
 	const fetchImpl = opts.fetchImpl ?? fetch;
@@ -162,6 +176,9 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 			if (hops.length > 0 && opts.checkHop) {
 				const reason = await opts.checkHop(url);
 				if (reason) return { outcome: 'policy-blocked', hops, finalUrl: url, reason };
+			}
+			if (!ALLOWED_PORTS.has(new URL(url).port)) {
+				return { outcome: 'fetch-failed', hops, finalUrl: url, reason: 'non-standard port' };
 			}
 
 			let res: Response;
@@ -186,9 +203,15 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 
 			let next: string | null = null;
 			const location = res.headers.get('location');
+			const refresh = resolveTarget(parseRefresh(res.headers.get('refresh') ?? ''), url);
 			if (res.status >= 300 && res.status < 400 && location) {
 				res.body?.cancel().catch(() => {});
 				next = location;
+				hop.via = 'http';
+			} else if (refresh && !hops.some((h) => h.url === refresh)) {
+				// A Refresh header that reloads a page already seen is not a hop; read the page.
+				res.body?.cancel().catch(() => {});
+				next = refresh;
 				hop.via = 'http';
 			} else {
 				const contentType = res.headers.get('content-type') ?? '';
@@ -208,14 +231,8 @@ export async function followChain(startUrl: string, opts: FollowOptions = {}): P
 					res.body?.cancel().catch(() => {});
 				}
 				const client = body ? findClientRedirect(body) : null;
-				let clientTarget: string | null = null;
-				if (client) {
-					try {
-						clientTarget = new URL(client.url, url).toString();
-					} catch {
-						// Unparseable script target: judge this page as it is.
-					}
-				}
+				// An unparseable target leaves clientTarget null: judge this page as it is.
+				const clientTarget = resolveTarget(client?.url ?? null, url);
 				// A client redirect back to a page already seen is a loop; judge this page.
 				if (!clientTarget || hops.some((h) => h.url === clientTarget)) {
 					return { outcome: 'page', hops, finalUrl: url, status: res.status, contentType, body };

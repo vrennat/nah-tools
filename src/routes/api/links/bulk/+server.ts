@@ -8,6 +8,13 @@ import { normalizeUrl } from '$utils/url';
 import { judgeDestination } from '$server/link-gate';
 import { gateDeps, scheduleRecheck, HOLD_NOTICE } from '$server/link-gate/route';
 
+/**
+ * Each link runs the spam gate (up to 6 fetches, a blocklist lookup per hop
+ * and one model call), so a bulk request is capped well below what one
+ * Worker invocation can afford. Links the gate cannot finish are held.
+ */
+const MAX_BULK_LINKS = 20;
+
 export const POST: RequestHandler = async ({ request, platform }) => {
 	const db = getDB(platform);
 
@@ -22,8 +29,8 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		throw error(400, 'links array is required and must not be empty');
 	}
 
-	if (links.length > 100) {
-		throw error(400, 'Maximum 100 links per request');
+	if (links.length > MAX_BULK_LINKS) {
+		throw error(400, `Maximum ${MAX_BULK_LINKS} links per request`);
 	}
 
 	// Verify Turnstile if configured
@@ -103,7 +110,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			}
 
 			// Every bulk link goes through the spam gate, one at a time. If the
-			// gate cannot finish (model down, subrequest limit), the link is held.
+			// model fails or the page cannot be fetched, the link is held.
 			const decision = await judgeDestination(normalized, deps);
 			if (decision.verdict === 'block') {
 				results.push({ short_code: '', short_url: '', destination: link.url, error: decision.reason });

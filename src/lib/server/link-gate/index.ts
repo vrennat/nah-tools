@@ -80,7 +80,7 @@ export async function judgeDestination(url: string, deps: GateDeps): Promise<Gat
 			}),
 			deps.clefTimeoutMs ?? CLEF_TIMEOUT_MS
 		);
-		return decideFromAnswers(parseClefResponse(raw));
+		return decideFromAnswers(parseClefResponse(raw), chain);
 	} catch (e) {
 		console.error('link gate: Clef call failed', e);
 		return { verdict: 'hold', holdReason: 'unchecked', detail: 'model unavailable' };
