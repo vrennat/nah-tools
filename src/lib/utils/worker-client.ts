@@ -1,13 +1,16 @@
 import * as Comlink from 'comlink';
 
+const WORKER_STOPPED = 'The background worker stopped unexpectedly. Please try again.';
+
 // Comlink never settles a call if its worker dies (script fails to load, OOM,
 // uncaught error), so a cached worker would leave every later call hanging.
-// Each call races the worker's error event; on error the cached worker is
-// dropped and the next call spawns a fresh one.
+// Each call listens for the worker's error event until it settles; on error the
+// cached worker is dropped and the next call spawns a fresh one. The listener is
+// removed when the call settles, so finished calls and their results are not
+// kept alive by a healthy worker.
 export function createWorkerClient<T>(spawn: () => Worker) {
 	let worker: Worker | null = null;
 	let api: Comlink.Remote<T> | null = null;
-	let failed: Promise<never> = Promise.resolve() as never;
 
 	function terminate() {
 		worker?.terminate();
@@ -15,26 +18,39 @@ export function createWorkerClient<T>(spawn: () => Worker) {
 		api = null;
 	}
 
-	function connect() {
-		if (worker && api) return { api, failed };
+	function connect(): { worker: Worker; api: Comlink.Remote<T> } {
+		if (worker && api) return { worker, api };
 		const w = spawn();
-		failed = new Promise<never>((_, reject) => {
-			w.addEventListener('error', (event) => {
-				event.preventDefault();
-				if (worker === w) terminate();
-				const message = (event as ErrorEvent).message;
-				reject(new Error(message || 'The background worker stopped unexpectedly. Please try again.'));
-			});
+		w.addEventListener('error', (event) => {
+			event.preventDefault();
+			if (worker === w) terminate();
 		});
-		failed.catch(() => {});
 		worker = w;
 		api = Comlink.wrap<T>(w);
-		return { api, failed };
+		return { worker: w, api };
 	}
 
 	function call<R>(fn: (api: Comlink.Remote<T>) => Promise<R>): Promise<R> {
-		const { api, failed } = connect();
-		return Promise.race([fn(api), failed]);
+		const { worker: w, api } = connect();
+		return new Promise<R>((resolve, reject) => {
+			const onError = (event: Event) => {
+				reject(new Error((event as ErrorEvent).message || WORKER_STOPPED));
+			};
+			w.addEventListener('error', onError);
+			const done = () => w.removeEventListener('error', onError);
+			Promise.resolve()
+				.then(() => fn(api))
+				.then(
+					(value) => {
+						done();
+						resolve(value);
+					},
+					(error) => {
+						done();
+						reject(error);
+					}
+				);
+		});
 	}
 
 	return { call, terminate };

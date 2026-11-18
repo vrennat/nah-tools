@@ -50,4 +50,26 @@ describe('createWorkerClient', () => {
 		void client.call((api) => api.work());
 		expect(spawned).toHaveLength(2);
 	});
+
+	it('drops its crash listener once a call settles', async () => {
+		const { client, spawned } = setup();
+		await expect(client.call(async () => 'first')).resolves.toBe('first');
+		await expect(client.call(async () => 'second')).resolves.toBe('second');
+		const worker = spawned[0];
+		let listeners = 0;
+		const add = worker.addEventListener.bind(worker);
+		const remove = worker.removeEventListener.bind(worker);
+		worker.addEventListener = ((...args: Parameters<typeof add>) => {
+			listeners++;
+			add(...args);
+		}) as typeof worker.addEventListener;
+		worker.removeEventListener = ((...args: Parameters<typeof remove>) => {
+			listeners--;
+			remove(...args);
+		}) as typeof worker.removeEventListener;
+		await client.call(async () => 'third');
+		await expect(client.call(async () => Promise.reject(new Error('nope')))).rejects.toThrow('nope');
+		expect(listeners).toBe(0);
+		expect(spawned).toHaveLength(1);
+	});
 });
